@@ -1,3 +1,10 @@
+# Microsoft Cloud Adoption Framework for Azure
+
+This repo shares code samples which support and accelerate the adoption guidance found in the [Cloud Adoption Framework](https://aka.ms/CAF)
+
+Cloud Adoption Framework is the One Microsoft voice for cloud adoption, consolidating and sharing best practices from Microsoft employees, partners, and customers. In this framework, customers will find tools, guidance, and narratives to help shape technology, business, and people strategies in an effort to drive desired business outcomes during each adoption effort. This lifecycle "product" aligns guidance to various phases and iterations of the typical cloud adoption lifecycle to ensure easy access to the right guidance at the right time.
+
+![Cloud Adoption Framework overview](https://docs.microsoft.com/azure/architecture/cloud-adoption/_images/cloud-adoption-framework-overview.png)
 
 # Contributing
 
