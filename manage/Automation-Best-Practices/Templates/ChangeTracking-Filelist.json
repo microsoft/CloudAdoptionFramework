@@ -1,0 +1,76 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspaceLocation": {
+            "type": "String"
+        },
+        "workspaceName": {
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "name": "[Concat(parameters('workspaceName'), '/ChangeTrackingServices_CollectionFrequency')]",
+            "type": "Microsoft.OperationalInsights/workspaces/dataSources",
+            "kind": "ChangeTrackingServices",
+            "comments": "The Collection Time Interval is in seconds",
+            "apiVersion": "2015-11-01-preview",
+            "location": "[parameters('workspaceLocation')]",
+            "properties": {
+                "ListType":"Blacklist",
+                "CollectionTimeInterval":12
+            }
+        },
+        {
+            "name": "[Concat(parameters('workspaceName'), '/ChangeTrackingDataTypeConfiguration_FileRecursive')]",
+            "type": "Microsoft.OperationalInsights/workspaces/dataSources",
+            "kind": "ChangeTrackingDataTypeConfiguration",
+            "comments": "Adding one file requires two PUT calls. Also each file needs to be added individually",
+            "apiVersion": "2015-11-01-preview",
+            "location": "[parameters('workspaceLocation')]",
+            "properties": {
+                "DataTypeId": "FileRecursive",
+                "Enabled": "false"
+            }
+        },
+        {
+            "name": "[Concat(parameters('workspaceName'), '/ChangeTrackingWindows_HostsFile')]",
+            "type": "Microsoft.OperationalInsights/workspaces/dataSources",
+            "kind": "ChangeTrackingCustomPath",
+            "comments": "Adding hosts file",
+            "apiVersion": "2015-11-01-preview",
+            "location": "[parameters('workspaceLocation')]",
+            "properties": {
+                "checksum": "MD5",
+                "enabled": true,
+                "groupTag": "Security",
+                "path": "%winDir%\\System32\\Drivers\\etc\\hosts",
+                "pathType": "File",
+                "recurse": false
+            }
+        },
+        {
+            "name": "[Concat(parameters('workspaceName'), '/ChangeTrackingLinux_networkfolder')]",
+            "type": "Microsoft.OperationalInsights/workspaces/dataSources",
+            "kind": "ChangeTrackingLinuxPath",
+            "comments": "Adding linux network file",
+            "apiVersion": "2015-11-01-preview",
+            "location": "[parameters('workspaceLocation')]",
+            "properties": {
+                "checksum": "MD5",
+                "enabled": true,
+                "groupTag": "custom",
+                "destinationPath": "/etc/networks/*.*",
+                "pathType": "File",
+                "recurse": true,
+                "useSudo": "true",
+                "type": "File",
+                "MaxContentsReturnable": "5000000",
+                "MaxOutputSize": "5000000",
+                "links": "Follow"           
+            }
+        }
+    ]
+}

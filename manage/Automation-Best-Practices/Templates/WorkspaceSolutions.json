@@ -1,0 +1,80 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify  the Log Analytic Workspace Name"
+        }
+    },
+    "workspaceLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify the region for your Workspace"
+      }
+    }
+  },
+  "variables": {
+    "solutions": {
+      "solution": [
+        {
+            "name": "[concat('SecurityCenterFree', '(', parameters('workspaceName'), ')')]",
+            "marketplaceName": "SecurityCenterFree"
+        },
+        {
+            "name": "[concat('AgentHealthAssessment', '(', parameters('workspaceName'), ')')]",
+            "marketplaceName": "AgentHealthAssessment"
+        },
+        {
+            "name": "[concat('ChangeTracking', '(', parameters('workspaceName'), ')')]",
+            "marketplaceName": "ChangeTracking"
+        },
+        {
+            "name": "[concat('Updates', '(', parameters('workspaceName'), ')')]",
+            "marketplaceName": "Updates"
+        },
+        {
+            "name": "[concat('AzureActivity', '(', parameters('workspaceName'), ')')]",
+            "marketplaceName": "AzureActivity"
+        },
+        {
+            "name": "[concat('AzureAutomation', '(', parameters('workspaceName'), ')')]",
+            "marketplaceName": "AzureAutomation"
+        },
+        {
+            "name": "[concat('InfrastructureInsights', '(', parameters('workspaceName'), ')')]",
+            "marketplaceName": "InfrastructureInsights"
+        },
+        {
+            "name": "[concat('ServiceMap', '(', parameters('workspaceName'), ')')]",
+            "marketplaceName": "ServiceMap"
+        }
+      ]
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-11-01-preview",
+      "type": "Microsoft.OperationsManagement/solutions",
+      "name": "[concat(variables('solutions').solution[copyIndex()].Name)]",
+      "location": "[parameters('workspaceLocation')]",
+      "copy": {
+          "name": "solutionCopy",
+          "count": "[length(variables('solutions').solution)]"
+      },
+      "properties": {
+          "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+      },
+      "plan": {
+          "name": "[variables('solutions').solution[copyIndex()].name]",
+          "product": "[concat('OMSGallery/', variables('solutions').solution[copyIndex()].marketplaceName)]",
+          "promotionCode": "",
+          "publisher": "Microsoft"
+      }
+    }
+  ], 
+
+  "outputs": {
+  }
+}

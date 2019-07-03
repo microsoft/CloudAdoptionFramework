@@ -1,0 +1,98 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": {
+      "type": "string",
+      "defaultValue": "WorkspaceOne",
+      "metadata": {
+        "description": "Assign a name for the Log Analytic Workspace Name"
+        }
+    },
+    "workspaceLocation": {
+      "type": "string",
+      "defaultValue": "eastus",
+      "metadata": {
+        "description": "Specify the region for your Workspace"
+      }
+    },
+    "automationLocation": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "metadata": {
+        "description": "Specify the region for your Automation Account"
+      }
+    },
+    "automationName": {
+        "type": "string",
+        "defaultValue": "AutomationAccountOne",
+        "metadata": {
+            "description": "Assign a name for the Automation Account Name"
+        }
+    }
+  },
+    "variables": {
+    },
+    "resources": [
+      {
+        "apiversion": "2015-10-31",
+        "location": "[parameters('automationLocation')]",
+        "name": "[parameters('automationName')]",
+        "type": "Microsoft.Automation/automationAccounts",
+        "comments": "Automation account",
+        "properties": {
+          "sku": {
+            "name": "OMS"
+          }
+        }
+      },
+
+      {
+        "apiVersion": "2017-03-15-preview",
+        "location": "[parameters('workspaceLocation')]",
+        "name": "[parameters('workspaceName')]",
+        "type": "Microsoft.OperationalInsights/workspaces",
+        "comments": "Log Analytics workspace",
+        "properties": {
+          "sku": {
+            "name": "pernode"
+          },
+          "features": {
+            "legacy": 0,
+            "searchVersion": 1
+          }
+        },
+        "resources": [
+          {
+            "name": "AzureActivityLog",
+            "type": "datasources",
+            "apiVersion": "2015-11-01-preview",
+            "dependsOn": [
+                "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+            ],
+            "kind": "AzureActivityLog",
+            "properties": {
+                "linkedResourceId": "[concat(subscription().id, '/providers/Microsoft.Insights/eventTypes/management')]"
+            }
+          },
+
+          {
+              "name": "Automation",
+              "type": "linkedServices",
+              "apiVersion": "2015-11-01-preview",
+              "dependsOn": [
+                  "[concat('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]",
+                  "[concat('Microsoft.Automation/automationAccounts/', parameters('automationName'))]"
+              ],
+              "properties": {
+                  "resourceId": "[resourceId('Microsoft.Automation/automationAccounts/', parameters('automationName'))]"
+              }
+          }
+        ]
+      } 
+    ], 
+
+  "outputs": {
+    }
+  
+}

@@ -1,0 +1,59 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "workspaceName": {
+        "type": "string",
+        "defaultValue": "WorkspaceOne",
+        "metadata": {
+          "description": "Assign a name for the Log Analytic Workspace Name"
+          }
+      },
+      "workspaceLocation": {
+        "type": "string",
+        "metadata": {
+          "description": "Specify the region for your Workspace"
+        }
+      }
+    },
+      "variables": {
+        "ChangeTrackingInclude": ["ChangeTracking_MicrosoftDefaultComputerGroup"] ,
+        "ScopeConfigName": "MicrosoftDefaultScopeConfig-ChangeTracking",
+        "ScopeConfigKind": "SearchComputerGroup"
+      },
+
+      "resources": [
+       {
+            "apiVersion": "2017-04-26-preview",
+            "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+            "name": "[concat(parameters('workspaceName'), '/', 'changetracking|microsoftdefaultcomputergroup')]",
+            "location": "[parameters('workspaceLocation')]",
+            "properties": {
+                "displayname": "MicrosoftDefaultComputerGroup",
+                "category": "ChangeTracking",
+                "query": "Heartbeat | where Computer in~ (\"\") or ComputerEnvironment =~ \"Azure\" or VMUUID in~ (\"\") | distinct Computer",
+                "functionAlias": "ChangeTracking_MicrosoftDefaultComputerGroup",
+                "etag": "",
+                "tags": [
+                    {
+                        "Name": "Group",
+                        "Value": "Computer"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2015-11-01-preview",
+            "type": "Microsoft.OperationalInsights/workspaces/configurationScopes",
+            "name": "[concat(parameters('workspaceName'), '/', variables('ScopeConfigName'), '/')]",
+            "kind": "[variables('ScopeConfigKind')]",            
+            "location": "[parameters('workspaceLocation')]",
+            "properties": {
+                "Include": "[variables('ChangeTrackingInclude')]"
+              }
+        }
+      ], 
+  
+    "outputs": {
+      }
+  }
