@@ -1,0 +1,115 @@
+{
+  "properties": {
+    "description": "Azure Migration Project",
+    "targetScope": "subscription",
+    "parameters": {
+      "Organization": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Enter your organization name (e.g. Contoso), must be unique"
+        },
+        "defaultValue": "contoso"
+      },
+      "AzureRegion": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Select the Azure Region to deploy the CAF Resources"
+        }
+      },
+      "IPAddress_Space": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Provide first 2 octets i.e. 10.0"
+        },
+        "defaultValue": "10.0"
+      },
+      "DR-Location": {
+        "type": "string",
+        "metadata": {
+          "displayName": "TEMP - DR Region"
+        }
+      },
+      "KV-AccessPolicy": {
+        "type": "string",
+        "metadata": {
+          "description": "User ID to grant permissions to in Key Vault"
+        }
+      },
+      "LogAnalytics_DataRetention": {
+        "type": "int",
+        "metadata": {
+          "displayName": "data-retention (Deploy Log Analytics)",
+          "description": "Number of days data will be retained for"
+        },
+        "defaultValue": 365,
+        "allowedValues": []
+      },
+      "LogAnalytics_Location": {
+        "type": "string",
+        "metadata": {
+          "displayName": "location (Deploy Log Analytics)",
+          "description": "Region used when establishing the workspace"
+        },
+        "allowedValues": [
+          "Australia Central",
+          "Australia East",
+          "Australia Southeast",
+          "Brazil South",
+          "Canada Central",
+          "Central India",
+          "Central US",
+          "East Asia",
+          "East US",
+          "East US 2",
+          "France Central",
+          "Japan East",
+          "Korea Central",
+          "North Central US",
+          "North Europe",
+          "South Africa North",
+          "South Central US",
+          "Southeast Asia",
+          "UK South",
+          "UK West",
+          "West Europe",
+          "West US",
+          "West US 2"
+        ]
+      }
+    },
+    "resourceGroups": {
+      "HUB-SharedServices-RG": {
+        "name": "[concat(parameters('organization'),'-sharedsvcs-rg')]",
+        "location": "[parameters('AzureRegion')]",
+        "metadata": {
+          "displayName": "Resource Group for Shared Services"
+        },
+        "dependsOn": []
+      },
+      "ASR-RG": {
+        "name": "[concat(parameters('organization'),'-ASR-rg')]",
+        "location": "[parameters('AzureRegion')]",
+        "metadata": {
+          "displayName": "Resource Group for Azure Site Recovery"
+        },
+        "dependsOn": []
+      },
+      "Network-RG": {
+        "name": "[concat(parameters('organization'),'-VNet-rg')]",
+        "location": "[parameters('AzureRegion')]",
+        "metadata": {
+          "displayName": "Resource Group for Networks"
+        },
+        "dependsOn": []
+      },
+      "Migration-RG": {
+        "name": "[concat(parameters('organization'),'-Migrate-rg')]",
+        "location": "westcentralus",
+        "metadata": {
+          "displayName": "Resource Group for Azure Migrate"
+        },
+        "dependsOn": []
+      }
+    }
+  }
+}

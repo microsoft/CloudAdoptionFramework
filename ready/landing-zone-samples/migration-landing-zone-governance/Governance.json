@@ -1,0 +1,331 @@
+{
+  "properties": {
+    "displayName": "Deploy Governance Foundation for Azure",
+    "description": "Governance ",
+    "targetScope": "subscription",
+    "parameters": {
+      "Organization": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Enter your organization name (e.g. Contoso), must be unique"
+        },
+        "defaultValue": ""
+      },
+      "HUB-RG-Location": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Select 1 Azure Region for Deployment",
+          "strongType": "location"
+        }        
+      },
+      "Policy_CostCenter_Tag": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Append CostCenter TAG & its value from the Resource Group"
+        },
+        "allowedValues": []
+      },
+      "Policy_Allowed-Locations": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Which Azure Regions will you allow resources to be built in?",
+          "strongType": "location"
+        },
+        "defaultValue": []
+      },
+      "Policy_Allowed-VM-SKUs": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Allowed virtual machine SKUs",
+          "strongType": "vmSKUs"
+        },
+        "defaultValue": [
+          "Standard_B2ms",
+          "Standard_DS1_v2",
+          "Standard_F2s_v2"
+        ],
+        "allowedValues": [
+          "Standard_A1_v2",
+          "Standard_A2m_v2",
+          "Standard_A2_v2",
+          "Standard_A4m_v2",
+          "Standard_A4_v2",
+          "Standard_A8m_v2",
+          "Standard_A8_v2",
+          "Standard_B1ls",
+          "Standard_B1ms",
+          "Standard_B1s",
+          "Standard_B2ms",
+          "Standard_B2s",
+          "Standard_B4ms",
+          "Standard_B8ms",
+          "Standard_D1_v2",
+          "Standard_D2s_v3",
+          "Standard_D2_v2",
+          "Standard_D2_v3",
+          "Standard_D3_v2",
+          "Standard_D4s_v3",
+          "Standard_D4_v2",
+          "Standard_D4_v3",
+          "Standard_D5_v2",
+          "Standard_D8s_v3",
+          "Standard_D8_v3",
+          "Standard_D11_v2",
+          "Standard_D12_v2",
+          "Standard_D13_v2",
+          "Standard_D14_v2",
+          "Standard_D15_v2",
+          "Standard_D16s_v3",
+          "Standard_D16_v3",
+          "Standard_D32s_v3",
+          "Standard_D32_v3",
+          "Standard_D64s_v3",
+          "Standard_D64_v3",
+          "Standard_DC2s",
+          "Standard_DC4s",
+          "Standard_DS1_v2",
+          "Standard_DS2_v2",
+          "Standard_DS3_v2",
+          "Standard_DS4_v2",
+          "Standard_DS5_v2",
+          "Standard_DS11-1_v2",
+          "Standard_DS11_v2",
+          "Standard_DS12-1_v2",
+          "Standard_DS12-2_v2",
+          "Standard_DS12_v2",
+          "Standard_DS13-2_v2",
+          "Standard_DS13-4_v2",
+          "Standard_DS13_v2",
+          "Standard_DS14-4_v2",
+          "Standard_DS14-8_v2",
+          "Standard_DS14_v2",
+          "Standard_DS15_v2",
+          "Standard_E2s_v3",
+          "Standard_E2_v3",
+          "Standard_E4-2s_v3",
+          "Standard_E4s_v3",
+          "Standard_E4_v3",
+          "Standard_E8-2s_v3",
+          "Standard_E8-4s_v3",
+          "Standard_E8s_v3",
+          "Standard_E8_v3",
+          "Standard_E16-4s_v3",
+          "Standard_E16-8s_v3",
+          "Standard_E16s_v3",
+          "Standard_E16_v3",
+          "Standard_E20s_v3",
+          "Standard_E20_v3",
+          "Standard_E32-8s_v3",
+          "Standard_E32-16s_v3",
+          "Standard_E32s_v3",
+          "Standard_E32_v3",
+          "Standard_E64-16s_v3",
+          "Standard_E64-32s_v3",
+          "Standard_E64is_v3",
+          "Standard_E64i_v3",
+          "Standard_E64s_v3",
+          "Standard_E64_v3",
+          "Standard_F1s",
+          "Standard_F2s",
+          "Standard_F2s_v2",
+          "Standard_F4s",
+          "Standard_F4s_v2",
+          "Standard_F8s",
+          "Standard_F8s_v2",
+          "Standard_F16s",
+          "Standard_F16s_v2",
+          "Standard_F32s_v2",
+          "Standard_F64s_v2",
+          "Standard_F72s_v2",
+          "Standard_GS1",
+          "Standard_GS2",
+          "Standard_GS3",
+          "Standard_GS4",
+          "Standard_GS4-4",
+          "Standard_GS4-8",
+          "Standard_GS5",
+          "Standard_GS5-8",
+          "Standard_GS5-16",
+          "Standard_H8",
+          "Standard_H8m",
+          "Standard_H16",
+          "Standard_H16m",
+          "Standard_H16mr",
+          "Standard_H16r",
+          "Standard_HB60rs",
+          "Standard_HC44rs",
+          "Standard_L4s",
+          "Standard_L8s",
+          "Standard_L8s_v2",
+          "Standard_L16s",
+          "Standard_L16s_v2",
+          "Standard_L32s",
+          "Standard_L32s_v2",
+          "Standard_L64s_v2",
+          "Standard_L80s_v2",
+          "Standard_M8-2ms",
+          "Standard_M8-4ms",
+          "Standard_M8ms",
+          "Standard_M16-4ms",
+          "Standard_M16-8ms",
+          "Standard_M16ms",
+          "Standard_M32-8ms",
+          "Standard_M32-16ms",
+          "Standard_M32ls",
+          "Standard_M32ms",
+          "Standard_M32ts",
+          "Standard_M64",
+          "Standard_M64-16ms",
+          "Standard_M64-32ms",
+          "Standard_M64ls",
+          "Standard_M64m",
+          "Standard_M64ms",
+          "Standard_M64s",
+          "Standard_M128",
+          "Standard_M128-32ms",
+          "Standard_M128-64ms",
+          "Standard_M128m",
+          "Standard_M128ms",
+          "Standard_M128s",
+          "Standard_NC6",
+          "Standard_NC6s_v2",
+          "Standard_NC6s_v3",
+          "Standard_NC12",
+          "Standard_NC12s_v2",
+          "Standard_NC12s_v3",
+          "Standard_NC24",
+          "Standard_NC24r",
+          "Standard_NC24rs_v2",
+          "Standard_NC24rs_v3",
+          "Standard_NC24s_v2",
+          "Standard_NC24s_v3",
+          "Standard_ND6s",
+          "Standard_ND12s",
+          "Standard_ND24rs",
+          "Standard_ND24s",
+          "Standard_NV6",
+          "Standard_NV6s_v2",
+          "Standard_NV12",
+          "Standard_NV12s_v2",
+          "Standard_NV24",
+          "Standard_NV24s_v2"
+        ]
+      },
+      "Policy_Allowed-StorageAccount-SKUs": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Allowed storage SKUs",
+          "description": "SKU used in Diagnostic Log storage accounts",
+          "strongType": "storageSKUs"
+        },
+        "defaultValue": [
+          "Standard_LRS"
+        ],
+        "allowedValues": [
+          "Premium_LRS",
+          "Standard_GRS",
+          "Standard_LRS",
+          "Standard_RAGRS",
+          "Standard_ZRS"
+        ]
+      },
+      "Policy_Resource-Types-DENY": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Denied Resource Types",
+          "description": "The list of resource types that cannot be deployed.",
+          "strongType": "resourceTypes"
+        }
+      },
+      "LogAnalytics_DataRetention": {
+        "type": "int",
+        "metadata": {
+          "displayName": "data-retention (Deploy Log Analytics)",
+          "description": "Number of days data will be retained for"
+        },
+        "defaultValue": 365,
+        "allowedValues": []
+      },
+      "LogAnalytics_Location": {
+        "type": "string",
+        "metadata": {
+          "displayName": "location (Deploy Log Analytics)",
+          "description": "Region used when establishing the workspace"
+        },
+        "defaultValue": "East US",
+        "allowedValues": [
+          "Australia Central",
+          "Australia East",
+          "Australia Southeast",
+          "Canada Central",
+          "Central India",
+          "Central US",
+          "East Asia",
+          "East US 2",
+          "East US",
+          "France Central",
+          "Japan East",
+          "Korea Central",
+          "North Central US",
+          "North Europe",
+          "South Central US",
+          "Southeast Asia",
+          "UK South",
+          "West Europe",
+          "West US 2",
+          "West US",
+          "US Gov Virginia"
+        ]
+      },
+      "KeyVault-user-id": {
+        "type": "string",
+        "metadata": {
+          "displayName": "KeyVault-User Access will be granted to an Azure AD Object ID i.e. (abc123de-f456-ghi7-89jk-l0mno123pqr4)",
+          "description": "AAD object ID of the user that requires access to Key Vault."
+        },
+        "allowedValues": []
+      },
+      "HUB-vNET-AddressSpace": {
+        "type": "string",
+        "metadata": {
+          "displayName": "HUB Vitual Network IP Address Space"
+        },
+        "defaultValue": "10.0"
+      }
+    },
+    "resourceGroups": {
+      "HUB-SharedServices-RG": {
+        "name": "[concat(parameters('organization'),'-sharedsvcs-rg')]",
+        "location": "[parameters('HUB-RG-Location')]",
+        "metadata": {
+          "displayName": "Resource Group for Shared Services"
+        },
+        "dependsOn": []
+      },
+      "HUB-Identity-RG": {
+        "name": "[concat(parameters('organization'),'-HUB-Identity-rg')]",
+        "location": "[parameters('HUB-RG-Location')]",
+        "metadata": {
+          "displayName": "Resource Group for Identity Services"
+        },
+        "dependsOn": []
+      },
+      "Network-RG": {
+        "name": "[concat(parameters('organization'),'-VNet-rg')]",
+        "location": "[parameters('HUB-RG-Location')]",
+        "metadata": {
+          "displayName": "Resource Group for Networks"
+        },
+        "dependsOn": []
+      },
+      "Application-RG": {
+        "name": "[concat(parameters('organization'),'-Application-rg')]",
+        "location": "[parameters('HUB-RG-Location')]",
+        "metadata": {
+          "displayName": "Resource Group for First Application"
+        },
+        "dependsOn": []
+      }
+    }
+  }
+}
