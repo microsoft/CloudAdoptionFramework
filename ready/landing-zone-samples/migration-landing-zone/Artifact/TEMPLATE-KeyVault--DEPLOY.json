@@ -1,0 +1,124 @@
+{
+  "kind": "template",
+  "properties": {
+    "displayName": "Deploy Key Vault",
+    "description": "Deploy Key Vault for Secrets, Certs & Keys",
+    "dependsOn": [],
+    "template": {
+      "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "organization": {
+          "type": "string",
+          "metadata": {
+            "description": "Organization name. For example: Contoso"
+          }
+        },
+        "KV-AccessPolicy": {
+          "type": "string",
+          "metadata": {
+            "description": "User ID to grant permissions to in Key Vault"
+          }
+        }
+      },
+      "variables": {
+        "deployment-prefix": "[concat(parameters('organization'), '-sharedsvcs')]",
+        "key-vault-name": "[concat(variables('deployment-prefix'), '-kv')]"
+      },
+      "resources": [
+        {
+          "type": "Microsoft.KeyVault/vaults",
+          "name": "[variables('key-vault-name')]",
+          "apiVersion": "2016-10-01",
+          "location": "[resourceGroup().location]",
+          "tags": {
+            "displayName": "KeyVault"
+          },
+          "properties": {
+            "createMode": "default",
+            "enabledForDeployment": true,
+            "enabledForDiskEncryption": true,
+            "enabledForTemplateDeployment": true,
+            "tenantId": "[subscription().tenantId]",
+            "sku": {
+              "name": "premium",
+              "family": "A"
+            },
+            "networkAcls": {
+              "defaultAction": "Allow",
+              "bypass": "AzureServices",
+              "virtualNetworkRules": [],
+              "ipRules": []
+            },
+            "accessPolicies": [
+              {
+                "objectId": "[parameters('KV-AccessPolicy')]",
+                "tenantId": "[subscription().tenantId]",
+                "permissions": {
+                  "keys": [
+                    "get",
+                    "list",
+                    "update",
+                    "create",
+                    "import",
+                    "delete",
+                    "recover",
+                    "backup",
+                    "restore"
+                  ],
+                  "secrets": [
+                    "get",
+                    "list",
+                    "set",
+                    "delete",
+                    "recover",
+                    "backup",
+                    "restore"
+                  ],
+                  "certificates": [
+                    "get",
+                    "list",
+                    "update",
+                    "create",
+                    "import",
+                    "delete",
+                    "recover",
+                    "deleteissuers",
+                    "recover",
+                    "managecontacts",
+                    "manageissuers",
+                    "getissuers",
+                    "listissuers",
+                    "setissuers"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "Microsoft.KeyVault/vaults/providers/locks",
+          "apiVersion": "2016-09-01",
+          "name": "[concat(variables('key-vault-name'), '/Microsoft.Authorization/keyVaultDoNotDelete')]",
+          "dependsOn": [
+            "[concat('Microsoft.KeyVault/vaults/', variables('key-vault-name'))]"
+          ],
+          "comments": "Resource lock on key vault",
+          "properties": {
+            "level": "CannotDelete"
+          }
+        }
+      ],
+      "outputs": {}
+    },
+    "resourceGroup": "HUB-SharedServices-RG",
+    "parameters": {
+      "organization": {
+        "value": "[parameters('Organization')]"
+      },
+      "KV-AccessPolicy": {
+        "value": "[parameters('KV-AccessPolicy')]"
+      }
+    }
+  }
+}

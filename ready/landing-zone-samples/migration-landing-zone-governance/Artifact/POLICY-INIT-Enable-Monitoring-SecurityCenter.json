@@ -1,0 +1,325 @@
+{
+  "kind": "policyAssignment",
+  "properties": {
+    "displayName": "Enable Monitoring in Azure Security Center",
+    "dependsOn": [],
+    "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8",
+    "parameters": {
+      "vmssSystemUpdatesMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "vmssEndpointProtectionMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "vmssOsVulnerabilitiesMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "systemUpdatesMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "systemConfigurationsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "endpointProtectionMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diskEncryptionMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "networkSecurityGroupsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "webApplicationFirewallMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "nextGenerationFirewallMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "vulnerabilityAssesmentMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "storageEncryptionMonitoringEffect": {
+        "value": "Audit"
+      },
+      "jitNetworkAccessMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "adaptiveApplicationControlsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "sqlAuditingMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "sqlEncryptionMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "sqlDbEncryptionMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "sqlServerAuditingMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "sqlServerAuditingActionsAndGroupsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInAppServiceMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "diagnosticsLogsInSelectiveAppServicesMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "encryptionOfAutomationAccountMonitoringEffect": {
+        "value": "Audit"
+      },
+      "diagnosticsLogsInBatchAccountMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInBatchAccountRetentionDays": {
+        "value": "365"
+      },
+      "metricAlertsInBatchAccountMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "classicComputeVMsMonitoringEffect": {
+        "value": "Audit"
+      },
+      "classicStorageAccountsMonitoringEffect": {
+        "value": "Audit"
+      },
+      "diagnosticsLogsInDataLakeAnalyticsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInDataLakeAnalyticsRetentionDays": {
+        "value": "365"
+      },
+      "diagnosticsLogsInDataLakeStoreMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInDataLakeStoreRetentionDays": {
+        "value": "365"
+      },
+      "diagnosticsLogsInEventHubMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInEventHubRetentionDays": {
+        "value": "365"
+      },
+      "diagnosticsLogsInKeyVaultMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInKeyVaultRetentionDays": {
+        "value": "365"
+      },
+      "diagnosticsLogsInLogicAppsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInLogicAppsRetentionDays": {
+        "value": "365"
+      },
+      "diagnosticsLogsInRedisCacheMonitoringEffect": {
+        "value": "Audit"
+      },
+      "diagnosticsLogsInSearchServiceMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInSearchServiceRetentionDays": {
+        "value": "365"
+      },
+      "aadAuthenticationInServiceFabricMonitoringEffect": {
+        "value": "Audit"
+      },
+      "clusterProtectionLevelInServiceFabricMonitoringEffect": {
+        "value": "Audit"
+      },
+      "diagnosticsLogsInServiceBusMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInServiceBusRetentionDays": {
+        "value": "365"
+      },
+      "namespaceAuthorizationRulesInServiceBusMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "aadAuthenticationInSqlServerMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "secureTransferToStorageAccountMonitoringEffect": {
+        "value": "Audit"
+      },
+      "diagnosticsLogsInStreamAnalyticsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInStreamAnalyticsRetentionDays": {
+        "value": "365"
+      },
+      "useRbacRulesMonitoringEffect": {
+        "value": "Audit"
+      },
+      "disableUnrestrictedNetworkToStorageAccountMonitoringEffect": {
+        "value": "Audit"
+      },
+      "diagnosticsLogsInServiceFabricMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "accessRulesInEventHubNamespaceMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "accessRulesInEventHubMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "sqlDbVulnerabilityAssesmentMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "sqlDbDataClassificationMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityDesignateLessThanOwnersMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityDesignateMoreThanOneOwnerMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityEnableMFAForOwnerPermissionsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityEnableMFAForWritePermissionsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityEnableMFAForReadPermissionsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityRemoveDeprecatedAccountWithOwnerPermissionsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityRemoveDeprecatedAccountMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityRemoveExternalAccountWithOwnerPermissionsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityRemoveExternalAccountWithWritePermissionsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "identityRemoveExternalAccountWithReadPermissionsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "apiAppConfigureIPRestrictionsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "functionAppConfigureIPRestrictionsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "webAppConfigureIPRestrictionsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "apiAppDisableRemoteDebuggingMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "functionAppDisableRemoteDebuggingMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "webAppDisableRemoteDebuggingMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "apiAppDisableWebSocketsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "functionAppDisableWebSocketsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "webAppDisableWebSocketsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "apiAppEnforceHttpsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "functionAppEnforceHttpsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "webAppEnforceHttpsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "apiAppRestrictCORSAccessMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "functionAppRestrictCORSAccessMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "webAppRestrictCORSAccessMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "apiAppUsedCustomDomainsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "functionAppUsedCustomDomainsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "webAppUsedCustomDomainsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "apiAppUsedLatestDotNetMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "webAppUsedLatestDotNetMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "apiAppUsedLatestJavaMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "webAppUsedLatestJavaMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "webAppUsedLatestNodeJsMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "apiAppUsedLatestPHPMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "webAppUsedLatestPHPMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "apiAppUsedLatestPythonMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "webAppUsedLatestPythonMonitoringEffect": {
+        "value": "Disabled"
+      },
+      "vnetEnableDDoSProtectionMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInIoTHubMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "diagnosticsLogsInIoTHubRetentionDays": {
+        "value": "365"
+      },
+      "sqlServerAdvancedDataSecurityMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "sqlManagedInstanceAdvancedDataSecurityMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "kubernetesServiceRbacEnabledMonitoringEffect": {
+        "value": "Audit"
+      },
+      "vulnerabilityAssessmentOnManagedInstanceMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "vulnerabilityAssessmentOnServerMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "adaptiveNetworkHardeningsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "restrictAccessToManagementPortsMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "restrictAccessToAppServicesMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      },
+      "disableIPForwardingMonitoringEffect": {
+        "value": "AuditIfNotExists"
+      }
+    }
+  }
+}

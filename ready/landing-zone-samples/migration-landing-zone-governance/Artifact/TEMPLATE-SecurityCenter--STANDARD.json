@@ -1,0 +1,26 @@
+{
+  "kind": "template",
+  "properties": {
+    "displayName": "Azure Security Center template",
+    "description": "Set Security Center Standard",
+    "dependsOn": [],
+    "template": {
+      "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+      "contentVersion": "1.0.0.1",
+      "parameters": {},
+      "variables": {},
+      "resources": [
+        {
+          "type": "Microsoft.Security/pricings",
+          "apiVersion": "2017-08-01-preview",
+          "name": "default",
+          "properties": {
+            "pricingTier": "Standard"
+          }
+        }
+      ],
+      "outputs": {}
+    },
+    "parameters": {}
+  }
+}

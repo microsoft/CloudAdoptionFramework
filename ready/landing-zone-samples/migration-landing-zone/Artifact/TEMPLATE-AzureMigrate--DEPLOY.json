@@ -1,0 +1,53 @@
+{
+  "kind": "template",
+  "properties": {
+    "displayName": "Deploy Azure Migrate",
+    "description": "Deploy Azure Migrate Project",
+    "dependsOn": [],
+    "template": {
+      "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "Organization": {
+          "type": "string",
+          "metadata": {
+            "description": "Organization name. For example: Contoso"
+          }
+        }
+      },
+      "variables": {
+        "AzureMigrateName": "[concat(parameters('Organization'),'-Migrate')]"
+      },
+      "resources": [
+        {
+          "type": "Microsoft.Migrate/projects",
+          "apiVersion": "2018-02-02",
+          "name": "[variables('AzureMigrateName')]",
+          "location": "westcentralus",
+          "properties": {},
+          "dependsOn": [],
+          "comments": "Azure Migration project."
+        },
+        {
+          "type": "Microsoft.Migrate/projects/providers/locks",
+          "apiVersion": "2016-09-01",
+          "name": "[concat(variables('AzureMigrateName'), '/Microsoft.Authorization/AzureMigrateDoNotDelete')]",
+          "dependsOn": [
+            "[variables('AzureMigrateName')]"
+          ],
+          "comments": "Resource lock on Azure Migrate",
+          "properties": {
+            "level": "CannotDelete"
+          }
+        }
+      ],
+      "outputs": {}
+    },
+    "resourceGroup": "Migration-RG",
+    "parameters": {
+      "Organization": {
+        "value": "[parameters('Organization')]"
+      }
+    }
+  }
+}

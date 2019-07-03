@@ -1,0 +1,13 @@
+{
+  "kind": "policyAssignment",
+  "properties": {
+    "displayName": "Resource Types that you do not want to allow in your environment",
+    "dependsOn": [],
+    "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6c112d4e-5bc7-47ae-a041-ea2d9dccd749",
+    "parameters": {
+      "listOfResourceTypesNotAllowed": {
+        "value": "[parameters('Policy_Resource-Types-DENY')]"
+      }
+    }
+  }
+}

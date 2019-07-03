@@ -1,0 +1,13 @@
+{
+  "kind": "policyAssignment",
+  "properties": {
+    "displayName": "Allowed storage account SKUs",
+    "dependsOn": [],
+    "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7433c107-6db4-4ad1-b57a-a76dce0154a1",
+    "parameters": {
+      "listOfAllowedSKUs": {
+        "value": "[parameters('Policy_Allowed-StorageAccount-SKUs')]"
+      }
+    }
+  }
+}

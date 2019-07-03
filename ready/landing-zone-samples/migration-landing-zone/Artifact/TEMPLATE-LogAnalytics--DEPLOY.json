@@ -1,0 +1,152 @@
+{
+  "kind": "template",
+  "properties": {
+    "displayName": "Deploy Log Analytics",
+    "description": "Deploy Log Analytics for Diagnostics",
+    "dependsOn": [],
+    "template": {
+      "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "organization": {
+          "type": "string",
+          "metadata": {
+            "description": "Organization name. For example: Contoso"
+          }
+        },
+        "data-retention": {
+          "type": "int",
+          "defaultValue": 365,
+          "minValue": 0,
+          "maxValue": 365,
+          "metadata": {
+            "displayName": "Log retention in days",
+            "description": "Number of days data will be retained for"
+          }
+        },
+        "location": {
+          "type": "string",
+          "allowedValues": [
+            "Australia Central",
+            "Australia East",
+            "Australia Southeast",
+            "Brazil South",
+            "Canada Central",
+            "Central India",
+            "Central US",
+            "East Asia",
+            "East US",
+            "East US 2",
+            "France Central",
+            "Japan East",
+            "Korea Central",
+            "North Central US",
+            "North Europe",
+            "South Africa North",
+            "South Central US",
+            "Southeast Asia",
+            "UK South",
+            "UK West",
+            "West Europe",
+            "West US",
+            "West US 2"
+          ],
+          "defaultValue": "East US",
+          "metadata": {
+            "displayName": "Location",
+            "description": "Region used when establishing the workspace"
+          }
+        }
+      },
+      "variables": {
+        "deployment-prefix": "[concat(parameters('Organization'), '-sharedsvcs')]",
+        "uniqueString": "[uniqueString(subscription().id, concat(variables('deployment-prefix'), '-log'))]",
+        "diagnostic-storageAccount-prefix": "[concat(replace(variables('deployment-prefix'), '-', ''), 'diag')]",
+        "diagnostic-storageAccount-name": "[toLower(substring(replace(concat(variables('diagnostic-storageAccount-prefix'), variables('uniqueString'), variables('uniqueString')), '-', ''), 0, 23) )]",
+        "oms-workspace-name": "[concat(variables('deployment-prefix'), '-log')]"
+      },
+      "resources": [
+        {
+          "comments": "----DIAGNOSTICS STORAGE ACCOUNT-----",
+          "type": "Microsoft.Storage/storageAccounts",
+          "name": "[variables('diagnostic-storageAccount-name')]",
+          "apiVersion": "2018-07-01",
+          "location": "[resourceGroup().location]",
+          "kind": "StorageV2",
+          "sku": {
+            "name": "Standard_LRS"
+          },
+          "tags": {
+            "displayName": "Storage Account"
+          },
+          "properties": {
+            "encryption": {
+              "keySource": "Microsoft.Storage",
+              "services": {
+                "blob": {
+                  "enabled": true
+                },
+                "file": {
+                  "enabled": true
+                }
+              }
+            },
+            "supportsHttpsTrafficOnly": true
+          }
+        },
+        {
+          "type": "Microsoft.Storage/storageAccounts/providers/locks",
+          "apiVersion": "2016-09-01",
+          "name": "[concat(variables('diagnostic-storageAccount-name'), '/Microsoft.Authorization/storageDoNotDelete')]",
+          "dependsOn": [
+            "[concat('Microsoft.Storage/storageAccounts/', variables('diagnostic-storageAccount-name'))]"
+          ],
+          "comments": "Resource lock on diagnostic storage account",
+          "properties": {
+            "level": "CannotDelete"
+          }
+        },
+        {
+          "type": "Microsoft.OperationalInsights/workspaces",
+          "name": "[variables('oms-workspace-name')]",
+          "apiVersion": "2017-03-15-preview",
+          "location": "[parameters('location')]",
+          "tags": {
+            "displayName": "Log Analytics"
+          },
+          "properties": {
+            "sku": {
+              "Name": "pergb2018"
+            },
+            "retention": "[parameters('data-retention')]"
+          }
+        },
+        {
+          "type": "Microsoft.OperationalInsights/workspaces/providers/locks",
+          "apiVersion": "2016-09-01",
+          "name": "[concat(variables('oms-workspace-name'), '/Microsoft.Authorization/logAnalyticsDoNotDelete')]",
+          "dependsOn": [
+            "[variables('oms-workspace-name')]"
+          ],
+          "comments": "Resource lock on Log Analytics",
+          "properties": {
+            "level": "CannotDelete"
+          }
+        }
+      ],
+      "outputs": {}
+    },
+    "resourceGroup": "HUB-SharedServices-RG",
+    "parameters": {
+      "organization": {
+        "value": "[parameters('Organization')]"
+      },
+      "data-retention": {
+        "value": "[parameters('LogAnalytics_DataRetention')]"
+      },
+      "location": {
+        "value": "[parameters('LogAnalytics_Location')]"
+      }
+    }
+  }
+}

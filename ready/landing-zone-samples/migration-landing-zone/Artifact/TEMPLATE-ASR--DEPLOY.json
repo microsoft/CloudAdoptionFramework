@@ -1,0 +1,105 @@
+{
+  "kind": "template",
+  "properties": {
+    "displayName": "Deploy Azure Site Recovery",
+    "description": "Deploy Azure Site Recovery",
+    "dependsOn": [],
+    "template": {
+      "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "organization": {
+          "type": "string",
+          "metadata": {
+            "description": "Organization name. For example:Contoso"
+          },
+          "defaultValue": "Contoso"
+        },
+        "DR-Location": {
+          "type": "string",
+          "metadata": {
+            "displayName": "Azure DR Region"
+          },
+          "defaultValue": "westus2",
+          "allowedValues": [
+            "eastasia",
+            "southeastasia",
+            "centralus",
+            "eastus",
+            "eastus2",
+            "westus",
+            "northcentralus",
+            "southcentralus",
+            "northeurope",
+            "westeurope",
+            "japanwest",
+            "japaneast",
+            "brazilsouth",
+            "australiaeast",
+            "australiasoutheast",
+            "southindia",
+            "centralindia",
+            "westindia",
+            "canadacentral",
+            "canadaeast",
+            "uksouth",
+            "ukwest",
+            "westcentralus",
+            "westus2",
+            "koreacentral",
+            "koreasouth",
+            "francecentral",
+            "francesouth",
+            "australiacentral",
+            "australiacentral2"
+          ]
+        }
+      },
+      "variables": {
+        "ASR-VaultName": "[concat(parameters('organization'), '-ASR')]"
+      },
+      "resources": [
+        {
+          "type": "Microsoft.RecoveryServices/vaults",
+          "apiVersion": "2016-06-01",
+          "name": "[variables('ASR-VaultName')]",
+          "location": "[resourceGroup().location]",
+          "copy": {
+            "name": "ASR-Vault-Copy",
+            "count": 1
+          },
+          "tags": {
+            "displayName": "ASR-Vault"
+          },
+          "sku": {
+            "name": "RS0",
+            "tier": "Standard"
+          },
+          "properties": {}
+        },
+        {
+          "type": "Microsoft.RecoveryServices/vaults/providers/locks",
+          "apiVersion": "2016-09-01",
+          "name": "[concat(variables('ASR-VaultName'), '/Microsoft.Authorization/ASRVaultDoNotDelete')]",
+          "dependsOn": [
+            "ASR-Vault-Copy"
+          ],
+          "comments": "Resource lock on ASR",
+          "properties": {
+            "level": "CannotDelete"
+          }
+        }
+      ],
+      "outputs": {}
+    },
+    "resourceGroup": "ASR-RG",
+    "parameters": {
+      "organization": {
+        "value": "[parameters('Organization')]"
+      },
+      "DR-Location": {
+        "value": "[parameters('DR-Location')]"
+      }
+    }
+  }
+}
