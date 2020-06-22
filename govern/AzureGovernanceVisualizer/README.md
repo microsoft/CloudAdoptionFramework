@@ -19,7 +19,7 @@ The new version comes with a handful of enhancements:
 
 ### Demo
 
-<a href="https://www.azadvertizer.net/azgovviz/demo/AzGovViz_Contoso_Demo.html" target="_blank">AzGovViz Demo</a>
+[AzGovViz Demo](https://www.azadvertizer.net/azgovviz/demo/AzGovViz_Contoso_Demo.html)
 
 ### Screenshots
 
