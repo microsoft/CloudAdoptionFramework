@@ -32,22 +32,6 @@ AzGovViz is intended to help you to get a holistic overview on your technical Az
 </td>
 </table>
 
-## AzGovViz @ Microsoft Cloud Adoption Framework
-
-<table>
-<td>
-
-<img width="120" src="img/caf-govern.png">
-
-</td>
-<td>
-
-__AzGovViz now listed as Tool for the Govern discipline in the Microsoft Cloud Adoption Framework!__  
-<https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/reference/tools-templates#govern>
-
-</td>
-</table>
-
 ## AzGovViz version history
 
 ### AzGovViz version 4
