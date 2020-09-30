@@ -1,7 +1,17 @@
 # AzGovViz
-# First things first: edit line 10 and line 11 
+# First things first: edit line 20 and line 21 
 # https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting
 # Also check https://www.azadvertizer.net to keep up with the pace on Azure Governance capabilities such as Azure Policies, Policy Initiatives, Policy Aliases and RBAC Roles
+# 
+# Parameters reference (use in line 59)
+# LimitCriticalPercentage | default is '80' | example: -LimitCriticalPercentage 90  | WhatDoesItDo? marks capabilities that approch limits e.g. limit 100, usage 80 will mark with warning
+# SubscriptionQuotaIdWhitelist | default is 'undefined'; separator is '\' | example: -SubscriptionQuotaIdWhitelist MSDN_\EnterpriseAgreement_ | WhatDoesItDo? processes only subscriptions that startWith the given QuotaIds
+# HierarchyMapOnly | switch | example: -HierarchyMapOnly | WhatDoesItDo? only creates the Hierarchy Tree
+# DoNotShowRoleAssignmentsUserData | switch | example: -DoNotShowRoleAssignmentsUserData | WhatDoesItDo? scrub user information
+# NoASCSecureScore | switch | example: -NoASCSecureScore | WhatDoesItDo? disables ASC Secure Score request for subscriptions (ASC Score API currently in preview)
+# NoResourceProvidersDetailed | switch | example: -NoResourceProvidersDetailed | WhatDoesItDo? disables 'ResourceProvider Detailed' output for TenantSummary (compute intensive)
+# CsvDelimiter | example: -CsvDelimiter "," | WhatDoesItDo? the world is split into two kind of delimiters - comma and semicolon - choose yours
+
 trigger: none
 
 pr: none
@@ -16,49 +26,50 @@ variables:
   Script: AzGovViz.ps1
 
 schedules:
-- cron: "0 0,6,12,18 * * *"
-  displayName: every 6h
+- cron: "0 0,12 * * *"
+  displayName: every 12h
   always: true
   branches:
     include:
     - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+- job: AzGovViz  
+  timeoutInMinutes: 0
 
-steps:
+  pool:
+    vmImage: 'ubuntu-latest'
 
-- powershell: |
-   write-host "#################################"
-   write-host "Ensure AzGovViz prerequisites"
-   write-host "#################################"
-   write-host "wiki dir check"
-   if(!(test-path $(System.DefaultWorkingDirectory)/$(WikiDir))){New-Item -ItemType Directory -Force -Path $(System.DefaultWorkingDirectory)/$(WikiDir)}
-   write-host "install Azure Powershell Module 'Az.ResourceGraph'"
-   Install-Module -Name Az.ResourceGraph -Force
-  displayName: 'Ensure AzGovViz prerequisites'
-  env:
-    workingdirectory: $(Agent.BuildDirectory)
-
-- task: AzurePowerShell@4
-  inputs:
-    azureSubscription: '$(ServiceConnection)'
-    ScriptPath: '$(System.DefaultWorkingDirectory)/$(ScriptDir)/$(Script)'
-    ScriptArguments: '-ManagementGroupId $(ManagementGroupId) -OutputPath $(WikiDir) -CsvDelimiter "$(CsvDelimiter)" -AzureDevOpsWikiAsCode -SubscriptionQuotaIdWhitelist $(SubscriptionQuotaIdWhitelist)'
-    preferredAzurePowerShellVersion: 3.1.0
-  displayName: 'Run AzGovViz'
-
-- powershell: |
-   write-host "#################################"
-   write-host "Push AzGovViz output to repository"
-   write-host "#################################"
-   $executionDateTimeInternationalReadable = get-date -format "dd-MMM-yyyy HH:mm:ss"
-   $currentTimeZone = (Get-TimeZone).Id
-   git config --global user.email "AzGovVizPipeline@azdo.com"
-   $PipelineInfo = "Pipeline: '$(Build.DefinitionName)' 'rev $(Build.BuildNumber)' (Project: $([uri]::EscapeDataString("$(System.TeamProject)")); Repository: $(Build.Repository.Name); Branch: $(Build.SourceBranchName) Commit: $(Build.SourceVersion))"
-   git config --global user.name "$PipelineInfo"
-   git config pull.rebase false
-   git add --all
-   git commit -m "wiki $executionDateTimeInternationalReadable ($currentTimeZone)"
-   git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin HEAD:master
-  displayName: 'Push AzGovViz output to repository'
+  steps:
+  - powershell: |
+      write-host "#################################"
+      write-host "Ensure AzGovViz prerequisites"
+      write-host "#################################"
+      write-host "wiki dir check"
+      if(!(test-path $(System.DefaultWorkingDirectory)/$(WikiDir))){New-Item -ItemType Directory -Force -Path $(System.DefaultWorkingDirectory)/$(WikiDir)}
+      write-host "install Azure Powershell Module 'Az.ResourceGraph'"
+      Install-Module -Name Az.ResourceGraph -Force
+    displayName: 'Ensure AzGovViz prerequisites'
+    env:
+      workingdirectory: $(Agent.BuildDirectory)
+  - task: AzurePowerShell@4
+    inputs:
+      azureSubscription: '$(ServiceConnection)'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/$(ScriptDir)/$(Script)'
+      ScriptArguments: '-ManagementGroupId $(ManagementGroupId) -OutputPath $(WikiDir) -CsvDelimiter "$(CsvDelimiter)" -AzureDevOpsWikiAsCode -SubscriptionQuotaIdWhitelist $(SubscriptionQuotaIdWhitelist)'
+      preferredAzurePowerShellVersion: 3.1.0
+    displayName: 'Run AzGovViz'
+  - powershell: |
+      write-host "#################################"
+      write-host "Push AzGovViz output to repository"
+      write-host "#################################"
+      $executionDateTimeInternationalReadable = get-date -format "dd-MMM-yyyy HH:mm:ss"
+      $currentTimeZone = (Get-TimeZone).Id
+      git config --global user.email "AzGovVizPipeline@azdo.com"
+      $PipelineInfo = "Pipeline: '$(Build.DefinitionName)' 'rev $(Build.BuildNumber)' (Project: $([uri]::EscapeDataString("$(System.TeamProject)")); Repository: $(Build.Repository.Name); Branch: $(Build.SourceBranchName) Commit: $(Build.SourceVersion))"
+      git config --global user.name "$PipelineInfo"
+      git config pull.rebase false
+      git add --all
+      git commit -m "wiki $executionDateTimeInternationalReadable ($currentTimeZone)"
+      git -c http.extraheader="AUTHORIZATION: bearer $(System.AccessToken)" push origin HEAD:master
+    displayName: 'Push AzGovViz output to repository'
