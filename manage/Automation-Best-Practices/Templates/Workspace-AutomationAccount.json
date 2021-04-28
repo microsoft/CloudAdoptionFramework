@@ -42,7 +42,7 @@
         "comments": "Automation account",
         "properties": {
           "sku": {
-            "name": "OMS"
+            "name": "Basic"
           }
         }
       },
