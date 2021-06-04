@@ -1,0 +1,76 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "emailSecurityContact": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Security contacts email address",
+                "description": "Provide email address for Azure Security Center contact details"
+            }
+        }
+    },
+    "resources": [
+        {
+            // Creates a new policy set including all policies related with ASC deployment
+            "name": "ASCEnforceDefinition",
+            "type": "Microsoft.Authorization/policySetDefinitions",
+            "apiVersion": "2020-03-01",
+            "properties": {
+                "displayName": "Security policies to enforce compliance",
+                "metadata": {
+                    "ASC": "true"
+                },
+                "parameters": {
+                    "emailSecurityContact": {
+                        "type": "string"
+                    }
+                },
+                "policyDefinitions": [
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', '6df2fee6-a9ed-4fef-bced-e13be1b25f1c')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-ARM')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-DNS')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-Servers')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-SecurityContacts')]",
+                        "parameters": {
+                            "emailSecurityContact": "[parameters('emailSecurityContact')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            // Assigns the azure security benchmarck policy initiative
+            "name": "ASCDefault",
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2020-03-01",  
+            "properties": {  
+                "policyDefinitionId": "1f3afdf9-d0c9-4c3d-847f-89da613e70a8"  
+            }
+        },
+        {
+            // Asigns the new policy set to subscription
+            "name": "ASCEnforce",
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2020-03-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/policySetDefinitions', 'ASCEnforceDefinition')]"
+            ],
+            "properties": {
+                "policyDefinitionId": "[resourceId('Microsoft.Authorization/policySetDefinitions', 'ASCEnforceDefinition')]",
+                "parameters": {
+                    "emailSecurityContact": "[parameters('emailSecurityContact')]"
+                }
+            }
+        }
+    ]
+}
