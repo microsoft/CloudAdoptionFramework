@@ -20,3 +20,51 @@ ASC-Enable-Alerts | Deploy-ASC-SecurityContacts
 ASC-Enable-AzureDefender-for-ARM | Deploy-ASC-Defender-ARM
 ASC-Enable-AzureDefender-for-DNS | Deploy-ASC-Defender-DNS
 ASC-Enable-AzureDefender-for-Servers | Deploy-ASC-Defender-VMs
+
+## RBAC
+
+- Suggested RBAC/PIM approach
+  <https://github.com/Azure/Enterprise-Scale/blob/main/docs/reference/contoso/Readme.md>
+  Search: "Identity and Access Management"
+
+- RBAC is suggested but there are not templates to define custom roles. Check:
+  - <https://github.com/Azure/Enterprise-Scale/issues/415>
+  - <https://github.com/edm-ms/AzureLandingZone/tree/main/Identity>
+
+- When a new subscription (landing zone) is created (in one of the management groups),
+  a principal id is send as parameter an added to 'Owner' role within
+  the new subscription
+  <https://github.com/Azure/Enterprise-Scale/blob/main/examples/landing-zones/subscription-with-rbac/subscriptionWithRbac.json>
+
+- Enable Service Principal to create landing zones
+  As a last step the Service Principal will be granted access to the enrolment account by assigning a role 
+  with the Microsoft.Subscription/subscriptions/write permission. 
+  Build-in role Enrollment account subscription creator (GUID: a0bcee42-bf30-4d1b-926a-48d21664ef71) is used in this guide.
+
+- Policy Assignment
+  Assigns policy service principal (created when policy was assigned?)
+  to the role definition specified by the policy definition (or owner sometimes)
+
+  Sample:
+
+  ```json
+    {
+        // Role assignment for the policy assignment to do on-behalf-of deployments
+        "type": "Microsoft.Authorization/roleAssignments",
+        "apiVersion": "2018-09-01-preview",
+        "name": "[variables('rbacNameForLz')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Authorization/policyAssignments', variables('vNetPolicyAssignment'))]"
+        ],
+        "properties": {
+            "principalType": "ServicePrincipal",
+            "principalId": "[reference(resourceId('Microsoft.Authorization/policyAssignments/', variables('vNetPolicyAssignment')), '2019-06-01', 'Full').identity.principalId]",
+            "roleDefinitionId": "[reference(variables('vNetPolicyDefinition'), '2019-06-01').policyRule.then.details.roleDefinitionIds[0]]"
+        }
+    }
+    ```
+
+  Links:
+
+  - <https://github.com/Azure/Enterprise-Scale/blob/main/docs/reference/adventureworks/armTemplates/auxiliary/corp-policy-peering.json>
+  - <https://github.com/Azure/Enterprise-Scale/blob/main/docs/reference/contoso/armTemplates/auxiliary/diagnosticsAndSecurity.json>
