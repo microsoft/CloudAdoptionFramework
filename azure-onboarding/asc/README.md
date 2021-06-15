@@ -1,4 +1,12 @@
-# Azure Security Center Onboarding Sample
+# Azure Security Center Onboarding
+
+## Initiative
+
+An Azure initiative is a collection of Azure policy definitions, or rules, that are grouped together towards a specific goal or purpose. Azure initiatives simplify management of your policies by grouping a set of policies together, logically, as a single item.
+
+This workshop installs the [Azure Security Benchmark Initiative](https://docs.microsoft.com/security/benchmark/azure/) and the [CIS Microsoft Azure Foundations Benchmark Initiative](https://www.cisecurity.org/benchmark/azure/).
+
+> Some policies are shared between both initiatives. The exact mapping between them is found [here](https://docs.microsoft.com/security/benchmark/azure/v2-cis-benchmark)
 
 ## Policies
 
@@ -21,7 +29,7 @@ It only enables it for ARM, DNS and Servers.
 
 ### templates\deploy-policies.json
 
-- Assigns the [Azure Security Benchmark](https://docs.microsoft.com/security/benchmark/azure/) policies as the default initiative for the subscription.
+- Assigns the [Azure Security Benchmark](https://docs.microsoft.com/security/benchmark/azure/) and [CIS Microsoft Azure Foundations Benchmark Initiative](https://www.cisecurity.org/benchmark/azure/) initiatives to the subscription.
 - Creates a new policy set including all the custom policies defined inside the policies folder.
 - Assigns the newly created policy set to the subscription to enforce ASC configuration.
 

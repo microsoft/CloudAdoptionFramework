@@ -52,8 +52,8 @@
             }
         },
         {
-            // Assigns the azure security benchmarck policy initiative
-            "name": "ASCDefault",
+            // Assigns the Azure Security Benchmark initiative
+            "name": "AzureSecurityBenchmarkInitiative",
             "type": "Microsoft.Authorization/policyAssignments",
             "apiVersion": "2020-03-01",  
             "properties": {  
@@ -107,6 +107,15 @@
                 "principalType": "ServicePrincipal",
                 "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', variables('securityAdminRoleDefinitionId'))]",
                 "principalId": "[toLower(reference('/providers/Microsoft.Authorization/policyAssignments/ASCEnforce', '2020-03-01', 'Full' ).identity.principalId)]"
+            }
+        },
+        {
+            // Assigns the CIS Microsoft Azure Foundations Benchmark initiative
+            "name": "CISMicrosoftAzureInitiative",
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2020-03-01",
+            "properties": {
+                "policyDefinitionId": "612b5213-9160-4969-8578-1518bd2a000c"
             }
         }
     ]
