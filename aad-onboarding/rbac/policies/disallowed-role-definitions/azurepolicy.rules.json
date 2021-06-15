@@ -1,0 +1,23 @@
+{
+	"if": {
+		"allOf": [
+			{
+				"field": "type",
+				"equals": "Microsoft.Authorization/roleAssignments"
+			},
+			{
+				"value": "[split(field('Microsoft.Authorization/roleAssignments/roleDefinitionId'),'/')[6]]",
+				"in": "[parameters('roleDefinitionIds')]"
+			},
+			{
+				"not": {
+					"field": "Microsoft.Authorization/roleAssignments/principalId",
+					"in": "[parameters('exemptPrincipalIDs')]"
+				}
+			}
+		]
+	},
+	"then": {
+		"effect": "[parameters('effect')]"
+	}
+}

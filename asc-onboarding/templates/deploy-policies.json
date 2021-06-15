@@ -10,6 +10,9 @@
             }
         }
     },
+    "variables": {
+        "securityAdminRoleDefinitionId": "fb1c8493-542b-48eb-b624-b4c8fea62acd"
+    },
     "resources": [
         {
             // Creates a new policy set including all policies related with ASC deployment
@@ -54,7 +57,27 @@
             "type": "Microsoft.Authorization/policyAssignments",
             "apiVersion": "2020-03-01",  
             "properties": {  
-                "policyDefinitionId": "1f3afdf9-d0c9-4c3d-847f-89da613e70a8"  
+                "policyDefinitionId": "1f3afdf9-d0c9-4c3d-847f-89da613e70a8",
+                "parameters": {
+                    "identityDesignateLessThanOwnersMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "useRbacRulesMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "useServicePrincipalToProtectSubscriptionsMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "identityEnableMFAForOwnerPermissionsMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "networkWatcherShouldBeEnabledMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "autoProvisioningOfTheLogAnalyticsAgentShouldBeEnabledOnYourSubscriptionMonitoringEffect": {
+                        "value": "Disabled"
+                    }
+                }
             }
         },
         {
@@ -70,6 +93,20 @@
                 "parameters": {
                     "emailSecurityContact": "[parameters('emailSecurityContact')]"
                 }
+            }
+        },
+        {
+            // Role assignment for the ASCEnforce assignment
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2020-10-01-preview",
+            "name": "ASCEnforceRoleAssignments",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/policyAssignments', 'ASCEnforce')]"
+            ],
+            "properties": {
+                "principalType": "ServicePrincipal",
+                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', variables('securityAdminRoleDefinitionId'))]",
+                "principalId": "[toLower(reference('/providers/Microsoft.Authorization/policyAssignments/ASCEnforce', '2020-03-01', 'Full' ).identity.principalId)]"
             }
         }
     ]

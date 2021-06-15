@@ -9,6 +9,8 @@ Policies templates were built based on the [Azure Security Center Policy Definit
 - **policies\ASC-Enable-AzureDefender-for-Servers.json**: Enables standard pricing for VMs in ASC.
 - **policies\ASC-Enable-SecurityContacts.json**: Enables and configures security contact information in ASC.
 
+A full list of built-in policies available in azure can be found [here](https://github.com/Azure/azure-policy)
+
 ## Templates
 
 ### templates\deploy-asc.json
@@ -19,8 +21,8 @@ It only enables it for ARM, DNS and Servers.
 
 ### templates\deploy-policies.json
 
+- Assigns the [Azure Security Benchmark](https://docs.microsoft.com/security/benchmark/azure/) policies as the default initiative for the subscription.
 - Creates a new policy set including all the custom policies defined inside the policies folder.
-- Assigns the Azure Security Benchmark policies as the default initiative for the subscription.
 - Assigns the newly created policy set to the subscription to enforce ASC configuration.
 
 ## Notes
