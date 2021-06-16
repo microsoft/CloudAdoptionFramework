@@ -12,9 +12,14 @@ This workshop installs the [Azure Security Benchmark Initiative](https://docs.mi
 
 Policies templates were built based on the [Azure Security Center Policy Definitions](https://github.com/Azure/Azure-Security-Center/tree/main/Pricing%20%26%20Settings/Azure%20Policy%20definitions)
 
+- **policies\ASC-Enable-AzureDefender-for-AppService.json**: Enables standard pricing for App Services in ASC.
 - **policies\ASC-Enable-AzureDefender-for-ARM.json**: Enables standard pricing for ARM in ASC.
+- **policies\ASC-Enable-AzureDefender-for-ContainerRegistry.json**: Enables Azure Defender for Container Registry in ASC.
 - **policies\ASC-Enable-AzureDefender-for-DNS.json**: Enables standard pricing for DNS in ASC.
 - **policies\ASC-Enable-AzureDefender-for-Servers.json**: Enables standard pricing for VMs in ASC.
+- **policies\ASC-Enable-AzureDefender-for-SqlServers.json**: Enables Azure Defender for Azure SQL Database in ASC.
+- **policies\ASC-Enable-AzureDefender-for-SqlServerVirtualMachines.json**: Enables Azure Defender for SQL Servers on machines in ASC.
+- **policies\ASC-Enable-AzureDefender-for-StorageAccounts.json**: Enables Azure Defender for Storage Accounts in ASC.
 - **policies\ASC-Enable-SecurityContacts.json**: Enables and configures security contact information in ASC.
 
 A full list of built-in policies available in azure can be found [here](https://github.com/Azure/azure-policy)

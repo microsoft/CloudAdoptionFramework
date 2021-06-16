@@ -20,10 +20,9 @@ $emailSecurityContact = Read-Host "Provide email address for Azure Security Cent
 az deployment create --location westus --template-file "templates\deploy-asc.json" --parameters emailSecurityContact=$emailSecurityContact
 
 # Deploys custom policies
-az deployment create --location westus --template-file "policies\ASC-Enable-AzureDefender-for-ARM.json"
-az deployment create --location westus --template-file "policies\ASC-Enable-AzureDefender-for-DNS.json"
-az deployment create --location westus --template-file "policies\ASC-Enable-AzureDefender-for-Servers.json"
-az deployment create --location westus --template-file "policies\ASC-Enable-SecurityContacts.json"
+Get-ChildItem "policies" -Filter *.json | Foreach-Object {
+    az deployment create --location westus --template-file "$($_.FullName)"
+}
 
 # Assigns azure security benchmark intiative and custom policy set
 az deployment create --location westus --template-file "templates\deploy-policies.json" --parameters emailSecurityContact=$emailSecurityContact
