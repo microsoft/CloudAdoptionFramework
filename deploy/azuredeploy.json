@@ -1,0 +1,1087 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceGroupName": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Resource group name",
+                "description": "Provide name for resource group"
+            }
+        },
+        "workspaceName": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Log Workspace name",
+                "description": "Provide name for log analytics workspace"
+            }
+        },
+        "retentionInDays": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Data retention (days)",
+                "description": "Select data retention (days) for Log Analytics."
+            },
+            "defaultValue": "30"
+        },
+        "emailSecurityContact": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Security contacts email address",
+                "description": "Provide email address for Azure Security Center contact details"
+            }
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        // Deploy resource group for log workspace
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2020-10-01",
+            "name": "[parameters('resourceGroupName')]",
+            "location": "[deployment().location]",
+            "properties": {}
+        },
+
+        // Deploy log workspace into resource group
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "DeployLogAnalytics",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/resourceGroups/', parameters('resourceGroupName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "variables": {},
+                    "resources": [
+                        {
+                            "apiVersion": "2020-10-01",
+                            "location": "[deployment().location]",
+                            "name": "[parameters('workspaceName')]",
+                            "type": "Microsoft.OperationalInsights/workspaces",
+                            "properties": {
+                                "sku": {
+                                    "name": "pergb2018"
+                                },
+                                "retentionInDays": "[int(parameters('retentionInDays'))]"
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+
+        // Deploy diagnostic setting for Activity log
+        {
+            "type": "Microsoft.Insights/diagnosticSettings",
+            "apiVersion": "2017-05-01-preview",
+            "location": "[deployment().location]",
+            "name": "[concat(parameters('workspaceName'), '-diag')]",
+            "dependsOn": [
+                "[concat(subscription().id, '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Resources/deployments/DeployLogAnalytics')]"
+            ],
+            "properties": {
+                "workspaceId": "[concat(subscription().id, '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]",
+                "logs": [
+                    {
+                        "category": "Administrative",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Security",
+                        "enabled": true
+                    },
+                    {
+                        "category": "ServiceHealth",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Alert",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Recommendation",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Policy",
+                        "enabled": true
+                    },
+                    {
+                        "category": "Autoscale",
+                        "enabled": true
+                    },
+                    {
+                        "category": "ResourceHealth",
+                        "enabled": true
+                    }
+                ]
+            }
+        },
+
+        // Deploy azure security center settings
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "AppServices",
+            "properties": {
+                "pricingTier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "Arm",
+            "properties": {
+                "pricingTier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "ContainerRegistry",
+            "properties": {
+                "pricingTier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "Dns",
+            "properties": {
+                "pricingTier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "VirtualMachines",
+            "properties": {
+                "pricingTier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "SqlServers",
+            "properties": {
+                "pricingTier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "SqlServerVirtualMachines",
+            "properties": {
+                "pricingTier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Security/pricings",
+            "apiVersion": "2018-06-01",
+            "name": "StorageAccounts",
+            "properties": {
+                "pricingTier": "Standard"
+            }
+        },
+        {
+            "type": "Microsoft.Security/securityContacts",
+            "apiVersion": "2020-01-01-preview",
+            "name": "default",
+            "properties": {
+                "emails": "[parameters('emailSecurityContact')]",
+                "notificationsByRole": {
+                    "state": "On",
+                    "roles": [
+                        "Owner"
+                    ]
+                },
+                "alertNotifications": {
+                    "state": "On",
+                    "minimalSeverity": "High"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Security/autoProvisioningSettings",
+            "apiVersion": "2017-08-01-preview",
+            "name": "default",
+            "properties": {
+                "autoProvision": "On"
+            }
+        },
+
+        // Create policies
+        {
+            "name": "ASC-Enable-AzureDefender-for-AppService",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable Azure Defender for App Service",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables Azure Defender for App Service.",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {},
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Security/pricings",
+                            "name": "AppServices",
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "existenceCondition": {
+                                "field": "Microsoft.Security/pricings/pricingTier",
+                                "equals": "Standard"
+                            },
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "parameters": {},
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {},
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/pricings",
+                                                "apiVersion": "2018-06-01",
+                                                "name": "AppServices",
+                                                "properties": {
+                                                    "pricingTier": "Standard"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "ASC-Enable-AzureDefender-for-ARM",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable Azure Defender for Azure Resource Manager (ARM)",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables Azure Defender for Azure Resource Manager (ARM).",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {},
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Security/pricings",
+                            "name": "Arm",
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "existenceCondition": {
+                                "field": "Microsoft.Security/pricings/pricingTier",
+                                "equals": "Standard"
+                            },
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "parameters": {},
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {},
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/pricings",
+                                                "apiVersion": "2018-06-01",
+                                                "name": "Arm",
+                                                "properties": {
+                                                    "pricingTier": "Standard"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "ASC-Enable-AzureDefender-for-ContainerRegistry",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable Azure Defender for Container Registry",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables Azure Defender for Container Registry",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {},
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Security/pricings",
+                            "name": "ContainerRegistry",
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "existenceCondition": {
+                                "field": "Microsoft.Security/pricings/pricingTier",
+                                "equals": "Standard"
+                            },
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "parameters": {},
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {},
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/pricings",
+                                                "apiVersion": "2018-06-01",
+                                                "name": "ContainerRegistry",
+                                                "properties": {
+                                                    "pricingTier": "Standard"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "ASC-Enable-AzureDefender-for-DNS",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable Azure Defender for DNS",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables Azure Defender for DNS.",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {},
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Security/pricings",
+                            "name": "Dns",
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "existenceCondition": {
+                                "field": "Microsoft.Security/pricings/pricingTier",
+                                "equals": "Standard"
+                            },
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "parameters": {},
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {},
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/pricings",
+                                                "apiVersion": "2018-06-01",
+                                                "name": "Dns",
+                                                "properties": {
+                                                    "pricingTier": "Standard"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "ASC-Enable-AzureDefender-for-Servers",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable Azure Defender for Servers",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables Azure Defender for Servers.",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {},
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Security/pricings",
+                            "name": "VirtualMachines",
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "existenceCondition": {
+                                "field": "Microsoft.Security/pricings/pricingTier",
+                                "equals": "Standard"
+                            },
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "parameters": {},
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {},
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/pricings",
+                                                "apiVersion": "2018-06-01",
+                                                "name": "VirtualMachines",
+                                                "properties": {
+                                                    "pricingTier": "Standard"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "ASC-Enable-AzureDefender-for-SqlServers",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable Azure Defender for Azure SQL Database",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables Azure Defender for Azure SQL Database.",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {},
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Security/pricings",
+                            "name": "SqlServers",
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "existenceCondition": {
+                                "field": "Microsoft.Security/pricings/pricingTier",
+                                "equals": "Standard"
+                            },
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "parameters": {},
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {},
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/pricings",
+                                                "apiVersion": "2018-06-01",
+                                                "name": "SqlServers",
+                                                "properties": {
+                                                    "pricingTier": "Standard"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "ASC-Enable-AzureDefender-for-SqlServerVirtualMachines",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable Azure Defender for SQL Servers on machines",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables Azure Defender for SQL Servers on machines.",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {},
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Security/pricings",
+                            "name": "SqlServerVirtualMachines",
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "existenceCondition": {
+                                "field": "Microsoft.Security/pricings/pricingTier",
+                                "equals": "Standard"
+                            },
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "parameters": {},
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {},
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/pricings",
+                                                "apiVersion": "2018-06-01",
+                                                "name": "SqlServerVirtualMachines",
+                                                "properties": {
+                                                    "pricingTier": "Standard"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "ASC-Enable-AzureDefender-for-StorageAccounts",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable Azure Defender for Storage Accounts",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables Azure Defender for Storage Accounts",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {},
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "type": "Microsoft.Security/pricings",
+                            "name": "StorageAccounts",
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "existenceCondition": {
+                                "field": "Microsoft.Security/pricings/pricingTier",
+                                "equals": "Standard"
+                            },
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "parameters": {},
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {},
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/pricings",
+                                                "apiVersion": "2018-06-01",
+                                                "name": "StorageAccounts",
+                                                "properties": {
+                                                    "pricingTier": "Standard"
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "name": "ASC-Enable-SecurityContacts",
+            "type": "Microsoft.Authorization/policyDefinitions",
+            "apiVersion": "2019-09-01",
+            "properties": {
+                "displayName": "Enable security alerts notifications",
+                "policyType": "Custom",
+                "mode": "All",
+                "description": "This policy enables security alerts notifications",
+                "metadata": {
+                    "version": "1.0.0",
+                    "category": "Security Center",
+                    "securityCenter": {
+                        "Severity": "Medium"
+                    }
+                },
+                "parameters": {
+                    "emailSecurityContact": {
+                        "type": "String",
+                        "metadata": {
+                            "displayName": "Security contacts email address",
+                            "description": "Provide email address for Azure Security Center contact details"
+                        }
+                    }
+                },
+                "policyRule": {
+                    "if": {
+                        "allOf": [
+                            {
+                                "field": "type",
+                                "equals": "Microsoft.Resources/subscriptions"
+                            }
+                        ]
+                    },
+                    "then": {
+                        "effect": "deployIfNotExists",
+                        "details": {
+                            "deploymentScope": "subscription",
+                            "existenceScope": "subscription",
+                            "type": "Microsoft.Security/securityContacts",
+                            "existenceCondition": {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Security/securityContacts/email",
+                                        "equals": "[[parameters('emailSecurityContact')]"
+                                    }
+                                ]
+                            },
+                            "roleDefinitionIds": [
+                                "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                            ],
+                            "deployment": {
+                                "location": "[deployment().location]",
+                                "properties": {
+                                    "mode": "incremental",
+                                    "template": {
+                                        "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                                        "contentVersion": "1.0.0.0",
+                                        "parameters": {
+                                            "emailSecurityContact": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "variables": {},
+                                        "resources": [
+                                            {
+                                                "type": "Microsoft.Security/securityContacts",
+                                                "apiVersion": "2020-01-01-preview",
+                                                "name": "default",
+                                                "properties": {
+                                                    "emails": "[[parameters('emailSecurityContact')]",
+                                                    "notificationsByRole": {
+                                                        "state": "On",
+                                                        "roles": [
+                                                            "Owner"
+                                                        ]
+                                                    },
+                                                    "alertNotifications": {
+                                                        "state": "On",
+                                                        "minimalSeverity": "High"
+                                                    }
+                                                }
+                                            }
+                                        ],
+                                        "outputs": {}
+                                    },
+                                    "parameters": {
+                                        "emailSecurityContact": {
+                                            "value": "[[parameters('emailSecurityContact')]"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        // Create policy set
+        {
+            // Creates a new policy set including all policies related with ASC deployment
+            "name": "ASCEnforceDefinition",
+            "type": "Microsoft.Authorization/policySetDefinitions",
+            "apiVersion": "2019-09-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-AppService')]",
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-ARM')]",
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-ContainerRegistry')]",
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-DNS')]",
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-Servers')]",
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-SqlServers')]",
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-SqlServerVirtualMachines')]",
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-StorageAccounts')]",
+                "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-SecurityContacts')]"
+            ],
+            "properties": {
+                "displayName": "Security policies to enforce compliance",
+                "metadata": {
+                    "ASC": "true"
+                },
+                "parameters": {
+                    "emailSecurityContact": {
+                        "type": "string"
+                    }
+                },
+                "policyDefinitions": [
+                    {
+                        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6df2fee6-a9ed-4fef-bced-e13be1b25f1c"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-AppService')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-ARM')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-ContainerRegistry')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-DNS')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-Servers')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-SqlServers')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-SqlServerVirtualMachines')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-AzureDefender-for-StorageAccounts')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions/', 'ASC-Enable-SecurityContacts')]",
+                        "parameters": {
+                            "emailSecurityContact": {
+                                "value": "[[parameters('emailSecurityContact')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+
+        // Deploy policy initiatives
+        {
+            // Azure Security Benchmark
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2020-09-01",
+            "name": "AzureSecurityBenchmarkInitiative",
+            "properties": {  
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8",
+                "parameters": {
+                    "identityDesignateLessThanOwnersMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "useRbacRulesMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "useServicePrincipalToProtectSubscriptionsMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "identityEnableMFAForOwnerPermissionsMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "networkWatcherShouldBeEnabledMonitoringEffect": {
+                        "value": "Disabled"
+                    },
+                    "autoProvisioningOfTheLogAnalyticsAgentShouldBeEnabledOnYourSubscriptionMonitoringEffect": {
+                        "value": "Disabled"
+                    }
+                }
+            }
+        },
+        {
+            // CIS Microsoft Azure Foundations Benchmark
+            "name": "CISMicrosoftAzureInitiative",
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2020-09-01",
+            "properties": {
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/612b5213-9160-4969-8578-1518bd2a000c"
+            }
+        },
+
+        // Assign policies to subscription
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2020-09-01",
+            "name": "ActivityLogEnforce",
+            "location": "[deployment().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Insights/diagnosticSettings/', concat(parameters('workspaceName'), '-diag'))]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "description": "Enforce activity log to be sent to the log workspace",
+                "displayName": "ActivityLogEnforce",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2465583e-4e78-4c15-b6be-a36cbc7c8b0f",
+                "parameters": {
+                    "logAnalytics": {
+                        "value": "[concat(subscription().id, '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    },
+                    "logsEnabled": {
+                        "value": "True"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2020-09-01",
+            "name": "ASCEnforce",
+            "location": "[deployment().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/policySetDefinitions/', 'ASCEnforceDefinition')]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "description": "Enforce Azure Security Center to be enabled and configured for the subscription",
+                "displayName": "ASCEnforce",
+                "policyDefinitionId": "[resourceId('Microsoft.Authorization/policySetDefinitions/', 'ASCEnforceDefinition')]",
+                "parameters": {
+                    "emailSecurityContact": {
+                        "value": "[parameters('emailSecurityContact')]"
+                    }
+                }
+            }
+        },
+
+        // Role assignments to policies
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "DeployRoleAssignments",
+            "location": "[deployment().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Authorization/policyAssignments/', 'ActivityLogEnforce')]",
+                "[resourceId('Microsoft.Authorization/policyAssignments/', 'ASCEnforce')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "guid": {
+                            "defaultValue": "[newGuid()]",
+                            "type": "String"
+                        }
+                    },
+                    "variables": {
+                        "securityAdminRoleDefinitionId": "fb1c8493-542b-48eb-b624-b4c8fea62acd",
+                        "logAnalyticsContributorRoleDefinitionId": "92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2021-04-01-preview",
+                            "name": "[guid(uniquestring(parameters('guid'), 'ActivityLogEnforce'))]",
+                            "properties": {
+                                "principalType": "ServicePrincipal",
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', variables('logAnalyticsContributorRoleDefinitionId'))]",
+                                "principalId": "[toLower(reference(concat(subscription().id, '/providers/Microsoft.Authorization/policyAssignments/ActivityLogEnforce'), '2020-03-01', 'Full').identity.principalId)]"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2021-04-01-preview",
+                            "name": "[guid(uniquestring(parameters('guid'), 'ASCEnforce'))]",
+                            "properties": {
+                                "principalType": "ServicePrincipal",
+                                "roleDefinitionId": "[concat('/providers/Microsoft.Authorization/roleDefinitions/', variables('securityAdminRoleDefinitionId'))]",
+                                "principalId": "[toLower(reference(concat(subscription().id, '/providers/Microsoft.Authorization/policyAssignments/ASCEnforce'), '2020-03-01', 'Full').identity.principalId)]"
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}

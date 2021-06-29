@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "emailSecurityContact": {
@@ -34,13 +34,28 @@
                         "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', '6df2fee6-a9ed-4fef-bced-e13be1b25f1c')]"
                     },
                     {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-AppService')]"
+                    },
+                    {
                         "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-ARM')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-ContainerRegistry')]"
                     },
                     {
                         "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-DNS')]"
                     },
                     {
                         "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-Servers')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-SqlServers')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-SqlServerVirtualMachines')]"
+                    },
+                    {
+                        "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-AzureDefender-for-StorageAccounts')]"
                     },
                     {
                         "policyDefinitionId": "[resourceId('Microsoft.Authorization/policyDefinitions', 'ASC-Enable-SecurityContacts')]",
@@ -57,7 +72,7 @@
             "type": "Microsoft.Authorization/policyAssignments",
             "apiVersion": "2020-03-01",  
             "properties": {  
-                "policyDefinitionId": "1f3afdf9-d0c9-4c3d-847f-89da613e70a8",
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8",
                 "parameters": {
                     "identityDesignateLessThanOwnersMonitoringEffect": {
                         "value": "Disabled"
@@ -82,12 +97,16 @@
         },
         {
             // Asigns the new policy set to subscription
-            "name": "ASCEnforce",
             "type": "Microsoft.Authorization/policyAssignments",
             "apiVersion": "2020-03-01",
+            "name": "ASCEnforce",
+            "location": "[deployment().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Authorization/policySetDefinitions', 'ASCEnforceDefinition')]"
             ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "properties": {
                 "policyDefinitionId": "[resourceId('Microsoft.Authorization/policySetDefinitions', 'ASCEnforceDefinition')]",
                 "parameters": {
@@ -98,8 +117,8 @@
         {
             // Role assignment for the ASCEnforce assignment
             "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "2020-10-01-preview",
-            "name": "ASCEnforceRoleAssignments",
+            "apiVersion": "2021-04-01-preview",
+            "name": "[guid(uniquestring(subscription().id, 'ASCEnforceRoleAssignments'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Authorization/policyAssignments', 'ASCEnforce')]"
             ],
@@ -115,7 +134,7 @@
             "type": "Microsoft.Authorization/policyAssignments",
             "apiVersion": "2020-03-01",
             "properties": {
-                "policyDefinitionId": "612b5213-9160-4969-8578-1518bd2a000c"
+                "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/612b5213-9160-4969-8578-1518bd2a000c"
             }
         }
     ]
