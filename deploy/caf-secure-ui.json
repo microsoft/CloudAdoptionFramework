@@ -1,0 +1,336 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "Cloud Adoption Framework - Secure Accelerator"
+            },
+            {
+                "name": "infoBox1",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                    "icon": "Info",
+                    "text": "The Microsoft Cloud Adoption Framework (CAF) for Azure is proven guidance that's designed to help create and implement the business and technology strategies necessary for organizations to succeed in the cloud. The Secure methodology provides security guidance by providing clarity for the processes, best practices, models, and experiences. This guidance is based on the lessons learned and real world experiences of real customers, Microsoft's security journey, and work with organizations like NIST, The Open Group, and the Center for Internet Security (CIS).",
+                    "uri": "https://github.com/mspnp/caf-secure-amp-infra"
+                }
+            },
+            {
+                "name": "ptDeploymentPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Deployment prefix",
+                "toolTip": "Provide a prefix (max 10 characters, unique at tenant-scope) for subscription resources created as part of this deploy.",
+                "defaultValue": "cafsecure",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-z0-9A-Z-]{1,10}$",
+                    "validationMessage": "The prefix must be 1-10 characters."
+                }
+            }
+        ],
+        "steps": [
+            {
+                "name": "step1",
+                "label": "Azure Security Center",
+                "subLabel": {
+                    "preValidation": "",
+                    "postValidation": ""
+                },
+                "bladeTitle": "lzGs",
+                "elements": [
+                    {
+                        "name": "ptEmailSecurityContact",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Email Contact",
+                        "toolTip": "Email address to get email notifications from Azure Security Center",
+                        "visible": true,
+                        "defaultValue": "",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$",
+                            "validationMessage": "Please provide a valid email address"
+                        }
+                    },
+                    {
+                        "name": "sectionCISInitiative",
+                        "type": "Microsoft.Common.Section",
+                        "label": "CIS Microsoft Azure Foundations Benchmark",
+                        "elements": [
+                            {
+                                "name": "textBlock1",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "link": {
+                                        "label": "Learn more about CIS Benchmarks for Microsoft Azure",
+                                        "uri": "https://www.cisecurity.org/benchmark/azure"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "ptEnableCISInitiative",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable CIS Microsoft Azure Foundations Benchmark initiative",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes', ARM will assign the CIS Microsoft Azure Foundations Benchmark initiative to the subscription. If 'No', it will be skipped",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionLogAnalytics",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Log Analytics",
+                        "elements": [
+                            {
+                                "name": "ptRetentionInDays",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 30,
+                                "max": 730,
+                                "label": "Log Analytics Data Retention (days)",
+                                "subLabel": "Days",
+                                "defaultValue": 30,
+                                "showStepMarkers": false,
+                                "toolTip": "Select retention days for Azure logs. Default is 30 days.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "ptEnableLogs",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Stream activity log to log analytics workspace",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes', ARM will enable logs stream to the Log analytics workspace. If 'No', they will be disabled.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionAzureDefender",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Azure Defender",
+                        "elements": [
+                            {
+                                "name": "textBlock2",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "link": {
+                                        "label": "Learn more about Azure Security Center solutions",
+                                        "uri": "https://docs.microsoft.com/azure/security/fundamentals/overview"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForServers",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for servers",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for all servers.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForAppServices",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for App Service",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for AppServices.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForStorage",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for Storage",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for Storage.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForSql",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for Azure SQL database servers",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for Azure SQL Database.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForSqlOnVm",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for SQL servers on machines",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for SQL servers on machines.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForArm",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for Azure Resource Manager",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for Resource Manager.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForDns",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for DNS",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for DNS.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForRegistries",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for container registries",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for Azure Container Registries.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "deploymentPrefix": "[basics('ptDeploymentPrefix')]",
+            "emailSecurityContact": "[steps('step1').ptEmailSecurityContact]",
+            "enableCISInitiative": "[steps('step1').sectionCISInitiative.ptEnableCISInitiative]",
+            "retentionInDays": "[steps('step1').sectionLogAnalytics.ptRetentionInDays]",
+            "enableLogs": "[steps('step1').sectionLogAnalytics.ptEnableLogs]",
+            "enableAscForServers": "[steps('step1').sectionAzureDefender.ptEnableAscForServers]",
+            "enableAscForAppServices": "[steps('step1').sectionAzureDefender.ptEnableAscForAppServices]",
+            "enableAscForStorage": "[steps('step1').sectionAzureDefender.ptEnableAscForStorage]",
+            "enableAscForSql": "[steps('step1').sectionAzureDefender.ptEnableAscForSql]",
+            "enableAscForSqlOnVm": "[steps('step1').sectionAzureDefender.ptEnableAscForSqlOnVm]",
+            "enableAscForArm": "[steps('step1').sectionAzureDefender.ptEnableAscForArm]",
+            "enableAscForDns": "[steps('step1').sectionAzureDefender.ptEnableAscForDns]",
+            "enableAscForRegistries": "[steps('step1').sectionAzureDefender.ptEnableAscForRegistries]"
+        }
+    }
+}
