@@ -42,4 +42,6 @@ $TenantId = "<your tenant guid>"
 .\create-emergency-access-users.ps1
 ```
 
-TODO: figure out when/where to add the usage alerts
+## TODO
+
+Add the usage alerts

@@ -1,15 +1,24 @@
 # Azure AD Enablement
 
-Intro
+Conditional Access is the tool used by Azure Active Directory to bring signals together, to make decisions, and enforce organizational policies. Conditional Access is at the heart of the new identity driven control plane.
+
+Conditional Access policies at their simplest are if-then statements, if a user wants to access a resource, then they must complete an action. Example: A payroll manager wants to access the payroll application and is required to perform multi-factor authentication to access it.
+
+Administrators are faced with two primary goals:
+
+- Empower users to be productive wherever and whenever
+- Protect the organization's assets
+
+By using Conditional Access policies, you can apply the right access controls when needed to keep your organization secure and stay out of your user's way when not needed.
 
 ## Azure AD Security Defaults
 
 For organizations that are truly looking for a "quick start" with conditional access policies or you use the free tier of Azure Active Directory, then using [Azure Active Directory's Security defaults](https://docs.microsoft.com/azure/active-directory/fundamentals/concept-fundamentals-security-defaults) is the right place to start. These are a basic set of identity security mechanisms recommended by Microsoft. The include the following policies.
 
-* All users in your tenant must register for multi-factor authentication (MFA), but it's not enforced for all users to use for most interactions. Only when those users perform security-interesting activities such as logging on from a new device, performing critical tasks, using a new application, will MFA be triggered. 
-* All users with privileged access (e.g. Global, SharePoint, Exchange, User, Security administrators), are required to use MFA for most authentication operations.
-* Legacy authentication attempts are blocked, this includes things like Office 2010, SMTP, and POP3. Basically any authentication flow that does not support the potential for MFA to be involved.
-* All users interacting with Azure via the Portal, Azure CLI/PowerShell, or similar will require MFA.
+- All users in your tenant must register for multi-factor authentication (MFA), but it's not enforced for all users to use for most interactions. Only when those users perform security-interesting activities such as logging on from a new device, performing critical tasks, using a new application, will MFA be triggered.
+- All users with privileged access (e.g. Global, SharePoint, Exchange, User, Security administrators), are required to use MFA for most authentication operations.
+- Legacy authentication attempts are blocked, this includes things like Office 2010, SMTP, and POP3. Basically any authentication flow that does not support the potential for MFA to be involved.
+- All users interacting with Azure via the Portal, Azure CLI/PowerShell, or similar will require MFA.
 
 All MFA usage above is exclusively performed via the Microsoft Authenticator app.
 
@@ -61,7 +70,7 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
 
       Condition: All Users, No Exceptions, Legacy App Types
       Control: Block
-   
+
       ```powershell
       $conditions = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessConditionSet
       $conditions.Applications = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessApplicationCondition
@@ -81,7 +90,7 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
       Condition:
       Exclusions: Emergency access/break-glass accounts, service accounts/service principals
       Control: Block
-   
+
       ```powershell
       $conditions = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessConditionSet
       $conditions.Applications = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessApplicationCondition
@@ -102,7 +111,7 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
       Condition:
       Exclusions: Emergency access/break-glass accounts, service accounts/service principals
       Control: Block
-   
+
       ```powershell
       $conditions = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessConditionSet
       $conditions.Applications = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessApplicationCondition
@@ -123,7 +132,7 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
       Condition:
       Exclusions: Emergency access/break-glass accounts, service accounts/service principals
       Control: Block
-   
+
       ```powershell
       $conditions = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessConditionSet
       $conditions.Applications = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessApplicationCondition
@@ -138,11 +147,10 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
 
       New-AzureADMSConditionalAccessPolicy -DisplayName "Require MFA for all users" -State "enabledForReportingButNotEnforced" -Conditions $conditions -GrantControls $controls
       ```
- 
-TODO: Should we include a sign-in risk-based CA?  If so, should that be merged in with one of the boave?
 
-TODO: Should we include a user risk-based CA?  If so, should that be merged in with one of the boave?
+## TODO
 
-TODO: Should we include a block access by location CA?
-
-TODO: Should we include a compliant device (audit only) CA?
+- Should we include a sign-in risk-based CA?  If so, should that be merged in with one of the above?
+- Should we include a user risk-based CA?  If so, should that be merged in with one of the above?
+- Should we include a block access by location CA?
+- Should we include a compliant device (audit only) CA?
