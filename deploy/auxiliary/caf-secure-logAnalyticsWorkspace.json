@@ -1,0 +1,169 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentPrefix": {
+            "type": "string",
+            "maxLength": 10,
+            "metadata": {
+                "displayName": "Deployment prefix",
+                "description": "Provide a prefix (max 10 characters, unique at tenant-scope) for subscription resources created as part of this deploy."
+            },
+            "defaultValue": "cafsecure"
+        },
+        "retentionInDays": {
+            "type": "int",
+            "metadata": {
+                "displayName": "Data retention (days)",
+                "description": "Select data retention (days) for Log Analytics."
+            },
+            "defaultValue": 30
+        },
+        "enableLogs": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enable logs",
+                "description": "If 'Yes', ARM will enable logs stream to the log analytics workspace. If 'No', they will be disabled"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        }
+    },
+    "variables": {
+        "logsEnabled": "[if(equals(parameters('enableLogs'), 'Yes'), 'True', 'False')]",
+        "resourceGroupName": "[concat('rg-', parameters('deploymentPrefix'), '-log')]",
+        "deploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-log')]",
+        "deploymentId": "[concat(subscription().id, '/resourceGroups/', variables('resourceGroupName'), '/providers/Microsoft.Resources/deployments/', variables('deploymentName'))]",
+        "workspaceName": "[concat('log-', parameters('deploymentPrefix'))]"
+    },
+    "resources": [
+        // Creates resource group
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('resourceGroupName')]",
+            "location": "[deployment().location]",
+            "properties": {}
+        },
+
+        // Deploy log workspace into resource group
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentName')]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "dependsOn": [
+                "[subscriptionResourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "workspaceName": {
+                            "type": "string"
+                        },
+                        "retentionInDays": {
+                            "type": "int"
+                        }
+                    },
+                    "variables": {
+                    },
+                    "resources": [
+                        {
+                            "apiVersion": "2020-10-01",
+                            "location": "[resourceGroup().location]",
+                            "name": "[parameters('workspaceName')]",
+                            "type": "Microsoft.OperationalInsights/workspaces",
+                            "properties": {
+                                "sku": {
+                                    "name": "pergb2018"
+                                },
+                                "retentionInDays": "[parameters('retentionInDays')]"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "workspaceId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+                        }
+                    }
+                },
+                "parameters": {
+                    "workspaceName": {
+                        "value": "[variables('workspaceName')]"
+                    },
+                    "retentionInDays": {
+                        "value": "[parameters('retentionInDays')]"
+                    }
+                }
+            }
+        },
+
+         // Deploy diagnostic setting for Activity log
+        {
+            "type": "Microsoft.Insights/diagnosticSettings",
+            "apiVersion": "2017-05-01-preview",
+            "location": "[deployment().location]",
+            "name": "default",
+            "dependsOn": [
+                "[variables('deploymentId')]"
+            ],
+            "properties": {
+                "workspaceId": "[reference(variables('deploymentName')).outputs.workspaceId.value]",
+                "logs": [
+                    {
+                        "category": "Administrative",
+                        "enabled": "[variables('logsEnabled')]"
+                    },
+                    {
+                        "category": "Security",
+                        "enabled": "[variables('logsEnabled')]"
+                    },
+                    {
+                        "category": "ServiceHealth",
+                        "enabled": "[variables('logsEnabled')]"
+                    },
+                    {
+                        "category": "Alert",
+                        "enabled": "[variables('logsEnabled')]"
+                    },
+                    {
+                        "category": "Recommendation",
+                        "enabled": "[variables('logsEnabled')]"
+                    },
+                    {
+                        "category": "Policy",
+                        "enabled": "[variables('logsEnabled')]"
+                    },
+                    {
+                        "category": "Autoscale",
+                        "enabled": "[variables('logsEnabled')]"
+                    },
+                    {
+                        "category": "ResourceHealth",
+                        "enabled": "[variables('logsEnabled')]"
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "workspaceId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.workspaceId.value]"
+        },
+        "diagnosticSettingsId": {
+            "type": "string",
+            "value": "[subscriptionResourceId('Microsoft.Insights/diagnosticSettings', 'default')]"
+        }
+    }
+}

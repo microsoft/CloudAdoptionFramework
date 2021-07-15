@@ -39,6 +39,7 @@ These artifacts, when deployed into a greenfield environment will illustrate a s
   - Azure Security Benchmark
   - Azure CIS Regulatory reporting
 - Azure Policy
+- Hub-spoke Network Topology
 
 - Azure AD onboarding
   - Azure AD _emergency access_ accounts
@@ -51,29 +52,44 @@ These artifacts, when deployed into a greenfield environment will illustrate a s
 |:-----------------------------------|
 |These artifacts are designed for illustrative purposes in a **greenfield environment**. They are NOT suitable to be executed, without modification, against pre-existing Azure AD tenants or Azure Subscriptions. Doing so could result in **critical failure/misconfiguration** on the existing subscriptions and/or tenant due to pre-existing configuration not accounted for by the scripts.|
 
-### Azure Security Center & Azure Policy
+## Azure Onboarding
 
-Azure Security Center and Azure Policies are automatically deployed with single ARM template:
+Azure Onboarding is implemented using a single deployment script that wil create resources and configurations within the selected subscription to show the following artifacts:
+
+- Azure Security Center
+  - Azure Defender
+  - Azure Security Benchmark
+  - Azure CIS Regulatory reporting
+- Azure Policy
+- Hub-spoke Network Topology
+
+Use the following link to deploy it to a greenfield subscription:
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmspnp%2Fcaf-secure-amp-infra%2Fmain%2Fdeploy%2Fcaf-secure-deploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fmspnp%2Fcaf-secure-amp-infra%2Fmain%2Fdeploy%2Fcaf-secure-ui.json)
 
-#### Resources
+### Log Analytics Workspace
 
-The deployment script wil create and use the following resources within the selected subscription:
+Deploys a new log analytics workspace and configures diagnostic setting to send all activity log into the default log workspace.
 
-- Resource Group
-- Log Workspace
+> When using a custom log workspace, in multi geo deployments, the log agent will still send logs to the a single workspace (located in one of the geos). This can cause undesired costs associated with cross-geo traffic. One possible solution can be found in [Azure Security Center Repository](https://github.com/Azure/Azure-Security-Center/tree/main/Pricing%20%26%20Settings/Azure%20Policy%20definitions/Workspace%20Management/Regional%20Workspaces)
 
-#### Initial Configuration
+### Hub-spoke Network Topology
 
-The deployment will:
+This section implements a hub-spoke topology in Azure. The hub virtual network acts as a central point of connectivity to many spoke virtual networks. The hub can also be used as the connectivity point to your on-premises networks. The spoke virtual networks peer with the hub and can be used to isolate workloads.
+
+A hub and spoke network topology allows you to create a central Hub VNet that contains shared networking components (such as Azure Firewall, ExpressRoute and VPN Gateways) that can then be used by spoke VNets, connected to the Hub VNet via VNET Peering, to centralize connectivity in your environment.
+
+Hub and spoke network design considerations & recommendations can be found [here](https://docs.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/traditional-azure-networking-topology).
+
+This deployment includes a Hub and two peered Spokes.
+
+### Azure Security Center
 
 - Enable Azure Defender for selected resources
 - Enable Auto Provision in Azure Security Center and send the logs into the default log workspace
 - Configure security contact in Azure Security Center
-- Configure diagnostic setting to send all activity log into the default log workspace
 
-#### Policies & Initiatives
+### Azure Policy
 
 An Azure initiative is a collection of Azure policy definitions, or rules, that are grouped together towards a specific goal or purpose. Azure initiatives simplify management of your policies by grouping a set of policies together, logically, as a single item.
 
@@ -89,23 +105,19 @@ This workshop will create a new policy set and assign it at subscription level t
 - **Enable Security Contacts**: Enables and configures security contact information in ASC.
 - **Enable Auto Provision**: Enables and configure vm agent auto provision
 
-#### Additional Notes
+> To apply the same policies when register newly created subscriptions, customers have to create a remediation task for the policies. This is because subscriptions are not a top-level ARM resource, so they currently do not trigger a policy evaluation when they are created.
 
-- To register newly created subscriptions, customers have to create a remediation task for the policies. This is because subscriptions are not a top-level ARM resource, so they currently do not trigger a policy evaluation when they are created.
-
-- When using a custom log workspace, in multi geo deployments, the log agent will still send logs to the a single workspace (located in one of the geos). This can cause undesired costs associated with cross-geo traffic. One possible solution can be found in [Azure Security Center Repository](https://github.com/Azure/Azure-Security-Center/tree/main/Pricing%20%26%20Settings/Azure%20Policy%20definitions/Workspace%20Management/Regional%20Workspaces)
-
-### Azure AD onboarding
+## Azure AD Onboarding
 
 For an introduction on the services and resources this implementation includes for Azure AD check the [Azure AD onboarding README](.\aad-onboarding\README.md)
 
-#### Azure AD emergency access accounts
+### Azure AD emergency access accounts
 
 _Emergency access_ accounts (typically known as "break-glass" accounts), are highly-privileged accounts in your Azure AD tenant. They are not assigned to specific individuals. And most importantly, usage is expressly limited to emergency scenarios where normal individual-based administrative accounts literally cannot be used. This is usually due to unexpected external influence, such as current solo Global Administrator needs to be terminated, a natural disaster impacting multi-factor auth, or a misconfiguration of conditional access policies.
 
 This reference implementation provides a set of scripts to help you create an emergency account. For further information and guidance check the [Azure AD emergency access accounts README](.\aad-onboarding\azuread-emergency-access\README.md)
 
-#### Azure AD conditional access policies
+### Azure AD conditional access policies
 
 Conditional Access is the tool used by Azure Active Directory to bring signals together, to make decisions, and enforce organizational policies. Conditional Access is at the heart of the new identity driven control plane.
 
@@ -120,13 +132,13 @@ By using Conditional Access policies, you can apply the right access controls wh
 
 For more details on conditional access reference implementation, check the [Azure AD conditional access policies README](.\aad-onboarding\conditional-access\README.md)
 
-### Azure Subscription Role-Based Access Control (RBAC)
+## Azure Subscription Role-Based Access Control (RBAC)
 
 To manage Azure Security Center organization-wide, it is necessary that customers have named a team who is responsible for monitoring and governing their Azure environment from a security perspective.
 
 This reference implementation provides a set of scripts to manage roles and a set of sample policies related with RBAC configuration management. Check the [Azure RBAC README](.\azure-onboarding\rbac\README.md) for further information.
 
-#### JIT Access
+### JIT Access
 
 JIT access is implemented through Privileged Identity Management (PIM).
 

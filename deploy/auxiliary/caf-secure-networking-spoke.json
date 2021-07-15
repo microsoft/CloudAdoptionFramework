@@ -1,0 +1,273 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentPrefix": {
+            "type": "string",
+            "maxLength": 10,
+            "metadata": {
+                "displayName": "Deployment prefix",
+                "description": "Provide a prefix (max 10 characters, unique at tenant-scope) for subscription resources created as part of this deploy."
+            },
+            "defaultValue": "cafsecure"
+        },
+        "hubNetworkId": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Virtual network id for the hub that the spoke will use"
+            }
+        },
+        "addressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the spoke network"
+            },
+            "defaultValue": "10.1.0.0/16"
+        },
+        "subnetAddressPrefixForAppGW": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway"
+            },
+            "defaultValue": "10.1.1.0/24"
+        },
+        "subnetAddressPrefixForWorkload": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the workload"
+            },
+            "defaultValue": "10.1.2.0/24"
+        },
+        "DdoSId": {
+            "type": "string",
+            "metadata": {
+                "displayName": "DDoS Id",
+                "description": "The DDoS Standard protection plan information id to use with the hub spoke."
+            },
+            "defaultValue": ""
+        }
+    },
+    "variables": {
+        "resourceGroupName": "[concat('rg-', parameters('deploymentPrefix'), '-networking-spokes')]",
+        "nameSuffix": "[replace(split(parameters('addressPrefix'), '/')[0],'.', '_')]",
+        "spokeName": "[concat(parameters('deploymentPrefix'), '-spoke-', variables('nameSuffix'))]",
+        "deploymentName": "[concat('deploy-', variables('spokeName'))]",
+        "deploymentId": "[concat(subscription().id, '/resourceGroups/', variables('resourceGroupName'), '/providers/Microsoft.Resources/deployments/', variables('deploymentName'))]",
+        "deploymentNamePeering": "[concat(variables('deploymentName'), '-peering-', substring(uniqueString(subscription().id),0,6))]"
+    },
+    "resources": [
+        // Creates the resource group
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2019-10-01",
+            "location": "[deployment().location]",
+            "name": "[variables('resourceGroupName')]",
+            "properties": {}
+        },
+
+        // Deploys spoke vnet and peer to hub
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentName')]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "dependsOn": [
+                "[subscriptionResourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "hubNetworkId": {
+                            "type": "string"
+                        },
+                        "spokeName": {
+                            "type": "string"
+                        },
+                        "addressPrefix": {
+                            "type": "string"
+                        },
+                        "subnetAddressPrefixForAppGW": {
+                            "type": "string"
+                        },
+                        "subnetAddressPrefixForWorkload": {
+                            "type": "string"
+                        },
+                        "DdoSId": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "networkName": "[concat('vnet-', parameters('spokeName'))]",
+                        "networkSecurityGroupName": "[concat('nsg-', parameters('spokeName'))]",
+                        "hubName": "[split(parameters('hubNetworkId'),'/')[8]]"
+                    },
+                    "resources": [
+                        // Empty Network Security Group
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('networkSecurityGroupName')]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                            }
+                        },
+                        // Spoke network
+                        {
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('networkName')]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                            ],
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": [
+                                        "[parameters('addressPrefix')]"
+                                    ]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "[concat('snet-', parameters('spokeName'), '-appgw')]",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('subnetAddressPrefixForAppGW')]"
+                                        }
+                                    },
+                                    {
+                                        "name": "[concat('snet-', parameters('spokeName'), '-workload')]",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('subnetAddressPrefixForWorkload')]",
+                                            "networkSecurityGroup": {
+                                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "enableDdosProtection": "[not(empty(parameters('DdoSId')))]",
+                                "ddosProtectionPlan": {
+                                    "id": "[if(empty(parameters('DdoSId')), json('null'), parameters('DdoSId'))]"
+                                }
+                            }
+                        },
+                        // Virtual network peering spoke to hub
+                        {
+                            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                            "apiVersion": "2020-05-01",
+                            "name": "[concat(variables('networkName'), '/peer-to-', variables('hubName'))]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/virtualNetworks', variables('networkName'))]"
+                            ],
+                            "properties": {
+                                "remoteVirtualNetwork": {
+                                    "id": "[parameters('hubNetworkId')]"
+                                },
+                                "allowVirtualNetworkAccess": true,
+                                "allowForwardedTraffic": true,
+                                "allowGatewayTransit": false,
+                                "useRemoteGateways": false
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "networkId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Network/virtualNetworks', variables('networkName'))]"
+                        }
+                    }
+                },
+                "parameters": {
+                    "hubNetworkId": {
+                        "value": "[parameters('hubNetworkId')]"
+                    },
+                    "spokeName": {
+                        "value": "[variables('spokeName')]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('addressPrefix')]"
+                    },
+                    "subnetAddressPrefixForAppGW": {
+                        "value": "[parameters('subnetAddressPrefixForAppGW')]"
+                    },
+                    "subnetAddressPrefixForWorkload": {
+                        "value": "[parameters('subnetAddressPrefixForWorkload')]"
+                    },
+                    "DdoSId": {
+                        "value": "[parameters('DdoSId')]"
+                    }
+                }
+            }
+        },
+
+        // Peering hub to spoke
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentNamePeering')]",
+            "resourceGroup": "[split(parameters('hubNetworkId'),'/')[4]]",
+            "dependsOn": [
+                "[variables('deploymentId')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "hubName": {
+                            "type": "string"
+                        },
+                        "spokeNetworkId": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "vnetPeerName": "[last(split(parameters('spokeNetworkId'),'/'))]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+                            "apiVersion": "2020-05-01",
+                            "name": "[concat(parameters('hubName'), '/peer-to-', variables('vnetPeerName'))]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "allowVirtualNetworkAccess": true,
+                                "allowForwardedTraffic": true,
+                                "allowGatewayTransit": true,
+                                "useRemoteGateways": false,
+                                "remoteVirtualNetwork": {
+                                    "id": "[parameters('spokeNetworkId')]"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "parameters": {
+                    "spokeNetworkId": {
+                        "value": "[reference(variables('deploymentName')).outputs.networkId.value]"
+                        // concat(subscription().id,'/resourceGroups/',parameters('vNetRgName'), '/providers/','Microsoft.Network/virtualNetworks/', parameters('vNetName'))]"
+                    },
+                    "hubName": {
+                        "value": "[split(parameters('hubNetworkId'),'/')[8]]"
+                    }
+                }
+
+            }
+        }
+    ],
+    "outputs": {
+        "networkId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.networkId.value]"
+        }
+    }
+}

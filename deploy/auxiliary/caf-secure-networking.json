@@ -1,0 +1,225 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentPrefix": {
+            "type": "string",
+            "maxLength": 10,
+            "metadata": {
+                "displayName": "Deployment prefix",
+                "description": "Provide a prefix (max 10 characters, unique at tenant-scope) for subscription resources created as part of this deploy."
+            },
+            "defaultValue": "cafsecure"
+        },
+        "enableDdoS": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enables DDoS Protection plan",
+                "description": "If 'Yes', ARM will deploy DDoS Protection plan. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "hubNetworkNetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the hub network"
+            },
+            "defaultValue": "192.168.0.0/16"
+        },
+        "hubSubnetAddressPrefixForAppGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Application Gateway for hub"
+            },
+            "defaultValue": "192.168.1.0/24"
+        },
+        "hubSubnetAddressPrefixForAzFw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Firewall for hub"
+            },
+            "defaultValue": "192.168.2.0/24"
+        },
+        "hubSubnetAddressPrefixForBastion": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Bastion for hub."
+            },
+            "defaultValue": "192.168.3.0/24"
+        },
+        "spokeOneAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the spoke one network"
+            },
+            "defaultValue": "10.1.0.0/16"
+        },
+        "spokeOneSubnetAddressPrefixForAppGW": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway for spoke one"
+            },
+            "defaultValue": "10.1.1.0/24"
+        },
+        "spokeOneSubnetAddressPrefixForWorkload": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the workload for spoke one"
+            },
+            "defaultValue": "10.1.2.0/24"
+        },
+        "spokeTwoAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the spoke two network"
+            },
+            "defaultValue": "10.2.0.0/16"
+        },
+        "spokeTwoSubnetAddressPrefixForAppGW": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway for spoke two"
+            },
+            "defaultValue": "10.2.1.0/24"
+        },
+        "spokeTwoSubnetAddressPrefixForWorkload": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the workload for spoke two"
+            },
+            "defaultValue": "10.2.2.0/24"
+        },
+        "templateRootUri": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Root URI for auxiliary arm templates"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/mspnp/caf-secure-amp-infra/main/deploy/auxiliary/"
+        }
+    },
+    "variables": {
+        "hubNameSuffix": "[replace(split(parameters('hubNetworkNetAddressPrefix'), '/')[0],'.', '_')]",
+        "hubDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-hubs-', variables('hubNameSuffix'))]",
+        "spokeOneNameSuffix": "[replace(split(parameters('spokeOneAddressPrefix'), '/')[0],'.', '_')]",
+        "spokeOneDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-spokes-', variables('spokeOneNameSuffix'))]",
+        "spokeTwoNameSuffix": "[replace(split(parameters('spokeTwoAddressPrefix'), '/')[0],'.', '_')]",
+        "spokeTwoDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-spokes-', variables('spokeTwoNameSuffix'))]",
+    },
+    "resources": [
+
+        // Deploy Hub
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('hubDeploymentName')]",
+            "location": "[deployment().location]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateRootUri'), 'caf-secure-networking-hub.json')]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "enableDdoS": {
+                        "value": "[parameters('enableDdoS')]"
+                    },
+                    "hubNetworkNetAddressPrefix": {
+                        "value": "[parameters('hubNetworkNetAddressPrefix')]"
+                    },
+                    "subnetAddressPrefixForAppGw": {
+                        "value": "[parameters('hubSubnetAddressPrefixForAppGw')]"
+                    },
+                    "subnetAddressPrefixForAzFw": {
+                        "value": "[parameters('hubSubnetAddressPrefixForAzFw')]"
+                    },
+                    "subnetAddressPrefixForBastion": {
+                        "value": "[parameters('hubSubnetAddressPrefixForBastion')]"
+                    }
+                }
+            }
+        },
+
+        // Deploy Spoke One
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('spokeOneDeploymentName')]",
+            "location": "[deployment().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', variables('hubDeploymentName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateRootUri'), 'caf-secure-networking-spoke.json')]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "hubNetworkId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.hubNetworkId.value]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('SpokeOneAddressPrefix')]"
+                    },
+                    "subnetAddressPrefixForAppGW": {
+                        "value": "[parameters('SpokeOneSubnetAddressPrefixForAppGW')]"
+                    },
+                    "subnetAddressPrefixForWorkload": {
+                        "value": "[parameters('SpokeOneSubnetAddressPrefixForWorkload')]"
+                    },
+                    "DdoSId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.DdoSId.value]"
+                    }
+                }
+            }
+        },
+
+        // Deploy Spoke One
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('spokeTwoDeploymentName')]",
+            "location": "[deployment().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', variables('spokeOneDeploymentName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateRootUri'), 'caf-secure-networking-spoke.json')]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "hubNetworkId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.hubNetworkId.value]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('SpokeTwoAddressPrefix')]"
+                    },
+                    "subnetAddressPrefixForAppGW": {
+                        "value": "[parameters('SpokeTwoSubnetAddressPrefixForAppGW')]"
+                    },
+                    "subnetAddressPrefixForWorkload": {
+                        "value": "[parameters('SpokeTwoSubnetAddressPrefixForWorkload')]"
+                    },
+                    "DdoSId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.DdoSId.value]"
+                    }
+                }
+            }
+        }
+    ]
+}

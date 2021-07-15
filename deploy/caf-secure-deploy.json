@@ -121,18 +121,107 @@
                 "Standard",
                 "Free"
             ]
+        },
+        "deployHubSpokeTopology": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy Hub-spoke network topology",
+                "description": "If 'Yes', ARM will deploy hub-spoke network topology to the subscription. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "enableDdoS": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enables DDoS Protection plan",
+                "description": "If 'Yes', DDoS Protection plan will be applied to spokes with ingress traffic. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "hubNetworkNetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the hub network"
+            },
+            "defaultValue": "192.168.0.0/16"
+        },
+        "hubSubnetAddressPrefixForAppGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Application Gateway for hub"
+            },
+            "defaultValue": "192.168.1.0/24"
+        },
+        "hubSubnetAddressPrefixForAzFw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Firewall for hub"
+            },
+            "defaultValue": "192.168.2.0/24"
+        },
+        "hubSubnetAddressPrefixForBastion": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Bastion for hub"
+            },
+            "defaultValue": "192.168.3.0/24"
+        },
+        "spokeOneAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the spoke one network"
+            },
+            "defaultValue": "10.1.0.0/16"
+        },
+        "spokeOneSubnetAddressPrefixForAppGW": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway for spoke one"
+            },
+            "defaultValue": "10.1.1.0/24"
+        },
+        "spokeOneSubnetAddressPrefixForWorkload": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the workload for spoke one"
+            },
+            "defaultValue": "10.1.2.0/24"
+        },
+        "spokeTwoAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the spoke two network"
+            },
+            "defaultValue": "10.2.0.0/16"
+        },
+        "spokeTwoSubnetAddressPrefixForAppGW": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway for spoke two"
+            },
+            "defaultValue": "10.2.1.0/24"
+        },
+        "spokeTwoSubnetAddressPrefixForWorkload": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the workload for spoke two"
+            },
+            "defaultValue": "10.2.2.0/24"
         }
     },
     "variables": {
-        "logsEnabled": "[if(equals(parameters('enableLogs'), 'Yes'), 'True', 'False')]",
-        "resourceGroupName": "[concat('rg-', parameters('deploymentPrefix'))]",
-        "resourceGroupId": "[subscriptionResourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]",
+        "templateRootUri": "https://raw.githubusercontent.com/mspnp/caf-secure-amp-infra/main/deploy/auxiliary/",
 
-        "workspaceName": "[concat('log-', parameters('deploymentPrefix'))]",
-        "workspaceId": "[concat(subscription().id, '/resourceGroups/', variables('resourceGroupName'), '/providers/Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]",
-        "workspaceSku": "pergb2018",
-        "workspaceDeploymentName": "[concat('deployment-', parameters('deploymentPrefix'), '-log')]",
-        "workspaceDeploymentId": "[concat(subscription().id, '/resourceGroups/', variables('resourceGroupName'), '/providers/Microsoft.Resources/deployments/', variables('workspaceDeploymentName'))]",
+        "networkingDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking')]",
+        "workspaceDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-workspace')]",
 
         "policyDefinitionName-Prefix": "[concat('policy-', parameters('deploymentPrefix'), '-')]",
         "policyDefinitionName-ASCEnableAppService": "[concat(variables('policyDefinitionName-Prefix'), 'ASC-Enable-AzureDefender-AppService')]",
@@ -177,95 +266,87 @@
         "roleId-LogAnalyticsContributor": "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
     },
     "resources": [
-        // Deploy resource group for log workspace
-        {
-            "type": "Microsoft.Resources/resourceGroups",
-            "apiVersion": "2020-10-01",
-            "name": "[variables('resourceGroupName')]",
-            "location": "[deployment().location]",
-            "properties": {}
-        },
 
-        // Deploy log workspace into resource group
+        // Deploy log analytics workspace resources
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-10-01",
             "name": "[variables('workspaceDeploymentName')]",
-            "resourceGroup": "[variables('resourceGroupName')]",
-            "dependsOn": [
-                "[variables('resourceGroupId')]"
-            ],
+            "location": "[deployment().location]",
             "properties": {
                 "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {},
-                    "variables": {},
-                    "resources": [
-                        {
-                            "apiVersion": "2020-10-01",
-                            "location": "[deployment().location]",
-                            "name": "[variables('workspaceName')]",
-                            "type": "Microsoft.OperationalInsights/workspaces",
-                            "properties": {
-                                "sku": {
-                                    "name": "[variables('workspaceSku')]"
-                                },
-                                "retentionInDays": "[parameters('retentionInDays')]"
-                            }
-                        }
-                    ],
-                    "outputs": {}
+                "templateLink": {
+                    "uri": "[concat(variables('templateRootUri'), 'caf-secure-logAnalyticsWorkspace.json')]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "retentionInDays": {
+                        "value": "[parameters('retentionInDays')]"
+                    },
+                    "enableLogs": {
+                        "value": "[parameters('enableLogs')]"
+                    }
                 }
             }
         },
 
-        // Deploy diagnostic setting for Activity log
+        // Deploy networking resources
         {
-            "type": "Microsoft.Insights/diagnosticSettings",
-            "apiVersion": "2017-05-01-preview",
+            "condition": "[equals(parameters('deployHubSpokeTopology'), 'Yes')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('networkingDeploymentName')]",
             "location": "[deployment().location]",
-            "name": "default",
-            "dependsOn": [
-                "[variables('workspaceDeploymentId')]"
-            ],
             "properties": {
-                "workspaceId": "[variables('workspaceId')]",
-                "logs": [
-                    {
-                        "category": "Administrative",
-                        "enabled": "[variables('logsEnabled')]"
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('templateRootUri'), 'caf-secure-networking.json')]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
                     },
-                    {
-                        "category": "Security",
-                        "enabled": "[variables('logsEnabled')]"
+                    "enableDdoS": {
+                        "value": "[parameters('enableDdoS')]"
                     },
-                    {
-                        "category": "ServiceHealth",
-                        "enabled": "[variables('logsEnabled')]"
+                    "hubNetworkNetAddressPrefix": {
+                        "value": "[parameters('hubNetworkNetAddressPrefix')]"
                     },
-                    {
-                        "category": "Alert",
-                        "enabled": "[variables('logsEnabled')]"
+                    "hubSubnetAddressPrefixForAppGw": {
+                        "value": "[parameters('hubSubnetAddressPrefixForAppGw')]"
                     },
-                    {
-                        "category": "Recommendation",
-                        "enabled": "[variables('logsEnabled')]"
+                    "hubSubnetAddressPrefixForAzFw": {
+                        "value": "[parameters('hubSubnetAddressPrefixForAzFw')]"
                     },
-                    {
-                        "category": "Policy",
-                        "enabled": "[variables('logsEnabled')]"
+                    "hubSubnetAddressPrefixForBastion": {
+                        "value": "[parameters('hubSubnetAddressPrefixForBastion')]"
                     },
-                    {
-                        "category": "Autoscale",
-                        "enabled": "[variables('logsEnabled')]"
+                    "spokeOneAddressPrefix": {
+                        "value": "[parameters('spokeOneAddressPrefix')]"
                     },
-                    {
-                        "category": "ResourceHealth",
-                        "enabled": "[variables('logsEnabled')]"
+                    "spokeOneSubnetAddressPrefixForAppGW": {
+                        "value": "[parameters('spokeOneSubnetAddressPrefixForAppGW')]"
+                    },
+                    "spokeOneSubnetAddressPrefixForWorkload": {
+                        "value": "[parameters('spokeOneSubnetAddressPrefixForWorkload')]"
+                    },
+                    "spokeTwoAddressPrefix": {
+                        "value": "[parameters('spokeTwoAddressPrefix')]"
+                    },
+                    "spokeTwoSubnetAddressPrefixForAppGW": {
+                        "value": "[parameters('spokeTwoSubnetAddressPrefixForAppGW')]"
+                    },
+                    "spokeTwoSubnetAddressPrefixForWorkload": {
+                        "value": "[parameters('spokeTwoSubnetAddressPrefixForWorkload')]"
+                    },
+                    "templateRootUri": {
+                        "value": "[variables('templateRootUri')]"
                     }
-                ]
+                }
             }
         },
 
@@ -365,11 +446,11 @@
             "apiVersion": "2017-08-01-preview",
             "name": "default",
             "dependsOn": [
-                "[variables('workspaceDeploymentId')]"
+                "[subscriptionResourceId('Microsoft.Resources/deployments', variables('workspaceDeploymentName'))]"
             ],
             "properties": {
                 "scope": "[subscription().id]",
-                "workspaceId": "[variables('workspaceId')]"
+                "workspaceId": "[reference(variables('workspaceDeploymentName')).outputs.workspaceId.value]"
             }
         },
 
@@ -1157,8 +1238,7 @@
             "name": "[variables('policyAssignmentName-SendActivityLogToLog')]",
             "location": "[deployment().location]",
             "dependsOn": [
-                "[variables('workspaceDeploymentId')]",
-                "[subscriptionResourceId('Microsoft.Insights/diagnosticSettings', 'default')]"
+                "[subscriptionResourceId('Microsoft.Resources/deployments', variables('workspaceDeploymentName'))]"
             ],
             "identity": {
                 "type": "SystemAssigned"
@@ -1169,10 +1249,10 @@
                 "policyDefinitionId": "[variables('policyDefinitionId-SendActivityLogToLog')]",
                 "parameters": {
                     "logAnalytics": {
-                        "value": "[variables('workspaceId')]"
+                        "value": "[reference(variables('workspaceDeploymentName')).outputs.workspaceId.value]"
                     },
                     "logsEnabled": {
-                        "value": "[variables('logsEnabled')]"
+                        "value": "[if(equals(parameters('enableLogs'), 'Yes'), 'True', 'False')]"
                     }
                 }
             }
@@ -1183,7 +1263,7 @@
             "name": "[variables('policyAssignmentName-EnableSecurityCenter')]",
             "location": "[deployment().location]",
             "dependsOn": [
-                "[variables('workspaceDeploymentId')]",
+                "[subscriptionResourceId('Microsoft.Resources/deployments', variables('workspaceDeploymentName'))]",
                 "[variables('policyDefinitionId-ASCEnableSecurityCenter')]"
             ],
             "identity": {
@@ -1198,7 +1278,7 @@
                         "value": "[parameters('emailSecurityContact')]"
                     },
                     "logAnalytics": {
-                        "value": "[variables('workspaceId')]"
+                        "value": "[reference(variables('workspaceDeploymentName')).outputs.workspaceId.value]"
                     }
                 }
             }
@@ -1259,6 +1339,21 @@
                 "principalType": "ServicePrincipal",
                 "roleDefinitionId": "[variables('roleId-SecurityAdmin')]",
                 "principalId": "[reference(variables('policyAssignmentId-EnableSecurityCenter'), '2020-03-01', 'Full').identity.principalId]"
+            }
+        },
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "pid-d144d13e-71ea-439a-91e0-320d3c6d49e7",
+            "location": "[deployment().location]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
             }
         }
     ],

@@ -35,10 +35,10 @@
                 "name": "step1",
                 "label": "Azure Security Center",
                 "subLabel": {
-                    "preValidation": "",
-                    "postValidation": ""
+                    "preValidation": "Configure Azure Security Center settings",
+                    "postValidation": "Done"
                 },
-                "bladeTitle": "lzGs",
+                "bladeTitle": "Azure Security Center",
                 "elements": [
                     {
                         "name": "ptEmailSecurityContact",
@@ -315,6 +315,211 @@
                         "visible": true
                     }
                 ]
+            },
+            {
+                "name": "step2",
+                "label": "Hub-spoke Topology",
+                "subLabel": {
+                    "preValidation": "Configure Hub-spoke topology",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Hub-spoke",
+                "elements": [
+                    {
+                        "name": "ptDeployHubSpoke",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Deploy Hub-spoke network topology",
+                        "defaultValue": "Yes (recommended)",
+                        "toolTip": "If 'Yes', ARM will deploy hub-spoke network topology to the subscription. If 'No', it will be skipped",
+                        "visible": true,
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes (recommended)",
+                                    "value": "Yes"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "No"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "ptEnableDdoS",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Enables DDoS Protection plan",
+                        "defaultValue": "Yes (recommended)",
+                        "toolTip": "If 'Yes', DDoS Protection plan will be applied to spokes with ingress traffic. If 'No', it will be skipped",
+                        "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes (recommended)",
+                                    "value": "Yes"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "No"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sectionHub",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Hub",
+                        "elements": [
+                            {
+                                "name": "ptAddressPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Network Address Prefix",
+                                "toolTip": "IP address prefix for the hub network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "192.168.0.0/16",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAppGw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for Azure Application Gateway",
+                                "toolTip": "Subnet address prefix for Azure Application Gateway for the hub network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "192.168.1.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAzFw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for Azure Firewall",
+                                "toolTip": "Subnet address prefix for Azure Firewall for the hub network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "192.168.2.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForBastion",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for Azure Bastion",
+                                "toolTip": "Subnet address prefix for Azure Bastion for the hub network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "192.168.3.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            }
+                        ],
+                        "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]"
+                    },
+                    {
+                        "name": "sectionSpokeOne",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Spoke One",
+                        "elements": [
+                            {
+                                "name": "ptAddressPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Network Address Prefix",
+                                "toolTip": "IP address prefix for the spoke network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "10.1.0.0/16",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAppGw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for Azure Application Gateway",
+                                "toolTip": "Subnet address prefix for Azure Application Gateway for the spoke network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "10.1.1.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForWorkload",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for workload",
+                                "toolTip": "Subnet address prefix for spoke workload for the spoke network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "10.1.2.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            }
+                        ],
+                        "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]"
+                    },
+                    {
+                        "name": "sectionSpokeTwo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Spoke Two",
+                        "elements": [
+                            {
+                                "name": "ptAddressPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Network Address Prefix",
+                                "toolTip": "IP address prefix for the spoke network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "10.2.0.0/16",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAppGw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for Azure Application Gateway",
+                                "toolTip": "Subnet address prefix for Azure Application Gateway for the spoke network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "10.2.1.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForWorkload",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for workload",
+                                "toolTip": "Subnet address prefix for spoke workload for the spoke network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "10.2.2.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            }
+                        ],
+                        "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]"
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -330,7 +535,19 @@
             "enableAscForSqlOnVm": "[steps('step1').sectionAzureDefender.ptEnableAscForSqlOnVm]",
             "enableAscForArm": "[steps('step1').sectionAzureDefender.ptEnableAscForArm]",
             "enableAscForDns": "[steps('step1').sectionAzureDefender.ptEnableAscForDns]",
-            "enableAscForRegistries": "[steps('step1').sectionAzureDefender.ptEnableAscForRegistries]"
+            "enableAscForRegistries": "[steps('step1').sectionAzureDefender.ptEnableAscForRegistries]",
+            "deployHubSpokeTopology": "[steps('step2').ptDeployHubSpoke]",
+            "enableDdoS": "[steps('step2').ptEnableDdoS]",
+            "hubNetworkNetAddressPrefix": "[steps('step2').sectionHub.ptAddressPrefix]",
+            "hubSubnetAddressPrefixForAppGw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForAppGw]",
+            "hubSubnetAddressPrefixForAzFw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForAzFw]",
+            "hubSubnetAddressPrefixForBastion": "[steps('step2').sectionHub.ptSubnetAddressPrefixForBastion]",
+            "spokeOneAddressPrefix": "[steps('step2').sectionSpokeOne.ptAddressPrefix]",
+            "spokeOneSubnetAddressPrefixForAppGW": "[steps('step2').sectionSpokeOne.ptSubnetAddressPrefixForAppGw]",
+            "spokeOneSubnetAddressPrefixForWorkload": "[steps('step2').sectionSpokeOne.ptSubnetAddressPrefixForWorkload]",
+            "spokeTwoAddressPrefix": "[steps('step2').sectionSpokeTwo.ptAddressPrefix]",
+            "spokeTwoSubnetAddressPrefixForAppGW": "[steps('step2').sectionSpokeTwo.ptSubnetAddressPrefixForAppGw]",
+            "spokeTwoSubnetAddressPrefixForWorkload": "[steps('step2').sectionSpokeTwo.ptSubnetAddressPrefixForWorkload]"
         }
     }
 }

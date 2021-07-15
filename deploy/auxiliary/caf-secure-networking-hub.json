@@ -1,0 +1,223 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentPrefix": {
+            "type": "string",
+            "maxLength": 10,
+            "metadata": {
+                "displayName": "Deployment prefix",
+                "description": "Provide a prefix (max 10 characters, unique at tenant-scope) for subscription resources created as part of this deploy."
+            },
+            "defaultValue": "cafsecure"
+        },
+        "enableDdoS": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enables DDoS Protection plan",
+                "description": "If 'Yes', DDoS Protection plan will be applied to spokes with ingress traffic. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "hubNetworkNetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the hub network"
+            },
+            "defaultValue": "192.168.0.0/16"
+        },
+        "subnetAddressPrefixForAppGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Application Gateway"
+            },
+            "defaultValue": "192.168.1.0/24"
+        },
+        "subnetAddressPrefixForAzFw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Firewall"
+            },
+            "defaultValue": "192.168.2.0/24"
+        },
+        "subnetAddressPrefixForBastion": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Bastion"
+            },
+            "defaultValue": "192.168.1.0/24"
+        }
+    },
+    "variables": {
+        "deploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-hubs')]",
+        "resourceGroupName": "[concat('rg-', parameters('deploymentPrefix'), '-networking-hubs')]"
+    },
+    "resources": [
+
+        // Creates the resource group
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2019-10-01",
+            "location": "[deployment().location]",
+            "name": "[variables('resourceGroupName')]",
+            "properties": {}
+        },
+
+        // Deploys connectivity resources
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentName')]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "dependsOn": [
+                "[subscriptionResourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "deploymentPrefix": {
+                            "type": "string"
+                        },
+                        "enableDdoS": {
+                            "type": "String"
+                        },
+                        "hubNetworkNetAddressPrefix": {
+                            "type": "string"
+                        },
+                        "subnetAddressPrefixForAppGw": {
+                            "type": "string"
+                        },
+                        "subnetAddressPrefixForAzFw": {
+                            "type": "string"
+                        },
+                        "subnetAddressPrefixForBastion": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "networkSecurityGroupName": "[concat('nsg-', parameters('deploymentPrefix'), '-hub')]",
+                        "hubNetworkName": "[concat('vnet-', parameters('deploymentPrefix'), '-hub')]",
+                        "dDoSName": "[concat('ddos-', parameters('deploymentPrefix'))]"
+                    },
+                    "resources": [
+                        // Deploy DDoS Protection plan
+                        {
+                            "condition": "[equals(parameters('enableDdoS'), 'Yes')]",
+                            "type": "Microsoft.Network/ddosProtectionPlans",
+                            "apiVersion": "2019-02-01",
+                            "name": "[variables('dDoSName')]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {}
+                        },
+
+                        // Network Security Group
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('networkSecurityGroupName')]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                            }
+                        },
+
+                        // Hub virtual network
+                        {
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('hubNetworkName')]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+                                "[resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName'))]"
+                            ],
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": [
+                                        "[parameters('hubNetworkNetAddressPrefix')]"
+                                    ]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "GatewaySubnet",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('subnetAddressPrefixForAppGw')]"
+                                        }
+                                    },
+                                    {
+                                        "name": "AzureFirewallSubnet",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('subnetAddressPrefixForAzFw')]"
+                                        }
+                                    },
+                                    {
+                                        "name": "BastionSubnet",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('subnetAddressPrefixForBastion')]",
+                                            "networkSecurityGroup": {
+                                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "enableDdosProtection": "[equals(parameters('enableDdoS'), 'Yes')]",
+                                "ddosProtectionPlan": {
+                                    "id": "[if(equals(parameters('enableDdoS'), 'Yes'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), null())]"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "hubNetworkId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Network/virtualNetworks', variables('hubNetworkName'))]"
+                        },
+                        "dDosId": {
+                            "type": "string",
+                            "value": "[if(equals(parameters('enableDdoS'), 'Yes'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), json('null'))]"
+                        }
+                    }
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "enableDdoS": {
+                        "value": "[parameters('enableDdoS')]"
+                    },
+                    "hubNetworkNetAddressPrefix": {
+                        "value": "[parameters('hubNetworkNetAddressPrefix')]"
+                    },
+                    "subnetAddressPrefixForAppGw": {
+                        "value": "[parameters('subnetAddressPrefixForAppGw')]"
+                    },
+                    "subnetAddressPrefixForAzFw": {
+                        "value": "[parameters('subnetAddressPrefixForAzFw')]"
+                    },
+                    "subnetAddressPrefixForBastion": {
+                        "value": "[parameters('subnetAddressPrefixForBastion')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "hubNetworkId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.hubNetworkId.value]"
+        },
+        "dDosId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.dDosId.value]"
+        }
+    }
+}
