@@ -8,9 +8,12 @@ CAF consists of multiple methodologies, providing the right guidance at the righ
 
 ## Customer profile
 
-This workshop provides a design path and initial technical state for small enterprises or customers willing to learn and start using Azure security tools and services. It's meant for organizations that do not yet have a large IT team nor require fine grained administration delegation models. Hence, all resources and security rules are consolidated in a single subscription.
+This content is intended to be used as part of the Azure Migration Program (AMP) security workshop for partners to work with customers to explore the core disciplines for cloud security and make informed design decisions.
+The deployable assets in this repository are made available in order to provide a design path and initial technical state for small enterprises or customers willing to learn and start using Azure security tools and services. It's meant for organizations that do not yet have a large IT team nor require fine grained administration delegation models. Hence, all resources and security rules are consolidated in a single subscription.
 
 This reference implementation is also well suited for bigger organization or customers who want to start with Azure Security Center for their net new deployment/development in Azure by implementing a network architecture based on the traditional hub-spoke network topology.
+
+The deployed products and configurations are not intended to be a fully-matured end-state, rather a starting point for organizations to explore and have further design conversations in context. 
 
 ## How to evolve later
 
@@ -135,7 +138,7 @@ For further information and samples, check [Azure PIM README](.\aad-onboarding\p
 
 This reference architecture includes a minimum set of configurations and resources as a starting point to present the different security services, tools and resources that Azure is offering. It is not meant to be a "best practice guide" for everybody.
 
-After the initial deployment, it is expected each customer will have to adapt the final setup based on the size of the organization and the security needs of the business. For bigger/complex organizations, this reference implementation will not be enough and we **highly** recommend checking the [Enterprise-Scale reference architectures](https://github.com/Azure/Enterprise-Scale).
+After the initial deployment, it is expected each customer will have to adapt the final setup based on the size of the organization and the security needs of the business. For bigger/complex organizations, this reference implementation will not be enough and we **highly** recommend exploring the [Enterprise-Scale reference architectures](https://github.com/Azure/Enterprise-Scale).
 
 While this reference architecture works at subscription level, Enterprise-Scale uses management groups which will allow scaling and configuration much better while adopting Azure Security for more complex scenarios. Having the ability to assign different policies depending on the management group, allows fine tuning the security rules to avoid having to define exceptions for specific cases.
 
