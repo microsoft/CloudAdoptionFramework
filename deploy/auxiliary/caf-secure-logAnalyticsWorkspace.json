@@ -108,7 +108,7 @@
             }
         },
 
-         // Deploy diagnostic setting for Activity log
+        // Deploy diagnostic setting for Activity log
         {
             "type": "Microsoft.Insights/diagnosticSettings",
             "apiVersion": "2017-05-01-preview",
@@ -160,10 +160,6 @@
         "workspaceId": {
             "type": "string",
             "value": "[reference(variables('deploymentName')).outputs.workspaceId.value]"
-        },
-        "diagnosticSettingsId": {
-            "type": "string",
-            "value": "[subscriptionResourceId('Microsoft.Insights/diagnosticSettings', 'default')]"
         }
     }
 }

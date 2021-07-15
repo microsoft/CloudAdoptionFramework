@@ -410,6 +410,33 @@
                                 }
                             },
                             {
+                                "name": "ptAzFirewallZones",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Select Availability Zones for the Azure Firewall",
+                                "multiselect": true,
+                                "selectAll": true,
+                                "filter": true,
+                                "toolTip": "ARM will deploy Azure Firewall to the selected region and availability zones",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "None",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Zone 1",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "label": "Zone 2",
+                                            "value": "2"
+                                        },
+                                        {
+                                            "label": "Zone 3",
+                                            "value": "3"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
                                 "name": "ptSubnetAddressPrefixForBastion",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Subnet prefix for Azure Bastion",
@@ -541,6 +568,7 @@
             "hubNetworkNetAddressPrefix": "[steps('step2').sectionHub.ptAddressPrefix]",
             "hubSubnetAddressPrefixForAppGw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForAppGw]",
             "hubSubnetAddressPrefixForAzFw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForAzFw]",
+            "azFirewallZones": "[steps('step2').sectionHub.ptAzFirewallZones]",
             "hubSubnetAddressPrefixForBastion": "[steps('step2').sectionHub.ptSubnetAddressPrefixForBastion]",
             "spokeOneAddressPrefix": "[steps('step2').sectionSpokeOne.ptAddressPrefix]",
             "spokeOneSubnetAddressPrefixForAppGW": "[steps('step2').sectionSpokeOne.ptSubnetAddressPrefixForAppGw]",

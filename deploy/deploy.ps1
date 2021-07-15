@@ -8,4 +8,4 @@ az account set -s $subscription_name
 
 # Deploy
 $location = Read-Host "Enter the location (ex: eastus, westus, etc.)"
-az deployment create --location $location --template-file caf-secure-deploy.json
+az deployment sub create --location $location --template-file caf-secure-deploy.json

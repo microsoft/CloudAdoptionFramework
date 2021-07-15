@@ -215,6 +215,13 @@
                 "displayName": "Subnet prefix for the workload for spoke two"
             },
             "defaultValue": "10.2.2.0/24"
+        },
+        "azFirewallZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Firewall"
+            },
+            "defaultValue": []
         }
     },
     "variables": {
@@ -300,6 +307,9 @@
             "apiVersion": "2020-10-01",
             "name": "[variables('networkingDeploymentName')]",
             "location": "[deployment().location]",
+            "dependsOn": [
+                "[subscriptionResourceId('Microsoft.Resources/deployments', variables('workspaceDeploymentName'))]"
+            ],
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -312,6 +322,12 @@
                     },
                     "enableDdoS": {
                         "value": "[parameters('enableDdoS')]"
+                    },
+                    "workspaceId": {
+                        "value": "[reference(variables('workspaceDeploymentName')).outputs.workspaceId.value]"
+                    },
+                    "enableLogs": {
+                        "value": "[parameters('enableLogs')]"
                     },
                     "hubNetworkNetAddressPrefix": {
                         "value": "[parameters('hubNetworkNetAddressPrefix')]"
@@ -342,6 +358,9 @@
                     },
                     "spokeTwoSubnetAddressPrefixForWorkload": {
                         "value": "[parameters('spokeTwoSubnetAddressPrefixForWorkload')]"
+                    },
+                    "azFirewallZones": {
+                        "value": "[parameters('azFirewallZones')]"
                     },
                     "templateRootUri": {
                         "value": "[variables('templateRootUri')]"

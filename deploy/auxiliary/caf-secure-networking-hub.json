@@ -11,6 +11,24 @@
             },
             "defaultValue": "cafsecure"
         },
+        "workspaceId": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Log Analytics workspace id"
+            }
+        },
+        "enableLogs": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enable logs",
+                "description": "If 'Yes', ARM will enable logs stream to the log analytics workspace. If 'No', they will be disabled"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
         "enableDdoS": {
             "type": "String",
             "metadata": {
@@ -49,7 +67,14 @@
             "metadata": {
                 "displayName": "Subnet prefix for Azure Bastion"
             },
-            "defaultValue": "192.168.1.0/24"
+            "defaultValue": "192.168.3.0/24"
+        },
+        "azFirewallZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Firewall"
+            },
+            "defaultValue": []
         }
     },
     "variables": {
@@ -88,8 +113,14 @@
                         "deploymentPrefix": {
                             "type": "string"
                         },
+                        "workspaceId": {
+                            "type": "string"
+                        },
+                        "enableLogs": {
+                            "type": "bool"
+                        },
                         "enableDdoS": {
-                            "type": "String"
+                            "type": "bool"
                         },
                         "hubNetworkNetAddressPrefix": {
                             "type": "string"
@@ -102,17 +133,23 @@
                         },
                         "subnetAddressPrefixForBastion": {
                             "type": "string"
+                        },
+                        "azFirewallZones": {
+                            "type": "array"
                         }
                     },
                     "variables": {
                         "networkSecurityGroupName": "[concat('nsg-', parameters('deploymentPrefix'), '-hub')]",
                         "hubNetworkName": "[concat('vnet-', parameters('deploymentPrefix'), '-hub')]",
-                        "dDoSName": "[concat('ddos-', parameters('deploymentPrefix'))]"
+                        "dDoSName": "[concat('ddos-', parameters('deploymentPrefix'))]",
+                        "azFwName": "[concat('fw-', parameters('deploymentPrefix'))]",
+                        "azFwIpName": "[concat(variables('azFwName'), '-pip')]",
+                        "azFwPolicyName": "[concat(variables('azFwName'), '-policy')]"
                     },
                     "resources": [
                         // Deploy DDoS Protection plan
                         {
-                            "condition": "[equals(parameters('enableDdoS'), 'Yes')]",
+                            "condition": "[parameters('enableDdoS')]",
                             "type": "Microsoft.Network/ddosProtectionPlans",
                             "apiVersion": "2019-02-01",
                             "name": "[variables('dDoSName')]",
@@ -169,10 +206,91 @@
                                         }
                                     }
                                 ],
-                                "enableDdosProtection": "[equals(parameters('enableDdoS'), 'Yes')]",
+                                "enableDdosProtection": "[parameters('enableDdoS')]",
                                 "ddosProtectionPlan": {
-                                    "id": "[if(equals(parameters('enableDdoS'), 'Yes'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), null())]"
+                                    "id": "[if(parameters('enableDdoS'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), null())]"
                                 }
+                            }
+                        },
+
+                        // Azure Firewall Public IP
+                        {
+                            "apiVersion": "2020-05-01",
+                            "type": "Microsoft.Network/publicIpAddresses",
+                            "name": "[variables('azFwIpName')]",
+                            "location": "[resourceGroup().location]",
+                            "sku": {
+                                "name": "Standard"
+                            },                                  
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            }
+                        },
+
+                        // Azure Firewall Policy
+                        {
+                            "type": "Microsoft.Network/firewallPolicies",
+                            "apiVersion": "2020-11-01",
+                            "name": "[variables('azFwPolicyName')]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                            }
+                        },
+
+                        // Azure Firewall
+                        {
+                            "apiVersion": "2020-05-01",
+                            "type": "Microsoft.Network/azureFirewalls",
+                            "name": "[variables('azfwname')]",
+                            "location": "[resourceGroup().location]",
+                            "zones": "[if(not(empty(parameters('azFirewallZones'))), parameters('azFirewallZones'), json('null'))]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/firewallPolicies/', variables('azFwPolicyName'))]",
+                                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('azFwIpName'))]",
+                                "[resourceId('Microsoft.Network/virtualNetworks/', variables('hubNetworkName'))]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "[variables('azFwIpName')]",
+                                        "properties": {
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses/', variables('azFwIpName'))]"
+                                            },
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('hubNetworkName'), 'AzureFirewallSubnet')]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "firewallPolicy": {
+                                    "id": "[resourceId('Microsoft.Network/firewallPolicies/', variables('azFwPolicyName'))]"
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/azureFirewalls/providers/diagnosticSettings",
+                            "apiVersion": "2017-05-01-preview",
+                            "name": "[concat(variables('azfwname'), '/', 'Microsoft.Insights/', 'default')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/azureFirewalls', variables('azFwName'))]"
+                            ],
+                            "properties": {
+                                "workspaceId": "[parameters('workspaceId')]",
+                                "logs": [
+                                    {
+                                        "category": "AzureFirewallApplicationRule",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    },
+                                    {
+                                        "category": "AzureFirewallNetworkRule",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    },
+                                    {
+                                        "category": "AzureFirewallDnsProxy",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    }
+                                ]
                             }
                         }
                     ],
@@ -183,7 +301,11 @@
                         },
                         "dDosId": {
                             "type": "string",
-                            "value": "[if(equals(parameters('enableDdoS'), 'Yes'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), json('null'))]"
+                            "value": "[if(parameters('enableDdoS'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), null())]"
+                        },
+                        "azFirewallId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Network/azureFirewalls', variables('azFwName'))]"
                         }
                     }
                 },
@@ -191,8 +313,14 @@
                     "deploymentPrefix": {
                         "value": "[parameters('deploymentPrefix')]"
                     },
+                    "workspaceId": {
+                        "value": "[parameters('workspaceId')]"
+                    },
+                    "enableLogs": {
+                        "value": "[equals(parameters('enableLogs'), 'Yes')]"
+                    },
                     "enableDdoS": {
-                        "value": "[parameters('enableDdoS')]"
+                        "value": "[equals(parameters('enableDdoS'), 'Yes')]"
                     },
                     "hubNetworkNetAddressPrefix": {
                         "value": "[parameters('hubNetworkNetAddressPrefix')]"
@@ -205,6 +333,9 @@
                     },
                     "subnetAddressPrefixForBastion": {
                         "value": "[parameters('subnetAddressPrefixForBastion')]"
+                    },
+                    "azFirewallZones": {
+                        "value": "[parameters('azFirewallZones')]"
                     }
                 }
             }
@@ -218,6 +349,10 @@
         "dDosId": {
             "type": "string",
             "value": "[reference(variables('deploymentName')).outputs.dDosId.value]"
+        },
+        "azFirewallId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.azFirewallId.value]"
         }
     }
 }

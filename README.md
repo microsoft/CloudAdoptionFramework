@@ -54,7 +54,7 @@ These artifacts, when deployed into a greenfield environment will illustrate a s
 
 ## Azure Onboarding
 
-Azure Onboarding is implemented using a single deployment script that wil create resources and configurations within the selected subscription to show the following artifacts:
+Azure Onboarding is implemented using a single deployment script that will create resources and configurations within the selected subscription to show the following artifacts:
 
 - Azure Security Center
   - Azure Defender
@@ -81,7 +81,11 @@ A hub and spoke network topology allows you to create a central Hub VNet that co
 
 Hub and spoke network design considerations & recommendations can be found [here](https://docs.microsoft.com/azure/cloud-adoption-framework/ready/azure-best-practices/traditional-azure-networking-topology).
 
-This deployment includes a Hub and two peered Spokes.
+This deployment includes:
+
+- One Hub
+- Two peered Spokes
+- Azure Firewall
 
 ### Azure Security Center
 

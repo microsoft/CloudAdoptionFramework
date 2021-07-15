@@ -17,6 +17,12 @@
                 "displayName": "Virtual network id for the hub that the spoke will use"
             }
         },
+        "azFirewallId": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Azure Firewall id that the spoke will use"
+            }
+        },
         "addressPrefix": {
             "type": "string",
             "metadata": {
@@ -86,6 +92,9 @@
                         "hubNetworkId": {
                             "type": "string"
                         },
+                        "azFirewallId": {
+                            "type": "string"
+                        },
                         "spokeName": {
                             "type": "string"
                         },
@@ -105,7 +114,8 @@
                     "variables": {
                         "networkName": "[concat('vnet-', parameters('spokeName'))]",
                         "networkSecurityGroupName": "[concat('nsg-', parameters('spokeName'))]",
-                        "hubName": "[split(parameters('hubNetworkId'),'/')[8]]"
+                        "hubName": "[split(parameters('hubNetworkId'),'/')[8]]",
+                        "azFwRouteName": "udr-nexthop-to-fw"
                     },
                     "resources": [
                         // Empty Network Security Group
@@ -117,6 +127,26 @@
                             "properties": {
                             }
                         },
+                        // Route/force tunnel from spokes to Azure firewall
+                        {
+                            "type": "Microsoft.Network/routeTables",
+                            "name": "[variables('azFwRouteName')]",
+                            "apiVersion": "2020-08-01",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "disableBgpRoutePropagation": false,
+                                "routes": [
+                                    {
+                                        "name": "AzureFirewallRoute",
+                                        "properties": {
+                                            "addressPrefix": "0.0.0.0/0",
+                                            "nextHopType": "VirtualAppliance",
+                                            "nextHopIpAddress": "[reference(parameters('azFirewallId'), '2020-05-01').ipConfigurations[0].properties.privateIpAddress]"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
                         // Spoke network
                         {
                             "type": "Microsoft.Network/virtualNetworks",
@@ -124,7 +154,8 @@
                             "name": "[variables('networkName')]",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+                                "[resourceId('Microsoft.Network/routeTables', variables('azFwRouteName'))]"
                             ],
                             "properties": {
                                 "addressSpace": {
@@ -145,6 +176,9 @@
                                             "addressPrefix": "[parameters('subnetAddressPrefixForWorkload')]",
                                             "networkSecurityGroup": {
                                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                                            },
+                                            "routeTable": {
+                                                "id": "[resourceId('Microsoft.Network/routeTables', variables('azFwRouteName'))]"
                                             }
                                         }
                                     }
@@ -185,6 +219,9 @@
                 "parameters": {
                     "hubNetworkId": {
                         "value": "[parameters('hubNetworkId')]"
+                    },
+                    "azFirewallId": {
+                        "value": "[parameters('azFirewallId')]"
                     },
                     "spokeName": {
                         "value": "[variables('spokeName')]"
