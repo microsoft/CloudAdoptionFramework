@@ -16,6 +16,9 @@ foreach($RoleDefinition in $RoleDefinitions) {
         -ResourceId $Resource.Id `
         -Filter "roleDefinitionId eq '$($RoleDefinition.Id)' and assignmentState eq 'Active'"
 
+    $BreakGlassGroup = Get-AzureADGroup -Filter "DisplayName eq 'Emergency Access Accounts'"
+    $BreakGlassAccounts = (Get-AzureADGroupMember -ObjectId $BreakGlassGroup.ObjectId).UserPrincipalName
+
     # We need to remove the break-glass accounts to avoid adding PIM to those
     $RoleAssignments = $RoleAssignments | Where-Object { 
         $RoleAssignmentAccount = Get-AzureAdUser -ObjectId $_.SubjectId

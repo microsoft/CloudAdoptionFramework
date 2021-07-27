@@ -62,7 +62,9 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
    Connect-AzureAD -TenantId <your-test-tenant-guid>
    ```
 
-1. Disable Azure AD Security defaults. TODO
+1. Disable Azure AD Security defaults
+
+   You can't disable the Azure AD Security defaults using powershell. The instructions to do it using Azure portal are [here](https://docs.microsoft.com/azure/active-directory/fundamentals/concept-fundamentals-security-defaults#disabling-security-defaults)
 
 1. Apply common Conditional Access policies
 

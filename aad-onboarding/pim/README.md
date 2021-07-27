@@ -56,7 +56,6 @@ Convert all users assignations to selected roles as eligible instead of active, 
 
 ```powershell
 $Groups = "Owner", "Security Admin"
-$BreakGlassAccounts = "account1@mail.com", "account2@mail.com"
 ./scripts/roles-make-eligible.ps1
 ```
 
