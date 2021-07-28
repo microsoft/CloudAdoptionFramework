@@ -1,14 +1,18 @@
 # Microsoft Cloud Adoption Framework for Azure
 
-This repo shares code samples which support and accelerate the adoption guidance found in the [Cloud Adoption Framework](https://aka.ms/CAF)
+This repo contains code samples which support and accelerate the adoption guidance found in the [Cloud Adoption Framework](https://aka.ms/CAF).
 
 Cloud Adoption Framework is the One Microsoft voice for cloud adoption, consolidating and sharing best practices from Microsoft employees, partners, and customers. In this framework, customers will find tools, guidance, and narratives to help shape technology, business, and people strategies in an effort to drive desired business outcomes during each adoption effort. This lifecycle "product" aligns guidance to various phases and iterations of the typical cloud adoption lifecycle to ensure easy access to the right guidance at the right time.
+
+## Documentation repository
+
+If you're looking to contribute to or report an issue regarding the Cloud Adoption Framework documentation found on Microsoft Docs, please visit the [Cloud Adoption Framework documentation repository on GitHub](https://github.com/MicrosoftDocs/cloud-adoption-framework).
 
 <!--
 ![Cloud Adoption Framework overview](https://docs.microsoft.com/azure/architecture/cloud-adoption/_images/cloud-adoption-framework-overview.png) 
 -->
 
-# Contributing
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
@@ -22,7 +26,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-# Legal Notices
+## Legal Notices
 
 Microsoft and any contributors grant you a license to the Microsoft documentation and other content
 in this repository under the [Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode),
