@@ -1,10 +1,11 @@
 # Set the schedule for role assignment request
-# No end time means a permanent assignment
+# Max end date time for eligible assignments is 1 year
 $Schedule = New-Object Microsoft.Open.MSGraph.Model.AzureADMSPrivilegedSchedule
 $Schedule.Type = "Once"
 $Schedule.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+$schedule.endDateTime = $Schedule.StartDateTime.AddYears(1)
 
-$Resource = Get-AzureADMSPrivilegedResource -ProviderId 'azureResources' -ExternalId "/subscriptions/$($SubscriptionId)"
+$Resource = Get-AzureADMSPrivilegedResource -ProviderId 'azureResources'
 
 $RoleDefinitions = Get-AzureADMSPrivilegedRoleDefinition -ProviderId 'azureResources' -ResourceId $Resource.Id
 $RoleDefinitions = $RoleDefinitions | Where-Object { $_.DisplayName -in $Groups }
@@ -16,13 +17,17 @@ foreach($RoleDefinition in $RoleDefinitions) {
         -ResourceId $Resource.Id `
         -Filter "roleDefinitionId eq '$($RoleDefinition.Id)' and assignmentState eq 'Active'"
 
-    $BreakGlassGroup = Get-AzureADGroup -Filter "DisplayName eq 'Emergency Access Accounts'"
-    $BreakGlassAccounts = (Get-AzureADGroupMember -ObjectId $BreakGlassGroup.ObjectId).UserPrincipalName
-
     # We need to remove the break-glass accounts to avoid adding PIM to those
-    $RoleAssignments = $RoleAssignments | Where-Object { 
-        $RoleAssignmentAccount = Get-AzureAdUser -ObjectId $_.SubjectId
-        $RoleAssignmentAccount.UserPrincipalName -notin $BreakGlassAccounts 
+    $BreakGlassGroup = Get-AzureADGroup -Filter "DisplayName eq 'Emergency Access Accounts'"
+    if ($BreakGlassGroup)
+    {
+        $BreakGlassAccounts = (Get-AzureADGroupMember -ObjectId $BreakGlassGroup.ObjectId).UserPrincipalName
+        if ($BreakGlassAccounts) {
+            $RoleAssignments = $RoleAssignments | Where-Object {
+                try { $RoleAssignmentAccount = Get-AzureAdUser -ObjectId $_.SubjectId } catch { $RoleAssignmentAccount = $null }
+                (!$RoleAssignmentAccount) -or ($RoleAssignmentAccount.UserPrincipalName -notin $BreakGlassAccounts)
+            }
+        }
     }
 
     # Change all the role's active assignments to eligible

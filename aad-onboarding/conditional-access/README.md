@@ -34,11 +34,6 @@ All changes to Azure AD should always follow your Safe Deployment Practices. Con
 
 For this workshop, we'll use basic PowerShell scripts to set up the environment.
 
-// TODO, would this be better as Graph API templates instead?
-// TODO, should we always have a "Test Group (Audit)" -> "Test Group (On)" -> "All (Audit)" -> "All (On)" flow? to simulate a controlled rollout?
-
-> Next Step: Prereqs  (TODO Break into another page)
-
 CRITICAL:
 
 Because this impact the security profile of Azure AD, ensure you are doing this workshop in an isolated tenant that is free of any business impact caused by changes to policy. In this tenant you need to at least hold the Azure AD role of [Conditional Access administrator](https://docs.microsoft.com/azure/active-directory/roles/permissions-reference#conditional-access-administrator). (For demo purposes, Security administrator or Global administrator will work as well.)
@@ -94,13 +89,26 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
       Control: Block
 
       ```powershell
+      $ExcludedUsers = $null
+      $BreakGlassGroup = Get-AzureADGroup -Filter "DisplayName eq 'Emergency Access Accounts'"
+      if ($Group) {
+          $ExcludedUsers = (Get-AzureADGroupMember -ObjectId $BreakGlassGroup.ObjectId).UserPrincipalName
+      }
+
+      $IncludedUsers = $null
+      $AdminGroupName = "Global Administrator"
+      $AdminGroup = Get-AzureADGroup -Filter "DisplayName eq '$AdminGroupName'"
+      if ($AdminGroup) {
+          $IncludedUsers = (Get-AzureADGroupMember -ObjectId $AdminGroup.ObjectId).UserPrincipalName
+      }
+
       $conditions = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessConditionSet
       $conditions.Applications = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessApplicationCondition
       $conditions.Applications.IncludeApplications = "All"
       $conditions.ClientAppTypes = "All"
       $conditions.Users = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessUserCondition
-      $conditions.Users.IncludeRoles = **TODO Query All Recommended Roles**
-      $conditions.Users.ExcludeUsers = **TODO Exclude Break-Glass User once we create it, query for -- should be group based instead**
+      $conditions.Users.IncludeRoles = $IncludedUsers
+      $conditions.Users.ExcludeUsers = $ExcludedUsers
       $controls = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessGrantControls
       $controls._Operator = "OR"
       $controls.BuiltInControls = "Mfa"
@@ -115,13 +123,20 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
       Control: Block
 
       ```powershell
+      $ExcludedUsers = $null
+      $BreakGlassGroup = Get-AzureADGroup -Filter "DisplayName eq 'Emergency Access Accounts'"
+      if ($Group) {
+          $ExcludedUsers = (Get-AzureADGroupMember -ObjectId $BreakGlassGroup.ObjectId).UserPrincipalName
+      }
+
       $conditions = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessConditionSet
       $conditions.Applications = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessApplicationCondition
-      $conditions.Applications.IncludeApplications = "797f4846-ba00-4fd7-ba43-dac1f8f63013" // TODO validate if this is static or needs to be queried -- This is Azure Management
+      # This is Azure Management
+      $conditions.Applications.IncludeApplications = "797f4846-ba00-4fd7-ba43-dac1f8f63013"
       $conditions.ClientAppTypes = "All"
       $conditions.Users = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessUserCondition
-      $conditions.Users.IncludeUsers = **All**
-      $conditions.Users.ExcludeUsers = **TODO Exclude Break-Glass User once we create it, query for -- should be group based instead**
+      $conditions.Users.IncludeUsers = "All"
+      $conditions.Users.ExcludeUsers = $ExcludedUsers
       $controls = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessGrantControls
       $controls._Operator = "OR"
       $controls.BuiltInControls = "mfa"
@@ -136,23 +151,22 @@ Because this impact the security profile of Azure AD, ensure you are doing this 
       Control: Block
 
       ```powershell
+      $ExcludedUsers = $null
+      $BreakGlassGroup = Get-AzureADGroup -Filter "DisplayName eq 'Emergency Access Accounts'"
+      if ($Group) {
+          $ExcludedUsers = (Get-AzureADGroupMember -ObjectId $BreakGlassGroup.ObjectId).UserPrincipalName
+      }
+
       $conditions = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessConditionSet
       $conditions.Applications = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessApplicationCondition
       $conditions.Applications.IncludeApplications = "All"
       $conditions.ClientAppTypes = "All"
       $conditions.Users = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessUserCondition
       $conditions.Users.IncludeUsers = "All"
-      $conditions.Users.ExcludeUsers = **TODO Exclude Break-Glass User once we create it, query for - should be group based instead**
+      $conditions.Users.ExcludeUsers = $ExcludedUsers
       $controls = New-Object -TypeName Microsoft.Open.MSGraph.Model.ConditionalAccessGrantControls
       $controls._Operator = "OR"
       $controls.BuiltInControls = "mfa"
 
       New-AzureADMSConditionalAccessPolicy -DisplayName "Require MFA for all users" -State "enabledForReportingButNotEnforced" -Conditions $conditions -GrantControls $controls
       ```
-
-## TODO
-
-- Should we include a sign-in risk-based CA?  If so, should that be merged in with one of the above?
-- Should we include a user risk-based CA?  If so, should that be merged in with one of the above?
-- Should we include a block access by location CA?
-- Should we include a compliant device (audit only) CA?

@@ -4,7 +4,7 @@ $Schedule.Type = "Once"
 $Schedule.Duration = "PT1H"
 $Schedule.StartDateTime = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
 
-$Resource = Get-AzureADMSPrivilegedResource -ProviderId 'azureResources' -ExternalId "/subscriptions/$($SubscriptionId)"
+$Resource = Get-AzureADMSPrivilegedResource -ProviderId 'azureResources'
 
 $RoleDefinition = Get-AzureADMSPrivilegedRoleDefinition `
     -ProviderId 'azureResources' `
