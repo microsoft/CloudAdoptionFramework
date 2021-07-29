@@ -48,10 +48,10 @@
             },
             "defaultValue": "192.168.0.0/16"
         },
-        "hubSubnetAddressPrefixForAppGw": {
+        "hubSubnetAddressPrefixForGw": {
             "type": "string",
             "metadata": {
-                "displayName": "Subnet prefix for Azure Application Gateway for hub"
+                "displayName": "Subnet prefix for the gateway for hub"
             },
             "defaultValue": "192.168.1.0/24"
         },
@@ -76,19 +76,38 @@
             },
             "defaultValue": "10.1.0.0/16"
         },
-        "spokeOneSubnetAddressPrefixForAppGW": {
-            "type": "string",
-            "metadata": {
-                "displayName": "Subnet prefix for the application gateway for spoke one"
-            },
-            "defaultValue": "10.1.1.0/24"
-        },
         "spokeOneSubnetAddressPrefixForWorkload": {
             "type": "string",
             "metadata": {
                 "displayName": "Subnet prefix for the workload for spoke one"
             },
             "defaultValue": "10.1.2.0/24"
+        },
+        "spokeOneDeployAppGw": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy application gateway in spoke one",
+                "description": "If 'Yes', ARM will deploy an application gateway in spoke one. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "spokeOneSubnetAddressPrefixForAppGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway for spoke one"
+            },
+            "defaultValue": "10.1.1.0/24"
+        },
+        "spokeOneAppGwZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Application Gateway for spoke one"
+            },
+            "defaultValue": []
         },
         "spokeTwoAddressPrefix": {
             "type": "string",
@@ -97,19 +116,38 @@
             },
             "defaultValue": "10.2.0.0/16"
         },
-        "spokeTwoSubnetAddressPrefixForAppGW": {
-            "type": "string",
-            "metadata": {
-                "displayName": "Subnet prefix for the application gateway for spoke two"
-            },
-            "defaultValue": "10.2.1.0/24"
-        },
         "spokeTwoSubnetAddressPrefixForWorkload": {
             "type": "string",
             "metadata": {
                 "displayName": "Subnet prefix for the workload for spoke two"
             },
             "defaultValue": "10.2.2.0/24"
+        },
+        "spokeTwoDeployAppGw": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy application gateway in spoke two",
+                "description": "If 'Yes', ARM will deploy an application gateway in spoke two. If 'No', it will be skipped"
+            },
+            "defaultValue": "No",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "spokeTwoSubnetAddressPrefixForAppGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway for spoke two"
+            },
+            "defaultValue": "10.2.1.0/24"
+        },
+        "spokeTwoAppGwZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Application Gateway for spoke two"
+            },
+            "defaultValue": []
         },
         "azFirewallZones": {
             "type": "array",
@@ -132,7 +170,7 @@
         "spokeOneNameSuffix": "[replace(split(parameters('spokeOneAddressPrefix'), '/')[0],'.', '_')]",
         "spokeOneDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-spokes-', variables('spokeOneNameSuffix'))]",
         "spokeTwoNameSuffix": "[replace(split(parameters('spokeTwoAddressPrefix'), '/')[0],'.', '_')]",
-        "spokeTwoDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-spokes-', variables('spokeTwoNameSuffix'))]",
+        "spokeTwoDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-spokes-', variables('spokeTwoNameSuffix'))]"
     },
     "resources": [
 
@@ -164,8 +202,8 @@
                     "hubNetworkNetAddressPrefix": {
                         "value": "[parameters('hubNetworkNetAddressPrefix')]"
                     },
-                    "subnetAddressPrefixForAppGw": {
-                        "value": "[parameters('hubSubnetAddressPrefixForAppGw')]"
+                    "subnetAddressPrefixForGw": {
+                        "value": "[parameters('hubSubnetAddressPrefixForGw')]"
                     },
                     "subnetAddressPrefixForAzFw": {
                         "value": "[parameters('hubSubnetAddressPrefixForAzFw')]"
@@ -199,6 +237,12 @@
                     "deploymentPrefix": {
                         "value": "[parameters('deploymentPrefix')]"
                     },
+                    "workspaceId": {
+                        "value": "[parameters('workspaceId')]"
+                    },
+                    "enableLogs": {
+                        "value": "[parameters('enableLogs')]"
+                    },
                     "hubNetworkId": {
                         "value": "[reference(variables('hubDeploymentName')).outputs.hubNetworkId.value]"
                     },
@@ -206,22 +250,28 @@
                         "value": "[reference(variables('hubDeploymentName')).outputs.azFirewallId.value]"
                     },
                     "addressPrefix": {
-                        "value": "[parameters('SpokeOneAddressPrefix')]"
-                    },
-                    "subnetAddressPrefixForAppGW": {
-                        "value": "[parameters('SpokeOneSubnetAddressPrefixForAppGW')]"
+                        "value": "[parameters('spokeOneAddressPrefix')]"
                     },
                     "subnetAddressPrefixForWorkload": {
-                        "value": "[parameters('SpokeOneSubnetAddressPrefixForWorkload')]"
+                        "value": "[parameters('spokeOneSubnetAddressPrefixForWorkload')]"
                     },
                     "DdoSId": {
                         "value": "[reference(variables('hubDeploymentName')).outputs.DdoSId.value]"
+                    },
+                    "deployAppGw": {
+                        "value": "[parameters('spokeOneDeployAppGw')]"
+                    },
+                    "subnetAddressPrefixForAppGw": {
+                        "value": "[parameters('spokeOneSubnetAddressPrefixForAppGw')]"
+                    },
+                    "appGwZones": {
+                        "value": "[parameters('spokeOneAppGwZones')]"
                     }
                 }
             }
         },
 
-        // Deploy Spoke One
+        // Deploy Spoke Two
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-10-01",
@@ -240,6 +290,12 @@
                     "deploymentPrefix": {
                         "value": "[parameters('deploymentPrefix')]"
                     },
+                    "workspaceId": {
+                        "value": "[parameters('workspaceId')]"
+                    },
+                    "enableLogs": {
+                        "value": "[parameters('enableLogs')]"
+                    },
                     "hubNetworkId": {
                         "value": "[reference(variables('hubDeploymentName')).outputs.hubNetworkId.value]"
                     },
@@ -247,16 +303,22 @@
                         "value": "[reference(variables('hubDeploymentName')).outputs.azFirewallId.value]"
                     },
                     "addressPrefix": {
-                        "value": "[parameters('SpokeTwoAddressPrefix')]"
-                    },
-                    "subnetAddressPrefixForAppGW": {
-                        "value": "[parameters('SpokeTwoSubnetAddressPrefixForAppGW')]"
+                        "value": "[parameters('spokeTwoAddressPrefix')]"
                     },
                     "subnetAddressPrefixForWorkload": {
-                        "value": "[parameters('SpokeTwoSubnetAddressPrefixForWorkload')]"
+                        "value": "[parameters('spokeTwoSubnetAddressPrefixForWorkload')]"
                     },
                     "DdoSId": {
                         "value": "[reference(variables('hubDeploymentName')).outputs.DdoSId.value]"
+                    },
+                    "deployAppGw": {
+                        "value": "[parameters('spokeTwoDeployAppGw')]"
+                    },
+                    "subnetAddressPrefixForAppGw": {
+                        "value": "[parameters('spokeTwoSubnetAddressPrefixForAppGw')]"
+                    },
+                    "appGwZones": {
+                        "value": "[parameters('spokeTwoAppGwZones')]"
                     }
                 }
             }

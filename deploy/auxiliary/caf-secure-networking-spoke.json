@@ -11,6 +11,24 @@
             },
             "defaultValue": "cafsecure"
         },
+        "workspaceId": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Log Analytics workspace id"
+            }
+        },
+        "enableLogs": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enable logs",
+                "description": "If 'Yes', ARM will enable logs stream to the log analytics workspace. If 'No', they will be disabled"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
         "hubNetworkId": {
             "type": "string",
             "metadata": {
@@ -30,13 +48,6 @@
             },
             "defaultValue": "10.1.0.0/16"
         },
-        "subnetAddressPrefixForAppGW": {
-            "type": "string",
-            "metadata": {
-                "displayName": "Subnet prefix for the application gateway"
-            },
-            "defaultValue": "10.1.1.0/24"
-        },
         "subnetAddressPrefixForWorkload": {
             "type": "string",
             "metadata": {
@@ -51,6 +62,32 @@
                 "description": "The DDoS Standard protection plan information id to use with the hub spoke."
             },
             "defaultValue": ""
+        },
+        "deployAppGw": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy application gateway in this spoke",
+                "description": "If 'Yes', ARM will deploy an application gateway in this spoke. If 'No', it will be skipped"
+            },
+            "defaultValue": "No",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "subnetAddressPrefixForAppGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway"
+            },
+            "defaultValue": "10.1.1.0/24"
+        },
+        "appGwZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Application Gateway"
+            },
+            "defaultValue": []
         }
     },
     "variables": {
@@ -89,6 +126,12 @@
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
+                        "workspaceId": {
+                            "type": "string"
+                        },
+                        "enableLogs": {
+                            "type": "bool"
+                        },
                         "hubNetworkId": {
                             "type": "string"
                         },
@@ -101,21 +144,57 @@
                         "addressPrefix": {
                             "type": "string"
                         },
-                        "subnetAddressPrefixForAppGW": {
-                            "type": "string"
-                        },
                         "subnetAddressPrefixForWorkload": {
                             "type": "string"
                         },
                         "DdoSId": {
                             "type": "string"
+                        },
+                        "deployAppGw": {
+                            "type": "bool"
+                        },
+                        "subnetAddressPrefixForAppGw": {
+                            "type": "string"
+                        },
+                        "appGwZones": {
+                            "type": "array"
                         }
                     },
                     "variables": {
                         "networkName": "[concat('vnet-', parameters('spokeName'))]",
                         "networkSecurityGroupName": "[concat('nsg-', parameters('spokeName'))]",
+                        "appGwSubnetName": "[concat('snet-', parameters('spokeName'), '-appgw')]",
+                        "appGwNsgName": "[concat('nsg-', parameters('spokeName'), '-appgw')]",
                         "hubName": "[split(parameters('hubNetworkId'),'/')[8]]",
-                        "azFwRouteName": "udr-nexthop-to-fw"
+                        "azFwRouteName": "udr-nexthop-to-fw",
+                        "appGwName": "[concat('appgw-', parameters('spokeName'))]",
+                        "appGwIpName": "[concat(variables('appGwName'), '-pip')]",
+                        // Creating variable that later will be used in conjunction with the union() function to cater for conditional subnet creation while ensuring idempotency
+                        "appGwSubnet": [
+                            {
+                                "name": "[variables('appGwSubnetName')]",
+                                "properties": {
+                                    "addressPrefix": "[parameters('subnetAddressPrefixForAppGw')]",
+                                    "networkSecurityGroup": {
+                                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appGwNsgName'))]"
+                                    }
+                                }
+                            }
+                        ],
+                        "workloadSubnet": [
+                            {
+                                "name": "[concat('snet-', parameters('spokeName'), '-workload')]",
+                                "properties": {
+                                    "addressPrefix": "[parameters('subnetAddressPrefixForWorkload')]",
+                                    "networkSecurityGroup": {
+                                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                                    },
+                                    "routeTable": {
+                                        "id": "[resourceId('Microsoft.Network/routeTables', variables('azFwRouteName'))]"
+                                    }
+                                }
+                            }
+                        ]
                     },
                     "resources": [
                         // Empty Network Security Group
@@ -127,6 +206,89 @@
                             "properties": {
                             }
                         },
+
+                        // Network Security Group for AppGw
+                        {
+                            "condition": "[parameters('deployAppGw')]",
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('appGwNsgName')]",
+                            "location": "[resourceGroup().location]",
+                            "comments": "NSG on the App Gateway subnet.",
+                            "properties": {
+                                "securityRules": [
+                                    {
+                                        "name": "Allow80InBound",
+                                        "properties": {
+                                            "description": "Allow ALL web traffic into 80. (If you wanted to allow-list specific IPs, this is where you'd list them.)",
+                                            "protocol": "Tcp",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "Internet",
+                                            "destinationPortRange": "80",
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "access": "Allow",
+                                            "priority": 100,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowControlPlaneInBound",
+                                        "properties": {
+                                            "description": "Allow Azure Control Plane in. (https://docs.microsoft.com/azure/application-gateway/configuration-infrastructure#network-security-groups)",
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "65200-65535",
+                                            "destinationAddressPrefix": "*",
+                                            "access": "Allow",
+                                            "priority": 110,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowHealthProbesInBound",
+                                        "properties": {
+                                            "description": "Allow Azure Health Probes in. (https://docs.microsoft.com/azure/application-gateway/configuration-infrastructure#network-security-groups)",
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "AzureLoadBalancer",
+                                            "destinationPortRange": "*",
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "access": "Allow",
+                                            "priority": 120,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "DenyAllInBound",
+                                        "properties": {
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "access": "Deny",
+                                            "priority": 1000,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowAllOutBound",
+                                        "properties": {
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "access": "Allow",
+                                            "priority": 1000,
+                                            "direction": "Outbound"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+
                         // Route/force tunnel from spokes to Azure firewall
                         {
                             "type": "Microsoft.Network/routeTables",
@@ -155,6 +317,7 @@
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+                                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appGwNsgName'))]",
                                 "[resourceId('Microsoft.Network/routeTables', variables('azFwRouteName'))]"
                             ],
                             "properties": {
@@ -163,26 +326,7 @@
                                         "[parameters('addressPrefix')]"
                                     ]
                                 },
-                                "subnets": [
-                                    {
-                                        "name": "[concat('snet-', parameters('spokeName'), '-appgw')]",
-                                        "properties": {
-                                            "addressPrefix": "[parameters('subnetAddressPrefixForAppGW')]"
-                                        }
-                                    },
-                                    {
-                                        "name": "[concat('snet-', parameters('spokeName'), '-workload')]",
-                                        "properties": {
-                                            "addressPrefix": "[parameters('subnetAddressPrefixForWorkload')]",
-                                            "networkSecurityGroup": {
-                                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
-                                            },
-                                            "routeTable": {
-                                                "id": "[resourceId('Microsoft.Network/routeTables', variables('azFwRouteName'))]"
-                                            }
-                                        }
-                                    }
-                                ],
+                                "subnets": "[union(if(parameters('deployAppGw'), variables('appGwSubnet'), json('[]')), variables('workloadSubnet'))]",
                                 "enableDdosProtection": "[not(empty(parameters('DdoSId')))]",
                                 "ddosProtectionPlan": {
                                     "id": "[if(empty(parameters('DdoSId')), json('null'), parameters('DdoSId'))]"
@@ -207,16 +351,176 @@
                                 "allowGatewayTransit": false,
                                 "useRemoteGateways": false
                             }
+                        },
+
+                        // Application Gateway Public IP
+                        {
+                            "condition": "[parameters('deployAppGw')]",
+                            "type": "Microsoft.Network/publicIPAddresses",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('appGwIpName')]",
+                            "location": "[resourceGroup().location]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            }
+                        },
+                        // Application Gateway
+                        {
+                            "condition": "[parameters('deployAppGw')]",
+                            "type": "Microsoft.Network/applicationGateways",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('appGwName')]",
+                            "location": "[resourceGroup().location]",
+                            "zones": "[if(not(empty(parameters('appGwZones'))), parameters('appGwZones'), json('null'))]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/virtualNetworks', variables('networkName'))]",
+                                "[resourceId('Microsoft.Network/publicIPAddresses', variables('appGwIpName'))]"
+                            ],
+                            "properties": {
+                                "sku": {
+                                    "name": "WAF_v2",
+                                    "tier": "WAF_v2"
+                                },
+                                "gatewayIPConfigurations": [
+                                    {
+                                        "name": "appGatewayIpConfig",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('networkName'), variables('appGwSubnetName'))]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "frontendIPConfigurations": [
+                                    {
+                                        "name": "appGwPublicFrontendIp",
+                                        "properties": {
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('appGwIpName'))]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "frontendPorts": [
+                                    {
+                                        "name": "port_80",
+                                        "properties": {
+                                            "port": 80
+                                        }
+                                    }
+                                ],
+                                "backendAddressPools": [
+                                    {
+                                        "name": "backend-default"
+                                    }
+                                ],
+                                "backendHttpSettingsCollection": [
+                                    {
+                                        "name": "http-setting-default",
+                                        "properties": {
+                                            "port": 80,
+                                            "protocol": "Http",
+                                            "cookieBasedAffinity": "Disabled",
+                                            "pickHostNameFromBackendAddress": false,
+                                            "requestTimeout": 20
+                                        }
+                                    }
+                                ],
+                                "httpListeners": [
+                                    {
+                                        "name": "http-listener-default",
+                                        "properties": {
+                                            "frontendIPConfiguration": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', variables('appGwName'), 'appGwPublicFrontendIp')]"
+                                            },
+                                            "frontendPort": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/frontendPorts', variables('appGwName'), 'port_80')]"
+                                            },
+                                            "protocol": "Http",
+                                            "requireServerNameIndication": false
+                                        }
+                                    }
+                                ],
+                                "requestRoutingRules": [
+                                    {
+                                        "name": "http-rule",
+                                        "properties": {
+                                            "ruleType": "Basic",
+                                            "httpListener": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', variables('appGwName'), 'http-listener-default')]"
+                                            },
+                                            "backendAddressPool": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('appGwName'), 'backend-default')]"
+                                            },
+                                            "backendHttpSettings": {
+                                                "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', variables('appGwName'), 'http-setting-default')]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "enableHttp2": false,
+                                "autoscaleConfiguration": {
+                                    "minCapacity": 0,
+                                    "maxCapacity": 5
+                                },
+                                "webApplicationFirewallConfiguration": {
+                                    "enabled": true,
+                                    "firewallMode": "Prevention",
+                                    "ruleSetType": "OWASP",
+                                    "ruleSetVersion": "3.2"
+                                }
+                            }
+                        },
+                        {
+                            "condition": "[parameters('deployAppGw')]",
+                            "type": "Microsoft.Network/applicationGateways/providers/diagnosticSettings",
+                            "apiVersion": "2017-05-01-preview",
+                            "name": "[concat(variables('appGwName'), '/Microsoft.Insights/default')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/applicationGateways', variables('appGwName'))]"
+                            ],
+                            "properties": {
+                                "workspaceId": "[parameters('workspaceId')]",
+                                "logs": [
+                                    {
+                                        "category": "ApplicationGatewayAccessLog",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    },
+                                    {
+                                        "category": "ApplicationGatewayPerformanceLog",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    },
+                                    {
+                                        "category": "ApplicationGatewayFirewallLog",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    }
+                                ]
+                            }
                         }
                     ],
                     "outputs": {
                         "networkId": {
                             "type": "string",
                             "value": "[resourceId('Microsoft.Network/virtualNetworks', variables('networkName'))]"
+                        },
+                        "appGwId": {
+                            "condition": "[parameters('deployAppGw')]",
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Network/applicationGateways', variables('appGwName'))]"
                         }
                     }
                 },
                 "parameters": {
+                    "workspaceId": {
+                        "value": "[parameters('workspaceId')]"
+                    },
+                    "enableLogs": {
+                        "value": "[equals(parameters('enableLogs'), 'Yes')]"
+                    },
                     "hubNetworkId": {
                         "value": "[parameters('hubNetworkId')]"
                     },
@@ -229,14 +533,20 @@
                     "addressPrefix": {
                         "value": "[parameters('addressPrefix')]"
                     },
-                    "subnetAddressPrefixForAppGW": {
-                        "value": "[parameters('subnetAddressPrefixForAppGW')]"
-                    },
                     "subnetAddressPrefixForWorkload": {
                         "value": "[parameters('subnetAddressPrefixForWorkload')]"
                     },
                     "DdoSId": {
                         "value": "[parameters('DdoSId')]"
+                    },
+                    "deployAppGw": {
+                        "value": "[equals(parameters('deployAppGw'), 'Yes')]"
+                    },
+                    "subnetAddressPrefixForAppGw": {
+                        "value": "[parameters('subnetAddressPrefixForAppGw')]"
+                    },
+                    "appGwZones": {
+                        "value": "[parameters('appGwZones')]"
                     }
                 }
             }
@@ -291,7 +601,6 @@
                 "parameters": {
                     "spokeNetworkId": {
                         "value": "[reference(variables('deploymentName')).outputs.networkId.value]"
-                        // concat(subscription().id,'/resourceGroups/',parameters('vNetRgName'), '/providers/','Microsoft.Network/virtualNetworks/', parameters('vNetName'))]"
                     },
                     "hubName": {
                         "value": "[split(parameters('hubNetworkId'),'/')[8]]"
@@ -305,6 +614,11 @@
         "networkId": {
             "type": "string",
             "value": "[reference(variables('deploymentName')).outputs.networkId.value]"
+        },
+        "appGwId": {
+            "condition": "[equals(parameters('deployAppGw'), 'Yes')]",
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.appGwId.value]"
         }
     }
 }

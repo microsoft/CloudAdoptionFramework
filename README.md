@@ -13,7 +13,7 @@ The deployable assets in this repository are made available in order to provide 
 
 This reference implementation is also well suited for bigger organization or customers who want to start with Azure Security Center for their net new deployment/development in Azure by implementing a network architecture based on the traditional hub-spoke network topology.
 
-The deployed products and configurations are not intended to be a fully-matured end-state, rather a starting point for organizations to explore and have further design conversations in context. 
+The deployed products and configurations are not intended to be a fully-matured end-state, rather a starting point for organizations to explore and have further design conversations in context.
 
 ## How to evolve later
 
@@ -86,6 +86,15 @@ This deployment includes:
 - One Hub
 - Two peered Spokes
 - Azure Firewall
+- Azure Application Gateway
+
+#### Firewall and Application Gateway in parallel
+
+Because of its simplicity and flexibility, running Application Gateway and Azure Firewall in parallel is often the best scenario.
+
+Implement this design if there's a mix of web and non-web workloads in the virtual network. Azure WAF protects inbound traffic to the web workloads, and the Azure Firewall inspects inbound traffic for the other applications. The Azure Firewall will cover outbound flows from both workload types.
+
+For further information, please check [Firewall and Application Gateway for virtual networks - Azure Example Scenarios](https://docs.microsoft.com/azure/architecture/example-scenario/gateway/firewall-application-gateway#firewall-and-application-gateway-in-parallel)
 
 ### Azure Security Center
 

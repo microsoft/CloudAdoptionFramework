@@ -384,10 +384,10 @@
                                 }
                             },
                             {
-                                "name": "ptSubnetAddressPrefixForAppGw",
+                                "name": "ptSubnetAddressPrefixForGw",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Subnet prefix for Azure Application Gateway",
-                                "toolTip": "Subnet address prefix for Azure Application Gateway for the hub network",
+                                "label": "Subnet prefix for the gateway",
+                                "toolTip": "Subnet address prefix for the gateway for the hub network",
                                 "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
                                 "defaultValue": "192.168.1.0/24",
                                 "constraints": {
@@ -416,7 +416,7 @@
                                 "multiselect": true,
                                 "selectAll": true,
                                 "filter": true,
-                                "toolTip": "ARM will deploy Azure Firewall to the selected region and availability zones",
+                                "toolTip": "ARM will deploy Azure Firewall to the selected availability zones. Make sure the selected region supports the availabilities zones",
                                 "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
                                 "defaultValue": "None",
                                 "constraints": {
@@ -471,19 +471,6 @@
                                 }
                             },
                             {
-                                "name": "ptSubnetAddressPrefixForAppGw",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Subnet prefix for Azure Application Gateway",
-                                "toolTip": "Subnet address prefix for Azure Application Gateway for the spoke network",
-                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
-                                "defaultValue": "10.1.1.0/24",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
-                                    "validationMessage": "Please provide a valid IP address prefix"
-                                }
-                            },
-                            {
                                 "name": "ptSubnetAddressPrefixForWorkload",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Subnet prefix for workload",
@@ -494,6 +481,66 @@
                                     "required": true,
                                     "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
                                     "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptDeployAppGw",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Deploy application gateway",
+                                "defaultValue": "Yes",
+                                "toolTip": "If 'Yes', ARM will deploy an application gateway. If 'No', it will be skipped.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                },
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]"
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAppGw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for the application gateway",
+                                "toolTip": "Subnet address prefix for the application gateway for the spoke network",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').sectionSpokeOne.ptDeployAppGw, 'Yes'))]",
+                                "defaultValue": "10.1.1.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptAppGwZones",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Select Availability Zones for the Azure Application Gateway",
+                                "multiselect": true,
+                                "selectAll": true,
+                                "filter": true,
+                                "toolTip": "ARM will deploy Azure Application Gateway to the selected availability zones. Make sure the selected region supports the availabilities zones",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').sectionSpokeOne.ptDeployAppGw, 'Yes'))]",
+                                "defaultValue": "None",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Zone 1",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "label": "Zone 2",
+                                            "value": "2"
+                                        },
+                                        {
+                                            "label": "Zone 3",
+                                            "value": "3"
+                                        }
+                                    ]
                                 }
                             }
                         ],
@@ -518,19 +565,6 @@
                                 }
                             },
                             {
-                                "name": "ptSubnetAddressPrefixForAppGw",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Subnet prefix for Azure Application Gateway",
-                                "toolTip": "Subnet address prefix for Azure Application Gateway for the spoke network",
-                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
-                                "defaultValue": "10.2.1.0/24",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
-                                    "validationMessage": "Please provide a valid IP address prefix"
-                                }
-                            },
-                            {
                                 "name": "ptSubnetAddressPrefixForWorkload",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Subnet prefix for workload",
@@ -541,6 +575,66 @@
                                     "required": true,
                                     "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
                                     "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptDeployAppGw",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Deploy application gateway",
+                                "defaultValue": "No",
+                                "toolTip": "If 'Yes', ARM will deploy an application gateway. If 'No', it will be skipped.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                },
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]"
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAppGw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for the application gateway",
+                                "toolTip": "Subnet address prefix for the application gateway for the spoke network",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').sectionSpokeTwo.ptDeployAppGw, 'Yes'))]",
+                                "defaultValue": "10.2.1.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptAppGwZones",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Select Availability Zones for the Azure Application Gateway",
+                                "multiselect": true,
+                                "selectAll": true,
+                                "filter": true,
+                                "toolTip": "ARM will deploy Azure Application Gateway to the selected availability zones. Make sure the selected region supports the availabilities zones",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').sectionSpokeTwo.ptDeployAppGw, 'Yes'))]",
+                                "defaultValue": "None",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Zone 1",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "label": "Zone 2",
+                                            "value": "2"
+                                        },
+                                        {
+                                            "label": "Zone 3",
+                                            "value": "3"
+                                        }
+                                    ]
                                 }
                             }
                         ],
@@ -566,16 +660,20 @@
             "deployHubSpokeTopology": "[steps('step2').ptDeployHubSpoke]",
             "enableDdoS": "[steps('step2').ptEnableDdoS]",
             "hubNetworkNetAddressPrefix": "[steps('step2').sectionHub.ptAddressPrefix]",
-            "hubSubnetAddressPrefixForAppGw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForAppGw]",
+            "hubSubnetAddressPrefixForGw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForGw]",
             "hubSubnetAddressPrefixForAzFw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForAzFw]",
             "azFirewallZones": "[steps('step2').sectionHub.ptAzFirewallZones]",
             "hubSubnetAddressPrefixForBastion": "[steps('step2').sectionHub.ptSubnetAddressPrefixForBastion]",
             "spokeOneAddressPrefix": "[steps('step2').sectionSpokeOne.ptAddressPrefix]",
-            "spokeOneSubnetAddressPrefixForAppGW": "[steps('step2').sectionSpokeOne.ptSubnetAddressPrefixForAppGw]",
             "spokeOneSubnetAddressPrefixForWorkload": "[steps('step2').sectionSpokeOne.ptSubnetAddressPrefixForWorkload]",
+            "spokeOneDeployAppGw": "[steps('step2').sectionSpokeOne.ptDeployAppGw]",
+            "spokeOneSubnetAddressPrefixForAppGw": "[steps('step2').sectionSpokeOne.ptSubnetAddressPrefixForAppGw]",
+            "spokeOneAppGwZones": "[steps('step2').sectionSpokeOne.ptAppGwZones]",
             "spokeTwoAddressPrefix": "[steps('step2').sectionSpokeTwo.ptAddressPrefix]",
-            "spokeTwoSubnetAddressPrefixForAppGW": "[steps('step2').sectionSpokeTwo.ptSubnetAddressPrefixForAppGw]",
-            "spokeTwoSubnetAddressPrefixForWorkload": "[steps('step2').sectionSpokeTwo.ptSubnetAddressPrefixForWorkload]"
+            "spokeTwoSubnetAddressPrefixForWorkload": "[steps('step2').sectionSpokeTwo.ptSubnetAddressPrefixForWorkload]",
+            "spokeTwoDeployAppGw": "[steps('step2').sectionSpokeTwo.ptDeployAppGw]",
+            "spokeTwoSubnetAddressPrefixForAppGw": "[steps('step2').sectionSpokeTwo.ptSubnetAddressPrefixForAppGw]",
+            "spokeTwoAppGwZones": "[steps('step2').sectionSpokeTwo.ptAppGwZones]"
         }
     }
 }
