@@ -4,6 +4,56 @@
 
 ### AzGovViz version 5
 
+__Changes__ (2021-July-28 / Major)
+
+* As demanded by the community reactivated parameters `-PolicyAtScopeOnly` and `-RBACAtScopeOnly`
+* New paramter `-AADGroupMembersLimit`. Defines the limit (default=500) of AAD Group members; For AAD Groups that have more members than the defined limit Group members will not be resolved 
+* New parameter `-JsonExportExcludeResourceGroups` - JSON Export will not include ResourceGroups (Policy & Role assignments)
+* New parameter `-JsonExportExcludeResources`- JSON Export will not include Resources (Role assignments)
+* Bugfixes
+* Performance optimization
+
+__Changes__ (2021-July-22 / Major)
+
+* Full blown JSON definition output. Leveraging Git with this new capability you can easily track any changes that occurred in between the previous and last AzGovViz run.  
+![newBuiltInRoleDefinition](img/gitdiff600.jpg)  
+_* a new BuiltIn RBAC Role definition was added_
+* Renamed parameter `-PolicyIncludeResourceGroups` to , `-DoNotIncludeResourceGroupsOnPolicy` (from now Policy assignments on ResourceGroups will be included by default)
+* Renamed parameter `-RBACIncludeResourceGroupsAndResources` to , `-DoNotIncludeResourceGroupsAndResourcesOnRBAC` (from now Role assignments on ResourceGroups and Resources will be included by default)
+* New parameter `-HtmlTableRowsLimit`. Although the parameter `-LargeTenant` was introduced recently, still the html output may become too large to be processed properly. The new parameter defines the limit of rows - if for the html processing part the limit is reached then the html table will not be created (csv and json output will still be created). Default rows limit is 40.000.
+* Added NonCompliance Message for Policy assignments
+* Cosmetics
+* Bugfixes
+* Performance optimization
+
+__Changes__ (2021-July-07 / Major)
+
+* Replaced parameters ~~`-NoScopeInsights`,~~ `-RBACAtScopeOnly` and `-PolicyAtScopeOnly` with `-LargeTenant`. A large tenant is a tenant with more than ~500 Subscriptions - the HTML output for large tenants simply becomes too big, therefore will not create __ScopeInsights__ and will not show inheritance for Policy and Role assignments in the __TenantSummary__ (html) output
+* Add Tenant to __HierarchyMap__ including count of Role assignments
+* Executing against any child Management Group will show all parent Management Groups in __HierarchyMap__
+* Cosmetics / Icons
+* Bugfixes
+* Performance optimization - optimized data collection to reduce memory utilization -> __big, fat 'Thank You'__ to Tim Wanierke and Brooks Vaughn
+
+__Changes__ (2021-June-16 / Minor)
+
+* added detailed [Setup](setup.md) instructions
+
+__Changes__ (2021-June-07 / Major)
+
+* Breaking Changes
+  * Changed parameter `-CsvExport` to `-NoCsvExport` - You will need to explicitly deny CSV export using `-NoCsvExport`
+  * Changed parameter `-JsonExport` to `-NoJsonExport` - You will need to explicitly deny JSON export using `-NoJsonExport`
+* __HierarchyMap__ enrich Management Groups with counts on Policy assignments, scoped Policy definitions and Role assignments
+* Enhanced Management Group and Subscription Diagnostic settings / list Management Groups and Subscriptions that do not have Diagnostic settings applied
+* Updated API error codes / throttle handling
+* Bugfixes
+
+__Changes__ (2021-June-01 / Feature)
+
+* Added Management Group and Subscription Diagnostic settings
+* Restructure __TenantSummary__ - 'Diagnostics' gets its own section
+
 __Changes__ (2021-May-19)
 
 * Removed Azure PowerShell module requirement Az.ResourceGraph 
