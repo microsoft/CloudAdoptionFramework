@@ -1,4 +1,4 @@
-$templateRootUri="https://raw.githubusercontent.com/mspnp/caf-secure-amp-infra/main"
+$templateRootUri="https://raw.githubusercontent.com/mspnp/caf-secure-amp-infra/main/deploy"
 
 # Login
 $tenant_id = Read-Host "Enter the tenant id"
