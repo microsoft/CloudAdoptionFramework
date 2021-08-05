@@ -1,4 +1,4 @@
-# Cloud Adoption Framework - Secure Accelerator
+# Cloud Adoption Framework - Security MVP
 
 ## Introduction
 
@@ -8,8 +8,7 @@ CAF consists of multiple methodologies, providing the right guidance at the righ
 
 ## Customer profile
 
-This content is intended to be used as part of the Azure Migration Program (AMP) security workshop for partners to work with customers to explore the core disciplines for cloud security and make informed design decisions.
-The deployable assets in this repository are made available in order to provide a design path and initial technical state for small enterprises or customers willing to learn and start using Azure security tools and services. It's meant for organizations that do not yet have a large IT team nor require fine grained administration delegation models. Hence, all resources and security rules are consolidated in a single subscription.
+This content is intended to be used as part of the Azure Migration Program (AMP) security workshop for partners to work with customers to explore the core disciplines for cloud security and make informed design decisions. The deployable assets in this repository are made available in order to provide a design path and initial technical state for small enterprises or customers willing to learn and start using Azure security tools and services. It's meant for organizations that do not yet have a large IT team nor require fine grained administration delegation models. Hence, all resources and security rules are consolidated in a single subscription.
 
 This reference implementation is also well suited for bigger organization or customers who want to start with Azure Security Center for their net new deployment/development in Azure by implementing a network architecture based on the traditional hub-spoke network topology.
 
@@ -42,15 +41,16 @@ These artifacts, when deployed into a greenfield environment will illustrate a s
 - Hub-spoke Network Topology
 
 - Azure AD onboarding
+
   - Azure AD _emergency access_ accounts
   - Azure AD conditional access policies
 
 - Azure Subscription Role-Based Access Control (RBAC)
   - Including JIT access
 
-|:warning: Greenfield Deployment Only|
-|:-----------------------------------|
-|These artifacts are designed for illustrative purposes in a **greenfield environment**. They are NOT suitable to be executed, without modification, against pre-existing Azure AD tenants or Azure Subscriptions. Doing so could result in **critical failure/misconfiguration** on the existing subscriptions and/or tenant due to pre-existing configuration not accounted for by the scripts.|
+| :warning: Greenfield Deployment Only |
+| :----------------------------------- |
+| These artifacts are designed for illustrative purposes in a **greenfield environment**. They are NOT suitable to be executed, without modification, against pre-existing Azure AD tenants or Azure Subscriptions. Doing so could result in **critical failure/misconfiguration** on the existing subscriptions and/or tenant due to pre-existing configuration not accounted for by the scripts. |
 
 ## Azure Onboarding
 
@@ -65,7 +65,7 @@ Azure Onboarding is implemented using a single deployment script that will creat
 
 Use the following link to deploy it to a greenfield subscription:
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmspnp%2Fcaf-secure-amp-infra%2Fmain%2Fdeploy%2Fcaf-secure-deploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fmspnp%2Fcaf-secure-amp-infra%2Fmain%2Fdeploy%2Fcaf-secure-ui.json)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fsecure%2Fsecurity-mvp%2Fdeploy%2Fcaf-secure-deploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fsecure%2Fsecurity-mvp%2Fdeploy%2Fcaf-secure-ui.json)
 
 ### Log Analytics Workspace
 
