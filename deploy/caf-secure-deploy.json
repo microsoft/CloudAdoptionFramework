@@ -134,6 +134,18 @@
                 "No"
             ]
         },
+        "deploySpokes": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy spokes network topology",
+                "description": "If 'Yes', ARM will deploy spokes network topology to the subscription. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
         "enableDdoS": {
             "type": "String",
             "metadata": {
@@ -260,10 +272,20 @@
                 "displayName": "Availability Zones for the Azure Firewall"
             },
             "defaultValue": []
+        },
+        "templateRootUri": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Root URI for auxiliary arm templates"
+            },
+            "defaultValue": "[deployment().properties.templateLink.uri]"
         }
     },
     "variables": {
-        "templateRootUri": "https://raw.githubusercontent.com/mspnp/caf-secure-amp-infra/main/deploy/auxiliary/",
+        "deploymentUris": {
+            "logAnalyticsWorkspace": "[uri(parameters('templateRootUri'), 'auxiliary/caf-secure-logAnalyticsWorkspace.json')]",
+            "networking": "[uri(parameters('templateRootUri'), 'auxiliary/caf-secure-networking.json')]"
+        },
 
         "networkingDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking')]",
         "workspaceDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-workspace')]",
@@ -321,7 +343,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('templateRootUri'), 'caf-secure-logAnalyticsWorkspace.json')]",
+                    "uri": "[variables('deploymentUris').logAnalyticsWorkspace]",
                     "contentVersion":"1.0.0.0"
                 },
                 "parameters": {
@@ -351,12 +373,15 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('templateRootUri'), 'caf-secure-networking.json')]",
+                    "uri": "[variables('deploymentUris').networking]",
                     "contentVersion":"1.0.0.0"
                 },
                 "parameters": {
                     "deploymentPrefix": {
                         "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "deploySpokes": {
+                        "value": "[parameters('deploySpokes')]"
                     },
                     "enableDdoS": {
                         "value": "[parameters('enableDdoS')]"
@@ -413,7 +438,7 @@
                         "value": "[parameters('azFirewallZones')]"
                     },
                     "templateRootUri": {
-                        "value": "[variables('templateRootUri')]"
+                        "value": "[parameters('templateRootUri')]"
                     }
                 }
             }

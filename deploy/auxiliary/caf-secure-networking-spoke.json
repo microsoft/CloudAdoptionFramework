@@ -169,6 +169,9 @@
                         "azFwRouteName": "udr-nexthop-to-fw",
                         "appGwName": "[concat('appgw-', parameters('spokeName'))]",
                         "appGwIpName": "[concat(variables('appGwName'), '-pip')]",
+                        "ddosProtectionPlanId": {
+                            "id": "[parameters('DdoSId')]"
+                        },
                         // Creating variable that later will be used in conjunction with the union() function to cater for conditional subnet creation while ensuring idempotency
                         "appGwSubnet": [
                             {
@@ -328,9 +331,7 @@
                                 },
                                 "subnets": "[union(if(parameters('deployAppGw'), variables('appGwSubnet'), json('[]')), variables('workloadSubnet'))]",
                                 "enableDdosProtection": "[not(empty(parameters('DdoSId')))]",
-                                "ddosProtectionPlan": {
-                                    "id": "[if(empty(parameters('DdoSId')), json('null'), parameters('DdoSId'))]"
-                                }
+                                "ddosProtectionPlan": "[if(not(empty(parameters('DdoSId'))), variables('ddosProtectionPlanId'), null())]"
                             }
                         },
                         // Virtual network peering spoke to hub
@@ -374,7 +375,7 @@
                             "apiVersion": "2020-05-01",
                             "name": "[variables('appGwName')]",
                             "location": "[resourceGroup().location]",
-                            "zones": "[if(not(empty(parameters('appGwZones'))), parameters('appGwZones'), json('null'))]",
+                            "zones": "[if(not(empty(parameters('appGwZones'))), parameters('appGwZones'), null())]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Network/virtualNetworks', variables('networkName'))]",
                                 "[resourceId('Microsoft.Network/publicIPAddresses', variables('appGwIpName'))]"

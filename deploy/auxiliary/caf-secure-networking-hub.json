@@ -146,7 +146,10 @@
                         "azFwIpOneName": "[concat(variables('azFwName'), '-pip-one')]",
                         "azFwIpTwoName": "[concat(variables('azFwName'), '-pip-two')]",
                         "azFwIpThreeName": "[concat(variables('azFwName'), '-pip-three')]",
-                        "azFwPolicyName": "[concat(variables('azFwName'), '-policy')]"
+                        "azFwPolicyName": "[concat(variables('azFwName'), '-policy')]",
+                        "ddosProtectionPlanId": {
+                            "id": "[resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName'))]"
+                        }
                     },
                     "resources": [
                         // Deploy DDoS Protection plan
@@ -370,9 +373,7 @@
                                     }
                                 ],
                                 "enableDdosProtection": "[parameters('enableDdoS')]",
-                                "ddosProtectionPlan": {
-                                    "id": "[if(parameters('enableDdoS'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), null())]"
-                                }
+                                "ddosProtectionPlan": "[if(parameters('enableDdoS'), variables('ddosProtectionPlanId'), null())]"
                             }
                         },
 
@@ -430,7 +431,7 @@
                             "type": "Microsoft.Network/azureFirewalls",
                             "name": "[variables('azfwname')]",
                             "location": "[resourceGroup().location]",
-                            "zones": "[if(not(empty(parameters('azFirewallZones'))), parameters('azFirewallZones'), json('null'))]",
+                            "zones": "[if(not(empty(parameters('azFirewallZones'))), parameters('azFirewallZones'), null())]",
                             "dependsOn": [
                                 "[resourceId('Microsoft.Network/firewallPolicies', variables('azFwPolicyName'))]",
                                 "[resourceId('Microsoft.Network/publicIpAddresses', variables('azFwIpOneName'))]",
@@ -506,7 +507,7 @@
                         },
                         "dDosId": {
                             "type": "string",
-                            "value": "[if(parameters('enableDdoS'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), null())]"
+                            "value": "[if(parameters('enableDdoS'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), '')]"
                         },
                         "azFirewallId": {
                             "type": "string",

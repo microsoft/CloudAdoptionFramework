@@ -11,6 +11,18 @@
             },
             "defaultValue": "cafsecure"
         },
+        "deploySpokes": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy spokes network topology",
+                "description": "If 'Yes', ARM will deploy spokes network topology to the subscription. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
         "enableDdoS": {
             "type": "String",
             "metadata": {
@@ -161,10 +173,14 @@
             "metadata": {
                 "displayName": "Root URI for auxiliary arm templates"
             },
-            "defaultValue": "https://raw.githubusercontent.com/mspnp/caf-secure-amp-infra/main/deploy/auxiliary/"
+            "defaultValue": "[deployment().properties.templateLink.uri]"
         }
     },
     "variables": {
+        "deploymentUris": {
+            "hub": "[uri(parameters('templateRootUri'), 'auxiliary/caf-secure-networking-hub.json')]",
+            "spoke": "[uri(parameters('templateRootUri'), 'auxiliary/caf-secure-networking-spoke.json')]"
+        },
         "hubNameSuffix": "[replace(split(parameters('hubNetworkNetAddressPrefix'), '/')[0],'.', '_')]",
         "hubDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-hubs-', variables('hubNameSuffix'))]",
         "spokeOneNameSuffix": "[replace(split(parameters('spokeOneAddressPrefix'), '/')[0],'.', '_')]",
@@ -183,7 +199,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('templateRootUri'), 'caf-secure-networking-hub.json')]",
+                    "uri": "[variables('deploymentUris').hub]",
                     "contentVersion":"1.0.0.0"
                 },
                 "parameters": {
@@ -220,6 +236,7 @@
 
         // Deploy Spoke One
         {
+            "condition": "[equals(parameters('deploySpokes'), 'Yes')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-10-01",
             "name": "[variables('spokeOneDeploymentName')]",
@@ -230,7 +247,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('templateRootUri'), 'caf-secure-networking-spoke.json')]",
+                    "uri": "[variables('deploymentUris').spoke]",
                     "contentVersion":"1.0.0.0"
                 },
                 "parameters": {
@@ -273,6 +290,7 @@
 
         // Deploy Spoke Two
         {
+            "condition": "[equals(parameters('deploySpokes'), 'Yes')]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2020-10-01",
             "name": "[variables('spokeTwoDeploymentName')]",
@@ -283,7 +301,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(parameters('templateRootUri'), 'caf-secure-networking-spoke.json')]",
+                    "uri": "[variables('deploymentUris').spoke]",
                     "contentVersion":"1.0.0.0"
                 },
                 "parameters": {
