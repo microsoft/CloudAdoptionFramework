@@ -14,7 +14,7 @@
                 "options": {
                     "icon": "Info",
                     "text": "The Microsoft Cloud Adoption Framework (CAF) for Azure is proven guidance that's designed to help create and implement the business and technology strategies necessary for organizations to succeed in the cloud. The Secure methodology provides security guidance by providing clarity for the processes, best practices, models, and experiences. This guidance is based on the lessons learned and real world experiences of real customers, Microsoft's security journey, and work with organizations like NIST, The Open Group, and the Center for Internet Security (CIS).",
-                    "uri": "https://github.com/mspnp/caf-secure-amp-infra"
+                    "uri": "https://github.com/microsoft/CloudAdoptionFramework/tree/master/secure/security-mvp"
                 }
             },
             {
