@@ -14,6 +14,8 @@ This reference implementation is also well suited for bigger organization or cus
 
 The deployed products and configurations are not intended to be a fully-matured end-state, rather a starting point for organizations to explore and have further design conversations in context.
 
+![Architecture diagram](./architecture.png)
+
 ## How to evolve later
 
 If the business requirements change over time and/or your organization grows, this simple implementation won't be enough to guarantee best practices and a more complex solution is recommended.
