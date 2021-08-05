@@ -1,0 +1,700 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "Cloud Adoption Framework - Secure Accelerator"
+            },
+            {
+                "name": "infoBox1",
+                "type": "Microsoft.Common.InfoBox",
+                "visible": true,
+                "options": {
+                    "icon": "Info",
+                    "text": "The Microsoft Cloud Adoption Framework (CAF) for Azure is proven guidance that's designed to help create and implement the business and technology strategies necessary for organizations to succeed in the cloud. The Secure methodology provides security guidance by providing clarity for the processes, best practices, models, and experiences. This guidance is based on the lessons learned and real world experiences of real customers, Microsoft's security journey, and work with organizations like NIST, The Open Group, and the Center for Internet Security (CIS).",
+                    "uri": "https://github.com/mspnp/caf-secure-amp-infra"
+                }
+            },
+            {
+                "name": "ptDeploymentPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Deployment prefix",
+                "toolTip": "Provide a prefix (max 10 characters, unique at tenant-scope) for subscription resources created as part of this deploy.",
+                "defaultValue": "cafsecure",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[a-z0-9A-Z-]{1,10}$",
+                    "validationMessage": "The prefix must be 1-10 characters."
+                }
+            }
+        ],
+        "steps": [
+            {
+                "name": "step1",
+                "label": "Azure Security Center",
+                "subLabel": {
+                    "preValidation": "Configure Azure Security Center settings",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Azure Security Center",
+                "elements": [
+                    {
+                        "name": "ptEmailSecurityContact",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Email Contact",
+                        "toolTip": "Email address to get email notifications from Azure Security Center",
+                        "visible": true,
+                        "defaultValue": "",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$",
+                            "validationMessage": "Please provide a valid email address"
+                        }
+                    },
+                    {
+                        "name": "sectionCISInitiative",
+                        "type": "Microsoft.Common.Section",
+                        "label": "CIS Microsoft Azure Foundations Benchmark",
+                        "elements": [
+                            {
+                                "name": "textBlock1",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "link": {
+                                        "label": "Learn more about CIS Benchmarks for Microsoft Azure",
+                                        "uri": "https://www.cisecurity.org/benchmark/azure"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "ptEnableCISInitiative",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable CIS Microsoft Azure Foundations Benchmark initiative",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes', ARM will assign the CIS Microsoft Azure Foundations Benchmark initiative to the subscription. If 'No', it will be skipped",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionLogAnalytics",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Log Analytics",
+                        "elements": [
+                            {
+                                "name": "ptRetentionInDays",
+                                "type": "Microsoft.Common.Slider",
+                                "min": 30,
+                                "max": 730,
+                                "label": "Log Analytics Data Retention (days)",
+                                "subLabel": "Days",
+                                "defaultValue": 30,
+                                "showStepMarkers": false,
+                                "toolTip": "Select retention days for Azure logs. Default is 30 days.",
+                                "constraints": {
+                                    "required": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "ptEnableLogs",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Stream activity log to log analytics workspace",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes', ARM will enable logs stream to the Log analytics workspace. If 'No', they will be disabled.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                },
+                                "visible": true
+                            }
+                        ],
+                        "visible": true
+                    },
+                    {
+                        "name": "sectionAzureDefender",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Azure Defender",
+                        "elements": [
+                            {
+                                "name": "textBlock2",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "link": {
+                                        "label": "Learn more about Azure Security Center solutions",
+                                        "uri": "https://docs.microsoft.com/azure/security/fundamentals/overview"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForServers",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for servers",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for all servers.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForAppServices",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for App Service",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for AppServices.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForStorage",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for Storage",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for Storage.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForSql",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for Azure SQL database servers",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for Azure SQL Database.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForSqlOnVm",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for SQL servers on machines",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for SQL servers on machines.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForArm",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for Azure Resource Manager",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for Resource Manager.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForDns",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for DNS",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for DNS.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptEnableAscForRegistries",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Enable Azure Defender for container registries",
+                                "defaultValue": "Yes (recommended)",
+                                "toolTip": "If 'Yes' is selected, Azure Defender will be enabled for Azure Container Registries.",
+                                "visible": true,
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes (recommended)",
+                                            "value": "Standard"
+                                        },
+                                        {
+                                            "label": "No, Azure Defender Off",
+                                            "value": "Free"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "visible": true
+                    }
+                ]
+            },
+            {
+                "name": "step2",
+                "label": "Hub-spoke Topology",
+                "subLabel": {
+                    "preValidation": "Configure Hub-spoke topology",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Hub-spoke",
+                "elements": [
+                    {
+                        "name": "ptDeployHubSpoke",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Deploy Hub-spoke network topology",
+                        "defaultValue": "Yes (recommended)",
+                        "toolTip": "If 'Yes', ARM will deploy hub-spoke network topology to the subscription. If 'No', it will be skipped",
+                        "visible": true,
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes (recommended)",
+                                    "value": "Yes"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "No"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "ptDeploySpokes",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Deploy Spokes",
+                        "defaultValue": "Yes (recommended)",
+                        "toolTip": "If 'Yes', ARM will deploy spokes networks topology to the subscription. If 'No', it will be skipped",
+                        "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes (recommended)",
+                                    "value": "Yes"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "No"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "ptEnableDdoS",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Enables DDoS Protection plan",
+                        "defaultValue": "Yes (recommended)",
+                        "toolTip": "If 'Yes', DDoS Protection plan will be applied to spokes with ingress traffic. If 'No', it will be skipped",
+                        "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes (recommended)",
+                                    "value": "Yes"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "No"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sectionHub",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Hub",
+                        "elements": [
+                            {
+                                "name": "ptAddressPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Network Address Prefix",
+                                "toolTip": "IP address prefix for the hub network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "192.168.0.0/16",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForGw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for the gateway",
+                                "toolTip": "Subnet address prefix for the gateway for the hub network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "192.168.1.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAzFw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for Azure Firewall",
+                                "toolTip": "Subnet address prefix for Azure Firewall for the hub network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "192.168.2.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptAzFirewallZones",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Select Availability Zones for the Azure Firewall",
+                                "multiselect": true,
+                                "selectAll": true,
+                                "filter": true,
+                                "toolTip": "ARM will deploy Azure Firewall to the selected availability zones. Make sure the selected region supports the availabilities zones",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "None",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Zone 1",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "label": "Zone 2",
+                                            "value": "2"
+                                        },
+                                        {
+                                            "label": "Zone 3",
+                                            "value": "3"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForBastion",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for Azure Bastion",
+                                "toolTip": "Subnet address prefix for Azure Bastion for the hub network",
+                                "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]",
+                                "defaultValue": "192.168.3.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            }
+                        ],
+                        "visible": "[equals(steps('step2').ptDeployHubSpoke, 'Yes')]"
+                    },
+                    {
+                        "name": "sectionSpokeOne",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Spoke One",
+                        "elements": [
+                            {
+                                "name": "ptAddressPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Network Address Prefix",
+                                "toolTip": "IP address prefix for the spoke network",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'))]",
+                                "defaultValue": "10.1.0.0/16",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForWorkload",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for workload",
+                                "toolTip": "Subnet address prefix for spoke workload for the spoke network",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'))]",
+                                "defaultValue": "10.1.2.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptDeployAppGw",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Deploy application gateway",
+                                "defaultValue": "Yes",
+                                "toolTip": "If 'Yes', ARM will deploy an application gateway. If 'No', it will be skipped.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                },
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'))]"
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAppGw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for the application gateway",
+                                "toolTip": "Subnet address prefix for the application gateway for the spoke network",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'), equals(steps('step2').sectionSpokeOne.ptDeployAppGw, 'Yes'))]",
+                                "defaultValue": "10.1.1.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptAppGwZones",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Select Availability Zones for the Azure Application Gateway",
+                                "multiselect": true,
+                                "selectAll": true,
+                                "filter": true,
+                                "toolTip": "ARM will deploy Azure Application Gateway to the selected availability zones. Make sure the selected region supports the availabilities zones",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'), equals(steps('step2').sectionSpokeOne.ptDeployAppGw, 'Yes'))]",
+                                "defaultValue": "None",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Zone 1",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "label": "Zone 2",
+                                            "value": "2"
+                                        },
+                                        {
+                                            "label": "Zone 3",
+                                            "value": "3"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'))]"
+                    },
+                    {
+                        "name": "sectionSpokeTwo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Spoke Two",
+                        "elements": [
+                            {
+                                "name": "ptAddressPrefix",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Network Address Prefix",
+                                "toolTip": "IP address prefix for the spoke network",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'))]",
+                                "defaultValue": "10.2.0.0/16",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForWorkload",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for workload",
+                                "toolTip": "Subnet address prefix for spoke workload for the spoke network",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'))]",
+                                "defaultValue": "10.2.2.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptDeployAppGw",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Deploy application gateway",
+                                "defaultValue": "No",
+                                "toolTip": "If 'Yes', ARM will deploy an application gateway. If 'No', it will be skipped.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": "Yes"
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": "No"
+                                        }
+                                    ]
+                                },
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'))]"
+                            },
+                            {
+                                "name": "ptSubnetAddressPrefixForAppGw",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Subnet prefix for the application gateway",
+                                "toolTip": "Subnet address prefix for the application gateway for the spoke network",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'), equals(steps('step2').sectionSpokeTwo.ptDeployAppGw, 'Yes'))]",
+                                "defaultValue": "10.2.1.0/24",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$",
+                                    "validationMessage": "Please provide a valid IP address prefix"
+                                }
+                            },
+                            {
+                                "name": "ptAppGwZones",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Select Availability Zones for the Azure Application Gateway",
+                                "multiselect": true,
+                                "selectAll": true,
+                                "filter": true,
+                                "toolTip": "ARM will deploy Azure Application Gateway to the selected availability zones. Make sure the selected region supports the availabilities zones",
+                                "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'), equals(steps('step2').sectionSpokeTwo.ptDeployAppGw, 'Yes'))]",
+                                "defaultValue": "None",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Zone 1",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "label": "Zone 2",
+                                            "value": "2"
+                                        },
+                                        {
+                                            "label": "Zone 3",
+                                            "value": "3"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "visible": "[and(equals(steps('step2').ptDeployHubSpoke, 'Yes'), equals(steps('step2').ptDeploySpokes, 'Yes'))]"
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "deploymentPrefix": "[basics('ptDeploymentPrefix')]",
+            "emailSecurityContact": "[steps('step1').ptEmailSecurityContact]",
+            "enableCISInitiative": "[steps('step1').sectionCISInitiative.ptEnableCISInitiative]",
+            "retentionInDays": "[steps('step1').sectionLogAnalytics.ptRetentionInDays]",
+            "enableLogs": "[steps('step1').sectionLogAnalytics.ptEnableLogs]",
+            "enableAscForServers": "[steps('step1').sectionAzureDefender.ptEnableAscForServers]",
+            "enableAscForAppServices": "[steps('step1').sectionAzureDefender.ptEnableAscForAppServices]",
+            "enableAscForStorage": "[steps('step1').sectionAzureDefender.ptEnableAscForStorage]",
+            "enableAscForSql": "[steps('step1').sectionAzureDefender.ptEnableAscForSql]",
+            "enableAscForSqlOnVm": "[steps('step1').sectionAzureDefender.ptEnableAscForSqlOnVm]",
+            "enableAscForArm": "[steps('step1').sectionAzureDefender.ptEnableAscForArm]",
+            "enableAscForDns": "[steps('step1').sectionAzureDefender.ptEnableAscForDns]",
+            "enableAscForRegistries": "[steps('step1').sectionAzureDefender.ptEnableAscForRegistries]",
+            "deployHubSpokeTopology": "[steps('step2').ptDeployHubSpoke]",
+            "enableDdoS": "[steps('step2').ptEnableDdoS]",
+            "deploySpokes": "[steps('step2').ptDeploySpokes]",
+            "hubNetworkNetAddressPrefix": "[steps('step2').sectionHub.ptAddressPrefix]",
+            "hubSubnetAddressPrefixForGw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForGw]",
+            "hubSubnetAddressPrefixForAzFw": "[steps('step2').sectionHub.ptSubnetAddressPrefixForAzFw]",
+            "azFirewallZones": "[steps('step2').sectionHub.ptAzFirewallZones]",
+            "hubSubnetAddressPrefixForBastion": "[steps('step2').sectionHub.ptSubnetAddressPrefixForBastion]",
+            "spokeOneAddressPrefix": "[steps('step2').sectionSpokeOne.ptAddressPrefix]",
+            "spokeOneSubnetAddressPrefixForWorkload": "[steps('step2').sectionSpokeOne.ptSubnetAddressPrefixForWorkload]",
+            "spokeOneDeployAppGw": "[steps('step2').sectionSpokeOne.ptDeployAppGw]",
+            "spokeOneSubnetAddressPrefixForAppGw": "[steps('step2').sectionSpokeOne.ptSubnetAddressPrefixForAppGw]",
+            "spokeOneAppGwZones": "[steps('step2').sectionSpokeOne.ptAppGwZones]",
+            "spokeTwoAddressPrefix": "[steps('step2').sectionSpokeTwo.ptAddressPrefix]",
+            "spokeTwoSubnetAddressPrefixForWorkload": "[steps('step2').sectionSpokeTwo.ptSubnetAddressPrefixForWorkload]",
+            "spokeTwoDeployAppGw": "[steps('step2').sectionSpokeTwo.ptDeployAppGw]",
+            "spokeTwoSubnetAddressPrefixForAppGw": "[steps('step2').sectionSpokeTwo.ptSubnetAddressPrefixForAppGw]",
+            "spokeTwoAppGwZones": "[steps('step2').sectionSpokeTwo.ptAppGwZones]"
+        }
+    }
+}

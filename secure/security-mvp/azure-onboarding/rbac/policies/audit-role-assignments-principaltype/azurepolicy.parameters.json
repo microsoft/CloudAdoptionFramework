@@ -1,0 +1,15 @@
+{
+    "principalType":{
+       "type":"String",
+       "metadata":{
+          "description":"Which principalType to audit against e.g. 'User, Group, ServicePrincipal'",
+          "displayName":"principalType"
+       },
+       "allowedValues":[
+          "User",
+          "Group",
+          "ServicePrincipal"
+       ],
+       "defaultValue":"User"
+    }
+}

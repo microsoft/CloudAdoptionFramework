@@ -1,0 +1,564 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentPrefix": {
+            "type": "string",
+            "maxLength": 10,
+            "metadata": {
+                "displayName": "Deployment prefix",
+                "description": "Provide a prefix (max 10 characters, unique at tenant-scope) for subscription resources created as part of this deploy."
+            },
+            "defaultValue": "cafsecure"
+        },
+        "workspaceId": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Log Analytics workspace id"
+            }
+        },
+        "enableLogs": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enable logs",
+                "description": "If 'Yes', ARM will enable logs stream to the log analytics workspace. If 'No', they will be disabled"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "enableDdoS": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enables DDoS Protection plan",
+                "description": "If 'Yes', DDoS Protection plan will be applied to spokes with ingress traffic. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "hubNetworkNetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the hub network"
+            },
+            "defaultValue": "192.168.0.0/16"
+        },
+        "subnetAddressPrefixForGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the gateway"
+            },
+            "defaultValue": "192.168.1.0/24"
+        },
+        "subnetAddressPrefixForAzFw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Firewall"
+            },
+            "defaultValue": "192.168.2.0/24"
+        },
+        "subnetAddressPrefixForBastion": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Bastion"
+            },
+            "defaultValue": "192.168.3.0/24"
+        },
+        "azFirewallZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Firewall"
+            },
+            "defaultValue": []
+        }
+    },
+    "variables": {
+        "deploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-hubs')]",
+        "resourceGroupName": "[concat('rg-', parameters('deploymentPrefix'), '-networking-hubs')]"
+    },
+    "resources": [
+
+        // Creates the resource group
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2019-10-01",
+            "location": "[deployment().location]",
+            "name": "[variables('resourceGroupName')]",
+            "properties": {}
+        },
+
+        // Deploys connectivity resources
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentName')]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "dependsOn": [
+                "[subscriptionResourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "deploymentPrefix": {
+                            "type": "string"
+                        },
+                        "workspaceId": {
+                            "type": "string"
+                        },
+                        "enableLogs": {
+                            "type": "bool"
+                        },
+                        "enableDdoS": {
+                            "type": "bool"
+                        },
+                        "hubNetworkNetAddressPrefix": {
+                            "type": "string"
+                        },
+                        "subnetAddressPrefixForGw": {
+                            "type": "string"
+                        },
+                        "subnetAddressPrefixForAzFw": {
+                            "type": "string"
+                        },
+                        "subnetAddressPrefixForBastion": {
+                            "type": "string"
+                        },
+                        "azFirewallZones": {
+                            "type": "array"
+                        }
+                    },
+                    "variables": {
+                        "bastionNsgName": "[concat('nsg-', parameters('deploymentPrefix'), '-bastion')]",
+                        "hubNetworkName": "[concat('vnet-', parameters('deploymentPrefix'), '-hub')]",
+                        "dDoSName": "[concat('ddos-', parameters('deploymentPrefix'))]",
+                        "azFwName": "[concat('fw-', parameters('deploymentPrefix'))]",
+                        "azFwIpOneName": "[concat(variables('azFwName'), '-pip-one')]",
+                        "azFwIpTwoName": "[concat(variables('azFwName'), '-pip-two')]",
+                        "azFwIpThreeName": "[concat(variables('azFwName'), '-pip-three')]",
+                        "azFwPolicyName": "[concat(variables('azFwName'), '-policy')]",
+                        "ddosProtectionPlanId": {
+                            "id": "[resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName'))]"
+                        }
+                    },
+                    "resources": [
+                        // Deploy DDoS Protection plan
+                        {
+                            "condition": "[parameters('enableDdoS')]",
+                            "type": "Microsoft.Network/ddosProtectionPlans",
+                            "apiVersion": "2019-02-01",
+                            "name": "[variables('dDoSName')]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {}
+                        },
+
+                        // Network Security Group for Bastion
+                        {
+                            "type": "Microsoft.Network/networkSecurityGroups",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('bastionNsgName')]",
+                            "location": "[resourceGroup().location]",
+                            "comments": "Wraps the AzureBastion subnet in this regional hub. Source: https://docs.microsoft.com/azure/bastion/bastion-nsg",
+                            "properties": {
+                                "securityRules": [
+                                    {
+                                        "name": "AllowWebExperienceInBound",
+                                        "properties": {
+                                            "description": "Allow our users in. Update this to be as restrictive as possible.",
+                                            "protocol": "Tcp",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "Internet",
+                                            "destinationPortRange": "443",
+                                            "destinationAddressPrefix": "*",
+                                            "access": "Allow",
+                                            "priority": 100,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowControlPlaneInBound",
+                                        "properties": {
+                                            "description": "Service Requirement. Allow control plane access. Regional Tag not yet supported.",
+                                            "protocol": "Tcp",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "GatewayManager",
+                                            "destinationPortRange": "443",
+                                            "destinationAddressPrefix": "*",
+                                            "access": "Allow",
+                                            "priority": 110,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowHealthProbesInBound",
+                                        "properties": {
+                                            "description": "Service Requirement. Allow Health Probes.",
+                                            "protocol": "Tcp",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "AzureLoadBalancer",
+                                            "destinationPortRange": "443",
+                                            "destinationAddressPrefix": "*",
+                                            "access": "Allow",
+                                            "priority": 120,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowBastionHostToHostInBound",
+                                        "properties": {
+                                            "description": "Service Requirement. Allow Required Host to Host Communication.",
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "VirtualNetwork",
+                                            "destinationPortRanges": [
+                                                "8080",
+                                                "5701"
+                                            ],
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "access": "Allow",
+                                            "priority": 130,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "DenyAllInBound",
+                                        "properties": {
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "access": "Deny",
+                                            "priority": 1000,
+                                            "direction": "Inbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowSshToVnetOutBound",
+                                        "properties": {
+                                            "description": "Allow SSH out to the VNet",
+                                            "protocol": "Tcp",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "22",
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "access": "Allow",
+                                            "priority": 100,
+                                            "direction": "Outbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowRdpToVnetOutBound",
+                                        "properties": {
+                                            "protocol": "Tcp",
+                                            "description": "Unused in this RI, but required for ARM validation.",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "3389",
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "access": "Allow",
+                                            "priority": 110,
+                                            "direction": "Outbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowControlPlaneOutBound",
+                                        "properties": {
+                                            "description": "Required for control plane outbound. Regional prefix not yet supported",
+                                            "protocol": "Tcp",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "443",
+                                            "destinationAddressPrefix": "AzureCloud",
+                                            "access": "Allow",
+                                            "priority": 120,
+                                            "direction": "Outbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowBastionHostToHostOutBound",
+                                        "properties": {
+                                            "description": "Service Requirement. Allow Required Host to Host Communication.",
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "VirtualNetwork",
+                                            "destinationPortRanges": [
+                                                "8080",
+                                                "5701"
+                                            ],
+                                            "destinationAddressPrefix": "VirtualNetwork",
+                                            "access": "Allow",
+                                            "priority": 130,
+                                            "direction": "Outbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "AllowBastionCertificateValidationOutBound",
+                                        "properties": {
+                                            "description": "Service Requirement. Allow Required Session and Certificate Validation.",
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "80",
+                                            "destinationAddressPrefix": "Internet",
+                                            "access": "Allow",
+                                            "priority": 140,
+                                            "direction": "Outbound"
+                                        }
+                                    },
+                                    {
+                                        "name": "DenyAllOutBound",
+                                        "properties": {
+                                            "protocol": "*",
+                                            "sourcePortRange": "*",
+                                            "sourceAddressPrefix": "*",
+                                            "destinationPortRange": "*",
+                                            "destinationAddressPrefix": "*",
+                                            "access": "Deny",
+                                            "priority": 1000,
+                                            "direction": "Outbound"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+
+                        // Hub virtual network
+                        {
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2020-05-01",
+                            "name": "[variables('hubNetworkName')]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('bastionNsgName'))]",
+                                "[resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName'))]"
+                            ],
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": [
+                                        "[parameters('hubNetworkNetAddressPrefix')]"
+                                    ]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "GatewaySubnet",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('subnetAddressPrefixForGw')]"
+                                        }
+                                    },
+                                    {
+                                        "name": "AzureFirewallSubnet",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('subnetAddressPrefixForAzFw')]"
+                                        }
+                                    },
+                                    {
+                                        "name": "BastionSubnet",
+                                        "properties": {
+                                            "addressPrefix": "[parameters('subnetAddressPrefixForBastion')]",
+                                            "networkSecurityGroup": {
+                                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('bastionNsgName'))]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "enableDdosProtection": "[parameters('enableDdoS')]",
+                                "ddosProtectionPlan": "[if(parameters('enableDdoS'), variables('ddosProtectionPlanId'), null())]"
+                            }
+                        },
+
+                        // Azure Firewall Public IPs
+                        {
+                            "apiVersion": "2020-05-01",
+                            "type": "Microsoft.Network/publicIpAddresses",
+                            "name": "[variables('azFwIpOneName')]",
+                            "location": "[resourceGroup().location]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            }
+                        },
+                        {
+                            "apiVersion": "2020-05-01",
+                            "type": "Microsoft.Network/publicIpAddresses",
+                            "name": "[variables('azFwIpTwoName')]",
+                            "location": "[resourceGroup().location]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            }
+                        },
+                        {
+                            "apiVersion": "2020-05-01",
+                            "type": "Microsoft.Network/publicIpAddresses",
+                            "name": "[variables('azFwIpThreeName')]",
+                            "location": "[resourceGroup().location]",
+                            "sku": {
+                                "name": "Standard"
+                            },
+                            "properties": {
+                                "publicIPAllocationMethod": "Static"
+                            }
+                        },
+
+                        // Azure Firewall Policy
+                        {
+                            "type": "Microsoft.Network/firewallPolicies",
+                            "apiVersion": "2020-11-01",
+                            "name": "[variables('azFwPolicyName')]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                            }
+                        },
+
+                        // Azure Firewall
+                        {
+                            "apiVersion": "2020-05-01",
+                            "type": "Microsoft.Network/azureFirewalls",
+                            "name": "[variables('azfwname')]",
+                            "location": "[resourceGroup().location]",
+                            "zones": "[if(not(empty(parameters('azFirewallZones'))), parameters('azFirewallZones'), null())]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/firewallPolicies', variables('azFwPolicyName'))]",
+                                "[resourceId('Microsoft.Network/publicIpAddresses', variables('azFwIpOneName'))]",
+                                "[resourceId('Microsoft.Network/publicIpAddresses', variables('azFwIpTwoName'))]",
+                                "[resourceId('Microsoft.Network/publicIpAddresses', variables('azFwIpThreeName'))]",
+                                "[resourceId('Microsoft.Network/virtualNetworks', variables('hubNetworkName'))]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "[variables('azFwIpOneName')]",
+                                        "properties": {
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses/', variables('azFwIpOneName'))]"
+                                            },
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('hubNetworkName'), 'AzureFirewallSubnet')]"
+                                            }
+                                        }
+                                    },
+                                                                        {
+                                        "name": "[variables('azFwIpTwoName')]",
+                                        "properties": {
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses/', variables('azFwIpTwoName'))]"
+                                            }
+                                        }
+                                    },
+                                                                        {
+                                        "name": "[variables('azFwIpThreeName')]",
+                                        "properties": {
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIpAddresses/', variables('azFwIpThreeName'))]"
+                                            }
+                                        }
+                                    }
+                                ],
+                                "firewallPolicy": {
+                                    "id": "[resourceId('Microsoft.Network/firewallPolicies/', variables('azFwPolicyName'))]"
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/azureFirewalls/providers/diagnosticSettings",
+                            "apiVersion": "2017-05-01-preview",
+                            "name": "[concat(variables('azfwname'), '/Microsoft.Insights/default')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Network/azureFirewalls', variables('azFwName'))]"
+                            ],
+                            "properties": {
+                                "workspaceId": "[parameters('workspaceId')]",
+                                "logs": [
+                                    {
+                                        "category": "AzureFirewallApplicationRule",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    },
+                                    {
+                                        "category": "AzureFirewallNetworkRule",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    },
+                                    {
+                                        "category": "AzureFirewallDnsProxy",
+                                        "enabled": "[parameters('enableLogs')]"
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "hubNetworkId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Network/virtualNetworks', variables('hubNetworkName'))]"
+                        },
+                        "dDosId": {
+                            "type": "string",
+                            "value": "[if(parameters('enableDdoS'), resourceId('Microsoft.Network/ddosProtectionPlans', variables('dDoSName')), '')]"
+                        },
+                        "azFirewallId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Network/azureFirewalls', variables('azFwName'))]"
+                        }
+                    }
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "workspaceId": {
+                        "value": "[parameters('workspaceId')]"
+                    },
+                    "enableLogs": {
+                        "value": "[equals(parameters('enableLogs'), 'Yes')]"
+                    },
+                    "enableDdoS": {
+                        "value": "[equals(parameters('enableDdoS'), 'Yes')]"
+                    },
+                    "hubNetworkNetAddressPrefix": {
+                        "value": "[parameters('hubNetworkNetAddressPrefix')]"
+                    },
+                    "subnetAddressPrefixForAzFw": {
+                        "value": "[parameters('subnetAddressPrefixForAzFw')]"
+                    },
+                    "subnetAddressPrefixForBastion": {
+                        "value": "[parameters('subnetAddressPrefixForBastion')]"
+                    },
+                    "subnetAddressPrefixForGw": {
+                        "value": "[parameters('subnetAddressPrefixForGw')]"
+                    },
+                    "azFirewallZones": {
+                        "value": "[parameters('azFirewallZones')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "hubNetworkId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.hubNetworkId.value]"
+        },
+        "dDosId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.dDosId.value]"
+        },
+        "azFirewallId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.azFirewallId.value]"
+        }
+    }
+}

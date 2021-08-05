@@ -1,0 +1,345 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentPrefix": {
+            "type": "string",
+            "maxLength": 10,
+            "metadata": {
+                "displayName": "Deployment prefix",
+                "description": "Provide a prefix (max 10 characters, unique at tenant-scope) for subscription resources created as part of this deploy."
+            },
+            "defaultValue": "cafsecure"
+        },
+        "deploySpokes": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy spokes network topology",
+                "description": "If 'Yes', ARM will deploy spokes network topology to the subscription. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "enableDdoS": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enables DDoS Protection plan",
+                "description": "If 'Yes', ARM will deploy DDoS Protection plan. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "workspaceId": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Log Analytics workspace id"
+            }
+        },
+        "enableLogs": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Enable logs",
+                "description": "If 'Yes', ARM will enable logs stream to the log analytics workspace. If 'No', they will be disabled"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "hubNetworkNetAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the hub network"
+            },
+            "defaultValue": "192.168.0.0/16"
+        },
+        "hubSubnetAddressPrefixForGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the gateway for hub"
+            },
+            "defaultValue": "192.168.1.0/24"
+        },
+        "hubSubnetAddressPrefixForAzFw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Firewall for hub"
+            },
+            "defaultValue": "192.168.2.0/24"
+        },
+        "hubSubnetAddressPrefixForBastion": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for Azure Bastion for hub."
+            },
+            "defaultValue": "192.168.3.0/24"
+        },
+        "spokeOneAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the spoke one network"
+            },
+            "defaultValue": "10.1.0.0/16"
+        },
+        "spokeOneSubnetAddressPrefixForWorkload": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the workload for spoke one"
+            },
+            "defaultValue": "10.1.2.0/24"
+        },
+        "spokeOneDeployAppGw": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy application gateway in spoke one",
+                "description": "If 'Yes', ARM will deploy an application gateway in spoke one. If 'No', it will be skipped"
+            },
+            "defaultValue": "Yes",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "spokeOneSubnetAddressPrefixForAppGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway for spoke one"
+            },
+            "defaultValue": "10.1.1.0/24"
+        },
+        "spokeOneAppGwZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Application Gateway for spoke one"
+            },
+            "defaultValue": []
+        },
+        "spokeTwoAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "IP address prefix for the spoke two network"
+            },
+            "defaultValue": "10.2.0.0/16"
+        },
+        "spokeTwoSubnetAddressPrefixForWorkload": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the workload for spoke two"
+            },
+            "defaultValue": "10.2.2.0/24"
+        },
+        "spokeTwoDeployAppGw": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Deploy application gateway in spoke two",
+                "description": "If 'Yes', ARM will deploy an application gateway in spoke two. If 'No', it will be skipped"
+            },
+            "defaultValue": "No",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ]
+        },
+        "spokeTwoSubnetAddressPrefixForAppGw": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Subnet prefix for the application gateway for spoke two"
+            },
+            "defaultValue": "10.2.1.0/24"
+        },
+        "spokeTwoAppGwZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Application Gateway for spoke two"
+            },
+            "defaultValue": []
+        },
+        "azFirewallZones": {
+            "type": "array",
+            "metadata": {
+                "displayName": "Availability Zones for the Azure Firewall"
+            },
+            "defaultValue": []
+        },
+        "templateRootUri": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Root URI for auxiliary arm templates"
+            },
+            "defaultValue": "[deployment().properties.templateLink.uri]"
+        }
+    },
+    "variables": {
+        "deploymentUris": {
+            "hub": "[uri(parameters('templateRootUri'), 'auxiliary/caf-secure-networking-hub.json')]",
+            "spoke": "[uri(parameters('templateRootUri'), 'auxiliary/caf-secure-networking-spoke.json')]"
+        },
+        "hubNameSuffix": "[replace(split(parameters('hubNetworkNetAddressPrefix'), '/')[0],'.', '_')]",
+        "hubDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-hubs-', variables('hubNameSuffix'))]",
+        "spokeOneNameSuffix": "[replace(split(parameters('spokeOneAddressPrefix'), '/')[0],'.', '_')]",
+        "spokeOneDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-spokes-', variables('spokeOneNameSuffix'))]",
+        "spokeTwoNameSuffix": "[replace(split(parameters('spokeTwoAddressPrefix'), '/')[0],'.', '_')]",
+        "spokeTwoDeploymentName": "[concat('deploy-', parameters('deploymentPrefix'), '-networking-spokes-', variables('spokeTwoNameSuffix'))]"
+    },
+    "resources": [
+
+        // Deploy Hub
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('hubDeploymentName')]",
+            "location": "[deployment().location]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deploymentUris').hub]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "enableDdoS": {
+                        "value": "[parameters('enableDdoS')]"
+                    },
+                    "workspaceId": {
+                        "value": "[parameters('workspaceId')]"
+                    },
+                    "enableLogs": {
+                        "value": "[parameters('enableLogs')]"
+                    },
+                    "hubNetworkNetAddressPrefix": {
+                        "value": "[parameters('hubNetworkNetAddressPrefix')]"
+                    },
+                    "subnetAddressPrefixForGw": {
+                        "value": "[parameters('hubSubnetAddressPrefixForGw')]"
+                    },
+                    "subnetAddressPrefixForAzFw": {
+                        "value": "[parameters('hubSubnetAddressPrefixForAzFw')]"
+                    },
+                    "subnetAddressPrefixForBastion": {
+                        "value": "[parameters('hubSubnetAddressPrefixForBastion')]"
+                    },
+                    "azFirewallZones": {
+                        "value": "[parameters('azFirewallZones')]"
+                    }
+                }
+            }
+        },
+
+        // Deploy Spoke One
+        {
+            "condition": "[equals(parameters('deploySpokes'), 'Yes')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('spokeOneDeploymentName')]",
+            "location": "[deployment().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', variables('hubDeploymentName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deploymentUris').spoke]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "workspaceId": {
+                        "value": "[parameters('workspaceId')]"
+                    },
+                    "enableLogs": {
+                        "value": "[parameters('enableLogs')]"
+                    },
+                    "hubNetworkId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.hubNetworkId.value]"
+                    },
+                    "azFirewallId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.azFirewallId.value]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('spokeOneAddressPrefix')]"
+                    },
+                    "subnetAddressPrefixForWorkload": {
+                        "value": "[parameters('spokeOneSubnetAddressPrefixForWorkload')]"
+                    },
+                    "DdoSId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.DdoSId.value]"
+                    },
+                    "deployAppGw": {
+                        "value": "[parameters('spokeOneDeployAppGw')]"
+                    },
+                    "subnetAddressPrefixForAppGw": {
+                        "value": "[parameters('spokeOneSubnetAddressPrefixForAppGw')]"
+                    },
+                    "appGwZones": {
+                        "value": "[parameters('spokeOneAppGwZones')]"
+                    }
+                }
+            }
+        },
+
+        // Deploy Spoke Two
+        {
+            "condition": "[equals(parameters('deploySpokes'), 'Yes')]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('spokeTwoDeploymentName')]",
+            "location": "[deployment().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', variables('spokeOneDeploymentName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deploymentUris').spoke]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[parameters('deploymentPrefix')]"
+                    },
+                    "workspaceId": {
+                        "value": "[parameters('workspaceId')]"
+                    },
+                    "enableLogs": {
+                        "value": "[parameters('enableLogs')]"
+                    },
+                    "hubNetworkId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.hubNetworkId.value]"
+                    },
+                    "azFirewallId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.azFirewallId.value]"
+                    },
+                    "addressPrefix": {
+                        "value": "[parameters('spokeTwoAddressPrefix')]"
+                    },
+                    "subnetAddressPrefixForWorkload": {
+                        "value": "[parameters('spokeTwoSubnetAddressPrefixForWorkload')]"
+                    },
+                    "DdoSId": {
+                        "value": "[reference(variables('hubDeploymentName')).outputs.DdoSId.value]"
+                    },
+                    "deployAppGw": {
+                        "value": "[parameters('spokeTwoDeployAppGw')]"
+                    },
+                    "subnetAddressPrefixForAppGw": {
+                        "value": "[parameters('spokeTwoSubnetAddressPrefixForAppGw')]"
+                    },
+                    "appGwZones": {
+                        "value": "[parameters('spokeTwoAppGwZones')]"
+                    }
+                }
+            }
+        }
+    ]
+}
