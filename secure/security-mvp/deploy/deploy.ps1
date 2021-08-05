@@ -1,4 +1,4 @@
-$templateRootUri="https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/main/secure/security-mvp/deploy"
+$templateRootUri="https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/secure/security-mvp/deploy"
 
 # Login
 $tenant_id = Read-Host "Enter the tenant id"

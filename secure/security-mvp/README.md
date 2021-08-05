@@ -65,7 +65,7 @@ Azure Onboarding is implemented using a single deployment script that will creat
 
 Use the following link to deploy it to a greenfield subscription:
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fsecure%2Fsecurity-mvp%2Fdeploy%2Fcaf-secure-deploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fsecure%2Fsecurity-mvp%2Fdeploy%2Fcaf-secure-ui.json)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#blade/Microsoft_Azure_CreateUIDef/CustomDeploymentBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmaster%2Fsecure%2Fsecurity-mvp%2Fdeploy%2Fcaf-secure-deploy.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmaster%2Fsecure%2Fsecurity-mvp%2Fdeploy%2Fcaf-secure-ui.json)
 
 ### Log Analytics Workspace
 
