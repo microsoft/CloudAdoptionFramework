@@ -1,0 +1,64 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Deployment prefix",
+                "description": "Provide a prefix (unique at tenant-scope) for subscription resources created as part of this deploy."
+            },
+            "defaultValue": "contoso-sharedsvcs"
+        },
+        "dataRetention": {
+            "type": "int",
+            "minValue": 0,
+            "maxValue": 365,
+            "metadata": {
+                "displayName": "Log retention in days",
+                "description": "Number of days data will be retained for"
+            },
+            "defaultValue": 365
+        }
+    },
+    "variables": {
+        "workspaceName": "[concat('log-', parameters('deploymentPrefix'))]"
+    },
+    "resources": [
+
+        {
+            "apiVersion": "2020-08-01",
+            "location": "[resourceGroup().location]",
+            "name": "[variables('workspaceName')]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "tags": {
+                "displayName": "Log Analytics"
+            },
+            "properties": {
+                "sku": {
+                    "name": "pergb2018"
+                },
+                "dataRetention": "[parameters('dataRetention')]"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/locks",
+            "apiVersion": "2016-09-01",
+            "name": "logAnalyticsDoNotDelete",
+            "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]"
+            ],
+            "scope": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]",
+            "properties": {
+                "level": "CanNotDelete",
+                "notes": "Prevent deletion of the log analytics workspace"
+            }
+        }
+    ],
+    "outputs": {
+        "workspaceId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]"
+        }
+    }
+}

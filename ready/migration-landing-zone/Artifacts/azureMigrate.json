@@ -1,0 +1,98 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "organization": {
+            "type": "string",
+            "metadata": {
+                "description": "Organization name. For example: contoso"
+            },
+            "defaultValue": "contoso"
+        }
+    },
+    "variables": {
+        "deploymentPrefix": "[concat(parameters('organization'), '-migrate')]",
+        "resourceGroupName": "[concat('rg-', variables('deploymentPrefix'))]",
+        "deploymentName": "[concat('deploy-', variables('deploymentPrefix'))]"
+    },
+    "resources": [
+        // Creates the resource group
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('resourceGroupName')]",
+            "location": "[deployment().location]",
+            "properties": {}
+        },
+
+        // Deploy azure migrate
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentName')]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "dependsOn": [
+                "[subscriptionResourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "deploymentPrefix": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "azureMigrateName": "[concat('migrate-', parameters('deploymentPrefix'))]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Migrate/projects",
+                            "apiVersion": "2018-02-02",
+                            "name": "[variables('azureMigrateName')]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {},
+                            "dependsOn": [],
+                            "comments": "Azure Migration project."
+                        },
+                        {
+                            "type": "Microsoft.Authorization/locks",
+                            "apiVersion": "2016-09-01",
+                            "name": "azureMigrateDoNotDelete",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Migrate/projects', variables('azureMigrateName'))]"
+                            ],
+                            "scope": "[resourceId('Microsoft.Migrate/projects', variables('azureMigrateName'))]",
+                            "properties": {
+                                "level": "CanNotDelete",
+                                "notes": "Prevent deletion of the azure migrate project"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "azureMigrateId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Migrate/projects', variables('azureMigrateName'))]"
+                        }
+                    }
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[variables('deploymentPrefix')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "azureMigrateId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.azureMigrateId.value]"
+        }
+    }
+}

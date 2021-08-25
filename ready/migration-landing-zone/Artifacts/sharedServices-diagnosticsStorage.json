@@ -1,0 +1,67 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentPrefix": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Deployment prefix",
+                "description": "Provide a prefix (unique at tenant-scope) for subscription resources created as part of this deploy."
+            },
+            "defaultValue": "contoso-sharedsvcs"
+        }
+    },
+    "variables": {
+        "uniqueString": "[uniqueString(subscription().id, parameters('deploymentPrefix'))]",
+        "storageAccountPrefix": "[concat('sto', replace(parameters('deploymentPrefix'), '-', ''))]",
+        "storageAccountName": "[toLower(substring(replace(concat(variables('storageAccountPrefix'), variables('uniqueString'), variables('uniqueString')), '-', ''), 0, 23))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "2021-02-01",
+            "location": "[resourceGroup().location]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "tags": {
+                "displayName": "Storage Account"
+            },
+            "properties": {
+                "encryption": {
+                    "keySource": "Microsoft.Storage",
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true
+                        }
+                    }
+                },
+                "supportsHttpsTrafficOnly": true
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/locks",
+            "apiVersion": "2016-09-01",
+            "name": "storageDoNotDelete",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+            "properties": {
+                "level": "CanNotDelete",
+                "notes": "Prevent deletion of the storage account"
+            }
+        }
+    ],
+    "outputs": {
+        "storageAccountId": {
+            "type": "string",
+            "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        }
+    }
+}

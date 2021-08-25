@@ -1,0 +1,147 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "organization": {
+            "type": "string",
+            "metadata": {
+                "description": "Organization name. For example: contoso"
+            },
+            "defaultValue": "contoso"
+        },
+        "logDataRetention": {
+            "type": "int",
+            "minValue": 0,
+            "maxValue": 365,
+            "metadata": {
+                "displayName": "Log retention in days",
+                "description": "Number of days data will be retained for"
+            },
+            "defaultValue": 365
+        },
+        "keyVaultObjectId": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the object ID of a user, service principal or security group in the Azure Active Directory tenant to grant permissions in Key Vault."
+            }
+        },
+        "networkIPAddressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide first 2 octets for the network. For example: 10.0"
+            },
+            "defaultValue": "10.0"
+        },
+        "templateRootUri": {
+            "type": "string",
+            "metadata": {
+                "displayName": "Root URI for artifacts arm templates"
+            },
+            "defaultValue": "[deployment().properties.templateLink.uri]"
+        }
+    },
+    "variables": {
+        "deploymentPrefix": "[concat(parameters('organization'), '-caf')]",
+        "deploymentUris": {
+            "sharedServices": "[uri(parameters('templateRootUri'), 'Artifacts/sharedServices.json')]",
+            "vnet": "[uri(parameters('templateRootUri'), 'Artifacts/vnet.json')]",
+            "azureMigrate": "[uri(parameters('templateRootUri'), 'Artifacts/azureMigrate.json')]",
+            "azureSiteRecovery": "[uri(parameters('templateRootUri'), 'Artifacts/azureSiteRecovery.json')]"
+        },
+        "deploymentNames": {
+            "sharedServices": "[concat('deploy-', variables('deploymentPrefix'), '-shared')]",
+            "vnet": "[concat('deploy-', variables('deploymentPrefix'), '-vnet')]",
+            "azureMigrate": "[concat('deploy-', variables('deploymentPrefix'), '-migrate')]",
+            "azureSiteRecovery": "[concat('deploy-', variables('deploymentPrefix'), '-asr')]"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentNames').sharedServices]",
+            "location": "[deployment().location]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deploymentUris').sharedServices]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "organization": {
+                        "value": "[parameters('organization')]"
+                    },
+                    "logDataRetention": {
+                        "value": "[parameters('logDataRetention')]"
+                    },
+                    "keyVaultObjectId": {
+                        "value": "[parameters('keyVaultObjectId')]"
+                    },
+                    "templateRootUri": {
+                        "value": "[parameters('templateRootUri')]"
+                    }
+                }
+            }
+        },
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentNames').vnet]",
+            "location": "[deployment().location]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deploymentUris').vnet]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "organization": {
+                        "value": "[parameters('organization')]"
+                    },
+                    "networkIPAddressPrefix": {
+                        "value": "[parameters('networkIPAddressPrefix')]"
+                    }
+                }
+            }
+        },
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentNames').azureMigrate]",
+            "location": "[deployment().location]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deploymentUris').azureMigrate]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "organization": {
+                        "value": "[parameters('organization')]"
+                    }
+                }
+            }
+        },
+
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentNames').azureSiteRecovery]",
+            "location": "[deployment().location]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('deploymentUris').azureSiteRecovery]",
+                    "contentVersion":"1.0.0.0"
+                },
+                "parameters": {
+                    "organization": {
+                        "value": "[parameters('organization')]"
+                    }
+                }
+            }
+        }
+    ]
+}

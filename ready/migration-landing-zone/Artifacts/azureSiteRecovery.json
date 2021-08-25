@@ -1,0 +1,100 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "organization": {
+            "type": "string",
+            "metadata": {
+                "description": "Organization name. For example: contoso"
+            },
+            "defaultValue": "contoso"
+        }
+    },
+    "variables": {
+        "deploymentPrefix": "[concat(parameters('organization'), '-asr')]",
+        "resourceGroupName": "[concat('rg-', variables('deploymentPrefix'))]",
+        "deploymentName": "[concat('deploy-', variables('deploymentPrefix'))]"
+    },
+    "resources": [
+        // Creates the resource group
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('resourceGroupName')]",
+            "location": "[deployment().location]",
+            "properties": {}
+        },
+
+        // Deploy azure recovery services
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-10-01",
+            "name": "[variables('deploymentName')]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "dependsOn": [
+                "[subscriptionResourceId('Microsoft.Resources/resourceGroups/', variables('resourceGroupName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "deploymentPrefix": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "vaultName": "[concat('asr-', parameters('deploymentPrefix'))]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.RecoveryServices/vaults",
+                            "apiVersion": "2016-06-01",
+                            "name": "[variables('vaultName')]",
+                            "location": "[resourceGroup().location]",
+                            "sku": {
+                                "name": "RS0",
+                                "tier": "Standard"
+                            },
+                            "properties": {}
+                        },
+                        {
+                            "type": "Microsoft.Authorization/locks",
+                            "apiVersion": "2016-09-01",
+                            "name": "ASRVaultDoNotDelete",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+                            ],
+                            "scope": "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]",
+                            "properties": {
+                                "level": "CanNotDelete",
+                                "notes": "Prevent deletion of the azure recovery services vault"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "azureRecoveryServicesVaultId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.RecoveryServices/vaults', variables('vaultName'))]"
+                        }
+                    }
+                },
+                "parameters": {
+                    "deploymentPrefix": {
+                        "value": "[variables('deploymentPrefix')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "azureRecoveryServicesVaultId": {
+            "type": "string",
+            "value": "[reference(variables('deploymentName')).outputs.azureRecoveryServicesVaultId.value]"
+        }
+    }
+}

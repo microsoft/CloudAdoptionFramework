@@ -1,0 +1,85 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            {
+                "name": "section1",
+                "type": "Microsoft.Common.Section",
+                "label": "Cloud Adoption Framework - Migration Landing Zone",
+                "elements": [
+					{
+						"name": "infoBox1",
+						"type": "Microsoft.Common.InfoBox",
+						"visible": true,
+						"options": {
+							"icon": "Info",
+							"text": "The Microsoft Cloud Adoption Framework for Azure (CAF) Migration landing zone is a set of infrastructure to help you set up for migrating your first workload and manage your cloud estate in alignment with CAF.",
+							"uri": "https://github.com/microsoft/CloudAdoptionFramework/tree/master/ready/migration-landing-zone"
+						}
+					}
+                ],
+                "visible": true
+            },
+
+            {
+                "name": "ptOrganization",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Organization",
+                "toolTip": "Organization name. For example: contoso",
+                "defaultValue": "contoso",
+                "constraints": {
+                    "required": true
+                }
+            },
+            {
+                "name": "ptLogDataRetention",
+                "type": "Microsoft.Common.Slider",
+                "min": 0,
+                "max": 365,
+                "defaultValue": 365,
+                "label": "Log Analytics Data Retention (days)",
+                "subLabel": "Days",
+                "showStepMarkers": false,
+                "toolTip": "Select retention days for Azure logs. Default is 365 days.",
+                "constraints": {
+                    "required": false
+                },
+                "visible": true
+            },
+            {
+                "name": "ptKeyVaultObjectId",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Object Id",
+                "toolTip": "Specifies the object ID of a user, service principal or security group in the Azure Active Directory tenant to grant permissions in Key Vault",
+                "constraints": {
+                    "required": true
+                },
+                "visible": true
+            },
+            {
+                "name": "ptNetworkIPAddressPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Network Address Prefix",
+                "toolTip": "Provide first 2 octets for the network. For example: 10.0",
+                "defaultValue": "10.0",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+                    "validationMessage": "Please provide a valid IP address prefix"
+                },
+                "visible": true
+            }
+        ],
+        "steps": [],
+        "outputs": {
+            "organization": "[basics('ptOrganization')]",
+            "logDataRetention": "[basics('ptLogDataRetention')]",
+            "keyVaultObjectId": "[basics('ptKeyVaultObjectId')]",
+            "networkIPAddressPrefix": "[basics('ptNetworkIPAddressPrefix')]"
+        }
+    }
+}
+
+
