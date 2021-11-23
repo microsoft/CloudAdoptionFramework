@@ -2,7 +2,7 @@
 
 | :warning: Content being retired |
 | :----------------------------------- |
-| Please note that this content is being retired by 31st December 2021, and is no longer being maintained. <br> Please refer to the [Azure Security Benchmark blueprint sample for guidance](https://docs.microsoft.com/en-gb/azure/governance/blueprints/samples/azure-security-benchmark-foundation)|
+| Please note that this content is being retired by 31st December 2021, and is no longer being maintained. <br> Please refer to the [Azure Security Benchmark blueprint sample for guidance](https://docs.microsoft.com/azure/governance/blueprints/samples/azure-security-benchmark-foundation)|
 
 ## Introduction
 
