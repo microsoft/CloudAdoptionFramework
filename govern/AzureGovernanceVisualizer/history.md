@@ -2,7 +2,114 @@
 
 ## AzGovViz version history
 
+### AzGovViz version 6
+
+__Changes__ (2021-Nov-23 / Major)
+
+* Add Microsoft Defender for Cloud 'Defender Plans' reporting (__TenantSummary__ -> Subscriptions, Resources & Defender; __ScopeInsights__ -> Defender Plans)
+* Adopt to new naming Azure Security Center (ASC) / Microsoft Defender for Cloud. Renamed parameter `-NoASCSecureScore` to `-NoMDfCSecureScore` (old parameter will still work)
+* Update policyAssignment API version '2020-09-01' to '2021-06-01'
+* Fix __ScopeInsights__ Tags usage
+* Fix dateTime formatting / use default format (createdOn/updatedOn)
+* Consumption feature has potential to fail. Changed Azure Consumption feature default = disabled; introducing new parameter `-DoAzureConsumption`
+* Changed `-HtmlTableRowsLimit`default from 40.000 to 20.000 
+* CSV output related changes
+  * Update *_RoleAssignments.csv output (add column for scope ResourceGroup name; add column for scope Resource name)
+  * Optimize *_PolicyDefinitions.csv and *_PolicySetDefinitions.csv file content / add BuiltIn definitions
+  * Add CSV export *_ResourceProviders.csv (all Resource Providers and their states for all Subscriptions)
+  * Add CSV export *_RoleDefinitions.csv (BuiltIn and Custom including some enriched information)
+* AzAPICall update error handing for 'Resource diagnostic settings' and 'AAD groups transitive members count'
+* Script optimization
+
+__Changes__ (2021-Nov-01 / Major)
+
+* New output - Feature request to create __Scope Insights__ output per Subscription has been implement. With this new feature you can share Subscription __Scope Insights__ with Subscription responsible staff. Use parameter `-NoSingleSubscriptionOutput` to disable the feature
+* Update [Required permissions in Azure Active Directory](#required-permissions-in-azure-active-directory) for the scenario of a Guest User executing the script
+* Add 'daily summary' output (CSV) to easily track your Tenant´s Governance evolution over time - Tim will hopefully create a PR for how he leverages AzGovViz historical data for Azure Log Analytics based dashboards
+* Improved permission related error handling 
+
+__Changes__ (2021-Oct-25 / Major)
+
+* AzAPICall enhanced error handling (general error 'An error has occurred.' ; roleAssignment schedules)
+
+__Changes__ (2021-Oct-21 / Major)
+
+* AzAPICall enhanced error handling (GatewayAuthenticationFailed; roleAssignment schedules)
+
+__Release v6 Changes__
+
+* Removed usage of Azure PowerShell cmdlet 'Get-AzRoleAssignment' / preparing for upcoming deprecation of 'Azure Active Directory Graph' API ([announcement](https://azure.microsoft.com/en-us/updates/update-your-apps-to-use-microsoft-graph-before-30-june-2022/))
+* Management Group diagnostic setting - reflect inheritance of diagnostic settings from upper Management Group scopes
+* __TenantSummary__ Policy assignments - resolve Managed Identity (if Policy assignment effect is DeployIfNotExists (DINE) or Modify)
+* Removed __TenantSummary__ RBAC Classic Role assignments
+* Improved AzAPICall error handling and output
+* Azure DevOps pipeline (yml) updated prerequisites to include Repository 'contribute' permission check
+* Added Application Insights [stats](#stats)
+* Performance optimization
+* Bugfixes
+
 ### AzGovViz version 5
+
+__Changes__ (2021-Sep-19 / Major)
+
+* Fix Issue #60
+* Fix JSON file creation / path containing brackets
+* AzAPICall enhanced error handling (ClientCertificateValidationFailure)
+* Minor performance optimization
+* Bugfixes
+
+__Changes__ (2021-Sep-13 / Major)
+
+* Fix Issue #58
+* Add Windows invalid character usage (Management Group, Subscription, Policy/Set definition, Rolicy assignment, Role definition)
+
+__Changes__ (2021-Sep-08 / Major)
+
+* Update AzAPICall handle variants of throttled requests
+
+__Changes__ (2021-Sep-07 / Minor)
+
+* Update AzAPICall CostManagement return
+* Fix markdown output (Management Group Hierarchy leveraging Mermaid plugin); hierarchy broken when not executing against Tenant Root Group but child Management Group
+
+__Changes__ (2021-Sep-03 / Major)
+
+* AzAPICall enhanced error handling
+
+__Changes__ (2021-Sep-01 / Major)
+
+* Update AzAPICall CostManagement return
+
+__Changes__ (2021-Aug-30 / Major)
+
+* Adding feature for RBAC Role assignments: determine 'standing' from PIM (Priviledged Identity Mangement) managed Role assignments
+* New parameter `-NoResources` - this will speed up the processing time but information like Resource diagnostics capability and resource type stats will not be made available (featured for large tenants)
+* Integrate AzGovViz with AzOps (after 'AzOps - Push' run AzGovViz) - (line 77 AzGovViz.yml). Checkout [AzOps Accellerator](https://github.com/Azure/AzOps-Accelerator)
+* Performance optimization
+
+__Changes__ (2021-Aug-25 / Major)
+
+* Resource diagnostics capability for logs and metrics will only be checked for 1st party (Microsoft) Resource types
+
+__Changes__ (2021-Aug-22 / Major)
+
+* Bugfix - indirect Role assignments (applied through AAD group membership); switched to Graph beta endpoint as v1.0 only resolves users and groups, whilst we´re also interested in Service Principals - [List group transitive members](https://docs.microsoft.com/en-us/graph/api/group-list-transitivemembers)
+
+__Changes__ (2021-Aug-18 / Major)
+
+* Added ASC Secure Score for Management Groups
+* Policy Compliance - if API returns 'ResponseTooLarge' then flag Policy Compliance entries with 'skipped' for given scope
+* Added [demo-output](demo-output) folder containing all outputs (html, csv, md, json, log)
+* Bugfixes
+
+__Changes__ (2021-Aug-06 / Major)
+
+* Enriched Policy assignments with list of used parameters
+* Enriched Role assignments on Groups with Group member count
+* Optimize JSON outputs
+* CSP scenario error handling
+* Bugfixes
+* Performance optimization
 
 __Changes__ (2021-July-28 / Major)
 
@@ -20,7 +127,7 @@ __Changes__ (2021-July-22 / Major)
 _* a new BuiltIn RBAC Role definition was added_
 * Renamed parameter `-PolicyIncludeResourceGroups` to , `-DoNotIncludeResourceGroupsOnPolicy` (from now Policy assignments on ResourceGroups will be included by default)
 * Renamed parameter `-RBACIncludeResourceGroupsAndResources` to , `-DoNotIncludeResourceGroupsAndResourcesOnRBAC` (from now Role assignments on ResourceGroups and Resources will be included by default)
-* New parameter `-HtmlTableRowsLimit`. Although the parameter `-LargeTenant` was introduced recently, still the html output may become too large to be processed properly. The new parameter defines the limit of rows - if for the html processing part the limit is reached then the html table will not be created (csv and json output will still be created). Default rows limit is 40.000.
+* New parameter `-HtmlTableRowsLimit`. Although the parameter `-LargeTenant` was introduced recently, still the html output may become too large to be processed properly. The new parameter defines the limit of rows - if for the html processing part the limit is reached then the html table will not be created (csv and json output will still be created). Default rows limit is 40.000
 * Added NonCompliance Message for Policy assignments
 * Cosmetics
 * Bugfixes
