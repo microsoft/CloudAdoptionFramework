@@ -1116,7 +1116,7 @@ if($Components -contains 'Location')
             Write-Host ""
             do 
             {
-                Write-Host "Do you want to keep these Geogrpahy Groups? Y for Yes and N for No"
+                Write-Host "Do you want to keep these Geography Groups? Y for Yes and N for No"
                 Write-Host ""
                 $Keep = Read-Host -Prompt 'Response'
                 Write-Host ""
