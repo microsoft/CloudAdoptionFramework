@@ -6,6 +6,8 @@ This guide will help you to setup and run AzGovViz
     * Azure DevOps - AzDO
 
 ## Table of contents
+* [Featured: __AzGovViz GitHub Codespaces__](#azgovviz-github-codespaces)
+
 * [__AzGovViz from Console__](#azgovviz-from-console)
     * Grant permissions in Azure
     * Execution options
@@ -332,3 +334,13 @@ Once the pipeline has executed successfully we can setup our Wiki (WikiAsCode)
 * Select the folder '__wiki__' and click '__OK__'
 * Enter a name for the Wiki
 * Click '__Publish__'
+
+# AzGovViz GitHub Codespaces
+
+Note: Codespaces is available for organizations using GitHub Team or GitHub Enterprise Cloud. [Quickstart for Codespaces](https://docs.github.com/en/codespaces/getting-started/quickstart)
+
+![alt text](img/codespaces0.png "AzGovViz GitHub Codespaces")  
+![alt text](img/codespaces1.png "AzGovViz GitHub Codespaces")  
+![alt text](img/codespaces2.png "AzGovViz GitHub Codespaces")  
+![alt text](img/codespaces3.png "AzGovViz GitHub Codespaces")  
+![alt text](img/codespaces4.png "AzGovViz GitHub Codespaces")
