@@ -1,10 +1,10 @@
-# Azure Naming Tool from the Azure FastTrack Team
+# Azure Naming Tool
 
 ## Description
 
-The Azure Naming Tool was built to accelerate Azure deployments using the [Cloud Adoption Framework (CAF)](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/) as a baseline. Recognizing the lengthy, complex process it was for organizations to develop a standardized naming convention, the tool takes the complexity out of the process to generate a customizable, baseline, naming convention within minutes.
+The Azure Naming Tool was built to accelerate Azure deployments using the [Cloud Adoption Framework (CAF)](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/) as a baseline. Recognizing the lengthy, complex process it was for organizations to develop a standardized naming convention, the tool takes the complexity out of the process to generate a customizable naming convention within minutes.
 
-The Azure Naming Tool creates a custom naming reference guide, name generator, and additional reference material for your Azure deployments. The tool initially begins with running a PowerShell script to collect organizational specific naming preferences.  This data is collected and stored in the configuration.csv file. The script also outputs an HTML file.  The HTML file contains both the reference guide and name generator using the data collected from the PowerShell script. These artifacts can be used to submit for approvals, accelerate deployments, and enhance overall governance practices.
+The Azure Naming Tool creates a custom naming reference guide and name generator for your Azure deployments. The tool initially begins with running a PowerShell script to collect organizational specific naming preferences.  This data is collected and stored in the "configuration.csv" file. The script also outputs an HTML file.  The HTML file contains both the reference guide and name generator using the data collected from the PowerShell script. These artifacts can be used to submit for approvals, accelerate deployments, and enhance overall governance practices.
 
 If the naming convention needs to be adjusted, the organizational specific data can edited in the CSV files before re-executing the PowerShell Script again. This will generate a new HTML file containing the updated reference guide and name generator.
 
