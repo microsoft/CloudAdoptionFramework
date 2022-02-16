@@ -50,7 +50,9 @@ There are only 3 field that should be modified in this CSV:
     ```
 
 1. Provide input for each of the questions to build out the configuration information for the Naming Tool.
-    - QUESTION 1: Remove the unwanted naming components  
+    - QUESTION 1: Remove the unwanted naming components
+        - The "Org" component cannot be removed and is only used to name high level resources, like subscriptions and management groups.  Refer to the "Include" and "Exclude" columns in the "resources.csv" to see which resources use the Org component.
+        - The "VM Role" is only allowed on virtual machine resources based on the inclusions and exclusions in the "resources.csv" file.
     - QUESTION 2: Order the desired naming components  
     - QUESTION 3: Choose delimiter between naming components
     - QUESTION 4: Organization name and shortname  
