@@ -4,6 +4,49 @@
 
 ### AzGovViz version 6
 
+__Changes__ (2022-Jan-31 / Major)
+
+* New __TenantSummary | RBAC__ feature - insights on all Role definitions that are capable to write Role assignments
+* __TenantSummary | Subscriptions, Resources & Defender | Subscriptions__ report (new) [Role assignment limits](https://docs.microsoft.com/en-us/azure/role-based-access-control/troubleshooting#azure-role-assignments-limit)
+* Handling orphaned Policy assignments (scope Management Group)
+* Datacollection for Management Groups process in batches (batch per Management Group level)
+* Update Dockerfile
+* Update API version for Resources, ResourceGroups and Subscriptions
+* Further enrich _PolicyDefinitions and _PolicySetDefinitions CSV outputs
+* HTML file performance optimization
+* Include instructions for GitHub Actions in the __[Setup Guide](setup.md)__
+* New [demo](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html) uploaded
+* Bugfixes
+
+__Changes__ (2022-Jan-16 / Major)
+
+* New parameter `-ManagementGroupsOnly` - collect data only for Management Groups (Subscription data such as e.g. Policy assignments etc. will not be collected)
+* New feature __TenantSummary | Subscriptions, Resources & Defender__, __TenantSummary | Azure Active Directory__ and __ScopeInsights__ insights on UserAssignedIdentities/Resources - which resource has an user assigned managed identity assigned / vice versa. Includes CSV export. Thanks to Thomas Naunheim (Microsoft Azure MVP) for inspiration :)
+* New feature __TenantSummary | Policy | Policy assignments orphanded__ (Policy assignments's Policy definition does not exist / likely Management Group scoped Policy defintion - Management Group deleted)
+* Optimize __DefinitionInsights__ collapsible JSON definitions
+* Defender plans usage / highlight use of depcrecated plans such as Container Registry & Kubernetes
+* New 'Large Tenant' feature __TenantSummary | Policy | Policy assignments__ if the number of Policy assignments exceeds the `-HtmlTableRowsLimit` parameter's value (default = 20.000) then the html table will not be created / the CSV file will still be created 
+* New feature  __TenantSummary | Azure Active Directory | AAD ServicePrincipals type=ManagedIdentity__ orphaned Managed Identities (for Policy assignment related Managed Identities - Policy assignment does not exist anymore)
+* Fix PIM (Priviliged Identity Management) state for inherited Subscription Role assignments
+* __TenantSummary | Azure Active Directory__ add link to [AzADServicePrincipalInsights](#azadserviceprincipalinsights) (POC)
+* Add CSV export for Policy Exemptions
+* Add workflow files (YAML) for GitHub Actions (one for [OpenID Connect (OIDC)](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-azure))
+* Bugfixes
+* HTML output patch jQuery / use latest version 3.6.0
+* Update [Demo](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html)
+* AzAPICall enhanced error handling (GeneralError, ResourceGroupNotFound)
+* Script optimization / prepare for PS module
+
+__Changes__ (2021-Dec-10 / Minor)
+
+* deprecation of parameter `-AzureDevOpsWikiAsCode` / Based on environment variables the script will detect the code run platform
+* changed throttlelimit default from 5 to 10
+
+__Changes__ (2021-Dec-09 / Minor)
+
+* [Run AzGovViz in GitHub CodeSpaces](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/setup.md#azgovviz-github-codespaces) - __thanks!__ Carlos Mendible (Microsoft Cloud Solution Architect - Spain)
+* JSON output update -> filenames will indicate if Role assignment is PIM (Priviliged Identity Management) based
+
 __Changes__ (2021-Nov-23 / Major)
 
 * Add Microsoft Defender for Cloud 'Defender Plans' reporting (__TenantSummary__ -> Subscriptions, Resources & Defender; __ScopeInsights__ -> Defender Plans)
@@ -12,7 +55,7 @@ __Changes__ (2021-Nov-23 / Major)
 * Fix __ScopeInsights__ Tags usage
 * Fix dateTime formatting / use default format (createdOn/updatedOn)
 * Consumption feature has potential to fail. Changed Azure Consumption feature default = disabled; introducing new parameter `-DoAzureConsumption`
-* Changed `-HtmlTableRowsLimit`default from 40.000 to 20.000 
+* Changed `-HtmlTableRowsLimit` default from 40.000 to 20.000 
 * CSV output related changes
   * Update *_RoleAssignments.csv output (add column for scope ResourceGroup name; add column for scope Resource name)
   * Optimize *_PolicyDefinitions.csv and *_PolicySetDefinitions.csv file content / add BuiltIn definitions
