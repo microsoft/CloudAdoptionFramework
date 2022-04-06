@@ -1966,7 +1966,7 @@ $Html = @'
             return output;
         }
 
-        // Validate Delimiter should be used
+        // Validate Delimiter
         function validateDelimiter(name, resource, delimiter) {
             let output = false;
 
@@ -1986,6 +1986,11 @@ $Html = @'
             // Check Invalid Characters
             let invalidChars = resource.invalidCharacters;
             if (invalidChars.includes(delimiter)) {
+                output = true;
+            }
+
+            // Remove Delimiter if generated name exceeds Maximum Length
+            if (name.length > resource.lengthMax) {
                 output = true;
             }
 
