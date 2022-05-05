@@ -1320,7 +1320,7 @@ $Html = @'
     <meta name="keywords" content="Azure, Governance, Naming, Convention, Reference, Generator">
     <meta name="author" content="FastTrack for Azure">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="https://portal.azure.com/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="https://portal.azure.com/Content/favicon.ico">
     <style>
         * {
             font-family: Arial, Helvetica, sans-serif;
@@ -1966,7 +1966,7 @@ $Html = @'
             return output;
         }
 
-        // Validate Delimiter should be used
+        // Validate Delimiter
         function validateDelimiter(name, resource, delimiter) {
             let output = false;
 
@@ -1986,6 +1986,11 @@ $Html = @'
             // Check Invalid Characters
             let invalidChars = resource.invalidCharacters;
             if (invalidChars.includes(delimiter)) {
+                output = true;
+            }
+
+            // Remove Delimiter if generated name exceeds Maximum Length
+            if (name.length > resource.lengthMax) {
                 output = true;
             }
 
