@@ -4,6 +4,33 @@
 
 ### AzGovViz version 6
 
+__Changes__ (2022-May-02 / Minor)
+
+* __Tenant Summary__ Change Tracking - RBAC Role assignments: add PIM (Priviledged Identity Management) information
+* Azure DevOps pipeline YAML - change `vmImage: 'ubuntu-18.04'` to  `vmImage: 'ubuntu-20.04'`
+* Published new HTML [demo](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html)
+
+__Changes__ (2022-May-01 / Major)
+
+* Switch from ARM API endpoint `roleAssignmentSchedules` to `roleAssignmentScheduleInstances`, switch from api-version `2020-10-01-preview` to `2020-10-01`
+* Update GitHub Actions workflows
+* Update `pwsh/prerequisites.ps1` script (relevant for GitHub Actions and Azure DevOps Pipeline)
+* Update __[API reference](#api-reference)__
+* Update __[Setup Guide](setup.md)__
+* Bugfix
+
+__Changes__ (2022-Apr-25 / Major)
+
+* New JSON output *_PolicyAll.json - Contains all relations of Policy/Set definitions and Policy assignments
+* New parameter `-ShowMemoryUsage` - Shows memory usage at memory intense sections of the scripts, this shall help you determine if the the worker is well sized for AzGovViz
+* Leveraging AzAPICall PowerShell module. The AzAPICall function has been removed from the AzGovViz code base and has been published as a module to the [PoweShell Gallery](https://www.powershellgallery.com/packages/AzAPICall) ([GitHub](https://aka.ms/AzAPICall))
+* Foreach -parallel import the AzAPICall module instead of $using:
+* Optimize GitHub Actions workflows (YAML)
+* Added list of [APIs](#api) that are polled by AzGovViz
+* Microsoft Graph `v1.0/directoryObjects/getByIds` do batching is exceeds 1000 identities
+* Performance optimization
+* Bugfixes
+
 __Changes__ (2022-Jan-31 / Major)
 
 * New __TenantSummary | RBAC__ feature - insights on all Role definitions that are capable to write Role assignments
