@@ -52,6 +52,7 @@ Listed as [security monitoring tool](https://docs.microsoft.com/en-us/azure/arch
   * [Required permissions in Azure Active Directory](#required-permissions-in-azure-active-directory)
   * [PowerShell](#powershell)
   * [Parameters](#parameters)
+  * [API reference](#api-reference)
 * [Integrate with AzOps](#integrate-with-azops)
 * [Stats](#stats)
 * [Security](#security)
@@ -64,33 +65,50 @@ Listed as [security monitoring tool](https://docs.microsoft.com/en-us/azure/arch
 
 ## Release history
 
-__Changes__ (2022-Jan-31 / Major)
+__Changes__ (2022-May-05 / Major)
 
-* New __TenantSummary | RBAC__ feature - insights on all Role definitions that are capable to write Role assignments
-* __TenantSummary | Subscriptions, Resources & Defender | Subscriptions__ report (new) [Role assignment limits](https://docs.microsoft.com/en-us/azure/role-based-access-control/troubleshooting#azure-role-assignments-limit)
-* Handling orphaned Policy assignments (scope Management Group)
-* Datacollection for Management Groups process in batches (batch per Management Group level)
-* Update Dockerfile
-* Update API version for Resources, ResourceGroups and Subscriptions
-* Further enrich _PolicyDefinitions and _PolicySetDefinitions CSV outputs
-* HTML file performance optimization
-* Include instructions for GitHub Actions in the __[Setup Guide](setup.md)__
-* New [demo](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html) uploaded
+* fix: `using:scriptPath` variable in foreach parallel (this is only relevant for Azure DevOps and GitHub if you have a non default folder structure in your repository)
+
+__Changes__ (2022-May-02 / Minor)
+
+* __Tenant Summary__ Change Tracking - RBAC Role assignments: add PIM (Priviledged Identity Management) information
+* Azure DevOps pipeline YAML - change `vmImage: 'ubuntu-18.04'` to  `vmImage: 'ubuntu-20.04'`
+* Published new HTML [demo](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html)
+
+__Changes__ (2022-May-01 / Major)
+
+* Switch from ARM API endpoint `roleAssignmentSchedules` to `roleAssignmentScheduleInstances`, switch from api-version `2020-10-01-preview` to `2020-10-01`
+* Update GitHub Actions workflows
+* Update `pwsh/prerequisites.ps1` script (relevant for GitHub Actions and Azure DevOps Pipeline)
+* Update __[API reference](#api-reference)__
+* Update __[Setup Guide](setup.md)__
+* Bugfix
+
+__Changes__ (2022-Apr-25 / Major)
+
+* New JSON output *_PolicyAll.json - Contains all relations of Policy/Set definitions and Policy assignments
+* New parameter `-ShowMemoryUsage` - Shows memory usage at memory intense sections of the scripts, this shall help you determine if the the worker is well sized for AzGovViz
+* Leveraging AzAPICall PowerShell module. The AzAPICall function has been removed from the AzGovViz code base and has been published as a module to the [PoweShell Gallery](https://www.powershellgallery.com/packages/AzAPICall) ([GitHub](https://aka.ms/AzAPICall))
+* Foreach -parallel import the AzAPICall module instead of $using:
+* Optimize GitHub Actions workflows (YAML)
+* Added list of [APIs](#api) that are polled by AzGovViz
+* Microsoft Graph `v1.0/directoryObjects/getByIds` do batching is exceeds 1000 identities
+* Performance optimization
 * Bugfixes
 
-Passed tests: Powershell Core 7.2.1 on Windows  
-Passed tests: Powershell Core 7.2.1 Azure DevOps hosted agent ubuntu-18.04  
-Passed tests: Powershell Core 7.2.1 Github Actions hosted agent ubuntu-latest  
-Passed tests: Powershell Core 7.2.1 GitHub Codespaces mcr.microsoft.com/powershell:latest  
+Passed tests: Powershell Core 7.2.2 on Windows  
+Passed tests: Powershell Core 7.2.2 Azure DevOps hosted agent ubuntu-20.04  
+Passed tests: Powershell Core 7.2.2 Github Actions hosted agent ubuntu-latest  
+Passed tests: Powershell Core 7.2.2 GitHub Codespaces mcr.microsoft.com/powershell:latest  
 Passed tests: AzureCloud, AzureUSGovernment, AzureChinaCloud
 
-[Release history](history.md)
+[Full release history](history.md)
 
 ## Demo
 
 <a href="https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html" target="_blank">![Demo](img/demo4_66.png)</a>
 
-[Demo (v6_major_20220131_1)](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html)  
+[Demo (v6_minor_20220502_2)](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html)  
 Enterprise-Scale ([WingTip](https://github.com/Azure/Enterprise-Scale/blob/main/docs/reference/wingtip/README.md)) implementation
 
 More [demo output](https://github.com/JulianHayward/AzGovViz)
@@ -408,6 +426,11 @@ Screenshot Azure Portal
   * ~~Az.Resources~~
   * ~~Az.ResourceGraph~~
   * [Install the Azure Az PowerShell module](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps)
+* Requires PowerShell Module 'AzAPICall'.  
+Running in Azure DevOps or GitHub Actions the AzAPICall PowerShell module will be installed automatically.  
+AzAPICall resources:
+  * [![PowerShell Gallery Version (including pre-releases)](https://img.shields.io/powershellgallery/v/AzAPICall?include_prereleases&label=PowerShell%20Gallery)](https://www.powershellgallery.com/packages/AzAPICall)  
+  * [GitHub Repository](https://aka.ms/AzAPICall)
 * Usage/command
   * `.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id>`
 
@@ -453,6 +476,63 @@ Screenshot Azure Portal
   * `-StatsOptOut` - Opt out sending [stats](#stats)
   * `-NoSingleSubscriptionOutput` - Single __Scope Insights__ output per Subscription should not be created
   * `-ManagementGroupsOnly` - Collect data only for Management Groups (Subscription data such as e.g. Policy assignments etc. will not be collected)
+  * `-ShowMemoryUsage` - Shows memory usage at memory intense sections of the scripts, this shall help you determine if the the worker is well sized for AzGovViz
+
+### API reference
+
+AzGovViz polls the following APIs
+
+| Endpoint | API version | API name |
+| --- | --- | --- |
+| MS Graph | beta | /groups/`aadGroupId`/transitiveMembers |
+| MS Graph | v1.0 | /applications |
+| MS Graph | v1.0 | /directoryObjects/getByIds |
+| MS Graph | v1.0 | /users |
+| MS Graph | v1.0 | /groups |
+| MS Graph | v1.0 | /servicePrincipals |
+| ARM |2021-05-01-preview | /`resourceId`/providers/Microsoft.Insights/diagnosticSettingsCategories |
+| ARM |2018-11-01-preview | /`scopeId`/providers/Microsoft.Blueprint/blueprints/`blueprintName` |
+| ARM |2021-06-01 | /providers/Microsoft.Authorization/policyDefinitions |
+| ARM |2021-06-01 | /providers/Microsoft.Authorization/policySetDefinitions |
+| ARM |2018-07-01 | /providers/Microsoft.Authorization/roleDefinitions |
+| ARM |2020-02-01 | /providers/Microsoft.Management/getEntities |
+| ARM |2021-06-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.Authorization/policyAssignments |
+| ARM |2021-06-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.Authorization/policyDefinitions |
+| ARM |2020-07-01-preview | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.Authorization/policyExemptions |
+| ARM |2021-06-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.Authorization/policySetDefinitions |
+| ARM |2015-07-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.Authorization/roleAssignments |
+| ARM |2020-10-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.Authorization/roleAssignmentScheduleInstances |
+| ARM |2015-07-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.Authorization/roleDefinitions |
+| ARM |2018-11-01-preview | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.Blueprint/blueprints |
+| ARM |2019-11-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.CostManagement/query |
+| ARM |2020-01-01-preview | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/microsoft.insights/diagnosticSettings |
+| ARM |2019-10-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId`/providers/Microsoft.PolicyInsights/policyStates/latest/summarize |
+| ARM |2020-05-01 | /providers/Microsoft.Management/managementGroups/`managementGroupId` |
+| ARM |2020-02-01 | /providers/Microsoft.Management/managementGroups/`tenantId`/settings |
+| ARM |2020-05-01 | /providers/Microsoft.Management/managementGroups |
+| ARM |2021-03-01 | /providers/Microsoft.ResourceGraph/resources |
+| ARM |2016-09-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/locks |
+| ARM |2021-06-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/policyAssignments |
+| ARM |2021-06-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/policyDefinitions |
+| ARM |2020-07-01-preview | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/policyExemptions |
+| ARM |2021-06-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/policySetDefinitions |
+| ARM |2015-07-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/roleAssignments |
+| ARM |2020-10-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/roleAssignmentScheduleInstances |
+| ARM |2019-08-01-preview | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/roleAssignmentsUsageMetrics |
+| ARM |2015-07-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Authorization/roleDefinitions |
+| ARM |2018-11-01-preview | /subscriptions/`subscriptionId`/providers/Microsoft.Blueprint/blueprintAssignments |
+| ARM |2018-11-01-preview | /subscriptions/`subscriptionId`/providers/Microsoft.Blueprint/blueprints |
+| ARM |2019-11-01 | /subscriptions/`subscriptionId`/providers/Microsoft.CostManagement/query |
+| ARM |2021-05-01-preview | /subscriptions/`subscriptionId`/providers/Microsoft.Insights/diagnosticSettings |
+| ARM |2019-10-01 | /subscriptions/`subscriptionId`/providers/Microsoft.PolicyInsights/policyStates/latest/summarize |
+| ARM |2020-06-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Resources/tags/default |
+| ARM |2018-06-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Security/pricings |
+| ARM |2020-01-01 | /subscriptions/`subscriptionId`/providers/Microsoft.Security/securescores |
+| ARM |2019-10-01 | /subscriptions/`subscriptionId`/providers |
+| ARM |2021-04-01 | /subscriptions/`subscriptionId`/resourcegroups |
+| ARM |2021-04-01 | /subscriptions/`subscriptionId`/resources |
+| ARM |2020-01-01 | /subscriptions |
+| ARM |2020-01-01 | /tenants |
 
 ## Integrate with AzOps
 
@@ -586,10 +666,9 @@ Also check <https://www.azadvertizer.net> - AzAdvertizer helps you to keep up wi
 
 ## AzADServicePrincipalInsights
 
-![alt text](img/azadserviceprincipalinsights73.png "example output")
+Also check <https://aka.ms/AzADServicePrincipalInsights> - What about your Azure Active Directory Service Principals? Get deep insights and track your Service Principals with AzADServicePrincipalInsights. Create a HTML overview, export to CSV and JSON and use it for further processing...
 
-Also check <https://aka.ms/AzADServicePrincipalInsights> - Provides deep insights on ServicePrincipals (Enterprise Applications and Applications).  
-__Note:__ AzADServicePrincipalInsights is in proof of concept phase, the repository is not open sourced. However testing the code is explicitly allowed and appreciated.
+![alt text](img/azadserviceprincipalinsights_preview.png "example output")
 
 ## Closing Note
 
