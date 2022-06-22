@@ -1,4 +1,4 @@
-# Azure Naming Tool
+# Azure Naming Tool v1
 
 ## Description
 

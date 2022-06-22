@@ -1,0 +1,143 @@
+﻿@page "/adminlog"
+@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@using AzureNamingTool.Services
+@using System.IO
+@using BlazorDownloadFile
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using System.Text
+@inject ILogger<Configuration> Logger
+@inject IJSRuntime JsRuntime
+@inject IConfiguration _config
+@inject StateContainer state
+@inject ProtectedSessionStorage session
+@inject IToastService toastService
+@implements IDisposable
+@inject NavigationManager NavigationManager
+
+<PageTitle>Azure Naming Tool - Admin Log</PageTitle>
+<div class="card  @theme.ThemeStyle">
+    <div class="card-body">
+        <h1>Admin Log</h1>
+        <div class="mb-3">This page displays a log of admin/configuration changes.</div>
+
+
+        @if (!dataLoaded)
+        {
+            <div class="spinner-border blue" role="status">
+                <span class="sr-only"></span>
+            </div>
+        }
+        else
+        {
+            <div class="mb-3">
+                @if (lstAdminLogMessages.Count > 0)
+                {
+                    <div class="mb-3">
+                        <button class="btn btn-primary" title="Export Admin Log" @onclick="@(e => OnExportLogClick())">
+                            Export Admin Log
+                        </button>
+                        <button class="btn btn-danger" title="Purge Admin Log" @onclick="@(e => OnPurgeLogClick())">
+                            Purge Admin Log
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table @theme.ThemeStyle">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Created On</th>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (AdminLogMessage message in lstAdminLogMessages)
+                                {
+                                    <tr>
+                                        <td class="align-top">
+                                            @message.CreatedOn.ToString()
+                                        </td>
+                                        <td class="align-top">
+                                            @message.Title
+                                        </td>
+                                        <td class="align-top">
+                                            @message.Message
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p style="font-style:italic">
+                        There are no log items to display.
+                    </p>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    
+    [CascadingParameter]
+    protected ThemeInfo? theme { get; set; }
+    private bool admin;
+    private bool dataLoaded = false;
+    List<AdminLogMessage> lstAdminLogMessages = new();
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var result = await session.GetAsync<bool>("admin");
+        admin = (bool)result.Value;
+        if (!admin)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+
+        if (firstRender)
+        {
+            lstAdminLogMessages = await GeneralHelper.GetAdminLog();
+            dataLoaded = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnInstructionsClick()
+    {
+        NavigationManager.NavigateTo("/instructions");
+    }
+
+
+    public void Dispose()
+    {
+        StateHasChanged();
+    }
+
+    private async Task OnPurgeLogClick()
+    {
+        bool confirm = false;
+        confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Admin Log. Are you sure?");
+        if (confirm)
+        {
+            await GeneralHelper.PurgeAdminLog();
+            toastService.ShowSuccess("Admin Log purged!", "SUCCESS");
+            GeneralHelper.LogAdminMessage("ADMIN LOG", "Admin Log log purged.");
+            lstAdminLogMessages = await GeneralHelper.GetAdminLog();
+            dataLoaded = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnExportLogClick()
+    {
+        await JsRuntime.InvokeVoidAsync("htmlToCSV", "adminlog.csv");
+    }
+}

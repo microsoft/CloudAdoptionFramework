@@ -1,0 +1,272 @@
+[
+    {
+        "id": 1,
+        "name": "Australia Central",
+        "shortName": "ac"
+    },
+    {
+        "id": 2,
+        "name": "Australia Central 2",
+        "shortName": "ac2"
+    },
+    {
+        "id": 3,
+        "name": "Australia East",
+        "shortName": "ae"
+    },
+    {
+        "id": 4,
+        "name": "Australia Southeast",
+        "shortName": "as"
+    },
+    {
+        "id": 5,
+        "name": "Brazil South",
+        "shortName": "bs2"
+    },
+    {
+        "id": 6,
+        "name": "Brazil Southeast",
+        "shortName": "bs"
+    },
+    {
+        "id": 7,
+        "name": "Canada Central",
+        "shortName": "cc"
+    },
+    {
+        "id": 8,
+        "name": "Canada East",
+        "shortName": "ce"
+    },
+    {
+        "id": 9,
+        "name": "Central India",
+        "shortName": "ci"
+    },
+    {
+        "id": 10,
+        "name": "Central US",
+        "shortName": "cu"
+    },
+    {
+        "id": 11,
+        "name": "China East",
+        "shortName": "ce"
+    },
+    {
+        "id": 12,
+        "name": "China East 2",
+        "shortName": "ce2"
+    },
+    {
+        "id": 13,
+        "name": "China North",
+        "shortName": "cn"
+    },
+    {
+        "id": 14,
+        "name": "China North 2",
+        "shortName": "cn2"
+    },
+    {
+        "id": 15,
+        "name": "East Asia",
+        "shortName": "ea"
+    },
+    {
+        "id": 16,
+        "name": "East US",
+        "shortName": "eu"
+    },
+    {
+        "id": 17,
+        "name": "East US 2",
+        "shortName": "eu2"
+    },
+    {
+        "id": 18,
+        "name": "France Central",
+        "shortName": "fc"
+    },
+    {
+        "id": 19,
+        "name": "France South",
+        "shortName": "fs"
+    },
+    {
+        "id": 20,
+        "name": "Germany North",
+        "shortName": "gn"
+    },
+    {
+        "id": 21,
+        "name": "Germany West Central",
+        "shortName": "gwc"
+    },
+    {
+        "id": 22,
+        "name": "Japan East",
+        "shortName": "je"
+    },
+    {
+        "id": 23,
+        "name": "Japan West",
+        "shortName": "jw"
+    },
+    {
+        "id": 24,
+        "name": "Jio India West",
+        "shortName": "jiw"
+    },
+    {
+        "id": 25,
+        "name": "Korea Central",
+        "shortName": "kc"
+    },
+    {
+        "id": 26,
+        "name": "Korea South",
+        "shortName": "ks"
+    },
+    {
+        "id": 27,
+        "name": "New Zealand North",
+        "shortName": "nzn"
+    },
+    {
+        "id": 28,
+        "name": "North Central US",
+        "shortName": "ncu"
+    },
+    {
+        "id": 29,
+        "name": "North Europe",
+        "shortName": "ne2"
+    },
+    {
+        "id": 30,
+        "name": "Norway East",
+        "shortName": "ne"
+    },
+    {
+        "id": 31,
+        "name": "Norway West",
+        "shortName": "nw"
+    },
+    {
+        "id": 32,
+        "name": "South Africa North",
+        "shortName": "san"
+    },
+    {
+        "id": 33,
+        "name": "South Africa West",
+        "shortName": "saw"
+    },
+    {
+        "id": 34,
+        "name": "South Central US",
+        "shortName": "scu"
+    },
+    {
+        "id": 35,
+        "name": "South India",
+        "shortName": "si"
+    },
+    {
+        "id": 36,
+        "name": "Southeast Asia",
+        "shortName": "sa"
+    },
+    {
+        "id": 37,
+        "name": "Switzerland North",
+        "shortName": "sn"
+    },
+    {
+        "id": 38,
+        "name": "Switzerland West",
+        "shortName": "sw"
+    },
+    {
+        "id": 39,
+        "name": "UAE Central",
+        "shortName": "uc"
+    },
+    {
+        "id": 40,
+        "name": "UAE North",
+        "shortName": "un"
+    },
+    {
+        "id": 41,
+        "name": "UK South",
+        "shortName": "us"
+    },
+    {
+        "id": 42,
+        "name": "UK West",
+        "shortName": "uw"
+    },
+    {
+        "id": 43,
+        "name": "USDoD Central",
+        "shortName": "uc"
+    },
+    {
+        "id": 44,
+        "name": "USDoD East",
+        "shortName": "ue"
+    },
+    {
+        "id": 45,
+        "name": "USGov Arizona",
+        "shortName": "ua"
+    },
+    {
+        "id": 46,
+        "name": "USGov Iowa",
+        "shortName": "ui"
+    },
+    {
+        "id": 47,
+        "name": "USGov Texas",
+        "shortName": "ut"
+    },
+    {
+        "id": 48,
+        "name": "USGov Virginia",
+        "shortName": "uv"
+    },
+    {
+        "id": 49,
+        "name": "West Central US",
+        "shortName": "wcu"
+    },
+    {
+        "id": 50,
+        "name": "West Europe",
+        "shortName": "we"
+    },
+    {
+        "id": 51,
+        "name": "West India",
+        "shortName": "wi"
+    },
+    {
+        "id": 52,
+        "name": "West US",
+        "shortName": "wu"
+    },
+    {
+        "id": 53,
+        "name": "West US 2",
+        "shortName": "wu2"
+    },
+    {
+        "id": 54,
+        "name": "West US 3",
+        "shortName": "wu3"
+    }
+]

@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "name": "ResourceType",
+    "displayname": "Resource Types",
+    "enabled": true,
+    "sortOrder": 1
+  },
+  {
+    "id": 3,
+    "name": "ResourceOrg",
+    "displayname": "Orgs",
+    "enabled": true,
+    "sortOrder": 2
+  },
+  {
+    "id": 7,
+    "name": "ResourceUnitDept",
+    "displayname": "Units/Depts",
+    "enabled": true,
+    "sortOrder": 3
+  },
+  {
+    "id": 6,
+    "name": "ResourceProjAppSvc",
+    "displayname": "Projects/Apps/Services",
+    "enabled": true,
+    "sortOrder": 4
+  },
+  {
+    "id": 8,
+    "name": "ResourceFunction",
+    "displayname": "Functions",
+    "enabled": true,
+    "sortOrder": 5
+  },
+  {
+    "id": 4,
+    "name": "ResourceEnvironment",
+    "displayname": "Environments",
+    "enabled": true,
+    "sortOrder": 6
+  },
+  {
+    "id": 2,
+    "name": "ResourceLocation",
+    "displayname": "Locations",
+    "enabled": true,
+    "sortOrder": 7
+  },
+  {
+    "id": 5,
+    "name": "ResourceInstance",
+    "displayname": "Instance",
+    "enabled": true,
+    "sortOrder": 8
+  }
+]

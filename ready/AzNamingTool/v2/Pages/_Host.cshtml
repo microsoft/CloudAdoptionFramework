@@ -1,0 +1,84 @@
+﻿@page "/"
+@namespace AzureNamingTool.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+}
+<link href="_content/Blazored.Toast/blazored-toast.min.css" rel="stylesheet" />
+<link href="_content/Blazored.Modal/blazored-modal.css" rel="stylesheet" />
+
+<component type="typeof(App)" render-mode="ServerPrerendered" />
+
+<script src="_content/Blazored.Modal/blazored.modal.js"></script>
+<script>
+
+            //Get the button:
+        scrollToTop = document.getElementById("btnScrollToTop");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+          if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            scrollToTop.style.display = "block";
+          } else {
+            scrollToTop.style.display = "none";
+          }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+          document.body.scrollTop = 0; // For Safari
+          document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        }
+
+        function scrollIntoView(id)
+        {
+            const element = document.getElementById(id);
+            var headerOffset = 70;
+            var elementPosition = element.getBoundingClientRect().top;
+            var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+        }
+
+        window.IsElementChecked = (id) => {
+            console.log(id);
+            console.log(document.getElementById(id));
+            console.log(document.getElementById(id).checked);
+            return document.getElementById(id).checked;
+        };
+
+        function htmlToCSV(filename)
+        {
+            var data = [];
+            var rows = document.querySelectorAll("table tr");
+
+            for (var i = 0; i < rows.length; i++) {
+                var row = [], cols = rows[i].querySelectorAll("td, th");
+
+                for (var j = 0; j < cols.length; j++) {
+                    row.push(cols[j].innerText);
+                }
+
+                data.push(row.join(","));
+            }
+            downloadCSVFile(data.join("\n"), filename);
+        }
+
+    function downloadCSVFile(csv, filename)
+    {
+        var csv_file, download_link;
+        csv_file = new Blob([csv], {type: "text/csv"});
+        download_link = document.createElement("a");
+        download_link.download = filename;
+        download_link.href = window.URL.createObjectURL(csv_file);
+        download_link.style.display = "none";
+        document.body.appendChild(download_link);
+        download_link.click();
+    }
+
+</script>

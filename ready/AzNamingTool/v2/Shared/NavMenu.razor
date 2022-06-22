@@ -1,0 +1,161 @@
+﻿@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@inject StateContainer state
+@inject ProtectedSessionStorage session
+@inject IJSRuntime JsRuntime
+@inject ILogger<NavMenu> Logger
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/"><img src="images/AzureNamingToolLogo-NoText.png" height="20px;" style="vertical-align:top;margin-top:2px;padding-right:10px;" alt="Azure Naming Tool" />Azure Naming Tool</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="instructions">
+                <span class="oi oi-info" aria-hidden="true"></span> Instructions
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="configuration">
+                <span class="oi oi-cog" aria-hidden="true"></span> Configuration
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="reference">
+                <span class="oi oi-spreadsheet" aria-hidden="true"></span> Reference
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="generate">
+                <span class="oi oi-check" aria-hidden="true"></span> Generate
+            </NavLink>
+        </div>
+
+        @if (PageType != null)
+        {
+            @if ((PageType.ToString() == "AzureNamingTool.Pages.Generate") || (PageType.ToString() == "AzureNamingTool.Pages.GeneratedNamesLog"))
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="generatednameslog">
+                        <span class="oi oi-list" aria-hidden="true"></span> Generated Names Log
+                    </NavLink>
+                </div>
+            }
+
+            @if (PageType.ToString() == "AzureNamingTool.Pages.Configuration")
+            {
+                <div class="card bg-transparent">
+                    <div class="card card-header bg-default text-white" style="font-weight:bold;">
+                        Jump To
+                    </div>
+                    <div class="card bg-transparent">
+                        <div class="nav-item px-3">
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("ResourceComponent"))' @onclick:preventDefault href="">Components</a>
+                        </div>
+                        <div class="nav-item px-3">
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("ResourceDelimiter"))' @onclick:preventDefault href="">Delimiters</a>
+                        </div>
+                        @if (servicesData.ResourceComponents != null)
+                        {
+                            @foreach (ResourceComponent resourceComponent in servicesData.ResourceComponents.OrderBy(x => x.Name))
+                            {
+                                @if (resourceComponent.Name != "ResourceInstance")
+                                {
+                                    <div class="nav-item px-3">
+                                        <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick(resourceComponent.Name))' @onclick:preventDefault href="">@(resourceComponent.DisplayName)</a>
+                                    </div>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            @if (PageType.ToString() == "AzureNamingTool.Pages.Instructions")
+            {
+                <div class="card bg-transparent">
+                    <div class="card card-header bg-default text-white" style="font-weight:bold;">
+                        Jump To
+                    </div>
+                    <div class="card bg-transparent">
+                        <div class="nav-item px-3">
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step1"))' @onclick:preventDefault href="">Step 1 - Admin Password</a>
+                        </div>
+                        <div class="nav-item px-3">
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step2"))' @onclick:preventDefault href="">Step 2 - Admin Config</a>
+                        </div>
+                        <div class="nav-item px-3">
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step3"))' @onclick:preventDefault href="">Step 3 - Tool Config</a>
+                        </div>
+                        <div class="nav-item px-3">
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step4"))' @onclick:preventDefault href="">Step 4 - Generate</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        @if (admin)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="adminlog">
+                    <span class="oi oi-lock-locked" aria-hidden="true"></span> Admin Log
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private ServicesData servicesData = new();
+    private bool admin;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    [Parameter]
+    public Type? PageType { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var result = await session.GetAsync<bool>("admin");
+        if (firstRender)
+        {
+            admin = (bool)result.Value;
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+        }
+        else
+        {
+
+            if ((admin != (bool)result.Value) || (servicesData == null))
+            {
+                admin = (bool)result.Value;
+                servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+            }
+        }
+        StateHasChanged();
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async void OnConfigNavClick(string e)
+    {
+        await JsRuntime.InvokeVoidAsync("scrollIntoView", e);
+    }
+}

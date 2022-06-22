@@ -1,0 +1,592 @@
+﻿@page "/generate"
+@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@using AzureNamingTool.Services
+@inject ILogger<Generate> Logger
+@inject NavigationManager NavigationManager
+@inject StateContainer state
+
+<PageTitle>Azure Naming Tool - Generate</PageTitle>
+<div class="card @theme.ThemeStyle">
+    <div class="card-body">
+        <h1>Generate</h1>
+        <div class="mb-3">This page generates a name for the selected resource type.</div>
+        @*        <div class="mb-3">
+        <button class="btn btn-primary" title="Instructions" @onclick="@(e => OnInstructionsClick())">
+        View Instructions
+        </button>
+        </div>*@
+        <p>
+            <strong>Instructions</strong>
+            <ol>
+                <li>
+                    Select the desired Resource Type
+                </li>
+                <li>
+                    Review the Naming Guidelines
+                </li>
+                <li>
+                    Select the component options
+                </li>
+                <li>
+                    Click <strong>Generate</strong> to generate the Azure resource name
+                </li>
+
+            </ol>
+        </p>
+
+        @if (servicesData.ResourceTypes == null)
+        {
+            <div class="spinner-border" role="status">
+                <span class="sr-only"></span>
+            </div>
+        }
+        else
+        {
+            <EditForm Model="@resourceNameRequest" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div id="generator">
+                    <div class="card @theme.ThemeStyle mb-3">
+                        <h5 class="card-header text-white bg-secondary">
+                            Delimiter
+                        </h5>
+                        <div class="card card-body @theme.ThemeStyle">
+                            @resourceDelimiter.Name: @resourceDelimiter.Delimiter
+                        </div>
+                    </div>
+                    <div class="card @theme.ThemeStyle mb-3">
+                        <h5 class="card-header text-white bg-secondary">
+                            Resource Type
+                        </h5>
+                        <div class="card card-body @theme.ThemeStyle">
+                            <p>
+                                Use the filters below to jump to a specifc resource type.
+                            </p>
+                            <InputSelect title="Resource Category" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceTypeCategory)"
+                                     Value="@selectedResourceTypeCategory"
+                                     ValueChanged="@((string value) => OnCategoryChanged(value))" aria-label="Select category">
+                                <option value="">Select a resource type provider (OPTIONAL)</option>
+                                @foreach (var category in @categories)
+                                {
+                                <option value="@category">@category</option>
+                                }
+                        </InputSelect>
+
+                        <InputSelect title="Resource Type" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceType)"
+                                     Value="@selectedResourceType"
+                                     ValueChanged="@((string value) => OnTypeChanged(value))" aria-label="Select type">
+                            <option value="">Select a resource type</option>
+                            @foreach (var type in @ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, selectedResourceTypeCategory))
+                                {
+                                @if (type.Property != "")
+                                    {
+                                    <option value="@type.Id">@type.Resource - @type.Property (@type.ShortName)</option>
+                                    }
+                                    else
+                                    {
+                                    <option value="@type.Id">@type.Resource (@type.ShortName)</option>
+                                    }
+                                }
+                        </InputSelect>
+
+                        @((MarkupString)namingGuidelines)
+                    </div>
+                </div>
+
+
+                @if (selectedResourceType != "")
+                    {
+                        @if (componentsVisible == "collapse")
+                        {
+                            <div class="mt-3 mb-3">
+                                <button type="button" title="Show/Hide Components" class="btn btn-primary" data-toggle="collapse" data-target="#components">Show/Hide Components</button>
+                            </div>
+                        }
+
+                        <div class="@componentsVisible" id="components">
+                            @foreach (ResourceComponent resourceComponent in servicesData.ResourceComponents)
+                            {
+                                if (!selectedResourceTypeExclude.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                                {
+                                    switch (resourceComponent.Name)
+                                    {
+                                        case "ResourceEnvironment":
+
+                                            <div class="card @theme.ThemeStyle mb-3">
+                                                <h5 class="card-header text-white bg-secondary">
+                                                    Environment
+                                                    @if (selectedResourceTypeOptional.ToLower().Contains("environment"))
+                                                    {
+                                                        @((MarkupString)optional)
+                                                    }
+                                                </h5>
+                                                <div class="card card-body @theme.ThemeStyle">
+                                                    <InputSelect title="@resourceComponent.DisplayName" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceEnvironment)"
+                                         Value="@selectedResourceEnvironment"
+                                         ValueChanged="@((string value) => OnComponentChanged("re",value))">
+                                                        <option value="">Select an environment</option>
+                                                        @foreach (var item in @servicesData.ResourceEnvironments)
+                                                        {
+                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                        }
+                            </InputSelect>
+                        </div>
+                    </div>
+                                            break;
+                                        case "ResourceFunction":
+                                            <div class="card @theme.ThemeStyle mb-3">
+                                                <h5 class="card-header text-white bg-secondary">
+                                                    Function
+                                                    @if (selectedResourceTypeOptional.ToLower().Contains("function"))
+                                                    {
+                                                        @((MarkupString)optional)
+                                                    }
+                                                </h5>
+                                                <div class="card card-body @theme.ThemeStyle">
+                                                    <InputSelect title="@resourceComponent.DisplayName" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceFunction)"
+                                         Value="@selectedResourceFunction"
+                                         ValueChanged="@((string value) => OnComponentChanged("rvmr",value))">
+                                                        <option value="">Select a Function</option>
+                                                        @foreach (var item in @servicesData.ResourceFunctions)
+                                                        {
+                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                        }
+                            </InputSelect>
+                        </div>
+                    </div>
+                                            break;
+                                        case "ResourceInstance":
+                                            <div class="card @theme.ThemeStyle mb-3">
+                                                <h5 class="card-header text-white bg-secondary">
+                                                    Instance
+                                                    @if (selectedResourceTypeOptional.ToLower().Contains("instance"))
+                                                    {
+                                                        @((MarkupString)optional)
+                                                    }
+                                                </h5>
+                                                <div class="card card-body @theme.ThemeStyle">
+                                                    <InputText title="@resourceComponent.DisplayName" class="@GetControlStyle()" id="ri" ValueExpression="@(()=>selectedResourceInstance)"
+                                       Value="@selectedResourceInstance" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))"
+                                       ValueChanged="@((string value) => OnComponentChanged("ri",value))" />
+                                                </div>
+                                            </div>
+                                            break;
+                                        case "ResourceLocation":
+                                            <div class="card @theme.ThemeStyle mb-3">
+                                                <h5 class="card-header text-white bg-secondary">
+                                                    Location
+                                                    @if (selectedResourceTypeOptional.ToLower().Contains("location"))
+                                                    {
+                                                        @((MarkupString)optional)
+                                                    }
+                                                </h5>
+                                                <div class="card card-body @theme.ThemeStyle">
+                                                    <InputSelect title="@resourceComponent.DisplayName" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceLocation)"
+                                         Value="@selectedResourceLocation"
+                                         ValueChanged="@((string value) => OnComponentChanged("rl",value))">
+                                                        <option value="">Select a location</option>
+                                                        @foreach (var item in @servicesData.ResourceLocations)
+                                                        {
+                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                        }
+                            </InputSelect>
+                        </div>
+                    </div>
+                                            break;
+                                        case "ResourceOrg":
+                                            <div class="card @theme.ThemeStyle mb-3">
+                                                <h5 class="card-header text-white bg-secondary">
+                                                    Org
+                                                    @if (selectedResourceTypeOptional.ToLower().Contains("org"))
+                                                    {
+                                                        @((MarkupString)optional)
+                                                    }
+                                                </h5>
+                                                <div class="card card-body @theme.ThemeStyle">
+                                                    <InputSelect title="@resourceComponent.DisplayName" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceOrg)"
+                                         Value="@selectedResourceOrg"
+                                         ValueChanged="@((string value) => OnComponentChanged("ro",value))">
+                                                        <option value="">Select an org</option>
+                                                        @foreach (var item in @servicesData.ResourceOrgs)
+                                                        {
+                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                        }
+                            </InputSelect>
+                        </div>
+                    </div>
+                                            break;
+                                        case "ResourceProjAppSvc":
+                                            <div class="card @theme.ThemeStyle mb-3">
+                                                <h5 class="card-header text-white bg-secondary">
+                                                    Project/App/Service
+                                                    @if (selectedResourceTypeOptional.ToLower().Contains("projappsvc"))
+                                                    {
+                                                        @((MarkupString)optional)
+                                                    }
+                                                </h5>
+                                                <div class="card card-body @theme.ThemeStyle">
+                                                    <InputSelect title="@resourceComponent.DisplayName" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceProjAppSvc)"
+                                         Value="@selectedResourceProjAppSvc"
+                                         ValueChanged="@((string value) => OnComponentChanged("rpas",value))">
+                                                        <option value="">Select a project/app/service</option>
+                                                        @foreach (var item in @servicesData.ResourceProjAppSvcs)
+                                                        {
+                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                        }
+                            </InputSelect>
+                        </div>
+                    </div>
+                                            break;
+                                        case "ResourceUnitDept":
+                                            <div class="card @theme.ThemeStyle mb-3">
+                                                <h5 class="card-header text-white bg-secondary">
+                                                    Unit/Dept
+                                                    @if (selectedResourceTypeOptional.ToLower().Contains("unitdept"))
+                                                    {
+                                                        @((MarkupString)optional)
+                                                    }
+                                                </h5>
+                                                <div class="card card-body @theme.ThemeStyle">
+                                                    <InputSelect title="@resourceComponent.DisplayName" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceUnitDept)"
+                                         Value="@selectedResourceUnitDept"
+                                         ValueChanged="@((string value) => OnComponentChanged("rud",value))">
+                                                        <option value="">Select a unit/dept</option>
+                                                        @foreach (var item in @servicesData.ResourceUnitDepts)
+                                                        {
+                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                        }
+                            </InputSelect>
+                        </div>
+                    </div>
+                                            break;
+                                    }
+                                }
+                            }
+                            <div class="mb-3">
+                                <br />
+                                <button class="btn btn-success" type="submit" title="Generate" disabled=@boolFormDisabled>
+                                    <span class="oi oi-loop-circular" aria-hidden="true"></span> Generate
+                                </button>
+                            </div>
+                        </div>
+                        @if (@resourceNameRequestResponse != null)
+                        {
+                            <div class="card @resultClass text-white mt-3">
+                                <div class="card-header">@resultHeader</div>
+                                <div class="card-body">
+                                    @if (@generatedName != null)
+                                    {
+                                        @if (@generatedName != "")
+                                        {
+                                            <div>
+                                                <strong>Generated Name: </strong>
+                                                <label>@generatedName</label>
+                                            </div>
+                                        }
+                                    }
+                                    @if (@message != null)
+                                    {
+                                        @if (@message != "")
+                                        {
+                                            <div>
+                                                <strong>Message: </strong>
+                                                <br />
+                                                @foreach (var sub in message.Split('\n'))
+                                                {
+                                                    @sub
+
+                                                    <br />
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
+@code {
+    [CascadingParameter]
+    protected ThemeInfo? theme { get; set; }
+    private ServicesData servicesData = new();
+    private ResourceDelimiter? resourceDelimiter;
+    private string? selectedResourceEnvironment;
+    private string? selectedResourceInstance;
+    private string? selectedResourceLocation;
+    private string? selectedResourceOrg;
+    private string? selectedResourceProjAppSvc;
+    private string? selectedResourceTypeCategory = "";
+    private string? selectedResourceType = "";
+    private string selectedResourceTypeExclude;
+    private string selectedResourceTypeOptional;
+    private List<string> categories = new List<string>();
+    private string? selectedResourceUnitDept;
+    private string? selectedResourceFunction;
+    private bool boolFormDisabled = true;
+    private string? generatedName;
+    private string? message;
+    private string? namingGuidelines;
+    private string? resultClass;
+    private string? resultHeader;
+    private string? componentsVisible = "collapse in";
+    private string optional = " (OPTIONAL)";
+    private string[] filteredscopes = new string[] { "resource group", "resource group & region", "region", "global", "subscription", "tenant" };
+    private ResourceNameRequest resourceNameRequest = new();
+    private ResourceNameResponse resourceNameRequestResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
+        List<ResourceType> filteredtypes = new List<ResourceType>();
+        // Filter out the types w/o the scope
+        foreach (ResourceType type in servicesData.ResourceTypes)
+        {
+            if (filteredscopes.Contains(type.Scope))
+            {
+                filteredtypes.Add(type);
+            }
+        }
+        servicesData.ResourceTypes = filteredtypes;
+
+        // Get the list of categories
+        categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+
+        resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
+        componentsVisible = "collapse show";
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Logger.LogInformation("HandleValidSubmit called");
+
+        // Create the name request
+        resourceNameRequest.ResourceDelimiter = resourceDelimiter;
+        resourceNameRequest.ResourceEnvironment = servicesData.ResourceEnvironments.FirstOrDefault(x => x.ShortName == selectedResourceEnvironment);
+        resourceNameRequest.ResourceFunction = servicesData.ResourceFunctions.FirstOrDefault(x => x.ShortName == selectedResourceFunction);
+        resourceNameRequest.ResourceInstance = selectedResourceInstance;
+        resourceNameRequest.ResourceLocation = servicesData.ResourceLocations.FirstOrDefault(x => x.ShortName == selectedResourceLocation);
+        resourceNameRequest.ResourceOrg = servicesData.ResourceOrgs.FirstOrDefault(x => x.ShortName == selectedResourceOrg);
+        resourceNameRequest.ResourceProjAppSvc = servicesData.ResourceProjAppSvcs.FirstOrDefault(x => x.ShortName == selectedResourceProjAppSvc);
+        resourceNameRequest.ResourceType = servicesData.ResourceTypes.FirstOrDefault(x => x.Id == Convert.ToInt32(selectedResourceType));
+        resourceNameRequest.ResourceUnitDept = servicesData.ResourceUnitDepts.FirstOrDefault(x => x.ShortName == selectedResourceUnitDept);
+
+        resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
+
+        // Process the valid form
+        generatedName = resourceNameRequestResponse.ResourceName;
+        message = resourceNameRequestResponse.Message;
+
+        // Set teh result container
+        if (resourceNameRequestResponse.Success)
+        {
+            resultClass = "bg-success";
+            resultHeader = "SUCCESS";
+            componentsVisible = "collapse";
+        }
+        else
+        {
+            resultClass = "bg-danger";
+            resultHeader = "FAILURE";
+            componentsVisible = "collapse show";
+        }
+    }
+
+    private void OnCategoryChanged(string value)
+    {
+        selectedResourceTypeCategory = value;
+        selectedResourceType = "";
+        namingGuidelines = "";
+        componentsVisible = "collapse show";
+    }
+
+    private Task OnTypeChanged(string value)
+    {
+        resourceNameRequestResponse = null;
+        // Assign the selected value to the Model
+        selectedResourceType = value;
+
+        namingGuidelines = "";
+        componentsVisible = "collapse show";
+
+        if (selectedResourceType != "")
+        {
+            // Find the selected resoruce type
+            ResourceType currentResourceType = servicesData.ResourceTypes.Find((t) => t.Id == Convert.ToInt32(selectedResourceType));
+
+            // Create the naming guidelines HTML
+            //namingGuidelines = "<div class=\"mb-3\">";
+            //namingGuidelines += "<a class=\"btn btn-primary mb-3\" data-toggle=\"collapse\" href=\"#guidelines\" role=\"button\" aria-expanded=\"false\" aria-controls=\"guidelines\">";
+            //namingGuidelines += "Resource Naming Guidelines";
+            //namingGuidelines += "</a>";
+            namingGuidelines += "<div id=\"guidelines\" class=\"card mt-3\">";
+            namingGuidelines += "<div class=\"card-header bg-default text-black\">";
+            namingGuidelines += "<a id=\"NamingGuidlines\" class=\"link-dark text-decoration-none\" data-toggle=\"collapse\" href=\"#namingguidelines\" role=\"button\" aria-expanded=\"false\" aria-controls=\"namingguidelines\">";
+            namingGuidelines += "Naming Guidelines";
+            namingGuidelines += "</a>";
+            namingGuidelines += "</div>";
+            namingGuidelines += "<div class=\"collapse card card-body " + theme.ThemeStyle + "\"  id=\"namingguidelines\">";
+            if (currentResourceType.LengthMin != "")
+            {
+                namingGuidelines += "<div><strong>Minimum Length:</strong> " + currentResourceType.LengthMin + "</div>";
+            }
+            if (currentResourceType.LengthMax != "")
+            {
+                namingGuidelines += "<div><strong>Maximum Length:</strong> " + currentResourceType.LengthMax + "</div>";
+            }
+            if (currentResourceType.ValidText != "")
+            {
+                namingGuidelines += "<div><strong>Valid Text:</strong> " + currentResourceType.ValidText + "</div>";
+            }
+            if (currentResourceType.Optional != "")
+            {
+                namingGuidelines += "<div><strong>Optional:</strong> " + currentResourceType.Optional + "</div>";
+            }
+            if (currentResourceType.Exclude != "")
+            {
+                namingGuidelines += "<div><strong>Excluded:</strong> " + currentResourceType.Exclude + "</div>";
+            }
+            if (currentResourceType.Regx != "")
+            {
+                namingGuidelines += "<div><strong>Regx:</strong> " + currentResourceType.Regx + "</div>";
+            }
+            namingGuidelines += "</div></div>";
+            //namingGuidelines += "</div>";
+
+            // Set the optional components
+            selectedResourceTypeOptional = currentResourceType.Optional;
+
+            // Set the excluded components
+            selectedResourceTypeExclude = currentResourceType.Exclude;
+
+            // Reset the selected items
+            selectedResourceEnvironment = null;
+            selectedResourceInstance = null;
+            selectedResourceLocation = null;
+            selectedResourceOrg = null;
+            selectedResourceProjAppSvc = null;
+            selectedResourceUnitDept = null;
+            selectedResourceFunction = null;
+
+            componentsVisible = "collapse show";
+
+            // Check if all the components are optional for the resource type
+
+            ValidateForm();
+
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnComponentChanged(string sender, string value)
+    {
+        switch (sender)
+        {
+            case "re":
+                selectedResourceEnvironment = value;
+                break;
+            case "ri":
+                selectedResourceInstance = value;
+                break;
+            case "rl":
+                selectedResourceLocation = value;
+                break;
+            case "ro":
+                selectedResourceOrg = value;
+                break;
+            case "rpas":
+                selectedResourceProjAppSvc = value;
+                break;
+            case "rud":
+                selectedResourceUnitDept = value;
+                break;
+            case "rvmr":
+                selectedResourceFunction = value;
+                break;
+        }
+
+        ValidateForm();
+        return Task.CompletedTask;
+    }
+
+    private void ValidateForm()
+    {
+        if (selectedResourceType != null)
+        {
+            boolFormDisabled = false;
+            @foreach (ResourceComponent resourceComponent in servicesData.ResourceComponents)
+            {
+                // Check if the component is excluded for the resource type
+                if (!selectedResourceTypeExclude.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                {
+                    // Check if the component is optional for the resource type
+                    if (!selectedResourceTypeOptional.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                    {
+                        switch (resourceComponent.Name)
+                        {
+                            case "ResourceEnvironment":
+                                if (selectedResourceEnvironment == null)
+                                {
+                                    boolFormDisabled = true;
+                                }
+                                break;
+
+                            case "ResourceInstance":
+                                if (selectedResourceInstance == null)
+                                {
+                                    boolFormDisabled = true;
+                                }
+                                break;
+                            case "ResourceLocation":
+                                if (selectedResourceLocation == null)
+                                {
+                                    boolFormDisabled = true;
+                                }
+                                break;
+                            case "ResourceOrg":
+                                if (selectedResourceOrg == null)
+                                {
+                                    boolFormDisabled = true;
+                                }
+                                break;
+                            case "ResourceProjAppSvc":
+                                if (selectedResourceProjAppSvc == null)
+                                {
+                                    boolFormDisabled = true;
+                                }
+                                break;
+                            case "ResourceUnitDept":
+                                if (selectedResourceUnitDept == null)
+                                {
+                                    boolFormDisabled = true;
+                                }
+                                break;
+                            case "ResourceFunction":
+                                if (selectedResourceFunction == null)
+                                {
+                                    boolFormDisabled = true;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task OnInstructionsClick()
+    {
+        NavigationManager.NavigateTo("/instructions");
+    }
+
+    private string GetControlStyle()
+    {
+        return "form-control " + theme.ThemeStyle;
+    }
+}
