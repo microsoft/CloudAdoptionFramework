@@ -103,7 +103,7 @@ docker build -t azurenamingtool .
 > **NOTE:**
 > Ensure the '.' is included in the command
 
-* Run the following ##Docker command** to create a new container and mount a new volume:
+* Run the following **Docker command** to create a new container and mount a new volume:
 
 ```cmd
 docker run -d -p 8081:80 --mount source=azurenamingtoolvol,target=/app/settings azurenamingtool:latest
