@@ -2,7 +2,7 @@
 
 > **CAUTION:** This version of the tool has been deprecated by the release of v2 and will no longer be updated. Please upgrade to v2 to benefit from the latest features.
 
-[Click here for Azure Naming Tool v2](../v2/README.md)
+[Click here for Azure Naming Tool v2](../v2)
 
 ## Description
 
