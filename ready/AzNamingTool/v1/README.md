@@ -1,5 +1,9 @@
 # Azure Naming Tool v1
 
+> **CAUTION:** This version of the tool has been deprecated by the release of v2 and will no longer be updated. Please upgrade to v2 to benefit from the latest features.
+
+[Click here for Azure Naming Tool v2](../v2/README.md)
+
 ## Description
 
 The Azure Naming Tool was built to accelerate Azure deployments using the [Cloud Adoption Framework (CAF)](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/) as a baseline. Recognizing the lengthy, complex process it was for organizations to develop a standardized naming convention, the tool takes the complexity out of the process to generate a customizable naming convention within minutes.
