@@ -4,6 +4,59 @@
 
 ### AzGovViz version 6
 
+__Changes__ (2022-Jun-22 / Major)
+
+* New feature 'Orphaned Resources' - Azure Resource Graph based reporting on orphaned resources (TenantSummary, ScopeInsights, CSV export). [Azure Orphan Resources - GitHub](https://github.com/dolevshor/azure-orphan-resources) ARG queries and workbooks by Dolev Shor
+* New feature 'Resource fluctuation' - Compare against Resources from previous run and output aggregated summary of the Resource fluctuation (TenantSummary, CSV export)
+* Fix `/providers/Microsoft.Authorization/roleAssignmentScheduleInstances` AzAPICall errorhandling (error 400, 500)
+* Optimize procedure to update the AzAPICall module
+* Use AzAPICall PowerShell module version 1.1.17
+* Updated [HTML Demo](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html)
+
+__Changes__ (2022-Jun-14 / Major)
+
+* Fix issue #110 / handle `DisallowedProvider` errorCode (Blueprints, PolicyInsights)
+* Fix issue #111 / replace .AddRange with foreach/.Add
+* Use AzAPICall PowerShell module version 1.1.16
+
+__Changes__ (2022-Jun-10 / Major)
+
+* Fix issue #110 / handle `DisallowedProvider` errorCode (Microsoft Defender for Cloud plans for Subscriptions)
+* Use AzAPICall PowerShell module version 1.1.15
+* Remove Azure DevOps 'PSRule for Azure' workaround / use latest PSRule.Rules.Azure PowerShell module version (current: 1.16.0)
+
+__Changes__ (2022-Jun-03 / Major)
+
+* Optimize Policy Exemption output (HTML TenantSummary, CSV output)
+* Update Azure DevOps variables YAML - add parameter `-DebugAzAPICall`
+* Update PSRule CSV output sorting
+
+__Changes__ (2022-Jun-02 / Major)
+
+* Fix ClassicAdministrators for non applicable Subscription offers
+* Use AzAPICall version 1.1.13
+
+__Changes__ (2022-May-31 / Major)
+
+* New feature - Report on 'Classic Administrators' for Subscriptions -> TenantSummary, ScopeInsights and CSV export
+* Fix consumption reporting (issue #101 - handle error: 'Management group `<ManagementGroupId>` does not have any valid subscriptions')
+* PSRule for Azure / Azure DevOps dependencies (Az.Resources) workaround -> use PSRule for Azure version 1.14.3 (else latest)
+
+__Changes__ (2022-May-21 / Major)
+
+> Note: Azure DevOps and GitHub users must update the YAML file(s) and PowerShell files (`AzGovVizParallel.ps1` and `prerequisites.ps1`)
+
+* Integration of [PSRule for Azure](#integrate-psrule-for-azure). This feature is optional, use new parameter `-DoPSRule`
+  * Provides a [Azure Well-Architected Framework](https://docs.microsoft.com/en-gb/azure/architecture/framework/) aligned suite of rules for validating Azure resources
+  * Provides meaningful information to allow remediation
+  * New parameter `-PSRuleVersion` - Define the PSRule..Rules.Azure PowerShell module version, if undefined then 'latest' will be used
+* Optional feature: publish HTML to Azure Web App (check the __[Setup Guide](setup.md)__) in Azure DevOps or GitHub Actions - thanks Wayne Meyer
+* New feature / report on [enabled Subscription Features](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features) TenantSummary, ScopeInsights and CSV export
+* Decomissioned Azure DevOps `.pipelines` - use the new YAML files `.azuredevops/pipelines/*` 
+* Fix [#issue92](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/92) -> pipeline .azuredevops/pipelines/AzGovViz.pipeline.yml
+* Update Azure DevOps pipelines / use AzurePowershell@5
+* Update prerequisites.ps1
+
 __Changes__ (2022-May-05 / Major)
 
 * fix: `using:scriptPath` variable in foreach parallel (this is only relevant for Azure DevOps and GitHub if you have a non default folder structure in your repository)
