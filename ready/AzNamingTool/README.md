@@ -12,9 +12,7 @@
 
 [How To Install](#how-to-install)
 
-* [Run as a Docker image](#run-as-a-docker-image)  
-
-https://user-images.githubusercontent.com/106343797/171671289-15fde526-30ab-443c-80da-1367ce13abc0.mp4
+* [Run as a Docker image](#run-as-a-docker-image)
 
 * [Run as an Azure App Service Container](#run-as-an-azure-app-service-container)
 
