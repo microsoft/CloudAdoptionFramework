@@ -84,15 +84,23 @@ This project contains a .NET 6 application, with Docker support. To use, complet
 
 This process will allow you to deploy the Azure Naming Tool using Docker to your local environment.
 
-* On the **<>Code** tab, select the **<>Code** button and select **Download ZIP**
-* Extract the zipped files to your local machine
-* Change directory to the project folder
+1. Scroll up to the top, left corner of this page.
+2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
+3. Click the green **<>Code** button and select **Download ZIP**.
+4. Open your Downloads folder using File Explorer.
+5. Extract the contents of the ZIP archive.
 
 > **NOTE:**
-> Ensure you can see the project files and are not in the parent folder
+> Validate the project files extracted successfully and match the contents in the GitHub repository.
 
-* Open a **Command Prompt** and change directory to the current project folder
-* Run the following **Docker command** to build the image:
+6. Open a **Command Prompt**
+7. Change the directory to the **AzNamingTool** folder. For example:
+
+```cmd
+cd .\Downloads\CloudAdoptionFramework-master\CloudAdoptionFramework-master\ready\AzNamingTool
+```
+
+8. Run the following **Docker command** to build the image:
 
 ```cmd
 docker build -t azurenamingtool .
@@ -101,7 +109,7 @@ docker build -t azurenamingtool .
 > **NOTE:**
 > Ensure the '.' is included in the command
 
-* Run the following **Docker command** to create a new container and mount a new volume:
+9. Run the following **Docker command** to create a new container and mount a new volume:
 
 ```cmd
 docker run -d -p 8081:80 --mount source=azurenamingtoolvol,target=/app/settings azurenamingtool:latest
@@ -111,9 +119,7 @@ docker run -d -p 8081:80 --mount source=azurenamingtoolvol,target=/app/settings 
 > * Substitute 8081 for any port not in use on your machine
 > * You may see warnings in the command prompt regarding DataProtection and keys. These indicate that the keys are not persisted and are only local to the container instances.
 
-* Access the site using the following URL  
-
-  *http://localhost:8081*
+10. Access the site using the following URL: *http://localhost:8081*
   
 > **NOTE:**
 > Substitute 8081 for the port you used in the docker run command
@@ -127,15 +133,23 @@ The Azure Naming Tool requires persistent storage for the configuration files wh
 > **NOTE:**
 > For many of the steps, a sample process is provided, however, there are many ways to accomplish each step.
 
-* On the **<>Code** tab, select the **<>Code** button and select **Download ZIP**
-* Extract the zipped files to your local machine
-* Change directory to the project folder
+1. Scroll up to the top, left corner of this page.
+2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
+3. Click the green **<>Code** button and select **Download ZIP**.
+4. Open your Downloads folder using File Explorer.
+5. Extract the contents of the ZIP archive.
 
 > **NOTE:**
-> Ensure you can see the project files and are not in the parent folder
+> Validate the project files extracted successfully and match the contents in the GitHub repository.
 
-* Open a **Command Prompt** and change directory to the current project folder
-* Run the following **Docker command** to build the image
+6. Open a **Command Prompt**
+7. Change the directory to the **AzNamingTool** folder. For example:
+
+```cmd
+cd .\Downloads\CloudAdoptionFramework-master\CloudAdoptionFramework-master\ready\AzNamingTool
+```
+
+8. Run the following **Docker command** to build the image:
 
 ```cmd
 docker build -t azurenamingtool .
@@ -144,16 +158,16 @@ docker build -t azurenamingtool .
 > **NOTE:**
 > Ensure the '.' is included in the command
   
-* Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
-* Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
-* Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
+9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
+10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
+11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
   
   ![FileShare](./wwwroot/Screenshots/FileShare.png)
 
-* Create an Azure App Service - Web App: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux)
-* Mount the file share as local storage for the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/configure-connect-to-azure-storage?tabs=portal&pivots=container-linux)
+12. Create an Azure App Service - Web App: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux)
+13. Mount the file share as local storage for the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/configure-connect-to-azure-storage?tabs=portal&pivots=container-linux)
   
   ![MountStorage](./wwwroot/Screenshots/MountStorage.png)
 
-* Deploy the image from the Azure Container Registry to the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/deploy-ci-cd-custom-container?tabs=acr&pivots=container-linux)
-* Access the site using your Azure App Service URL
+14. Deploy the image from the Azure Container Registry to the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/deploy-ci-cd-custom-container?tabs=acr&pivots=container-linux)
+15. Access the site using your Azure App Service URL
