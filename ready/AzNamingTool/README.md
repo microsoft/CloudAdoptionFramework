@@ -6,7 +6,7 @@
 
 [Project Structure](#project-structure)
 
-[Important Notes](#-important-notes-)
+[Important Notes](#important-notes)
 
 [Pages](#pages)
 
