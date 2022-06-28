@@ -1,124 +1,173 @@
-# Azure Naming Tool
+# Azure Naming Tool v2
 
-## Description
+<img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
-The Azure Naming Tool was built to accelerate Azure deployments using the [Cloud Adoption Framework (CAF)](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/) as a baseline. Recognizing the lengthy, complex process it was for organizations to develop a standardized naming convention, the tool takes the complexity out of the process to generate a customizable naming convention within minutes.
+[Overview](#overview)
 
-The Azure Naming Tool creates a custom naming reference guide and name generator for your Azure deployments. The tool initially begins with running a PowerShell script to collect organizational specific naming preferences.  This data is collected and stored in the "configuration.csv" file. The script also outputs an HTML file.  The HTML file contains both the reference guide and name generator using the data collected from the PowerShell script. These artifacts can be used to submit for approvals, accelerate deployments, and enhance overall governance practices.
+[Project Structure](#project-structure)
 
-If the naming convention needs to be adjusted, the organizational specific data can edited in the CSV files before re-executing the PowerShell Script again. This will generate a new HTML file containing the updated reference guide and name generator.
+[Important Notes](#important-notes)
 
-> **Important** - Due to the relative paths integrated within the script, you **MUST** run the script from the same directory where it is stored on your file system.
+[Pages](#pages)
 
-## Azure Naming Tool Components
+[How To Install](#how-to-install)
 
-### Data Collection and Output Files
+* [Run as a Docker image](#run-as-a-docker-image)
 
-- **PowerShell Script**  - The "Get-AzureNamingConfiguration.ps1" script is utilized for collecting naming preferences and organizational data to customize the HTML file.
+* [Run as an Azure App Service Container](#run-as-an-azure-app-service-container)
 
-- **Configuration CSV** - The "configuration.csv" file contains the selections captured during each run of the script.  Each time the script is run, this file is over written with the latest changes. In order to update these values, you **MUST** re-run the "Get-AzureNamingConfiguration.ps1" script.  This is to ensure the script can validate input, incorporate the values appropriately, and add them to the HTML based tool.
+## Overview
 
-    > **NOTE**
-    > It is **not** recommended to manually edit this file.
+The Naming Tool was developed using a naming pattern based on [Microsoft's best practices](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/naming-and-tagging). Once the organizational components have been defined by an administrator, users can use the tool to generate a name for the desired Azure resource.
 
-- **HTML File** - The "AzureNamingTool.html" file contains embedded JavaScript and CSS that is used to used to build the tools and style the page.  These features will need to be enabled in your browser for the tool to work appropriately.
+## Project Structure
 
-### Static Data Files
+The Azure Naming Tool is a .NET 6 Blazor application, with a RESTful API. The UI consists of several pages to allow the configuration and generation of Azure Resource names. The API provides a programmatic interface for the functionality. The application contains Docker support, allowing the site to be run as a stand-alone application, or a container.
 
-- **Environments CSV** - The "environments.csv" file is a static list of the suggested environments (e.g. Development, Test, etc.) with a 3 letter short name for each environment.
+### Project Components
 
-- **Azure Locations** - The "locations.csv" file is a static list of Azure's public locations (datacenters) with 2 or 3 alphanumeric short names for each location.
+* UI/Admin
+* API
+* JSON configuration files
+* Dockerfile
 
-- **Azure Resources CSV** - The "resources.csv" file is a static collection of Azure's resources and associated naming restrictions (e.g. allowed characters, name lengths, abbreviations, etc.).
-There are only 3 field that should be modified in this CSV:
-    1. OPTIONAL: the components of your naming convention that can be optional for a specific resource type.
-    1. EXCLUDE: the components of your naming convention that can be excluded for a specific resource type.
-    1. SHORTNAME: the short name for each resource type.
+### Important Notes
+
+The following are important notes/aspects of the Azure Naming Tool:
+
+* The application is designed to run as a stand-alone solution, with no internet/Azure connection.
+* The application can be run as a .NET 6 site, or as a Docker container.
+* The site can be hosted in any environment, including internal or in a public/private cloud.
+* The application uses local JSON files to store the configuration of the components.
+* The application requires persistent storage. If running as a container, a volume is required to store configuration files.
+* The application contains a *repository* folder, which contains the default component configuration JSON files. When deployed, these files are copied to the *settings* folder.
+* The Admin interface allows configurations to be "reset", if needed. This process copies the configuration from the *repository* folder to the *settings* folder.
+* The API requires an API Key for all executions. A default API Key (guid) will be generated on first launch. This value can be updated in the Admin section.
+* On first launch, the application will prompt for the Admin password to be set.
+
+  ![Admin Password Prompt](./wwwroot/Screenshots/AdminPasswordPrompt.png)
+
+## Pages
+
+### Home Page
+
+The Home Page provides an overview of the tool and the components.
+
+![Home Page](./wwwroot/Screenshots/HomePage.png)
+
+### Configuration
+
+The Configuration Page shows the current Name Generation configuration. This page also provides an Admin section for updating the configuration.
+
+![Configuration Page](./wwwroot/Screenshots/ConfigurationPage.png)
+
+### Reference
+
+The Reference Page provides examples for each type of Azure resource. The example values do not include any excluded naming components. Optional components are always displayed and are identified below the example. Since unique names are only required at specific scopes, the examples provided are only generated for the scopes above the resource scope: resource group, resource group & region, region, global, subscription, and tenant.
+
+![Reference Page](./wwwroot/Screenshots/ReferencePage.png)
+
+### Generate
+
+The Generate Page provides a dropdown menu to select an Azure resource. Once a resource is selected, naming component options are provided. Read-only components cannot be changed, like the value for a resource type or organization. Optional components, if left blank, will be null and not shown in the output. Required components do not allow a null value, and the first value in the array is set as the default.
+
+![Generate Page](./wwwroot/Screenshots/GeneratePage.png)
+
+## How To Install
+
+This project contains a .NET 6 application, with Docker support. To use, complete the following:
+
+> **NOTE:**
+> The Azure Naming Tool requires persistent storage for the configuration files when run as a container. The following processes will explain how to create this volume in your respective environment. All configuration JSON files will be stored in the volume to ensure the configuration is persisted.
+
+### Run as a Docker image
+
+This process will allow you to deploy the Azure Naming Tool using Docker to your local environment.
+
+1. Scroll up to the top, left corner of this page.
+2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
+3. Click the green **<>Code** button and select **Download ZIP**.
+4. Open your Downloads folder using File Explorer.
+5. Extract the contents of the ZIP archive.
+
+> **NOTE:**
+> Validate the project files extracted successfully and match the contents in the GitHub repository.
+
+6. Open a **Command Prompt**
+7. Change the directory to the **AzNamingTool** folder. For example:
+
+```cmd
+cd .\Downloads\CloudAdoptionFramework-master\CloudAdoptionFramework-master\ready\AzNamingTool
+```
+
+8. Run the following **Docker command** to build the image:
+
+```cmd
+docker build -t azurenamingtool .
+```
   
-- **VM Specific Roles CSV** - The "vmRoles.csv" file is a static collection of common server roles (e.g. DC, DNS, etc.) installed on Azure virtual machines with 2 letter short names for each role.
+> **NOTE:**
+> Ensure the '.' is included in the command
 
-## How to Use  
+9. Run the following **Docker command** to create a new container and mount a new volume:
 
-1. Download the GitHub Repo to a ZIP file.
-1. Extract the ZIP file to your local file system.
-1. Open PowerShell.
-1. Change your working directory to the location of the extracted ZIP file.
-1. Call the "AzureNamingConfiguration.ps1" script.
+```cmd
+docker run -d -p 8081:80 --mount source=azurenamingtoolvol,target=/app/settings azurenamingtool:latest
+```
 
-    ```powershell  
-    .\Set-AzureNamingConfiguration.ps1
-    ```
+> **NOTES:**  
+> * Substitute 8081 for any port not in use on your machine
+> * You may see warnings in the command prompt regarding DataProtection and keys. These indicate that the keys are not persisted and are only local to the container instances.
 
-1. Provide input for each of the questions to build out the configuration information for the Naming Tool.
-    - QUESTION 1: Remove the unwanted naming components
-        - The "Org" component cannot be removed and is only used to name high level resources, like subscriptions and management groups.  Refer to the "optional" and "exclude" columns in the "resources.csv" to see which resources use the Org component.
-        - The "VM Role" component is only allowed on virtual machine resources based on the "optional" and "exclude" columns in the "resources.csv" file.
-    - QUESTION 2: Order the desired naming components  
-    - QUESTION 3: Choose delimiter between naming components
-    - QUESTION 4: Organization name and shortname  
-    - QUESTION 5: Business units and departments
-    - QUESTION 6: Remove unwanted Environments
-    - QUESTION 7: Projects, Applications, and / or Services
+10. Access the site using the following URL: *http://localhost:8081*
+  
+> **NOTE:**
+> Substitute 8081 for the port you used in the docker run command
 
-1. Using File Explorer, open the directory of the extracted ZIP file
-1. Open the "AzureNamingTool.html".
-1. Select a tab to open the appropriate tool:  
-    - Reference - provides a list of all Azure services within the noted scopes, examples, and acceptable syntax.  
-    - Generator - allows you to create names based on your previously provided information for Azure resources in the noted scopes.  
+***
 
-    > **Note**  
-    > Ensure you adjust the instance number according to your needs and your organization has adopted the naming strategy.  
+### Run as an Azure App Service Container
 
-### Customizations
+The Azure Naming Tool requires persistent storage for the configuration files when run as a container. The following processes will explain how to create this volume for your Azure App Service Container. All configuration JSON files will be stored in the volume to ensure the configuration is persisted.
 
-Any of the CSV files in the Data subfolder can be modified to meet your needs. Below are the most commonly customized sections or settings.
-Consider reviewing the "Static Data Files" section for a summary of each CSV file.
+> **NOTE:**
+> For many of the steps, a sample process is provided, however, there are many ways to accomplish each step.
 
-#### Locations
+1. Scroll up to the top, left corner of this page.
+2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
+3. Click the green **<>Code** button and select **Download ZIP**.
+4. Open your Downloads folder using File Explorer.
+5. Extract the contents of the ZIP archive.
 
-To update the location short names:
+> **NOTE:**
+> Validate the project files extracted successfully and match the contents in the GitHub repository.
 
-1. Open the 'data' subfolder.
-1. Open the 'locations.csv' file in your favorite editor (i.e. Excel).
-1. Consider the following with setting or changing region codes:
+6. Open a **Command Prompt**
+7. Change the directory to the **AzNamingTool** folder. For example:
 
-    - Keep them unique so they are easily distinguishable with others
-    - Make sure they are short so they can be concatenated together with out exceeding limits for overall resource names. (Typically 3-4 characters at most)
+```cmd
+cd .\Downloads\CloudAdoptionFramework-master\CloudAdoptionFramework-master\ready\AzNamingTool
+```
 
-#### VM Roles
+8. Run the following **Docker command** to build the image:
 
-These short names are based on commonly deployed roles but as with any organization, are highly subjective.  To update the VM roles and short names:
+```cmd
+docker build -t azurenamingtool .
+```
+  
+> **NOTE:**
+> Ensure the '.' is included in the command
+  
+9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
+10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
+11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
+  
+  ![FileShare](./wwwroot/Screenshots/FileShare.png)
 
-1. Open the 'data' subfolder.
-1. Open the 'vmRoles.csv' file in your favorite editor (i.e. Excel).
-1. Consider the following with these names or values:
+12. Create an Azure App Service - Web App: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux)
+13. Mount the file share as local storage for the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/configure-connect-to-azure-storage?tabs=portal&pivots=container-linux)
+  
+  ![MountStorage](./wwwroot/Screenshots/MountStorage.png)
 
-    - Keep them unique as you would for the region codes so they are distinguishable.
-    - Also keep them as short as possible considering they are part of the overall resource name and subject to character limits as a whole.
-
-> **Important**  
-> Any **changes** to the CSV files in the data subfolder require you to **re-run** the script to recompile your customizations for the naming tool!
-
-## References  
-
-[Cloud Adoption Framework (Main Page)](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/)  
-[Define your naming convention](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming)  
-[Naming and tagging conventions tracking template](https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/naming-and-tagging-conventions-tracking-template.xlsx)  
-
-## Output Example
-
-### Tool Information
-
-![](./images/azNaming1_Info.png "Azure Naming Tool Information")
-
-### Configuration Overview
-
-![](./images/azNaming2_config.png "Azure Naming Configuration")
-
-### Reference Guide for Azure Services with Examples
-
-![](./images/azNaming3_ref.png "Azure Naming Configuration")
-
-### Azure Name Generator
-
-![](./images/azNaming4_gen.png "Azure Naming Configuration")
+14. Deploy the image from the Azure Container Registry to the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/deploy-ci-cd-custom-container?tabs=acr&pivots=container-linux)
+15. Access the site using your Azure App Service URL

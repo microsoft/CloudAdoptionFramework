@@ -1,0 +1,154 @@
+﻿@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@using AzureNamingTool.Services
+@using Microsoft.AspNetCore.Html
+@using AzureNamingTool.Helpers
+@inject IToastService toastService
+@inject StateContainer state
+
+<div class="modal fade show d-block" tabindex="-1" role="dialog">
+    <div class="modal-backdrop fade show" @onclick="Cancel"></div>
+    <div class="modal-dialog" style="z-index: 1050">
+        <!-- Pop it above the backdrop -->
+        <div class="modal-content @theme.ThemeStyle">
+            <div class="modal-header bg-navcolor text-white">
+                <h3 class="modal-title">@title</h3>
+            </div>
+            <div class="modal-body">
+                @((MarkupString)message)
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input title="Name" value="@itemName" type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
+                </div>
+
+                <div class="form-group">
+                    <label for="shortName">Short Name</label>
+                    <input title="Short Name" value="@itemShortName" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemShortName = (string)ui.Value;})" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button title="Add" @onclick="Save" class="btn btn-success">Add</button>
+                <button title="Cancel" @onclick="ModalInstance.CancelAsync" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public ThemeInfo theme { get; set; }
+
+    [Parameter] public int id { get; set; }
+    [Parameter] public string title { get; set; }
+    [Parameter] public string message { get; set; }
+    [Parameter] public string type { get; set; }
+
+
+    private ServiceResponse serviceResponse = new();
+    private string? itemName;
+    private string? itemShortName;
+
+    protected override async void OnInitialized()
+    {
+
+    }
+
+    async void Save()
+    {
+        if ((itemName != null) && (itemShortName != null))
+        {
+            if ((itemName != "") && (itemShortName != ""))
+            {
+                if (GeneralHelper.ValidateShortName(itemShortName, type))
+                {
+                    itemShortName = itemShortName.ToLower();
+                    switch (type)
+                    {
+                        case "ResourceEnvironment":
+                            ResourceEnvironment resourceEnvironment = new ResourceEnvironment()
+                                {
+                                    Name = itemName,
+                                    ShortName = itemShortName.ToLower()
+
+                                };
+                            serviceResponse = await ResourceEnvironmentService.PostItem(resourceEnvironment);
+                            break;
+                        case "ResourceLocation":
+                            ResourceLocation resourceLocation = new ResourceLocation()
+                                {
+                                    Name = itemName,
+                                    ShortName = itemShortName.ToLower()
+
+                                };
+                            serviceResponse = await ResourceLocationService.PostItem(resourceLocation);
+                            break;
+                        case "ResourceOrg":
+                            ResourceOrg resourceOrg = new ResourceOrg()
+                                {
+                                    Name = itemName,
+                                    ShortName = itemShortName.ToLower()
+
+                                };
+                            serviceResponse = await ResourceOrgService.PostItem(resourceOrg);
+                            break;
+                        case "ResourceProjAppSvc":
+                            ResourceProjAppSvc resourceProjAppSvc = new ResourceProjAppSvc()
+                                {
+                                    Name = itemName,
+                                    ShortName = itemShortName.ToLower()
+
+                                };
+                            serviceResponse = await ResourceProjAppSvcService.PostItem(resourceProjAppSvc);
+                            break;
+                        case "ResourceUnitDept":
+                            ResourceUnitDept resourceUnitDept = new ResourceUnitDept()
+                                {
+                                    Name = itemName,
+                                    ShortName = itemShortName.ToLower()
+
+                                };
+                            serviceResponse = await ResourceUnitDeptService.PostItem(resourceUnitDept);
+                            break;
+                        case "ResourceFunction":
+                            ResourceFunction ResourceFunction = new ResourceFunction()
+                                {
+                                    Name = itemName,
+                                    ShortName = itemShortName.ToLower()
+
+                                };
+                            serviceResponse = await ResourceFunctionService.PostItem(ResourceFunction);
+                            break;
+                    }
+
+                    if (serviceResponse.Success)
+                    {
+                        ModalInstance.CloseAsync();
+                        toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!", "SUCCESS");
+                        GeneralHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " added!");
+                    }
+                    else
+                    {
+                        toastService.ShowError("There was an error adding the " + type.Replace("Resource", "Resource ") + "!", "ERROR");
+                    }
+                }
+                else
+                {
+                    toastService.ShowError("You must enter a valid short name!", "ERROR");
+                }
+            }
+            else
+            {
+                toastService.ShowError("You must enter a name and short name!", "ERROR");
+            }
+        }
+        else
+        {
+            toastService.ShowError("You must enter a name and short name!", "ERROR");
+        }
+    }
+
+    async Task Cancel() => await ModalInstance.CancelAsync();
+}

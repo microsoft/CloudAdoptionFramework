@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+	<Version>2.0.0</Version>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>8d243b16-78f2-4542-8f36-682411560b1a</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>.</DockerfileContext>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="appsettings.Development.json" />
+    <Content Remove="appsettings.json" />
+    <Content Remove="settings\appsettings.Development.json" />
+    <Content Remove="settings\appsettings.json" />
+    <Content Remove="settings\namePolicyDefinition.json" />
+    <Content Remove="settings\resourcecomponents.json" />
+    <Content Remove="settings\resourcedelimiters.json" />
+    <Content Remove="settings\resourceenvironments.json" />
+    <Content Remove="settings\resourcefunctions.json" />
+    <Content Remove="settings\resourcelocations.json" />
+    <Content Remove="settings\generatednames.json" />
+	<Content Remove="settings\adminlog.json" />
+    <Content Remove="settings\resourceorgs.json" />
+    <Content Remove="settings\resourceprojappsvcs.json" />
+    <Content Remove="settings\resourcetypes.json" />
+    <Content Remove="settings\resourceunitdepts.json" />
+    <Content Remove="settings\resourcevmroles.json" />
+    <Content Remove="settings\resoureceunitdepts.json" />
+    <Content Remove="Shared\Admin.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Screenshots\AdminPasswordPrompt.png" />
+    <None Include="wwwroot\Screenshots\Containers1.png" />
+    <None Include="wwwroot\Screenshots\ConfigurationPage.png" />
+    <None Include="wwwroot\Screenshots\Containers2.png" />
+    <None Include="wwwroot\Screenshots\FileShare.png" />
+    <None Include="wwwroot\Screenshots\GeneratePage.png" />
+    <None Include="wwwroot\Screenshots\HomePage.png" />
+    <None Include="wwwroot\Screenshots\MountStorage.png" />
+    <None Include="wwwroot\Screenshots\ReferencePage.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BlazorDownloadFile" Version="2.3.1.1" />
+    <PackageReference Include="Blazored.Modal" Version="6.0.1" />
+    <PackageReference Include="Blazored.Toast" Version="3.2.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="settings\blank.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

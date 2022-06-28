@@ -1,0 +1,62 @@
+﻿@page "/"
+@using System.Reflection
+@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@inject ILogger<Index> Logger
+@inject NavigationManager NavigationManager
+@inject StateContainer state
+
+<PageTitle>Azure Naming Tool - Home</PageTitle>
+
+<div class="card @theme.ThemeStyle">
+    <div class="card-body">
+        <p>
+            <img src="images/AzureNamingToolLogo.png" height="160px;" alt="Azure Naming Tool" />
+        </p>        
+        <p style="font-style:italic">
+            Current App Version: @appversion
+        </p>
+        <h4>Disclaimer</h4>
+        <p>
+            This tool was designed using the best practices in the <a href="https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/" target="_blank">Azure Cloud Adoption Framework</a> which adheres to a few rules and allows the complete customization of your naming convention.  While most of the customizations can be made in your web browser, this tool also includes an API.
+        </p>
+        <p>
+            For guidance on the API, review your swagger page at: <a href="@(NavigationManager.Uri)swagger/index.html" target="_blank">@(NavigationManager.Uri)swagger/index.html</a>
+        </p>
+        <h4>Configuration</h4>
+        <p>
+            The Configuration page provides all the data points that make up your naming convention.  There are 8 possible components that may be used to name each Azure resource.  The data within each of those components can be completely customized, except for the resource types.  For the resource types, only the short name, optional, and excluded values may be updated.  A delimiter may be selected to separate each component in your resource names.  However, the delimiter will be included in a resource name if that character is allowed.  Your configuration may be exported under the Global Configuration header.  We recommend doing that after defining your naming convention as a backup.  @*Lastly, use the Policy export feature to create an Azure Policy Definition.  That can be applied to your Azure environment to enforce your naming convention.*@
+        </p>
+
+        <h4>References</h4>
+        <p>
+            The References page provides an example of each Azure resource type using your defined naming convention. The example values do not include any excluded naming components. Optional components are always displayed and are identified below the example. Since unique names are only required at specific scopes, the examples provided are only generated for the scopes above the resource scope: resource group, resource group & region, region, global, subscription, and tenant.
+        </p>
+
+        <h4>Generator</h4>
+        <p>
+            The Generator page provides a drop-down menu to select an Azure resource type. Once a resource is selected, the naming component options are provided. Read-only components cannot be changed, like the value for a resource type. Optional components, if unselected, will be null and not shown in the output. Required components do not allow a null value and will require a selection from the menu.
+        </p>
+        <p>
+            <button class="btn btn-primary" title="Instructions" @onclick="@(e => OnInstructionsClick())">
+                View Instructions
+            </button>
+        </p>
+    </div>
+</div>
+@code {
+    [CascadingParameter]
+    protected ThemeInfo? theme { get; set; }
+
+    private string? appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+    private string? apptheme;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {  
+    }
+
+    private async Task OnInstructionsClick()
+    {
+        NavigationManager.NavigateTo("/instructions");
+    }
+}

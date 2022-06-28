@@ -1,0 +1,190 @@
+﻿@page "/instructions"
+@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@inject StateContainer state
+
+<div class="card @theme.ThemeStyle">
+    <div class="card-body">
+        <h1>Instructions</h1>
+        <div class="mb-4">This page provides instructions on how to configure and use the Azure Naming Tool.</div>
+
+        <div class="card">
+            <h5 class="card-header bg-secondary text-white" id="step1">
+                Step 1 - Setting the Admin password
+            </h5>
+            <div class="card card-body @theme.ThemeStyle">
+                <p>
+                    When the site is first installed, the application will prompt for the <strong>Admin password</strong> to be set. This password allows access to the configuration for the tool.
+                </p>
+                <p>
+                    <img style="width:600px;" class="img-fluid" src="Screenshots/AdminPasswordPrompt.png" alt="Admin password prompt" />
+                </p>
+            </div>
+        </div>
+        <p></p>
+        <div class="card">
+            <h5 class="card-header bg-secondary text-white" id="step2">
+                Step 2 - View/Update the Admin configuration
+            </h5>
+            <div class="card card-body @theme.ThemeStyle">
+                <p>
+                    Click the <strong>Admin</strong> button in the top navigation to view the current configuration.
+                </p>
+                <p>
+                    <img style="width:600px;" class="img-fluid" src="Screenshots/AdminConfiguration.png" alt="Admin configuration" />
+                </p>
+                <p>
+                    <strong>New Password</strong>
+                </p>
+                <p>This section allows you to update the <strong>Admin password</strong> for the tool.</p>
+                <p>
+                    <strong>API Key</strong>
+                </p>
+                <p>
+                    The Azure Naming Tool provides a RESTful API. Each API function requires an <strong>API Key</strong> to be provided. This section provides the ability to view/update the API Key for the tool.
+                </p>
+            </div>
+        </div>
+        <p></p>
+        <div class="card">
+            <h5 class="card-header bg-secondary text-white" id="step3">
+                Step 3 - Configure the tool
+            </h5>
+            <div class="card card-body @theme.ThemeStyle">
+                <p>
+                    Click the <strong>Admin </strong> link in the top navigation to login. Once logged in, navigate to the <strong>Configuration</strong> page to set the configuration for the tool.
+                    The Configuration page is separated into multiple sections. Each section allows the management of the component, exporting of the configuration, and restore capability to the default state.
+                </p>
+                <p>
+                    <img style="width:600px;" class="img-fluid" src="Screenshots/ConfigurationPage.png" alt="Configuration" />
+                </p>
+                <div class="card">
+                    <h5 class="card-header bg-default text-black">
+                        Base Configuration
+                    </h5>
+                    <div class="card card-body @theme.ThemeStyle">
+                        <p>
+                            This section provides the ability to configure the base components required for resource name generation.
+                        </p>
+                        <p>
+                            <strong>
+                                Components
+                            </strong>
+                        </p>
+                        <p>
+                            This section allows the configuration of which components will be used for resource name generation. Components can be enabled/disabled, as well as sorted to the desired configuration.
+                        </p>
+                        <p>
+                            <strong>Delimiters</strong>
+                        </p>
+                        <p>
+                            The Azure Naming Tool allows for a specified delimiter to be used between components when a name is generated. This section allows the selection of the delimiter. In the event a resource type does not allow the selected delimiter, it will be removed.
+                        </p>
+                    </div>
+                </div>
+                <p></p>
+                <div class="card">
+                    <h5 class="card-header bg-default text-black">
+                        Component Configuration
+                    </h5>
+                    <div class="card card-body @theme.ThemeStyle">
+                        <p>
+                            This section provides the ability to configure the individual components used in name generation. Each component provides the ability to add/edit/delete items, as well as set the desired sort order.
+                            Note: The Resource Type and Location components allow limited configuration for consistency.
+                        </p>
+                        <p>
+                            <strong>Export</strong>
+                        </p>
+                        <p>
+                            Component configuration is stored as a JSON file within the application. Each component configuration file can be exported and stored for backup purposes. It is recommended to export all configuration files when updating the Azure Naming Tool codebase.
+                        </p>
+                        <p>
+                            <strong>Reset</strong>
+                        </p>
+                        <p>When the tool is installed, a default configuration is used for each component. The Reset feature allows the default configuration to be restored for the component.</p>
+                        <p>
+                            <strong>Import</strong>
+                        </p>
+                        <p>The tool provides the ability to import a new configuration for each component, if needed.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h5 class="card-header bg-default text-black">
+                        General Configuration
+                    </h5>
+                    <div class="card card-body @theme.ThemeStyle">
+                        <p>
+                            This section provides functionality to modify the master configuration for the tool. Administrators can export the current configuration (combining all component configuration files into a JSON file), or import a new configuration. This feature is used for backup/restore of the installation configuration.
+                        </p>
+                        <p>
+                            <strong>Global Configuration</strong>
+                        </p>
+                        <p>
+                            This section allows the user to import/export a complete configuration for the Azure Naming Tool Application. All component configuration files are combined into a single JSON file. This is especially helpful when backing up/restoring the application.
+                        </p>
+                        @*<p>
+                            <strong>Policy</strong>
+                            </p>
+                            <p>
+                            This section allows for the creation of an Azure Policy file. The configured components are converted to an Azure Policy Definition file to enforce the configuration with your subscription.
+                            </p>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p></p>
+        <div class="card">
+            <h5 class="card-header bg-secondary text-white" id="step4">
+                Step 4 - Generate names
+            </h5>
+            <div class="card card-body  @theme.ThemeStyle">
+                <p>
+                    The <strong>Generate</strong> page allows users to generate names with the selected options.
+                </p>
+                <p>
+                    After selecting the desired options, click <strong>Generate</strong> to generate the resource type name. The application will attempt to validate the generated name with the naming guidelines.
+                </p>
+                <p>
+                    <img style="width:600px;" class="img-fluid" src="Screenshots/GeneratePage.png" alt="Generate" />
+                </p>
+                <div class="card">
+                    <h5 class="card-header bg-default text-black">
+                        Delimiter
+                    </h5>
+                    <div class="card card-body @theme.ThemeStyle">
+                        <p>
+                            This section displays the delimiter configured for the application.
+                        </p>
+                    </div>
+                </div>
+                <p></p>
+                <div class="card">
+                    <h5 class="card-header bg-default text-black">
+                        Resource Type
+                    </h5>
+                    <div class="card card-body @theme.ThemeStyle">
+                        <p>
+                            This section allows the user to selected the desired resource type name to generate. Use the <strong>Category</strong> selector to filter the list of resource types.
+                        </p>
+                    </div>
+                </div>
+                <p></p>
+                <div class="card">
+                    <h5 class="card-header bg-default text-black">
+                        Components
+                    </h5>
+                    <div class="card card-body @theme.ThemeStyle">
+                        <p>
+                            Select the desired values for the required components. Optional components may be omitted.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<AnchorNavigation />
+@code {    
+    [CascadingParameter]
+    protected ThemeInfo? theme { get; set; }
+}

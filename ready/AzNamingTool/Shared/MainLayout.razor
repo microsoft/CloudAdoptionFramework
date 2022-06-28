@@ -1,0 +1,186 @@
+﻿@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject StateContainer state
+@inject IToastService toastService
+@inject IJSRuntime JsRuntime
+@inject ILogger<MainLayout> Logger
+@inject NavigationManager NavigationManager
+@using Blazored.Toast.Configuration
+@inject ProtectedLocalStorage storage
+
+<PageTitle>Azure Naming Tool</PageTitle>
+<BlazoredToasts Position="ToastPosition.BottomRight" ShowProgressBar="true" Timeout="3" />
+<div class="page @theme.ThemeStyle">
+    <div class="sidebar">
+        <NavMenu PageType="@PageType" />
+    </div>
+
+    <main>
+        <div class="top-row px-4 auth @theme.ThemeStyle">
+            <div class="px-3">
+                <label class="switch" title="App Theme">
+                    <input type="checkbox" checked="@isdarktheme" @oninput="ThemeChanged">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div>
+                <button type="button" class="btn btn-success" @onclick="@(e => ShowAdminModal())" title="Admin">Admin</button>
+            </div>
+        </div>
+
+        <article class="content px-4">
+            <CascadingValue Value=@theme>
+                @Body
+            </CascadingValue>
+        </article>
+    </main>
+</div>
+
+<button onclick="topFunction()" id="btnScrollToTop" class="btn btn-success btn-sm" title="Go to top">Top</button>
+@if (PasswordModalOpen)
+{
+    <PasswordModal OnClose="@OnPasswordModalClose">
+    </PasswordModal>
+}
+
+@code {
+
+    [CascadingParameter] public IModalService Modal { get; set; }
+    private ThemeInfo theme = new() { ThemeName = "Light", ThemeStyle = "bg-default text-black" };
+    private bool isdarktheme = false;
+
+    public bool PasswordModalOpen { get; set; }
+    public Type PageType { get; set; }
+    //public string apptheme = "bg-default text-black";
+
+    protected override void OnParametersSet()
+    {
+        PageType = (this.Body.Target as RouteView)?.RouteData.PageType;
+    }
+
+    private string? message;
+
+    protected override async void OnInitialized()
+    {
+        GeneralHelper.VerifyConfiguration();
+        GeneralHelper.VerifySecurity(state);
+
+        // Check that the admin password is set
+        if (!state.Password)
+        {
+            OpenPasswordModal();
+        }
+    }
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var result = await storage.GetAsync<string>("apptheme");
+                theme.ThemeStyle = result.Success ? result.Value : "bg-default text-black";
+            }
+            catch
+            {
+                theme.ThemeStyle = "bg-default text-black";
+            }
+            if (theme.ThemeStyle == "bg-default text-black")
+            {
+                theme.ThemeName = "Light";
+                isdarktheme = false;
+            }
+            else
+            {
+                theme.ThemeName = "Dark";
+                isdarktheme = true;
+            }
+            state.AppTheme = theme.ThemeStyle;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        state.OnChange -= StateHasChanged;
+    }
+
+    private void OpenPasswordModal()
+    {
+        PasswordModalOpen = true;
+        StateHasChanged();
+    }
+
+    private async Task OnPasswordModalClose(bool accepted)
+    {
+        PasswordModalOpen = false;
+        StateHasChanged();
+    }
+
+    async void ShowAdminModal()
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("theme", theme);
+
+        var options = new ModalOptions()
+            {
+                HideCloseButton = false,
+                UseCustomLayout = true
+            };
+
+        var modal = Modal.Show<AdminModal>("Admin", parameters, options);
+
+        var result = await modal.Result;
+
+        //if (!result.Cancelled)
+        //{
+        // Reload the current page
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+        //}
+    }
+
+    private async void MagicReset()
+    {
+        bool confrimAPIKeyGenerate = await JsRuntime.InvokeAsync<bool>("confirm", "This will reset the site settings. Are you sure?");
+        if (confrimAPIKeyGenerate)
+        {
+
+            var config = GeneralHelper.GetConfigurationData();
+            config.SALTKey = "";
+            config.AdminPassword = "";
+            config.APIKey = "";
+
+            GeneralHelper.UpdateSettings(config);
+            GeneralHelper.ResetState(state);
+            GeneralHelper.VerifySecurity(state);
+
+            toastService.ShowSuccess("The site has been reset.", "MAGIC RESET ENABLED!");
+
+            OpenPasswordModal();
+
+            StateHasChanged();
+        }
+    }
+
+    private async void ThemeChanged(ChangeEventArgs e)
+    {
+        isdarktheme = (bool)e.Value;
+        if (!isdarktheme)
+        {
+            theme.ThemeName = "Dark";
+            theme.ThemeStyle = "bg-default text-black";
+        }
+        else
+        {
+            theme.ThemeName = "Light";
+            theme.ThemeStyle = "bg-dark text-white";
+        }
+        await storage.SetAsync("apptheme", theme.ThemeStyle);
+        state.AppTheme = theme.ThemeStyle;
+        StateHasChanged();
+    }
+}
