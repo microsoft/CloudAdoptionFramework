@@ -99,8 +99,9 @@ namespace AzureNamingTool.Helpers
 
                 return items;
             }
-            catch
+            catch(Exception ex)
             {
+                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
                 throw;
             }
         }
@@ -142,22 +143,23 @@ namespace AzureNamingTool.Helpers
                         break;
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
                 throw;
             }
         }
 
         public static bool CheckNumeric(string value)
         {
-            Regex regx = new Regex("^[0-9]+$");
+            Regex regx = new ("^[0-9]+$");
             Match match = regx.Match(value);
             return match.Success;
         }
 
         public static bool CheckAlphanumeric(string value)
         {
-            Regex regx = new Regex("^[a-zA-Z0-9]+$");
+            Regex regx = new ("^[a-zA-Z0-9]+$");
             Match match = regx.Match(value);
             return match.Success;
         }
@@ -183,17 +185,13 @@ namespace AzureNamingTool.Helpers
                 aes.Key = Encoding.UTF8.GetBytes(keyString);
                 aes.IV = iv;
                 ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-                using (MemoryStream memoryStream = new MemoryStream())
+                using MemoryStream memoryStream = new();
+                using CryptoStream cryptoStream = new((Stream)memoryStream, encryptor, CryptoStreamMode.Write);
+                using (StreamWriter streamWriter = new((Stream)cryptoStream))
                 {
-                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write))
-                    {
-                        using (StreamWriter streamWriter = new StreamWriter((Stream)cryptoStream))
-                        {
-                            streamWriter.Write(text);
-                        }
-                        array = memoryStream.ToArray();
-                    }
+                    streamWriter.Write(text);
                 }
+                array = memoryStream.ToArray();
             }
             return Convert.ToBase64String(array);
         }
@@ -202,23 +200,15 @@ namespace AzureNamingTool.Helpers
         {
             byte[] iv = new byte[16];
             byte[] buffer = Convert.FromBase64String(cipherText);
-            using (Aes aes = Aes.Create())
-            {
-                aes.KeySize = 256;
-                aes.Key = Encoding.UTF8.GetBytes(keyString);
-                aes.IV = iv;
-                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-                using (MemoryStream memoryStream = new MemoryStream(buffer))
-                {
-                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader streamReader = new StreamReader((Stream)cryptoStream))
-                        {
-                            return streamReader.ReadToEnd();
-                        }
-                    }
-                }
-            }
+            using Aes aes = Aes.Create();
+            aes.KeySize = 256;
+            aes.Key = Encoding.UTF8.GetBytes(keyString);
+            aes.IV = iv;
+            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+            using MemoryStream memoryStream = new(buffer);
+            using CryptoStream cryptoStream = new((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
+            using StreamReader streamReader = new((Stream)cryptoStream);
+            return streamReader.ReadToEnd();
         }
 
         public static void VerifyConfiguration()
@@ -226,7 +216,7 @@ namespace AzureNamingTool.Helpers
             try
             {
                 // Get all the files in teh repository folder
-                DirectoryInfo dirRepository = new DirectoryInfo("repository");
+                DirectoryInfo dirRepository = new ("repository");
                 foreach (FileInfo file in dirRepository.GetFiles())
                 {
                     // Check if the file exists in the settings folder
@@ -254,7 +244,7 @@ namespace AzureNamingTool.Helpers
                     {
                         // Create a new SALT key 
                         const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-                        Random random = new Random();
+                        Random random = new ();
                         var salt = new string(Enumerable.Repeat(chars, 16)
                             .Select(s => s[random.Next(s.Length)]).ToArray());
 
@@ -510,8 +500,9 @@ namespace AzureNamingTool.Helpers
                 };
                 lstAdminLogMessages = JsonSerializer.Deserialize<List<AdminLogMessage>>(data, options).OrderByDescending(x => x.CreatedOn).ToList();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
             }
             return lstAdminLogMessages;
         }
@@ -520,7 +511,7 @@ namespace AzureNamingTool.Helpers
         {
             try
             {
-                AdminLogMessage adminmessage = new AdminLogMessage()
+                AdminLogMessage adminmessage = new ()
                 {
                     Id = 1,
                     CreatedOn = DateTime.Now,
@@ -552,10 +543,26 @@ namespace AzureNamingTool.Helpers
             {
                 await FileSystemHelper.WriteFile("adminlog.json", "[]");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
             }
+        }
+
+        public static async Task<string> DownloadString(string url)
+        {
+            string data;
+            try
+            {
+                HttpClient httpClient = new ();
+                data = await httpClient.GetStringAsync(url);
+            }
+            catch(Exception ex)
+            {
+                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                data = "";
+            }
+            return data;
         }
     }
 }

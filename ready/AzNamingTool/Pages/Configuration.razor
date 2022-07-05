@@ -1141,6 +1141,28 @@
                                                     </div>
                                                     <div class="card  w-auto mb-3">
                                                         <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                            Refresh the Resource Types Configuration
+                                                        </div>
+                                                        <div class="card card-body @theme.ThemeStyle">
+                                                            <p>
+                                                                Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository. This will add any new resource types, as well as update existing type details. 
+                                                            </p>
+                                                            <p>
+                                                                All of your existing type configurations will be retained.
+                                                            </p>
+                                                            <p>
+                                                                <strong>NOTE: This will refresh your current configuration and cannot be undone!</strong>
+                                                            </p>
+                                                            <p>
+                                                                <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceType",0,"refresh")) title="Refresh">
+                                                                    <span class="oi oi-reload" aria-hidden="true"></span> Refresh
+                                                                </button>
+
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card  w-auto mb-3">
+                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
                                                             Reset the Resource Types Configuration
                                                         </div>
                                                         <div class="card card-body @theme.ThemeStyle">
@@ -2219,6 +2241,23 @@
                             var typejson = serviceResponse.ResponseObject;
                             await BlazorDownloadFileService.DownloadFileFromText("typesconfig.json", JsonSerializer.Serialize(typejson).ToString(), System.Text.Encoding.UTF8, "application/octet-stream");
                             break;
+                        case "refresh":
+                            confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will refresh your current Types configuration with the latest configuration!\n\nAre you sure?");
+                            if (confirm)
+                            {
+                                if (await ResourceTypeService.RefreshResourceTypes())
+                                {
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = "Types configuration refreshed!";
+                                }
+                                else
+                                {
+                                    message.Type = MessageTypesEnum.ERROR;
+                                    message.Message = "Types configuration refresh failed!";
+                                }
+                            }
+                            break;
+
                         case "reset":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will reset your current Types configuration and cannot be undone!\n\nAre you sure?");
                             if (confirm)

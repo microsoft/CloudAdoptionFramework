@@ -65,10 +65,10 @@
                                             @nameRequest.ResourceName
                                         </td>
                                         <td class="align-top">
-                                            @foreach (Tuple<string, string> component in nameRequest.Components.ToList<Tuple<string, string>>())
+                                            @foreach (string[] component in nameRequest.Components.ToList<string[]>())
                                             {
                                                 <div style="line-break:anywhere;">
-                                                    @component.Item1 : @component.Item2
+                                                    @component[0] : @component[1]
                                                 </div>
                                             }
                                         </td>

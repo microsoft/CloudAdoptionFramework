@@ -67,29 +67,13 @@ namespace AzureNamingTool.Helpers
             }
         }
 
-        public static string UpdateAppSettings(IConfiguration config)
-        {
-            var jsonWriteOptions = new JsonSerializerOptions()
-            {
-                WriteIndented = true
-            };
-            jsonWriteOptions.Converters.Add(new JsonStringEnumConverter());
-
-            var newJson = JsonSerializer.Serialize(config, jsonWriteOptions);
-
-            var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/appsettings.json");
-            File.WriteAllText(appSettingsPath, newJson);
-
-            return "Success!";
-        }
-
         public static bool ResetConfiguration(string filename)
         {
             bool result = false;
             try
             {
                 // Get all the files in teh repository folder
-                DirectoryInfo dirRepository = new DirectoryInfo("repository");
+                DirectoryInfo dirRepository = new("repository");
                 foreach (FileInfo file in dirRepository.GetFiles())
                 {
                     if(file.Name == filename)
@@ -101,8 +85,9 @@ namespace AzureNamingTool.Helpers
                     }
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
             }
             return result;
         }
