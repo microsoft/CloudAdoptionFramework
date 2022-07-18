@@ -1,5 +1,8 @@
 ﻿using AzureNamingTool.Helpers;
 using AzureNamingTool.Models;
+using System.ComponentModel.Design;
+using System.Linq;
+using System.Text.Json;
 
 namespace AzureNamingTool.Services
 {
@@ -161,15 +164,15 @@ namespace AzureNamingTool.Services
 
         public static List<string> GetTypeCategories(List<ResourceType> types)
         {
-            List<string> categories = new List<string>();
+            List<string> categories = new();
 
             foreach (ResourceType type in types)
             {
 
                 string category = type.Resource;
-                if (category.Contains("/"))
+                if (category.Contains('/'))
                 {
-                    category = category.Substring(0, category.IndexOf("/"));
+                    category = category[..category.IndexOf("/")];
                 }
 
                 if (!categories.Contains(category))
@@ -181,11 +184,78 @@ namespace AzureNamingTool.Services
             return categories;
         }
 
-
         public static List<ResourceType> GetFilteredResourceTypes(List<ResourceType> types, string filter)
         {
             List<ResourceType> filteredtypes = types.Where(x => x.Resource.StartsWith(filter)).ToList();
             return filteredtypes;
+        }
+
+        public static async Task<bool> RefreshResourceTypes()
+        {
+            try
+            {
+                // Get the existing Resource Type items
+                ServiceResponse serviceResponse;
+                serviceResponse = await ResourceTypeService.GetItems();
+                List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
+                string url = "https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/repository/resourcetypes.json";
+                
+                string refreshdata = await GeneralHelper.DownloadString(url);
+                if (refreshdata != "")
+                {
+                    var newtypes = new List<ResourceType>();
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    newtypes = JsonSerializer.Deserialize<List<ResourceType>>(refreshdata, options);
+
+                    // Loop through the new items
+                    // Add any new resource type and update any existing types
+                    foreach (ResourceType newtype in newtypes)
+                    {
+                        // Check if the existing types contain the current type
+                        int i = types.FindIndex(x => x.Resource == newtype.Resource);
+                        if (i > -1)
+                        {
+                            ResourceType oldtype = types[i];
+                            // Update the Resaource Type Information
+                            newtype.Exclude = oldtype.Exclude;
+                            newtype.Optional = oldtype.Optional;
+                            newtype.ShortName = oldtype.ShortName;
+                            // Remove the old type
+                            types.RemoveAt(i);
+                            // Add the new type
+                            types.Add(newtype);
+                        }
+                        else
+                        {
+                            // Add a new resource type
+                            types.Add(newtype);
+                        }
+                    }
+
+                    // Update the settings file
+                    await PostConfig(types);
+
+                    // Update the repository file
+                    File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repository/resourcetypes.json"), refreshdata);
+
+                    return true;
+                }
+                else
+                {
+                    GeneralHelper.LogAdminMessage("ERROR", "There was a problem refreshing the resource types configuration.");
+
+                }
+            }
+            catch(Exception ex)
+            {
+                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+            }
+            return false;
         }
     }
 }

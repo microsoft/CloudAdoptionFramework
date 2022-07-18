@@ -31,8 +31,9 @@ namespace AzureNamingTool.Helpers
                 servicesData.ResourceFunctions = (List<ResourceFunction>)serviceReponse.ResponseObject;
                 return servicesData;
             }
-            catch
+            catch(Exception ex)
             {
+                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
                 return servicesData;
             }
         }
