@@ -112,6 +112,10 @@ function processScopeInsightsMgOrSub($mgOrSub, $mgChild, $subscriptionId, $subsc
         $arrayUserAssignedIdentities4ResourcesSubscription = $arrayUserAssignedIdentities4Resources.where( { $_.resourceSubscriptionId -eq $subscriptionId -or $_.miSubscriptionId -eq $subscriptionId } )
         $arrayUserAssignedIdentities4ResourcesSubscriptionCount = $arrayUserAssignedIdentities4ResourcesSubscription.Count
 
+        if ($subFeaturesGroupedBySubscription) {
+            $subscriptionFeatures = $subFeaturesGroupedBySubscription.where({ $_.name -eq $subscriptionId })
+        }
+        
         $cssClass = 'subDetailsTable'
 
         #$endScopeInsightsPreQuerySub = Get-Date
@@ -259,11 +263,19 @@ tf.init();}}
 "@)
         }
         else {
-            $subscriptionNotregisteredMDfC = $arrayDefenderPlansSubscriptionNotRegistered.where( { $_.subscriptionId -eq $subscriptionId } )
-            if ($subscriptionNotregisteredMDfC.Count -gt 0) {
-                [void]$htmlScopeInsights.AppendLine(@'
-<p><i class="fa fa-shield" aria-hidden="true"></i> Microsoft Defender for Cloud plans - Subscription not registered (ResourceProvider: Microsoft.Security) <a class="externallink" href="https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types#register-resource-provider" target="_blank" rel="noopener">docs <i class="fa fa-external-link" aria-hidden="true"></i></a></p>
-'@)
+            $subscriptionSkippedMDfC = $arrayDefenderPlansSubscriptionsSkipped.where( { $_.subscriptionId -eq $subscriptionId } )
+            if ($subscriptionSkippedMDfC.Count -gt 0) {
+                if ($subscriptionSkippedMDfC.reason -eq 'SubScriptionNotRegistered') {
+                    [void]$htmlScopeInsights.AppendLine(@"
+                    <p><i class=`"fa fa-shield`" aria-hidden=`"true`"></i> Microsoft Defender for Cloud plans - Subscription skipped ($($subscriptionSkippedMDfC.reason)) (ResourceProvider: Microsoft.Security) <a class=`"externallink`" href=`"https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types#register-resource-provider`" target=`"_blank`" rel=`"noopener`">docs <i class=`"fa fa-external-link`" aria-hidden=`"true`"></i></a></p>
+"@)
+                }
+                else {
+                    [void]$htmlScopeInsights.AppendLine(@"
+                    <p><i class=`"fa fa-shield`" aria-hidden=`"true`"></i> Microsoft Defender for Cloud plans - Subscription skipped ($($subscriptionSkippedMDfC.reason))</p>
+"@)   
+                }
+
             }
             else {
                 [void]$htmlScopeInsights.AppendLine(@'
@@ -628,9 +640,9 @@ extensions: [{ name: 'sort' }]
                 $totalCost = 0
 
                 $currency = $htAzureConsumptionSubscriptions.($subscriptionId).Currency
-                $consumedServiceCount = ($consumptionData.consumedService | Sort-Object -Unique | Measure-Object).Count
+                $consumedServiceCount = ($consumptionData.ResourceType | Sort-Object -Unique | Measure-Object).Count
                 $resourceCount = ($consumptionData.ResourceId | Sort-Object -Unique | Measure-Object).Count
-                $subConsumptionDataGrouped = $consumptionData | Group-Object -property ConsumedService, ChargeType, MeterCategory
+                $subConsumptionDataGrouped = $consumptionData | Group-Object -property ResourceType, ChargeType, MeterCategory
 
                 foreach ($consumptionline in $subConsumptionDataGrouped) {
 
@@ -643,7 +655,7 @@ extensions: [{ name: 'sort' }]
                     }
 
                     $null = $arrayConsumptionData.Add([PSCustomObject]@{
-                            ConsumedService              = ($consumptionline.name).split(', ')[0]
+                            ResourceType                 = ($consumptionline.name).split(', ')[0]
                             ConsumedServiceChargeType    = ($consumptionline.name).split(', ')[1]
                             ConsumedServiceCategory      = ($consumptionline.name).split(', ')[2]
                             ConsumedServiceInstanceCount = $consumptionline.Count
@@ -687,7 +699,7 @@ extensions: [{ name: 'sort' }]
                     @"
 <tr>
 <td>$($consumptionLine.ConsumedServiceChargeType)</td>
-<td>$($consumptionLine.ConsumedService)</td>
+<td>$($consumptionLine.ResourceType)</td>
 <td>$($consumptionLine.ConsumedServiceCategory)</td>
 <td>$($consumptionLine.ConsumedServiceInstanceCount)</td>
 <td>$($consumptionLine.ConsumedServiceCost)</td>
@@ -875,6 +887,93 @@ extensions: [{ name: 'sort' }]
         }
         #endregion ScopeInsightsResourceProvidersDetailed
 
+        #region ScopeInsightsSubscriptionFeatures
+        if ($subscriptionFeatures) {
+            $subscriptionFeaturesCount = $subscriptionFeatures.Group.Count
+
+            $tfCount = $subscriptionFeaturesCount
+            $htmlTableId = "ScopeInsights_SubscriptionFeatures_$($subscriptionId -replace '-','_')"
+            $randomFunctionName = "func_$htmlTableId"
+
+            [void]$htmlScopeInsights.AppendLine(@"
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible">
+<p><i class="fa fa-cube" aria-hidden="true"></i> $tfCount enabled Subscription Features</p></button>
+<div class="content contentSISub">
+&nbsp;&nbsp;<i class="fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Set up preview features in Azure subscription</span> <a class="externallink" href="https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features" target="_blank" rel="noopener">docs <i class="fa fa-external-link" aria-hidden="true"></i></a>
+<table id="$htmlTableId" class="$cssClass">
+<thead>
+<tr>
+<th>Feature</th>
+</tr>
+</thead>
+<tbody>
+"@)
+
+            foreach ($feature in $subscriptionFeatures.Group | Sort-Object -Property feature) {
+                [void]$htmlScopeInsights.AppendLine(@"
+    <tr><td>$($feature.feature)</td></tr>
+"@)
+            }
+
+
+            [void]$htmlScopeInsights.AppendLine(@"
+</tbody>
+</table>
+<script>
+            function loadtf$("func_$htmlTableId")() { if (window.helpertfConfig4$htmlTableId !== 1) {
+                window.helpertfConfig4$htmlTableId =1;
+                var tfConfig4$htmlTableId = {
+                base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,
+"@)
+            if ($tfCount -gt 10) {
+                $spectrum = "10, $tfCount"
+                if ($tfCount -gt 50) {
+                    $spectrum = "10, 25, 50, $tfCount"
+                }
+                if ($tfCount -gt 100) {
+                    $spectrum = "10, 30, 50, 100, $tfCount"
+                }
+                if ($tfCount -gt 500) {
+                    $spectrum = "10, 30, 50, 100, 250, $tfCount"
+                }
+                if ($tfCount -gt 1000) {
+                    $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
+                }
+                if ($tfCount -gt 2000) {
+                    $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
+                }
+                if ($tfCount -gt 3000) {
+                    $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
+                }
+                [void]$htmlScopeInsights.AppendLine(@"
+paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},*/
+"@)
+            }
+            [void]$htmlScopeInsights.AppendLine(@"
+btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
+            linked_filters: true,
+            col_types: [
+                'caseinsensitivestring'
+            ],
+extensions: [{ name: 'sort' }]
+            };
+            var tf = new TableFilter('$htmlTableId', tfConfig4$htmlTableId);
+            tf.init();}}
+        </script>
+</div>
+"@)
+        }
+        else {
+            [void]$htmlScopeInsights.AppendLine(@'
+            <p><i class="fa fa-ban" aria-hidden="true"></i> 0 enabled Subscription Features <a class="externallink" href="https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features" target="_blank" rel="noopener">docs <i class="fa fa-external-link" aria-hidden="true"></i></a></p>
+'@)
+        }
+        [void]$htmlScopeInsights.AppendLine(@'
+        </td></tr>
+        <tr><!--y--><td class="detailstd"><!--y-->
+'@)
+        #endregion ScopeInsightsSubscriptionFeatures
+
         #ResourceLocks
         #region ScopeInsightsResourceLocks
         if ($htResourceLocks.($subscriptionId)) {
@@ -987,7 +1086,7 @@ extensions: [{ name: 'sort' }]
         if (($htDiagnosticSettingsMgSub).mg.($mgChild)) {
             $diagnosticsMgCount = (($htDiagnosticSettingsMgSub).mg.($mgChild).Values.Count)
             $tfCount = $diagnosticsMgCount
-            $htmlTableId = "ScopeInsights_DiagnosticsMg_$($mgChild -replace '-','_')"
+            $htmlTableId = "ScopeInsights_DiagnosticsMg_$($mgChild -replace '\(','_' -replace '\)','_' -replace '-','_' -replace '\.','_')"
             $randomFunctionName = "func_$htmlTableId"
             [void]$htmlScopeInsights.AppendLine(@"
 <button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><p><i class="fa fa-check-circle blue" aria-hidden="true"></i> $diagnosticsMgCount Management Group Diagnostic settings</p></button>
@@ -1137,9 +1236,9 @@ extensions: [{ name: 'sort' }]
                     $consumptionDataGroupedByCurrency = $consumptionData | Group-Object -property Currency
                     foreach ($currency in $consumptionDataGroupedByCurrency) {
                         $totalCost = 0
-                        $tenantSummaryConsumptionDataGrouped = $currency.group | Group-Object -property ConsumedService, ChargeType, MeterCategory
+                        $tenantSummaryConsumptionDataGrouped = $currency.group | Group-Object -property ResourceType, ChargeType, MeterCategory
                         $subsCount = ($tenantSummaryConsumptionDataGrouped.group.subscriptionId | Sort-Object -Unique).Count
-                        $consumedServiceCount = ($tenantSummaryConsumptionDataGrouped.group.consumedService | Sort-Object -Unique).Count
+                        $consumedServiceCount = ($tenantSummaryConsumptionDataGrouped.group.ResourceType | Sort-Object -Unique).Count
                         $resourceCount = ($tenantSummaryConsumptionDataGrouped.group.ResourceId | Sort-Object -Unique).Count
                         foreach ($consumptionline in $tenantSummaryConsumptionDataGrouped) {
 
@@ -1152,7 +1251,7 @@ extensions: [{ name: 'sort' }]
                             }
 
                             $null = $arrayConsumptionData.Add([PSCustomObject]@{
-                                    ConsumedService              = ($consumptionline.name).split(', ')[0]
+                                    ResourceType                 = ($consumptionline.name).split(', ')[0]
                                     ConsumedServiceChargeType    = ($consumptionline.name).split(', ')[1]
                                     ConsumedServiceCategory      = ($consumptionline.name).split(', ')[2]
                                     ConsumedServiceInstanceCount = $consumptionline.Count
@@ -1173,7 +1272,7 @@ extensions: [{ name: 'sort' }]
                     }
 
                     $tfCount = ($arrayConsumptionData).Count
-                    $htmlTableId = "ScopeInsights_Consumption_$($mgChild -replace '-','_')"
+                    $htmlTableId = "ScopeInsights_Consumption_$($mgChild -replace '\(','_' -replace '\)','_' -replace '-','_' -replace '\.','_')"
                     $randomFunctionName = "func_$htmlTableId"
                     [void]$htmlScopeInsights.AppendLine(@"
 <button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><i class="fa fa-credit-card blue" aria-hidden="true"></i> Total cost $($arrayTotalCostSummaryMg -join "$CsvDelimiterOpposite ") last $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)</button>
@@ -1200,7 +1299,7 @@ extensions: [{ name: 'sort' }]
                         @"
 <tr>
 <td>$($consumptionLine.ConsumedServiceChargeType)</td>
-<td>$($consumptionLine.ConsumedService)</td>
+<td>$($consumptionLine.ResourceType)</td>
 <td>$($consumptionLine.ConsumedServiceCategory)</td>
 <td>$($consumptionLine.ConsumedServiceInstanceCount)</td>
 <td>$($consumptionLine.ConsumedServiceCost)</td>
@@ -1299,7 +1398,7 @@ tf.init();}}
         if ($mgOrSub -eq 'mg') {
             if ($resourcesAllChildSubscriptionLocationCount -gt 0) {
                 $tfCount = ($resourcesAllChildSubscriptionsArray).count
-                $htmlTableId = "ScopeInsights_Resources_$($mgChild -replace '-','_')"
+                $htmlTableId = "ScopeInsights_Resources_$($mgChild -replace '\(','_' -replace '\)','_' -replace '-','_' -replace '\.','_')"
                 $randomFunctionName = "func_$htmlTableId"
                 [void]$htmlScopeInsights.AppendLine(@"
 <button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><p><i class="fa fa-check-circle blue" aria-hidden="true"></i> $resourcesAllChildSubscriptionResourceTypeCount ResourceTypes ($resourcesAllChildSubscriptionTotal Resources) in $resourcesAllChildSubscriptionLocationCount Locations (all Subscriptions below this scope)</p></button>
@@ -1476,6 +1575,290 @@ extensions: [{ name: 'sort' }]
         #endregion ScopeInsightsResources
     }
 
+    if ($azAPICallConf['htParameters'].NoResources -eq $false) {
+        #region ScopeInsightsCAFResourceNamingALL
+        if ($mgOrSub -eq 'sub') {
+            $resourcesIdsAllCAFNamingRelevantThisSubscription = $resourcesIdsAllCAFNamingRelevantGroupedBySubscription.where({ $_.Name -eq $subscriptionId })
+            if ($resourcesIdsAllCAFNamingRelevantThisSubscription) {
+                $resourcesIdsAllCAFNamingRelevantThisSubscriptionGroupedByType = $resourcesIdsAllCAFNamingRelevantThisSubscription.Group | Group-Object -Property type
+                $resourcesIdsAllCAFNamingRelevantThisSubscriptionGroupedByTypeCount = ($resourcesIdsAllCAFNamingRelevantThisSubscriptionGroupedByType | Measure-Object).Count
+                
+                $tfCount = $resourcesIdsAllCAFNamingRelevantThisSubscriptionGroupedByTypeCount
+                $htmlTableId = "ScopeInsights_CAFResourceNamingALL_$($subscriptionId -replace '-','_')"
+                $randomFunctionName = "func_$htmlTableId"
+                [void]$htmlScopeInsights.AppendLine(@"
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><p><i class="fa fa-star-o" aria-hidden="true"></i> CAF Naming Recommendation Compliance</p></button>
+<div class="content contentSISub">
+&nbsp;&nbsp;<i class="fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">CAF - Recommended abbreviations for Azure resource types</span> <a class="externallink" href="https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations" target="_blank" rel="noopener">docs <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
+&nbsp;&nbsp;<i class="fa fa-lightbulb-o" aria-hidden="true"></i> Resource details can be found in the CSV output *_ResourcesAll.csv<br>
+&nbsp;&nbsp;<i class="fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
+<table id="$htmlTableId" class="$cssClass">
+<thead>
+<tr>
+<th>ResourceType</th>
+<th>Recommendation</th>
+<th>ResourceFriendlyName</th>
+<th>passed</th>
+<th>failed</th>
+<th>passed percentage</th>
+</tr>
+</thead>
+<tbody>
+"@)
+                $htmlScopeInsightsCAFResourceNamingALL = $null
+                $htmlScopeInsightsCAFResourceNamingALL = foreach ($entry in $resourcesIdsAllCAFNamingRelevantThisSubscriptionGroupedByType) {
+                    
+                    $resourceTypeGroupedByCAFResourceNamingResult = $entry.Group | Group-Object -Property cafResourceNamingResult, cafResourceNaming
+                    if ($entry.Group.cafResourceNaming.Count -gt 1) {
+                        $namingConvention = ($entry.Group.cafResourceNaming)[0]
+                        $namingConventionFriendlyName = ($entry.Group.cafResourceNamingFriendlyName)[0]
+                    }
+                    else {
+                        $namingConvention = $entry.Group.cafResourceNaming
+                        $namingConventionFriendlyName = $entry.Group.cafResourceNamingFriendlyName
+                    }
+                        
+                    $passed = 0
+                    $failed = 0
+                    foreach ($result in $resourceTypeGroupedByCAFResourceNamingResult) {
+                        $resultNameSplitted = $result.Name -split ", "
+                        if ($resultNameSplitted[0] -eq 'passed') {
+                            $passed = $result.Count
+                        }
+                            
+                        if ($resultNameSplitted[0] -eq 'failed') {
+                            $failed = $result.Count
+                        }        
+                    }
+    
+                    if ($passed -gt 0) {
+                        $percentage = [math]::Round(($passed / ($passed + $failed) * 100), 2)
+                    }
+                    else {
+                        $percentage = 0
+                    }
+
+                    @"
+<tr>
+<td>$($entry.Name)</td>
+<td>$($namingConvention)</td>
+<td>$($namingConventionFriendlyName)</td>
+<td>$($passed)</td>
+<td>$($failed)</td>
+<td>$($percentage)%</td>
+</tr>
+"@
+                }
+                [void]$htmlScopeInsights.AppendLine($htmlScopeInsightsCAFResourceNamingALL)
+                [void]$htmlScopeInsights.AppendLine(@"
+            </tbody>
+        </table>
+        <script>
+            function loadtf$("func_$htmlTableId")() { if (window.helpertfConfig4$htmlTableId !== 1) {
+                window.helpertfConfig4$htmlTableId =1;
+                var tfConfig4$htmlTableId = {
+                base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,
+"@)
+                if ($tfCount -gt 10) {
+                    $spectrum = "10, $tfCount"
+                    if ($tfCount -gt 50) {
+                        $spectrum = "10, 25, 50, $tfCount"
+                    }
+                    if ($tfCount -gt 100) {
+                        $spectrum = "10, 30, 50, 100, $tfCount"
+                    }
+                    if ($tfCount -gt 500) {
+                        $spectrum = "10, 30, 50, 100, 250, $tfCount"
+                    }
+                    if ($tfCount -gt 1000) {
+                        $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
+                    }
+                    if ($tfCount -gt 2000) {
+                        $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
+                    }
+                    if ($tfCount -gt 3000) {
+                        $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
+                    }
+                    [void]$htmlScopeInsights.AppendLine(@"
+paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},*/
+"@)
+                }
+                [void]$htmlScopeInsights.AppendLine(@"
+btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
+            col_types: [
+                'caseinsensitivestring',
+                'caseinsensitivestring',
+                'caseinsensitivestring',
+                'number',
+                'number',
+                'number'
+            ],
+            extensions: [{ name: 'sort' }]
+            };
+            var tf = new TableFilter('$htmlTableId', tfConfig4$htmlTableId);
+            tf.init();}}
+        </script>
+    </div>
+"@)
+            }
+            else {
+                [void]$htmlScopeInsights.AppendLine(@"
+                <p><i class="fa fa-ban" aria-hidden="true"></i> No CAF Naming Recommendation Compliance data available</p>
+"@)
+            }
+
+            [void]$htmlScopeInsights.AppendLine(@'
+</td></tr>
+<tr><td class="detailstd">
+'@)
+        }
+        #endregion ScopeInsightsCAFResourceNamingALL
+    }
+
+    #region ScopeInsightsOrphanedResources
+    if ($mgOrSub -eq 'sub') {
+        if ($arrayOrphanedResourcesGroupedBySubscription) {
+            $orphanedResourcesThisSubscription = $arrayOrphanedResourcesGroupedBySubscription.where({ $_.Name -eq $subscriptionId })
+            if ($orphanedResourcesThisSubscription) {
+                $orphanedResourcesThisSubscriptionCount = $orphanedResourcesThisSubscription.Group.count
+                $orphanedResourcesThisSubscriptionGroupedByType = $orphanedResourcesThisSubscription.Group | Group-Object -Property type
+                $orphanedResourcesThisSubscriptionGroupedByTypeCount = ($orphanedResourcesThisSubscriptionGroupedByType | Measure-Object).Count
+                $tfCount = $orphanedResourcesThisSubscriptionGroupedByTypeCount
+
+                if ($azAPICallConf['htParameters'].DoAzureConsumption -eq $true) {
+                    $orphanedIncludingCost = $true
+                    $hintTableTH = " ($($AzureConsumptionPeriod) days)"
+                }
+                else {
+                    $orphanedIncludingCost = $false
+                    $hintTableTH = ""
+                }
+
+                $htmlTableId = "ScopeInsights_OrphanedResources_$($subscriptionId -replace '-','_')"
+                $randomFunctionName = "func_$htmlTableId"
+                [void]$htmlScopeInsights.AppendLine(@"
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><p><i class="fa fa-trash-o" aria-hidden="true"></i> $orphanedResourcesThisSubscriptionCount Orphaned Resources ($orphanedResourcesThisSubscriptionGroupedByTypeCount ResourceTypes)</p></button>
+<div class="content contentSISub">
+&nbsp;&nbsp;<i class="fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">'Azure Orphan Resources' ARG queries and workbooks</span> <a class="externallink" href="https://github.com/dolevshor/azure-orphan-resources" target="_blank" rel="noopener">GitHub <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
+&nbsp;&nbsp;<i class="fa fa-lightbulb-o" aria-hidden="true"></i> Resource details can be found in the CSV output *_ResourcesOrphaned.csv<br>
+&nbsp;&nbsp;<i class="fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
+<table id="$htmlTableId" class="$cssClass">
+<thead>
+<tr>
+<th>ResourceType</th>
+<th>Resource count</th>
+<th>Intent</th>
+<th>Cost$($hintTableTH)</th>
+<th>Currency</th>
+</tr>
+</thead>
+<tbody>
+"@)
+                $htmlScopeInsightsOrphanedResources = $null
+                $htmlScopeInsightsOrphanedResources = foreach ($resourceType in $orphanedResourcesThisSubscriptionGroupedByType | Sort-Object -Property Name) {
+                    
+                    if ($orphanedIncludingCost) {
+                        if ($resourceType.Group.Intent[0] -eq "cost savings") {
+                            $orphCost = ($resourceType.Group.Cost | Measure-Object -Sum).Sum
+                            $orphCurrency = $resourceType.Group.Currency[0]
+                        }
+                        else {
+                            $orphCost = ""
+                            $orphCurrency = ""
+                        }
+                    }
+                    else {
+                        if ($resourceType.Group.Intent[0] -eq "cost savings") {
+                            $orphCost = "<span class=`"info`">use parameter <b>-DoAzureConsumption</b> to show potential savings</span>"
+                            $orphCurrency = ""
+                        }
+                        else {
+                            $orphCost = ""
+                            $orphCurrency = ""
+                        }
+                    }
+
+                    @"
+<tr>
+<td>$($resourceType.Name)</td>
+<td>$($resourceType.Group.Count)</td>
+<td>$($resourceType.Group[0].Intent)</td>
+<td>$($orphCost)</td>
+<td>$($orphCurrency)</td>
+</tr>
+"@
+                }
+                [void]$htmlScopeInsights.AppendLine($htmlScopeInsightsOrphanedResources)
+                [void]$htmlScopeInsights.AppendLine(@"
+            </tbody>
+        </table>
+        <script>
+            function loadtf$("func_$htmlTableId")() { if (window.helpertfConfig4$htmlTableId !== 1) {
+                window.helpertfConfig4$htmlTableId =1;
+                var tfConfig4$htmlTableId = {
+                base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,
+"@)
+                if ($tfCount -gt 10) {
+                    $spectrum = "10, $tfCount"
+                    if ($tfCount -gt 50) {
+                        $spectrum = "10, 25, 50, $tfCount"
+                    }
+                    if ($tfCount -gt 100) {
+                        $spectrum = "10, 30, 50, 100, $tfCount"
+                    }
+                    if ($tfCount -gt 500) {
+                        $spectrum = "10, 30, 50, 100, 250, $tfCount"
+                    }
+                    if ($tfCount -gt 1000) {
+                        $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
+                    }
+                    if ($tfCount -gt 2000) {
+                        $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
+                    }
+                    if ($tfCount -gt 3000) {
+                        $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
+                    }
+                    [void]$htmlScopeInsights.AppendLine(@"
+paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},*/
+"@)
+                }
+                [void]$htmlScopeInsights.AppendLine(@"
+btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
+                col_2: 'select',   
+                col_4: 'select',             
+                col_types: [
+                    'caseinsensitivestring',
+                    'number',
+                    'caseinsensitivestring',
+                    'number',
+                    'caseinsensitivestring'
+                ],
+extensions: [{ name: 'sort' }]
+            };
+            var tf = new TableFilter('$htmlTableId', tfConfig4$htmlTableId);
+            tf.init();}}
+        </script>
+    </div>
+"@)
+            }
+            else {
+                [void]$htmlScopeInsights.AppendLine(@"
+                <p><i class="fa fa-ban" aria-hidden="true"></i> 0 Orphaned Resources</p>
+"@)
+            }
+        }
+        else {
+            [void]$htmlScopeInsights.AppendLine(@"
+            <p><i class="fa fa-ban" aria-hidden="true"></i> 0 Orphaned Resources</p>
+"@)
+        }
+        [void]$htmlScopeInsights.AppendLine(@'
+</td></tr>
+<tr><td class="detailstd">
+'@)
+    }
+    #endregion ScopeInsightsOrphanedResources
+
     #ScopeInsightsDiagnosticsCapable
     if ($azAPICallConf['htParameters'].NoResources -eq $false) {
         #resourcesDiagnosticsCapable
@@ -1508,7 +1891,7 @@ extensions: [{ name: 'sort' }]
 
             if ($resourcesAllChildSubscriptionResourceTypeCount -gt 0) {
                 $tfCount = $resourcesAllChildSubscriptionResourceTypeCount
-                $htmlTableId = "ScopeInsights_resourcesDiagnosticsCapable_$($mgchild -replace '-','_')"
+                $htmlTableId = "ScopeInsights_resourcesDiagnosticsCapable_$($mgchild -replace '\(','_' -replace '\)','_' -replace '-','_' -replace '\.','_')"
                 $randomFunctionName = "func_$htmlTableId"
                 [void]$htmlScopeInsights.AppendLine(@"
 <button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><p><i class="fa fa-check-circle blue" aria-hidden="true"></i> $subscriptionResourceTypesDiagnosticsCapableMetricsLogsCount/$resourcesAllChildSubscriptionResourceTypeCount ResourceTypes (1st party) Diagnostics capable ($subscriptionResourceTypesDiagnosticsCapableMetricsCount Metrics, $subscriptionResourceTypesDiagnosticsCapableLogsCount Logs) (all Subscriptions below this scope)</p></button>
@@ -1775,8 +2158,8 @@ extensions: [{ name: 'sort' }]
 </thead>
 <tbody>
 "@)
-                $htmlScopeInsightsTags = $null
-                $htmlScopeInsightsTags = foreach ($miResEntry in $arrayUserAssignedIdentities4ResourcesSubscription | Sort-Object -Property miResourceId, resourceId) {
+                $htmlScopeInsightsUserAssignedIdentities4Resource = $null
+                $htmlScopeInsightsUserAssignedIdentities4Resource = foreach ($miResEntry in $arrayUserAssignedIdentities4ResourcesSubscription | Sort-Object -Property miResourceId, resourceId) {
                     @"
 <tr>
     <td>$($miResEntry.miResourceName)</td>
@@ -1799,7 +2182,7 @@ extensions: [{ name: 'sort' }]
 </tr>
 "@
                 }
-                [void]$htmlScopeInsights.AppendLine($htmlScopeInsightsTags)
+                [void]$htmlScopeInsights.AppendLine($htmlScopeInsightsUserAssignedIdentities4Resource)
                 [void]$htmlScopeInsights.AppendLine(@"
             </tbody>
         </table>
@@ -1874,6 +2257,269 @@ paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_
         <tr><!--y--><td class="detailstd"><!--y-->
 '@)
             #endregion ScopeInsightsUserAssignedIdentities4Resources
+        }
+    }
+
+    #ScopeInsightsPSRule
+    if ($azAPICallConf['htParameters'].NoResources -eq $false) {
+        if ($azAPICallConf['htParameters'].DoPSRule -eq $true) {
+            #region ScopeInsightsPSRule
+
+            if ($mgOrSub -eq 'mg') {
+
+                $allPSRuleResultsUnderThisMg = [system.collections.ArrayList]@()
+                foreach ($mg in $grpPSRuleManagementGroups) {
+                    if ($htManagementGroupsMgPath.($mg.name -replace '.*/').path -contains $mgchild) {
+                        $allPSRuleResultsUnderThisMg.AddRange($mg.Group)
+                    }
+                }
+
+                $grpThisManagementGroup = $allPSRuleResultsUnderThisMg | group-object -Property resourceType, pillar, category, severity, rule, result
+
+                if ($grpThisManagementGroup) {
+                    $grpThisManagementGroupCount = $grpThisManagementGroup.Count
+                    $tfCount = $grpThisManagementGroupCount
+                    $htmlTableId = "ScopeInsights_PSRule_$($mgchild -replace '\(','_' -replace '\)','_' -replace '-','_' -replace '\.','_')"
+                    $randomFunctionName = "func_$htmlTableId"
+                    [void]$htmlScopeInsights.AppendLine(@"
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible">
+<p><i class="fa fa-check-square-o" aria-hidden="true"></i> $grpThisManagementGroupCount 'PSRule for Azure' results</p></button>
+<div class="content contentSISub">
+&nbsp;&nbsp;<i class="fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Learn about</span> <a class="externallink" href="https://azure.github.io/PSRule.Rules.Azure" target="_blank" rel="noopener">PSRule for Azure <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
+&nbsp;&nbsp;<i class="fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
+<table id="$htmlTableId" class="$cssClass">
+<thead>
+<tr>
+<th>Resource Type</th>
+<th>Resource Count</th>
+<th>Subscription Count</th>
+<th>Pillar</th>
+<th>Category</th>
+<th>Severity</th>
+<th>Rule</th>
+<th>Recommendation</th>
+<th>lnk</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+"@)
+                    $htmlScopeInsightsPSRuleMG = $null
+                    $htmlScopeInsightsPSRuleMG = foreach ($result in $grpThisManagementGroup) {
+                        $resultNameSplit = $result.Name.split(', ')
+                        @"
+                        <tr>
+                            <td>$($resultNameSplit[0])</td>
+                            <td>$($result.Group.Count)</td>
+                            <td>$(($result.Group.subscriptionId | Sort-Object -Unique).Count)</td>
+                            <td>$($resultNameSplit[1])</td>
+                            <td>$($resultNameSplit[2])</td>
+                            <td>$($resultNameSplit[3])</td>
+                            <td>$(($result.Group[0].rule))</td>
+                            <td>$(($result.Group[0].recommendation))</td>
+                            <td><a href=`"$(($result.Group[0].link))`" target=`"_blank`"><i class="fa fa-external-link" aria-hidden="true"></i></a></td>
+                            <td>$($resultNameSplit[5])</td>
+                        </tr>
+"@
+                    }
+                    [void]$htmlScopeInsights.AppendLine($htmlScopeInsightsPSRuleMG)
+                    [void]$htmlScopeInsights.AppendLine(@"
+            </tbody>
+        </table>
+        <script>
+            function loadtf$("func_$htmlTableId")() { if (window.helpertfConfig4$htmlTableId !== 1) {
+                window.helpertfConfig4$htmlTableId =1;
+                var tfConfig4$htmlTableId = {
+                base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,
+"@)
+                    if ($tfCount -gt 10) {
+                        $spectrum = "10, $tfCount"
+                        if ($tfCount -gt 50) {
+                            $spectrum = "10, 25, 50, $tfCount"
+                        }
+                        if ($tfCount -gt 100) {
+                            $spectrum = "10, 30, 50, 100, $tfCount"
+                        }
+                        if ($tfCount -gt 500) {
+                            $spectrum = "10, 30, 50, 100, 250, $tfCount"
+                        }
+                        if ($tfCount -gt 1000) {
+                            $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
+                        }
+                        if ($tfCount -gt 2000) {
+                            $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
+                        }
+                        if ($tfCount -gt 3000) {
+                            $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
+                        }
+                        [void]$htmlScopeInsights.AppendLine(@"
+paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},*/
+"@)
+                    }
+                    [void]$htmlScopeInsights.AppendLine(@"
+                btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
+                linked_filters: true,
+                col_3: 'select',
+                col_4: 'select',
+                col_5: 'select',
+                col_9: 'select',
+                col_types: [
+                    'caseinsensitivestring',
+                    'number',
+                    'number',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring'
+                ],
+                extensions: [{ name: 'sort' }]
+            };
+            var tf = new TableFilter('$htmlTableId', tfConfig4$htmlTableId);
+            tf.init();}}
+        </script>
+    </div>
+"@)
+                    
+                }
+                else {
+                    [void]$htmlScopeInsights.AppendLine(@'
+                    <p><i class="fa fa-ban" aria-hidden="true"></i> No PSRule for Azure results</p>
+'@)
+                }
+                [void]$htmlScopeInsights.AppendLine(@'
+                </td></tr>
+                <tr><!--y--><td class="detailstd"><!--y-->
+'@)
+            }
+
+            if ($mgOrSub -eq 'sub') {
+                $grpThisSubscription = $grpPSRuleSubscriptions.where({ $_.Name -eq $subscriptionId })
+                $grpThisSubscriptionGrouped = $grpThisSubscription.Group | group-object -Property resourceType, pillar, category, severity, result
+
+                if ($grpThisSubscriptionGrouped) {
+                    $grpThisSubscriptionGroupedCount = $grpThisSubscriptionGrouped.Count
+                    $tfCount = $grpThisSubscriptionGroupedCount
+                    $htmlTableId = "ScopeInsights_PSRule_$($subscriptionId -replace '-','_')"
+                    $randomFunctionName = "func_$htmlTableId"
+                    [void]$htmlScopeInsights.AppendLine(@"
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible">
+<p><i class="fa fa-check-square-o" aria-hidden="true"></i> $grpThisSubscriptionGroupedCount PSRule for Azure results</p></button>
+<div class="content contentSISub">
+&nbsp;&nbsp;<i class="fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Learn about</span> <a class="externallink" href="https://azure.github.io/PSRule.Rules.Azure" target="_blank" rel="noopener">PSRule for Azure <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
+&nbsp;&nbsp;<i class="fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
+<table id="$htmlTableId" class="$cssClass">
+<thead>
+<tr>
+<th>Resource Type</th>
+<th>Resource Count</th>
+<th>Pillar</th>
+<th>Category</th>
+<th>Severity</th>
+<th>Rule</th>
+<th>Recommendation</th>
+<th>lnk</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+"@)
+                    $htmlScopeInsightsPSRuleSub = $null
+                    $htmlScopeInsightsPSRuleSub = foreach ($result in $grpThisSubscriptionGrouped) {
+                        $resultNameSplit = $result.Name.split(', ')
+                        @"
+                        <tr>
+                            <td>$($resultNameSplit[0])</td>
+                            <td>$($result.Group.Count)</td>
+                            <td>$($resultNameSplit[1])</td>
+                            <td>$($resultNameSplit[2])</td>
+                            <td>$($resultNameSplit[3])</td>
+                            <td>$(($result.Group[0].rule))</td>
+                            <td>$(($result.Group[0].recommendation))</td>
+                            <td><a href=`"$(($result.Group[0].link))`" target=`"_blank`"><i class="fa fa-external-link" aria-hidden="true"></i></a></td>
+                            <td>$($resultNameSplit[5])</td>
+                        </tr>
+"@
+                    }
+                    [void]$htmlScopeInsights.AppendLine($htmlScopeInsightsPSRuleSub)
+                    [void]$htmlScopeInsights.AppendLine(@"
+            </tbody>
+        </table>
+        <script>
+            function loadtf$("func_$htmlTableId")() { if (window.helpertfConfig4$htmlTableId !== 1) {
+                window.helpertfConfig4$htmlTableId =1;
+                var tfConfig4$htmlTableId = {
+                base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,
+"@)
+                    if ($tfCount -gt 10) {
+                        $spectrum = "10, $tfCount"
+                        if ($tfCount -gt 50) {
+                            $spectrum = "10, 25, 50, $tfCount"
+                        }
+                        if ($tfCount -gt 100) {
+                            $spectrum = "10, 30, 50, 100, $tfCount"
+                        }
+                        if ($tfCount -gt 500) {
+                            $spectrum = "10, 30, 50, 100, 250, $tfCount"
+                        }
+                        if ($tfCount -gt 1000) {
+                            $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
+                        }
+                        if ($tfCount -gt 2000) {
+                            $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
+                        }
+                        if ($tfCount -gt 3000) {
+                            $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
+                        }
+                        [void]$htmlScopeInsights.AppendLine(@"
+paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},*/
+"@)
+                    }
+                    [void]$htmlScopeInsights.AppendLine(@"
+                btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
+                linked_filters: true,
+                col_2: 'select',
+                col_3: 'select',
+                col_4: 'select',
+                col_8: 'select',
+                col_types: [
+                    'caseinsensitivestring',
+                    'number',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring',
+                    'caseinsensitivestring'
+                ],
+                extensions: [{ name: 'sort' }]
+            };
+            var tf = new TableFilter('$htmlTableId', tfConfig4$htmlTableId);
+            tf.init();}}
+        </script>
+    </div>
+"@)
+                    
+                }
+                else {
+                    [void]$htmlScopeInsights.AppendLine(@'
+                    <p><i class="fa fa-ban" aria-hidden="true"></i> No PSRule results</p>
+'@)
+                }
+                [void]$htmlScopeInsights.AppendLine(@'
+                </td></tr>
+                <tr><!--y--><td class="detailstd"><!--y-->
+'@)
+            }
+            #endregion ScopeInsightsPSRule
+        }
+        else {
+            [void]$htmlScopeInsights.AppendLine(@'
+            <p><i class="fa fa-check-square-o" aria-hidden="true"></i> PSRule for Azure - <span class="info">use parameter <b>-DoPSRule</b></span> - <a class="externallink" href="https://azure.github.io/PSRule.Rules.Azure/integrations" target="_blank" rel="noopener">PSRule for Azure <i class="fa fa-external-link" aria-hidden="true"></i></a></p>
+'@)
         }
     }
 
@@ -2889,6 +3535,94 @@ extensions: [{ name: 'sort' }]
 '@)
     #endregion ScopeInsightsBlueprintsScoped
 
+    if ($mgOrSub -eq 'sub') {
+        #region ScopeInsightsClassicAdministrators
+        if ($htClassicAdministrators.($subscriptionId).ClassicAdministrators.Count -gt 0) {
+            $tfCount = $htClassicAdministrators.($subscriptionId).ClassicAdministrators.Count
+            $htmlTableId = "ScopeInsights_ClassicAdministrators_$($subscriptionId -replace '\(','_' -replace '\)','_' -replace '-','_' -replace '\.','_')"
+            $randomFunctionName = "func_$htmlTableId"
+            [void]$htmlScopeInsights.AppendLine(@"
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><p><i class="fa fa-check-circle blue" aria-hidden="true"></i> $tfCount Classic Administrators</p></button>
+<div class="content $SIDivContentClass">
+&nbsp;&nbsp;<i class="fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
+<table id="$htmlTableId" class="$cssClass">
+<thead>
+<tr>
+<th>Role</th>
+<th>Identity</th>
+</tr>
+</thead>
+<tbody>
+"@)
+            $htmlScopeInsightsClassicAdministrators = $null
+            $htmlScopeInsightsClassicAdministrators = foreach ($classicAdministrator in $htClassicAdministrators.($subscriptionId).ClassicAdministrators | Sort-Object -Property Role, Identity) {
+                @"
+<tr>
+<td>$($classicAdministrator.Role)</td>
+<td>$($classicAdministrator.Identity)</td>
+</tr>
+"@
+            }
+            [void]$htmlScopeInsights.AppendLine($htmlScopeInsightsClassicAdministrators)
+            [void]$htmlScopeInsights.AppendLine(@"
+                </tbody>
+            </table>
+        </div>
+        <script>
+            function loadtf$("func_$htmlTableId")() { if (window.helpertfConfig4$htmlTableId !== 1) {
+                window.helpertfConfig4$htmlTableId =1;
+                var tfConfig4$htmlTableId = {
+                base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,
+"@)
+            if ($tfCount -gt 10) {
+                $spectrum = "10, $tfCount"
+                if ($tfCount -gt 50) {
+                    $spectrum = "10, 25, 50, $tfCount"
+                }
+                if ($tfCount -gt 100) {
+                    $spectrum = "10, 30, 50, 100, $tfCount"
+                }
+                if ($tfCount -gt 500) {
+                    $spectrum = "10, 30, 50, 100, 250, $tfCount"
+                }
+                if ($tfCount -gt 1000) {
+                    $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
+                }
+                if ($tfCount -gt 2000) {
+                    $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
+                }
+                if ($tfCount -gt 3000) {
+                    $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
+                }
+                [void]$htmlScopeInsights.AppendLine(@"
+paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},*/
+"@)
+            }
+            [void]$htmlScopeInsights.AppendLine(@"
+                btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
+                col_types: [
+                    'caseinsensitivestring',
+                    'caseinsensitivestring'
+                ],
+                extensions: [{ name: 'sort' }]
+            };
+            var tf = new TableFilter('$htmlTableId', tfConfig4$htmlTableId);
+            tf.init();}}
+        </script>
+"@)
+        }
+        else {
+            [void]$htmlScopeInsights.AppendLine(@"
+                    <p><i class="fa fa-ban" aria-hidden="true"></i> No Classic Administrators</p>
+"@)
+        }
+        [void]$htmlScopeInsights.AppendLine(@'
+</td></tr>
+<tr><td class="detailstd">
+'@)
+        #endregion ScopeInsightsClassicAdministrators
+    }
+
     #RoleAssignments
     #region ScopeInsightsRoleAssignments
     if ($mgOrSub -eq 'mg') {
@@ -3148,8 +3882,11 @@ btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { 
             $script:scopescnter = 0
             Write-Host '   append file duration: '(Measure-Command { $script:html | Add-Content -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName).html" -Encoding utf8 -Force }).TotalSeconds 'seconds'
             $script:html = $null
-            #[System.GC]::Collect()
         }
+    }
+
+    if ($scopescnter % 50 -eq 0) {
+        showMemoryUsage
     }
 
 }

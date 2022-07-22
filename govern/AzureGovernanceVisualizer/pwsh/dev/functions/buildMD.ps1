@@ -1,8 +1,5 @@
 function buildMD {
     Write-Host 'Building Markdown'
-    #test
-    Write-Host 'htParameters.onAzureDevOpsOrGitHubActions:' $azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions
-    Write-Host 'htParameters.codeRunPlatform:' $azAPICallConf['htParameters'].codeRunPlatform
     $startBuildMD = Get-Date
     $script:arrayMgs = [System.Collections.ArrayList]@()
     $script:arraySubs = [System.Collections.ArrayList]@()
@@ -17,7 +14,7 @@ function buildMD {
             $markdown += @"
 # AzGovViz - Management Group Hierarchy
 
-## Hierarchy Diagram (Mermaid)
+## HierarchyMap (Mermaid)
 
 ::: mermaid
     graph $($MermaidDirection.ToUpper());`n
@@ -28,7 +25,7 @@ function buildMD {
             $markdown += @"
 # AzGovViz - Management Group Hierarchy
 
-## Hierarchy Diagram (Mermaid)
+## HierarchyMap (Mermaid)
 
 $($marks)mermaid
     graph $($MermaidDirection.ToUpper());`n
@@ -42,7 +39,7 @@ $($marks)mermaid
 
 $executionDateTimeInternationalReadable ($currentTimeZone)
 
-## Hierarchy Diagram (Mermaid)
+## HierarchyMap (Mermaid)
 
 ::: mermaid
     graph $($MermaidDirection.ToUpper());`n
