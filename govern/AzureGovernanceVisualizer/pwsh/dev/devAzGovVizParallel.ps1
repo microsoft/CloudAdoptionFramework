@@ -34,7 +34,7 @@
     default is 80%, this parameter defines the warning level for approaching Limits (e.g. 80% of Role Assignment limit reached) change as per your preference
 
 .PARAMETER SubscriptionQuotaIdWhitelist
-    default is 'undefined', this parameter defines the QuotaIds the subscriptions must match so that AzGovViz processes them. The script checks if the QuotaId startswith the string that you have put in. Separate multiple strings with backslash e.g. MSDN_,EnterpriseAgreement_
+    default is 'undefined', this parameter defines the QuotaIds the subscriptions must match so that AzGovViz processes them. The script checks if the QuotaId startswith the string that you have put in. Separate multiple strings with comma e.g. MSDN_,EnterpriseAgreement_
 
 .PARAMETER NoPolicyComplianceStates
     use this parameter if policy compliance states should not be queried
@@ -137,6 +137,9 @@
 .PARAMETER ManagementGroupsOnly
     Collect data only for Management Groups (Subscription data such as e.g. Policy assignments etc. will not be collected)
 
+.PARAMETER ExcludedResourceTypesDiagnosticsCapable
+    Resource Types to be excluded from processing analysis for diagnostic settings capability (default: microsoft.web/certificates)
+
 .EXAMPLE
     Define the ManagementGroup ID
     PS C:\> .\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id>
@@ -159,8 +162,8 @@
     Define when limits should be highlighted as warning (default is 80 percent)
     PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -LimitCriticalPercentage 90
 
-    Define the QuotaId whitelist by providing strings separated by a backslash
-    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -SubscriptionQuotaIdWhitelist MSDN_, EnterpriseAgreement_
+    Define the QuotaId whitelist by providing strings separated by a comma
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -SubscriptionQuotaIdWhitelist MSDN_,EnterpriseAgreement_
 
     Define if policy compliance states should be queried
     PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoPolicyComplianceStates
@@ -261,6 +264,9 @@
     Define if data should be collected for Management Groups only (Subscription data such as e.g. Policy assignments etc. will not be collected)
     PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -ManagementGroupsOnly
 
+    Define Resource Types to be excluded from processing analysis for diagnostic settings capability (default: microsoft.web/certificates)
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -ExcludedResourceTypesDiagnosticsCapable @('microsoft.web/certificates')
+
     .NOTES
     AUTHOR: Julian Hayward - Customer Engineer - Customer Success Unit | Azure Infrastucture/Automation/Devops/Governance | Microsoft
 
@@ -277,10 +283,10 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $AzAPICallVersion = '1.1.11',
+    $AzAPICallVersion = '1.1.18',
 
     [string]
-    $ProductVersion = 'v6_major_20220505_1',
+    $ProductVersion = 'v6_minor_20220722_1',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
@@ -425,6 +431,18 @@ Param
     [switch]
     $ShowMemoryUsage,
 
+    [int]
+    $CriticalMemoryUsage = 90,
+
+    [switch]
+    $DoPSRule,
+
+    [switch]
+    $PSRuleFailedOnly,
+
+    [string]
+    $PSRuleVersion,
+
     #https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits#role-based-access-control-limits
     [int]
     $LimitRBACCustomRoleDefinitionsTenant = 5000,
@@ -479,11 +497,21 @@ $startAzGovViz = Get-Date
 $startTime = Get-Date -Format 'dd-MMM-yyyy HH:mm:ss'
 Write-Host "Start AzGovViz $($startTime) (#$($ProductVersion))"
 
+if ($ManagementGroupId -match " ") {
+    Write-Host "Provided Management Group ID: '$($ManagementGroupId)'" -ForegroundColor Yellow
+    Write-Host "The Management Group ID may not contain spaces - provide the Management Group ID, not the displayName." -ForegroundColor DarkRed
+    throw "Management Group ID validation failed!"
+}
+
 #region Functions
+. ".\$($ScriptPath)\functions\testGuid.ps1"
+. ".\$($ScriptPath)\functions\apiCallTracking.ps1"
 . ".\$($ScriptPath)\functions\addRowToTable.ps1"
 . ".\$($ScriptPath)\functions\testPowerShellVersion.ps1"
 . ".\$($ScriptPath)\functions\setOutput.ps1"
 . ".\$($ScriptPath)\functions\setTranscript.ps1"
+. ".\$($ScriptPath)\functions\verifyModules3rd.ps1"
+. ".\$($ScriptPath)\functions\checkAzGovVizVersion.ps1"
 . ".\$($ScriptPath)\functions\handleCloudEnvironment.ps1"
 . ".\$($ScriptPath)\functions\addHtParameters.ps1"
 . ".\$($ScriptPath)\functions\selectMg.ps1"
@@ -496,6 +524,7 @@ Write-Host "Start AzGovViz $($startTime) (#$($ProductVersion))"
 . ".\$($ScriptPath)\functions\processHierarchyMapOnly.ps1"
 . ".\$($ScriptPath)\functions\getSubscriptions.ps1"
 . ".\$($ScriptPath)\functions\detailSubscriptions.ps1"
+. ".\$($ScriptPath)\functions\getOrphanedResources.ps1"
 . ".\$($ScriptPath)\functions\getMDfCSecureScoreMG.ps1"
 . ".\$($ScriptPath)\functions\getConsumption.ps1"
 . ".\$($ScriptPath)\functions\cacheBuiltIn.ps1"
@@ -533,6 +562,7 @@ $funcAddRowToTable = $function:addRowToTable.ToString()
 $funcGetGroupmembers = $function:GetGroupmembers.ToString()
 $funcResolveObjectIds = $function:ResolveObjectIds.ToString()
 $funcNamingValidation = $function:NamingValidation.ToString()
+$funcTestGuid = $function:testGuid.ToString()
 
 testPowerShellVersion
 showMemoryUsage
@@ -541,127 +571,33 @@ if ($DoTranscript) {
     setTranscript
 }
 
-#region verifyAzAPICall
-if ($AzAPICallVersion) {
-    Write-Host " Verify 'AzAPICall' ($AzAPICallVersion)"
-}
-else {
-    Write-Host " Verify 'AzAPICall' (latest)"
-}
+#region verifyModules3rd
+$modules = [System.Collections.ArrayList]@()
+$null = $modules.Add([PSCustomObject]@{
+        ModuleName         = 'AzAPICall'
+        ModuleVersion      = $AzAPICallVersion
+        ModuleProductName  = 'AzAPICall'
+        ModulePathPipeline = 'AzAPICallModule'
+    })
 
-$maxRetry = 3
-$tryCount = 0
-do {
-    $tryCount++
-    if ($tryCount -gt $maxRetry) {
-        Write-Host " Managing 'AzAPICall' failed (tried $($tryCount - 1)x)"
-        throw " Managing 'AzAPICall' failed"
+if ($DoPSRule) {
+    
+    <#temporary workaround / PSRule/Azure DevOps Az.Resources module requirements
+    if ($env:SYSTEM_TEAMPROJECTID -and $env:BUILD_REPOSITORY_ID) {
+        $PSRuleVersion = '1.14.3'
+        Write-Host "Running in Azure DevOps; enforce PSRule version '$PSRuleVersion' (Az.Resources dependency on latest PSRule)"
     }
+    #>
 
-    $importAzAPICallModuleSuccess = $false
-    try {
-
-        if (-not $AzAPICallVersion) {
-            Write-Host '  Check latest module version'
-            try {
-                $AzAPICallVersion = (Find-Module -name AzAPICall).Version
-                Write-Host "  Latest module version: $AzAPICallVersion"
-            }
-            catch {
-                Write-Host '  Check latest module version failed'
-                throw
-            }
-        }
-
-        try {
-            $azAPICallModuleDeviation = $false
-            $azAPICallModuleVersionLoaded = ((Get-Module -name AzAPICall).Version)
-            foreach ($moduleLoaded in $azAPICallModuleVersionLoaded) {
-                if ($moduleLoaded.toString() -ne $AzAPICallVersion) {
-                    Write-Host "  Deviating loaded version found ('$($moduleLoaded.toString())' != '$($AzAPICallVersion)')"
-                    $azAPICallModuleDeviation = $true
-                }
-                else {
-                    if ($azAPICallModuleVersionLoaded.count -eq 1) {
-                        Write-Host "  AzAPICall module ($($moduleLoaded.toString())) is already loaded" -ForegroundColor Green
-                        $importAzAPICallModuleSuccess = $true
-                    }
-                }
-            }
-
-            if ($azAPICallModuleDeviation) {
-                $importAzAPICallModuleSuccess = $false
-                try {
-                    Write-Host "  Remove-Module AzAPICall ($(($azAPICallModuleVersionLoaded -join ', ').ToString()))"
-                    Remove-Module -Name AzAPICall -Force
-                }
-                catch {
-                    Write-Host '  Remove-Module AzAPICall failed'
-                    throw
-                }
-            }
-        }
-        catch {
-            #Write-Host '  AzAPICall module is not loaded'
-        }
-
-        if (-not $importAzAPICallModuleSuccess) {
-            Write-Host "  Try (#$tryCount) importing AzAPICall module ($AzAPICallVersion)"
-            if (($env:SYSTEM_TEAMPROJECTID -and $env:BUILD_REPOSITORY_ID) -or $env:GITHUB_ACTIONS) {
-                Import-Module ".\$($ScriptPath)\AzAPICallModule\AzAPICall\$($AzAPICallVersion)\AzAPICall.psd1" -Force -ErrorAction Stop
-                Write-Host "  Import PS module 'AzAPICall' ($($AzAPICallVersion)) succeeded" -ForegroundColor Green
-            }
-            else {
-                Import-Module -Name AzAPICall -RequiredVersion $AzAPICallVersion -Force
-                Write-Host "  Import PS module 'AzAPICall' ($($AzAPICallVersion)) succeeded" -ForegroundColor Green
-            }
-            $importAzAPICallModuleSuccess = $true
-        }
-    }
-    catch {
-        Write-Host '  Importing AzAPICall module failed'
-        if (($env:SYSTEM_TEAMPROJECTID -and $env:BUILD_REPOSITORY_ID) -or $env:GITHUB_ACTIONS) {
-            Write-Host "  Saving AzAPICall module ($($AzAPICallVersion))"
-            try {
-                $params = @{
-                    Name            = 'AzAPICall'
-                    Path            = ".\$($ScriptPath)\AzAPICallModule"
-                    Force           = $true
-                    RequiredVersion = $AzAPICallVersion
-                }
-                Save-Module @params
-            }
-            catch {
-                Write-Host "  Saving AzAPICall module ($($AzAPICallVersion)) failed"
-                throw
-            }
-        }
-        else {
-            do {
-                $installAzAPICallModuleUserChoice = Read-Host "  Do you want to install AzAPICall module ($($AzAPICallVersion)) from the PowerShell Gallery? (y/n)"
-                if ($installAzAPICallModuleUserChoice -eq 'y') {
-                    try {
-                        Install-Module -Name AzAPICall -RequiredVersion $AzAPICallVersion
-                    }
-                    catch {
-                        Write-Host "  Install-Module AzAPICall ($($AzAPICallVersion)) Failed"
-                        throw
-                    }
-                }
-                elseif ($installAzAPICallModuleUserChoice -eq 'n') {
-                    Write-Host '  AzAPICall module is required, please visit https://aka.ms/AZAPICall or https://www.powershellgallery.com/packages/AzAPICall'
-                    throw '  AzAPICall module is required'
-                }
-                else {
-                    Write-Host "  Accepted input 'y' or 'n'; start over.."
-                }
-            }
-            until ($installAzAPICallModuleUserChoice -eq 'y')
-        }
-    }
+    $null = $modules.Add([PSCustomObject]@{
+            ModuleName         = 'PSRule.Rules.Azure'
+            ModuleVersion      = $PSRuleVersion
+            ModuleProductName  = 'PSRule'
+            ModulePathPipeline = 'PSRuleModule'
+        })
 }
-until ($importAzAPICallModuleSuccess)
-#endregion verifyAzAPICall
+verifyModules3rd -modules $modules
+#endregion verifyModules3rd
 
 #Region initAZAPICall
 Write-Host "Initialize 'AzAPICall'"
@@ -674,10 +610,38 @@ $azAPICallConf = initAzAPICall @parameters4AzAPICallModule
 Write-Host " Initialize 'AzAPICall' succeeded" -ForegroundColor Green
 #EndRegion initAZAPICall
 
-#obsolete
-#$AzAPICallFunctions = getAzAPICallFunctions
+checkAzGovVizVersion
+
+#region promptNewAzGovVizVersionAvailable
+if ($azGovVizNewerVersionAvailable) {
+    if (-not $azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
+        Write-Host ''
+        Write-Host " * * * This AzGovViz version ($ProductVersion) is not up to date. Get the latest AzGovViz version ($azGovVizVersionOnRepositoryFull)! * * *" -ForegroundColor Green
+        Write-Host 'Check the AzGovViz history: https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/history.md'
+        Write-Host ' * * * * * * * * * * * * * * * * * * * * * *' -ForegroundColor Green
+        pause
+    }
+}
+#endregion promptNewAzGovVizVersionAvailable
 
 handleCloudEnvironment
+
+#region recommendPSRule
+if (-not $HierarchyMapOnly) {
+    if (-not $azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
+        if (-not $DoPSRule) {
+            Write-Host ""
+            Write-Host " * * * RECOMMENDATION: PSRule for Azure * * *" -ForegroundColor Magenta
+            Write-Host "Parameter -DoPSRule == '$DoPSRule'"
+            Write-Host "'PSRule for Azure' based ouputs provide aggregated Microsoft Azure Well-Architected Framework (WAF) aligned resource analysis results including guidance for remediation."
+            Write-Host "Consider running AzGovViz with the parameter -DoPSRule (example: .\pwsh\AzGovVizParallel.ps1 -DoPSRule)"
+            Write-Host " * * * * * * * * * * * * * * * * * * * * * *" -ForegroundColor Magenta
+            pause
+        }
+    }
+}
+#endregion recommendPSRule
+
 addHtParameters
 
 #region delimiterOpposite
@@ -692,7 +656,6 @@ if ($CsvDelimiter -eq ',') {
 #region runDataCollection
 
 #run
-$arrayAPICallTrackingCustomDataCollection = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
 
 validateAccess
 getFileNaming
@@ -746,14 +709,15 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $resourcesIdsAll = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $resourceGroupsAll = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htResourceProvidersAll = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $arrayFeaturesAll = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htResourceTypesUniqueResource = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $arrayDataCollectionProgressMg = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayDataCollectionProgressSub = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arraySubResourcesAddArrayDuration = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayDiagnosticSettingsMgSub = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htDiagnosticSettingsMgSub = @{}
-    ($htDiagnosticSettingsMgSub).mg = @{}
-    ($htDiagnosticSettingsMgSub).sub = @{}
+    $htDiagnosticSettingsMgSub.mg = @{}
+    $htDiagnosticSettingsMgSub.sub = @{}
     $htMgAtScopePolicyAssignments = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $htMgAtScopePoliciesScoped = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $htMgAtScopeRoleAssignments = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
@@ -773,7 +737,7 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $htServicePrincipals = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $htDailySummary = @{}
     $arrayDefenderPlans = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $arrayDefenderPlansSubscriptionNotRegistered = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
+    $arrayDefenderPlansSubscriptionsSkipped = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayUserAssignedIdentities4Resources = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htSubscriptionsRoleAssignmentLimit = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     if ($azAPICallConf['htParameters'].NoMDfCSecureScore -eq $false) {
@@ -783,7 +747,6 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $htPolicyAssignmentManagedIdentity = @{}
     $htManagedIdentityDisplayName = @{}
     $htAppDetails = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-
     if (-not $NoAADGroupsResolveMembers) {
 
         $htAADGroupsDetails = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
@@ -792,10 +755,13 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
         $arrayGroupRequestResourceNotFound = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
         $arrayProgressedAADGroups = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     }
-
     if ($DoAzureConsumption) {
         $allConsumptionData = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     }
+    $arrayPsRule = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
+    $arrayPSRuleTracking = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
+    $htClassicAdministrators = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $arrayOrphanedResources = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
 }
 
 getEntities
@@ -826,6 +792,8 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
         getConsumption
     }
 
+    getOrphanedResources
+    showMemoryUsage
     cacheBuiltIn
     showMemoryUsage
 
@@ -981,11 +949,15 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
 
     #region create array Policy definitions
     $tenantAllPoliciesCount = (($htCacheDefinitionsPolicy).Values).count
+    $tenantBuiltInPolicies = (($htCacheDefinitionsPolicy).Values).where({ $_.Type -eq 'BuiltIn' } )
+    $tenantBuiltInPoliciesCount = ($tenantBuiltInPolicies).count
     $tenantCustomPolicies = (($htCacheDefinitionsPolicy).Values).where({ $_.Type -eq 'Custom' } )
     $tenantCustomPoliciesCount = ($tenantCustomPolicies).count
     #endregion create array Policy definitions
 
     #region create array PolicySet definitions
+    $tenantBuiltInPolicySets = $tenantAllPolicySets.where({ $_.Type -eq 'Builtin' } )
+    $tenantBuiltInPolicySetsCount = ($tenantBuiltInPolicySets).count
     $tenantCustomPolicySets = $tenantAllPolicySets.where({ $_.Type -eq 'Custom' } )
     $tenantCustompolicySetsCount = ($tenantCustomPolicySets).count
     #endregion create array PolicySet definitions
@@ -1196,8 +1168,12 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     Write-Host " Total Subscriptions: $totalSubIncludedAndExcludedCount ($totalSubCount included; $totalSubOutOfScopeCount out-of-scope)"
     $htDailySummary.'Subscriptions' = $totalSubCount
     $htDailySummary.'SubscriptionsOutOfScope' = $totalSubOutOfScopeCount
+    Write-Host " Total BuiltIn Policy definitions: $tenantBuiltInPoliciesCount"
+    $htDailySummary.'PolicyDefinitionsBuiltIn' = $tenantBuiltInPoliciesCount
     Write-Host " Total Custom Policy definitions: $tenantCustomPoliciesCount"
     $htDailySummary.'PolicyDefinitionsCustom' = $tenantCustomPoliciesCount
+    Write-Host " Total BuiltIn PolicySet definitions: $tenantBuiltInPolicySetsCount"
+    $htDailySummary.'PolicySetDefinitionsBuiltIn' = $tenantBuiltInPolicySetsCount
     Write-Host " Total Custom PolicySet definitions: $tenantCustompolicySetsCount"
     $htDailySummary.'PolicySetDefinitionsCustom' = $tenantCustompolicySetsCount
     Write-Host " Total Policy assignments: $($totalPolicyAssignmentsCount)"
@@ -1297,7 +1273,7 @@ $html = @"
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" type="text/css" href="https://www.azadvertizer.net/azgovvizv4/css/jsonviewer_v01.css">
     <script type="text/javascript" src="https://www.azadvertizer.net/azgovvizv4/js/jsonviewer_v02.js"></script>
-
+    <script src="https://www.azadvertizer.net/azgovvizv4/js/dom-to-image.min.js"></script>
     <script>
         `$(window).on('load', function () {
             // Animate loader off screen
@@ -1436,7 +1412,7 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
                 <table class="subTable">
 '@
 
-        $htmlSubscriptionOnlyEnd = @'
+        $htmlSubscriptionOnlyEnd = @"
 </table>
 </div>
     </div>
@@ -1448,7 +1424,7 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     <script src="https://www.azadvertizer.net/azgovvizv4/js/toggle_v004_004.js"></script>
     <script src="https://www.azadvertizer.net/azgovvizv4/js/collapsetable_v004_001.js"></script>
     <script src="https://www.azadvertizer.net/azgovvizv4/js/fitty_v004_001.min.js"></script>
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/version_v004_001.js"></script>
+    <script src="https://www.azadvertizer.net/azgovvizv4/js/version_v004_002.js"></script>
     <script src="https://www.azadvertizer.net/azgovvizv4/js/autocorrectOff_v004_001.js"></script>
     <script>
         fitty('#fitme', {
@@ -1456,16 +1432,37 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
             maxSize: 10
         });
     </script>
+    <script>
+        `$("#getImage").on('click', function () {
+
+        element = document.getElementById('first')
+        var images = element.getElementsByTagName('img');
+        var l = images.length;
+        for (var i = 0; i < l; i++) {
+            images[0].parentNode.removeChild(images[0]);
+        }
+
+        domtoimage.toJpeg(element)
+            .then(function (dataUrl) {
+                var link = document.createElement('a');
+                link.download = '$($fileName)';
+                link.href = dataUrl;
+                link.click();
+            });
+                
+        })
+    </script>
 </body>
 
 </html>
-'@
+"@
     }
 
     $htmlShowHideScopeInfo =
     @"
 <p>
-    <button id="showHideScopeInfo">Hide<br>ScopeInfo</button>
+    <button id="showHideScopeInfo">Hide<br>ScopeInfo</button><br>
+    <a id="getImage" href="#"><button>save image</button></a>
     <script>
         `$("#showHideScopeInfo").click(function() {
             if (`$(this).html() == "Hide<br>ScopeInfo") {
@@ -1481,7 +1478,7 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
 "@
 }
 else {
-    $htmlShowHideScopeInfo = ''
+    $htmlShowHideScopeInfo = '<p><a id="getImage" href="#"><button>save image</button></a></p>'
 }
 
 $html += @"
@@ -1497,7 +1494,7 @@ $html += @"
 
 $html += @'
 <ul>
-    <li id="first">
+    <li id="first" style="background-color:white">
 '@
 
 if ($tenantDisplayName) {
@@ -1669,7 +1666,6 @@ Write-Host ' Building HierarchyMap'
 
 HierarchyMgHTML -mgChild $ManagementGroupId
 showMemoryUsage
-#[System.GC]::Collect()
 
 $endhierarchyMap = Get-Date
 Write-Host " Building HierarchyMap duration: $((NEW-TIMESPAN -Start $starthierarchyMap -End $endhierarchyMap).TotalMinutes) minutes ($((NEW-TIMESPAN -Start $starthierarchyMap -End $endhierarchyMap).TotalSeconds) seconds)"
@@ -1722,8 +1718,6 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $dailySummary4ExportToCSV | Export-Csv -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName)_DailySummary.csv" -Delimiter "$csvDelimiter" -NoTypeInformation
     #endregion BuildDailySummaryCSV
 
-    #[System.GC]::Collect()
-
     $endSummary = Get-Date
     Write-Host " Building TenantSummary duration: $((NEW-TIMESPAN -Start $startSummary -End $endSummary).TotalMinutes) minutes ($((NEW-TIMESPAN -Start $startSummary -End $endSummary).TotalSeconds) seconds)"
 
@@ -1739,7 +1733,6 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
 
     processDefinitionInsights
     showMemoryUsage
-    #[System.GC]::Collect()
 
     $html += @'
     </div><!--definitionInsights-->
@@ -1760,9 +1753,22 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
 
         $startHierarchyTable = Get-Date
         $script:scopescnter = 0
+        if ($azAPICallConf['htParameters'].NoResources -eq $false) {
+            if ($azAPICallConf['htParameters'].DoPSRule -eq $true) {
+                $grpPSRuleSubscriptions = $arrayPsRule | group-object -Property subscriptionId
+                $grpPSRuleManagementGroups = $arrayPsRule | group-object -Property mgPath
+            }
+        }
+        if ($arrayFeaturesAll.Count -gt 0) {
+            $script:subFeaturesGroupedBySubscription = $arrayFeaturesAll | Group-Object -property subscriptionId
+        }
+        if ($arrayOrphanedResourcesSlim.Count -gt 0) {
+            $arrayOrphanedResourcesGroupedBySubscription = $arrayOrphanedResourcesSlim | Group-Object subscriptionId
+        }
+        $resourcesIdsAllCAFNamingRelevantGroupedBySubscription = $resourcesIdsAllCAFNamingRelevant | Group-Object -Property subscriptionId
+
         processScopeInsights -mgChild $ManagementGroupId -mgChildOf $getMgParentId
         showMemoryUsage
-        #[System.GC]::Collect()
 
         $endHierarchyTable = Get-Date
         Write-Host " Building ScopeInsights duration: $((NEW-TIMESPAN -Start $startHierarchyTable -End $endHierarchyTable).TotalMinutes) minutes ($((NEW-TIMESPAN -Start $startHierarchyTable -End $endHierarchyTable).TotalSeconds) seconds)"
@@ -1789,24 +1795,24 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $paramsUsed += "Creation duration: $AzGovVizHTMLDuration minutes &#13;"
     if (-not $NoScopeInsights) {
         $html += @"
-        <abbr style="text-decoration:none" title="$($paramsUsed)"><i class="fa fa-question-circle" aria-hidden="true"></i></abbr> <button id="hierarchyTreeShowHide" onclick="toggleHierarchyTree()">Hide HierarchyMap</button> <button id="summaryShowHide" onclick="togglesummprnt()">Hide TenantSummary</button> <button id="definitionInsightsShowHide" onclick="toggledefinitioninsightsprnt()">Hide DefinitionInsights</button> <button id="hierprntShowHide" onclick="togglehierprnt()">Hide ScopeInsights</button>
+        <abbr style="text-decoration:none" title="$($paramsUsed)"><i class="fa fa-question-circle" aria-hidden="true"></i></abbr> <button id="hierarchyTreeShowHide" onclick="toggleHierarchyTree()">Hide HierarchyMap</button> <button id="summaryShowHide" onclick="togglesummprnt()">Hide TenantSummary</button> <button id="definitionInsightsShowHide" onclick="toggledefinitioninsightsprnt()">Hide DefinitionInsights</button> <button id="hierprntShowHide" onclick="togglehierprnt()">Hide ScopeInsights</button> $azGovVizNewerVersionAvailableHTML
         <hr>
 "@
     }
     else {
         $html += @"
-        <abbr style="text-decoration:none" title="$($paramsUsed)"><i class="fa fa-question-circle" aria-hidden="true"></i></abbr> <button id="hierarchyTreeShowHide" onclick="toggleHierarchyTree()">Hide HierarchyMap</button> <button id="summaryShowHide" onclick="togglesummprnt()">Hide TenantSummary</button> <button id="definitionInsightsShowHide" onclick="toggledefinitioninsightsprnt()">Hide DefinitionInsights</button>
+        <abbr style="text-decoration:none" title="$($paramsUsed)"><i class="fa fa-question-circle" aria-hidden="true"></i></abbr> <button id="hierarchyTreeShowHide" onclick="toggleHierarchyTree()">Hide HierarchyMap</button> <button id="summaryShowHide" onclick="togglesummprnt()">Hide TenantSummary</button> <button id="definitionInsightsShowHide" onclick="toggledefinitioninsightsprnt()">Hide DefinitionInsights</button> $azGovVizNewerVersionAvailableHTML
 "@
 
     }
 }
 
-$html += @'
+$html += @"
     </div>
     <script src="https://www.azadvertizer.net/azgovvizv4/js/toggle_v004_004.js"></script>
     <script src="https://www.azadvertizer.net/azgovvizv4/js/collapsetable_v004_001.js"></script>
     <script src="https://www.azadvertizer.net/azgovvizv4/js/fitty_v004_001.min.js"></script>
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/version_v004_001.js"></script>
+    <script src="https://www.azadvertizer.net/azgovvizv4/js/version_v004_002.js"></script>
     <script src="https://www.azadvertizer.net/azgovvizv4/js/autocorrectOff_v004_001.js"></script>
     <script>
         fitty('#fitme', {
@@ -1814,9 +1820,30 @@ $html += @'
             maxSize: 10
         });
     </script>
+
+    <script>
+        `$("#getImage").on('click', function () {
+    
+        element = document.getElementById('first')
+        var images = element.getElementsByTagName('img');
+        var l = images.length;
+        for (var i = 0; i < l; i++) {
+            images[0].parentNode.removeChild(images[0]);
+        }
+
+        domtoimage.toJpeg(element)
+            .then(function (dataUrl) {
+                var link = document.createElement('a');
+                link.download = '$($fileName).jpeg';
+                link.href = dataUrl;
+                link.click();
+            });
+                
+        })
+    </script>
 </body>
 </html>
-'@
+"@
 
 $html | Add-Content -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName).html" -Encoding utf8 -Force
 
@@ -1832,25 +1859,13 @@ if (-not $azAPICallConf['htParameters'].NoJsonExport) {
     showMemoryUsage
 }
 
-buildPolicyAllJSON
-showMemoryUsage
-
+if (-not $HierarchyMapOnly) {
+    buildPolicyAllJSON
+}
 #endregion createoutputs
 
-#APITracking
-$APICallTrackingCount = ($azAPICallConf['arrayAPICallTracking']).Count
-$APICallTrackingRetriesCount = ($azAPICallConf['arrayAPICallTracking'].where({ $_.TryCounter -gt 1 } )).Count
-$APICallTrackingGroupedByTargetEndpoint = $azAPICallConf['arrayAPICallTracking'] | Group-Object -Property TargetEndpoint
-$APICallTrackingRestartDueToDuplicateNextlinkCounterCount = ($azAPICallConf['arrayAPICallTracking'].where({ $_.RestartDueToDuplicateNextlinkCounter -gt 0 } )).Count
-Write-Host 'AzGovViz API call stats:'
-$duarationStats = ($azAPICallConf['arrayAPICallTracking'].Duration | Measure-Object -Average -Maximum -Minimum)
-Write-Host " API calls total count: $APICallTrackingCount ($APICallTrackingRetriesCount retries; $APICallTrackingRestartDueToDuplicateNextlinkCounterCount nextLinkReset) | average: $($duarationStats.Average) sec, maximum: $($duarationStats.Maximum) sec, minimum: $($duarationStats.Minimum) sec"
-foreach ($targetEndpoint in $APICallTrackingGroupedByTargetEndpoint | Sort-Object -Property Name) {
-    $APICallTrackingRetriesCount = ($targetEndpoint.Group.where({ $_.TryCounter -gt 1 } )).Count
-    $APICallTrackingRestartDueToDuplicateNextlinkCounterCount = ($targetEndpoint.Group.where({ $_.RestartDueToDuplicateNextlinkCounter -gt 0 } )).Count
-    $duarationStats = ($targetEndpoint.Group.Duration | Measure-Object -Average -Maximum -Minimum)
-    Write-Host " API calls endpoint '$($targetEndpoint.Name) ($($azAPICallConf['azAPIEndpointUrls'].($targetEndpoint.Name)))' count: $($targetEndpoint.Count) ($APICallTrackingRetriesCount retries; $APICallTrackingRestartDueToDuplicateNextlinkCounterCount nextLinkReset) | average: $($duarationStats.Average) sec, maximum: $($duarationStats.Maximum) sec, minimum: $($duarationStats.Minimum) sec"
-}
+apiCallTracking -stage 'Summary' -spacing ''
+
 $endAzGovViz = Get-Date
 $durationProduct = (NEW-TIMESPAN -Start $startAzGovViz -End $endAzGovViz)
 Write-Host "AzGovViz duration: $($durationProduct.TotalMinutes) minutes"
@@ -1876,8 +1891,35 @@ if ($DoTranscript) {
 
 Write-Host ''
 Write-Host '--------------------'
-Write-Host 'Completed successful' -ForegroundColor Green
-showMemoryUsage
+Write-Host 'AzGovViz completed successful' -ForegroundColor Green
+
 if ($Error.Count -gt 0) {
     Write-Host "Don't bother about dumped errors"
 }
+
+if ($DoPSRule) {
+    $psRuleErrors = $arrayPsRule.where({ -not [string]::IsNullOrWhiteSpace($_.errorMsg) })
+    if ($psRuleErrors) {
+        Write-Host ''
+        Write-Host "$($psRuleErrors.Count) 'PSRule for Azure' error(s) encountered"
+        Write-Host "Please review the error(s) and consider filing an issue at the PSRule.Rules.Azure GitHub repository https://github.com/Azure/PSRule.Rules.Azure - thank you"
+        $psRuleErrorsGrouped = $psRuleErrors | Group-Object -Property resourceType, errorMsg
+        foreach ($errorGroupedByResourceTypeAndMessage in $psRuleErrorsGrouped) {
+            Write-Host "$($errorGroupedByResourceTypeAndMessage.Count) x $($errorGroupedByResourceTypeAndMessage.Name)"
+            Write-Host 'Resources:'
+            foreach ($resourceId in $errorGroupedByResourceTypeAndMessage.Group.resourceId) {
+                Write-Host " -$resourceId"
+            }
+        }
+    }
+}
+
+#region infoNewAzGovVizVersionAvailable
+if ($azGovVizNewerVersionAvailable) {
+    if ($azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
+        Write-Host ''
+        Write-Host "This AzGovViz version ($ProductVersion) is not up to date. Get the latest AzGovViz version ($azGovVizVersionOnRepositoryFull)!"
+        Write-Host 'Check the AzGovViz history: https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/history.md'
+    }
+}
+#endregion infoNewAzGovVizVersionAvailable

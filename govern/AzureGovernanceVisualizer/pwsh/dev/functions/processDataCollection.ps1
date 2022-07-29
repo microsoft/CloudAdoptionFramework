@@ -8,8 +8,25 @@ function processDataCollection {
 
     $allManagementGroupsFromEntitiesChildOfRequestedMg = $arrayEntitiesFromAPI.where( { $_.type -eq 'Microsoft.Management/managementGroups' -and ($_.Name -eq $mgId -or $_.properties.parentNameChain -contains $mgId) })
     $allManagementGroupsFromEntitiesChildOfRequestedMgCount = ($allManagementGroupsFromEntitiesChildOfRequestedMg).Count
-
+    Write-Host " $allManagementGroupsFromEntitiesChildOfRequestedMgCount Management Groups: $(($allManagementGroupsFromEntitiesChildOfRequestedMg.Name | Sort-Object) -join ', ')"
     $mgBatch = ($allManagementGroupsFromEntitiesChildOfRequestedMg | Group-Object -Property { ($_.properties.parentNameChain).Count }) | Sort-Object -Property Name
+    Write-Host "  $(($mgBatch | Measure-Object).Count) batches of Management Groups to process:"
+    
+    $btchCnt = 0
+    foreach ($btch in $mgBatch) {
+        $btchCnt++
+        $listOfMGs = @()
+        foreach ($btchMg in $btch.Group | Sort-Object -Property name){
+            if ($btchMg.name -eq $btchMg.Properties.displayName){
+                $listOfMGs += $btchMg.name
+            }
+            else{
+                $listOfMGs += "$($btchMg.name) ($($btchMg.Properties.displayName))"
+            }
+        }
+        Write-Host "   Batch#$($btchCnt) - $($listOfMGs.Count) Management Groups: $($listOfMGs -join ', ')"
+    }
+
     foreach ($batchLevel in $mgBatch) {
         Write-Host "  Processing Management Groups L$($batchLevel.Name) ($($batchLevel.Count) Management Groups)"
 
@@ -53,7 +70,6 @@ function processDataCollection {
             $arrayEntitiesFromAPI = $using:arrayEntitiesFromAPI
             $allManagementGroupsFromEntitiesChildOfRequestedMgCount = $using:allManagementGroupsFromEntitiesChildOfRequestedMgCount
             $arrayDataCollectionProgressMg = $using:arrayDataCollectionProgressMg
-            $arrayAPICallTrackingCustomDataCollection = $using:arrayAPICallTrackingCustomDataCollection
             $arrayDiagnosticSettingsMgSub = $using:arrayDiagnosticSettingsMgSub
             $htMgAtScopePolicyAssignments = $using:htMgAtScopePolicyAssignments
             $htMgAtScopePoliciesScoped = $using:htMgAtScopePoliciesScoped
@@ -64,20 +80,11 @@ function processDataCollection {
             $htPrincipals = $using:htPrincipals
             $htServicePrincipals = $using:htServicePrincipals
             $htUserTypesGuest = $using:htUserTypesGuest
-            #Functions
-            #AzAPICall
-            if ($azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
-                Import-Module ".\$($scriptPath)\AzAPICallModule\AzAPICall\$($azAPICallConf['htParameters'].azAPICallModuleVersion)\AzAPICall.psd1" -Force -ErrorAction Stop
-            }
-            else {
-                Import-Module -Name AzAPICall -RequiredVersion $azAPICallConf['htParameters'].azAPICallModuleVersion -Force -ErrorAction Stop
-            }
             #other
             $function:addRowToTable = $using:funcAddRowToTable
             $function:namingValidation = $using:funcNamingValidation
             $function:resolveObjectIds = $using:funcResolveObjectIds
-
-            #$function:dataCollectionFunctions = $using:funcdataCollectionFunctions
+            $function:testGuid = $using:funcTestGuid
 
             $function:dataCollectionMGSecureScore = $using:funcDataCollectionMGSecureScore
             $function:dataCollectionDiagnosticsMG = $using:funcDataCollectionDiagnosticsMG
@@ -219,14 +226,15 @@ function processDataCollection {
 
             $null = $script:arrayDataCollectionProgressMg.Add($mgdetail.Name)
             $progressCount = ($arrayDataCollectionProgressMg).Count
-            Write-Host "  $($progressCount)/$($allManagementGroupsFromEntitiesChildOfRequestedMgCount) Management Groups processed"
+            Write-Host "   $($progressCount)/$($allManagementGroupsFromEntitiesChildOfRequestedMgCount) Management Groups processed"
 
         } -ThrottleLimit $ThrottleLimit
-        #[System.GC]::Collect()
     }
 
     $endMgLoop = Get-Date
     Write-Host " CustomDataCollection ManagementGroups processing duration: $((NEW-TIMESPAN -Start $startMgLoop -End $endMgLoop).TotalMinutes) minutes ($((NEW-TIMESPAN -Start $startMgLoop -End $endMgLoop).TotalSeconds) seconds)"
+
+    apiCallTracking -stage 'CustomDataCollection ManagementGroups' -spacing ' '
 
     #test
     if ($builtInPolicyDefinitionsCount -ne ($($htCacheDefinitionsPolicy).Values.where({ $_.Type -eq 'BuiltIn' }).Count) -or $builtInPolicyDefinitionsCount -ne ((($htCacheDefinitionsPolicy).Values.where( { $_.Type -eq 'BuiltIn' } )).Count)) {
@@ -263,7 +271,6 @@ function processDataCollection {
         $subscriptionsBatch = $subsToProcessInCustomDataCollection | Group-Object -Property { [math]::Floor($counterBatch.Value++ / $batchSize) }
         $batchCnt = 0
         foreach ($batch in $subscriptionsBatch) {
-            #[System.GC]::Collect()
             $startBatch = Get-Date
             $batchCnt++
             Write-Host " processing Batch #$batchCnt/$(($subscriptionsBatch | Measure-Object).Count) ($(($batch.Group | Measure-Object).Count) Subscriptions)"
@@ -289,6 +296,7 @@ function processDataCollection {
                 $htSubscriptionsMgPath = $using:htSubscriptionsMgPath
                 $htManagementGroupsMgPath = $using:htManagementGroupsMgPath
                 $htResourceProvidersAll = $using:htResourceProvidersAll
+                $arrayFeaturesAll = $using:arrayFeaturesAll
                 $htSubscriptionTagList = $using:htSubscriptionTagList
                 $htResourceTypesUniqueResource = $using:htResourceTypesUniqueResource
                 $htAllTagList = $using:htAllTagList
@@ -317,7 +325,6 @@ function processDataCollection {
                 $arraySubResourcesAddArrayDuration = $using:arraySubResourcesAddArrayDuration
                 $htAllSubscriptionsFromAPI = $using:htAllSubscriptionsFromAPI
                 $arrayEntitiesFromAPI = $using:arrayEntitiesFromAPI
-                $arrayAPICallTrackingCustomDataCollection = $using:arrayAPICallTrackingCustomDataCollection
                 $arrayDiagnosticSettingsMgSub = $using:arrayDiagnosticSettingsMgSub
                 $htMgASCSecureScore = $using:htMgASCSecureScore
                 $htRoleAssignmentsFromAPIInheritancePrevention = $using:htRoleAssignmentsFromAPIInheritancePrevention
@@ -326,27 +333,24 @@ function processDataCollection {
                 $htServicePrincipals = $using:htServicePrincipals
                 $htUserTypesGuest = $using:htUserTypesGuest
                 $arrayDefenderPlans = $using:arrayDefenderPlans
-                $arrayDefenderPlansSubscriptionNotRegistered = $using:arrayDefenderPlansSubscriptionNotRegistered
+                $arrayDefenderPlansSubscriptionsSkipped = $using:arrayDefenderPlansSubscriptionsSkipped
                 $arrayUserAssignedIdentities4Resources = $using:arrayUserAssignedIdentities4Resources
                 $htSubscriptionsRoleAssignmentLimit = $using:htSubscriptionsRoleAssignmentLimit
-                #Functions
-                #AzAPICall
-                if ($azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
-                    Import-Module ".\$($scriptPath)\AzAPICallModule\AzAPICall\$($azAPICallConf['htParameters'].azAPICallModuleVersion)\AzAPICall.psd1" -Force -ErrorAction Stop
-                }
-                else {
-                    Import-Module -Name AzAPICall -RequiredVersion $azAPICallConf['htParameters'].azAPICallModuleVersion -Force -ErrorAction Stop
-                }
+                $arrayPsRule = $using:arrayPsRule
+                $arrayPSRuleTracking = $using:arrayPSRuleTracking
+                $htClassicAdministrators = $using:htClassicAdministrators
                 #other
                 $function:addRowToTable = $using:funcAddRowToTable
                 $function:namingValidation = $using:funcNamingValidation
                 $function:resolveObjectIds = $using:funcResolveObjectIds
+                $function:testGuid = $using:funcTestGuid
                 $function:dataCollectionMGSecureScore = $using:funcDataCollectionMGSecureScore
                 $function:dataCollectionDefenderPlans = $using:funcDataCollectionDefenderPlans
                 $function:dataCollectionDiagnosticsSub = $using:funcDataCollectionDiagnosticsSub
                 $function:dataCollectionResources = $using:funcDataCollectionResources
                 $function:dataCollectionResourceGroups = $using:funcDataCollectionResourceGroups
                 $function:dataCollectionResourceProviders = $using:funcDataCollectionResourceProviders
+                $function:dataCollectionFeatures = $using:funcDataCollectionFeatures
                 $function:dataCollectionResourceLocks = $using:funcDataCollectionResourceLocks
                 $function:dataCollectionTags = $using:funcDataCollectionTags
                 $function:dataCollectionPolicyComplianceStates = $using:funcDataCollectionPolicyComplianceStates
@@ -359,6 +363,7 @@ function processDataCollection {
                 $function:dataCollectionPolicyAssignmentsSub = $using:funcDataCollectionPolicyAssignmentsSub
                 $function:dataCollectionRoleDefinitions = $using:funcDataCollectionRoleDefinitions
                 $function:dataCollectionRoleAssignmentsSub = $using:funcDataCollectionRoleAssignmentsSub
+                $function:dataCollectionClassicAdministratorsSub = $using:funcDataCollectionClassicAdministratorsSub
                 #endregion UsingVARs
 
                 $addRowToTableDone = $false
@@ -370,6 +375,8 @@ function processDataCollection {
                 $childMgId = $hierarchyInfo.Parent
                 $childMgDisplayName = $hierarchyInfo.ParentName
                 $childMgMgPath = $hierarchyInfo.pathDelimited
+                $childMgParentNameChain = $hierarchyInfo.ParentNameChain
+                $childMgParentNameChainDelimited = $hierarchyInfo.ParentNameChainDelimited
                 $childMgParentInfo = $htManagementGroupsMgPath.($childMgId)
                 $childMgParentId = $childMgParentInfo.Parent
                 $childMgParentName = $htManagementGroupsMgPath.($childMgParentInfo.Parent).DisplayName
@@ -394,8 +401,9 @@ function processDataCollection {
 
                     $targetMgOrSub = 'Sub'
                     $baseParameters = @{
-                        scopeId          = $childMgSubId
-                        scopeDisplayName = $childMgSubDisplayName
+                        scopeId             = $childMgSubId
+                        scopeDisplayName    = $childMgSubDisplayName
+                        subscriptionQuotaId = $subscriptionQuotaId
                     }
 
                     if (-not $azAPICallConf['htParameters'].ManagementGroupsOnly) {
@@ -420,6 +428,7 @@ function processDataCollection {
                             #resources
                             $dataCollectionResourcesParameters = @{
                                 ChildMgMgPath = $childMgMgPath
+                                ChildMgParentNameChainDelimited = $childMgParentNameChainDelimited
                             }
                             DataCollectionResources @baseParameters @dataCollectionResourcesParameters
                         }
@@ -429,6 +438,9 @@ function processDataCollection {
 
                         #resourceProviders
                         DataCollectionResourceProviders @baseParameters
+
+                        #features
+                        DataCollectionFeatures @baseParameters -MgParentNameChain $childMgParentNameChain
 
                         #resourceLocks
                         DataCollectionResourceLocks @baseParameters
@@ -453,7 +465,7 @@ function processDataCollection {
                             childMgParentId            = $childMgParentId
                             childMgParentName          = $childMgParentName
                             mgAscSecureScoreResult     = $mgAscSecureScoreResult
-                            subscriptionQuotaId        = $subscriptionQuotaId
+                            #subscriptionQuotaId        = $subscriptionQuotaId
                             subscriptionState          = $subscriptionState
                             subscriptionASCSecureScore = $subscriptionASCSecureScore
                             subscriptionTags           = $subscriptionTags
@@ -502,6 +514,9 @@ function processDataCollection {
                         if ($functionReturn.'addRowToTableDone') {
                             $addRowToTableDone = $true
                         }
+
+                        #SubscriptionClassicAdministrators
+                        dataCollectionClassicAdministratorsSub @baseParameters -SubscriptionMgPath $childMgMgPath
                     }
 
                     if ($addRowToTableDone -ne $true) {
@@ -545,11 +560,15 @@ function processDataCollection {
             $endBatch = Get-Date
             Write-Host " Batch #$batchCnt processing duration: $((NEW-TIMESPAN -Start $startBatch -End $endBatch).TotalMinutes) minutes ($((NEW-TIMESPAN -Start $startBatch -End $endBatch).TotalSeconds) seconds)"
         }
-        #[System.GC]::Collect()
 
         $endSubLoop = Get-Date
         Write-Host " CustomDataCollection Subscriptions processing duration: $((NEW-TIMESPAN -Start $startSubLoop -End $endSubLoop).TotalMinutes) minutes ($((NEW-TIMESPAN -Start $startSubLoop -End $endSubLoop).TotalSeconds) seconds)"
-
+        if ($azAPICallConf['htParameters'].DoPSRule -eq $true) {
+            if ($arrayPSRuleTracking.Count -gt 0) {
+                $durationPSRuleTotalSeconds = (($arrayPSRuleTracking.duration | Measure-Object -Sum).Sum)
+                Write-Host "  CustomDataCollection Subscriptions 'PSRule for Azure' processing duration (in sum): $($durationPSRuleTotalSeconds / 60) minutes ($($durationPSRuleTotalSeconds) seconds)"
+            }
+        }
         #test
         Write-Host " built-in PolicyDefinitions: $($($htCacheDefinitionsPolicy).Values.where({$_.Type -eq 'BuiltIn'}).Count)"
         Write-Host " custom PolicyDefinitions: $($($htCacheDefinitionsPolicy).Values.where({$_.Type -eq 'Custom'}).Count)"
@@ -564,11 +583,7 @@ function processDataCollection {
     Write-Host "Collecting custom data for $($arrayEntitiesFromAPIManagementGroupsCount) ManagementGroups Avg/Max/Min duration in seconds: Average: $([math]::Round($durationMGAverageMaxMin.Average,4)); Maximum: $([math]::Round($durationMGAverageMaxMin.Maximum,4)); Minimum: $([math]::Round($durationMGAverageMaxMin.Minimum,4))"
     Write-Host "Collecting custom data for $($arrayEntitiesFromAPISubscriptionsCount) Subscriptions Avg/Max/Min duration in seconds: Average: $([math]::Round($durationSUBAverageMaxMin.Average,4)); Maximum: $([math]::Round($durationSUBAverageMaxMin.Maximum,4)); Minimum: $([math]::Round($durationSUBAverageMaxMin.Minimum,4))"
 
-    #APITracking
-    $APICallTrackingCount = ($arrayAPICallTrackingCustomDataCollection).Count
-    $APICallTrackingRetriesCount = ($arrayAPICallTrackingCustomDataCollection.where( { $_.TryCounter -gt 1 } )).Count
-    $APICallTrackingRestartDueToDuplicateNextlinkCounterCount = ($arrayAPICallTrackingCustomDataCollection.where( { $_.RestartDueToDuplicateNextlinkCounter -gt 0 } )).Count
-    Write-Host "Collecting custom data APICalls (Management) total count: $APICallTrackingCount ($APICallTrackingRetriesCount retries; $APICallTrackingRestartDueToDuplicateNextlinkCounterCount nextLinkReset)"
+    apiCallTracking -stage 'CustomDataCollection ManagementGroups and Subscriptions' -spacing ' '
 
     if ($azAPICallConf['htParameters'].NoResources -eq $false) {
 
@@ -579,6 +594,204 @@ function processDataCollection {
 
         if (-not $azAPICallConf['htParameters'].HierarchyMapOnly -and -not $azAPICallConf['htParameters'].ManagementGroupsOnly) {
             if (-not $NoCsvExport) {
+
+                #fluctuation
+                Write-Host "Process Resource fluctuation"
+                $start = get-date
+                if (Test-Path -Filter "*$($ManagementGroupId)_ResourcesAll.csv" -LiteralPath "$($outputPath)") {
+                    $startImportPrevious = get-date
+                    $doResourceFluctuation = $true
+                    
+                    try {
+                        $previous = Get-ChildItem -Path $outputPath -Filter "*$($ManagementGroupId)_ResourcesAll.csv" | Sort-Object -Descending -Property LastWriteTime | Select-Object -First 1 -ErrorAction Stop
+                        $importPrevious = Import-Csv -LiteralPath "$($outputPath)$($DirectorySeparatorChar)$($previous.Name)" -Encoding utf8 -Delimiter ";" | Select-Object -ExpandProperty id
+                        Write-Host " Import previous ($($previous.Name)) duration: $((NEW-TIMESPAN -Start $startImportPrevious -End (get-date)).TotalSeconds)"
+                    }
+                    catch {
+                        Write-Host " FAILED: Import-Csv '$($outputPath)$($DirectorySeparatorChar)$($previous.Name)'"
+                        $doResourceFluctuation = $false
+
+                    }
+
+                    if ($doResourceFluctuation) {
+                        #$importPrevious.Count
+
+                        #https://gist.github.com/fatherjack/4c91cc6832b8b02d1b7319716a5fba52
+                        function Compare-StringSet {
+                            <#
+                        .SYNOPSIS
+                        Compare two sets of strings and see the matched and unmatched elements from each input
+                        
+                        .DESCRIPTION
+                        Compares sets of 
+                        
+                        .PARAMETER Ref
+                        The reference set of values to be compared
+                        
+                        .PARAMETER Diff
+                        The difference set of values to be compared
+                        
+                        .PARAMETER CaseSensitive
+                        Enables a case-sensitive comparison
+                        
+                        .EXAMPLE
+                        $ref, $dif = @(
+                            , @('a', 'b', 'c')
+                            , @('b', 'c', 'd')
+                        )
+                        $Sets = Compare-StringSet $ref $dif
+                        $Sets.RefOnly
+                        
+                        $Sets.DiffOnly
+                        
+                        $Sets.Both
+                        
+                        This example sets up two arrays with some similar values and then passes them both to the Compare-StringSet function. the results of this are stored in the variable $Sets.
+                        $Sets is an object that has three properties - RefOnly, DiffOnly, and Both. These are sets of the incoming values where they intersect or not.
+                        
+                        .EXAMPLE
+                        $ref, $dif = @(
+                            , @('tree', 'house', 'football')
+                            , @('dog', 'cat', 'tree', 'house', 'Football')
+                        )
+                        $Sets = Compare-StringSet $ref $dif -CaseSensitive
+                        $Sets.RefOnly
+                        $Sets.DiffOnly
+                        $Sets.Both
+                        
+                        This example sets up two arrays with some similar values and then passes them both to the Compare-StringSet function using the -CaseSensitive switch. The results of this are stored in the variable $Sets.
+                        $Sets is an object that has three properties - RefOnly, DiffOnly, and Both. 
+                        
+                        Because of the -CaseSensitive switch usage 'football' is shown as in RefOnly and 'Football' is shown as in DiffOnly.
+                        
+                        .NOTES
+                        From https://gist.github.com/IISResetMe/57ce7b76e1001974a4f7170e10775875
+                        #>
+                        
+                            param(
+                                [string[]]$Ref,
+                                [string[]]$Diff,
+
+                                [switch]$CaseSensitive
+                            )
+
+                            $Comparer = if ($CaseSensitive) {
+                                [System.StringComparer]::InvariantCulture
+                            }
+                            else {
+                                [System.StringComparer]::InvariantCultureIgnoreCase
+                            }
+
+                            $Results = [ordered]@{
+                                RefOnly  = @()
+                                Both     = @()
+                                DiffOnly = @()
+                            }
+
+                            $temp = [System.Collections.Generic.HashSet[string]]::new($Ref, $Comparer)
+                            $temp.IntersectWith($Diff)
+                            $Results['Both'] = $temp
+
+                            #$temp = [System.Collections.Generic.HashSet[string]]::new($Ref, [System.StringComparer]::CurrentCultureIgnoreCase)
+                            $temp = [System.Collections.Generic.HashSet[string]]::new($Ref, $Comparer)
+                            $temp.ExceptWith($Diff)
+                            $Results['RefOnly'] = $temp
+
+                            #$temp = [System.Collections.Generic.HashSet[string]]::new($Diff, [System.StringComparer]::CurrentCultureIgnoreCase)
+                            $temp = [System.Collections.Generic.HashSet[string]]::new($Diff, $Comparer)
+                            $temp.ExceptWith($Ref)
+                            $Results['DiffOnly'] = $temp
+
+                            return [pscustomobject]$Results
+                        }
+
+                        Write-Host " Comparing previous ($($importPrevious.Count)) with latest ($($resourcesIdsAll.Count))"
+                        $start = get-date
+                        $x = Compare-StringSet $importPrevious $resourcesIdsAll.id
+                        Write-Host " unique values in previous (deleted):" $x.RefOnly.Count
+                        Write-Host " values that are contained in previous and latest: $($x.Both.Count)"
+                        Write-Host " unique values in latest (added):" $x.DiffOnly.Count
+                        $end = get-date
+                        Write-Host " Compare previous with latest duration: $((NEW-TIMESPAN -Start $start -End $end).TotalMinutes) mins ($((NEW-TIMESPAN -Start $start -End $end).TotalSeconds) sec)"
+
+                        $script:arrayResourceFluctuationFinal = [System.Collections.ArrayList]@()
+
+                        #ADDED
+                        $arrayAdded = [System.Collections.ArrayList]@()
+                        foreach ($resource in $x.DiffOnly) {
+                            $resourceSplitted = $resource.split('/')
+                            #$resourceSplitted
+
+                            $null = $arrayAdded.Add([PSCustomObject]@{
+                                    subscriptionId = $resourceSplitted[2]
+                                    resourceType0  = $resourceSplitted[6]
+                                    resourceType1  = $resourceSplitted[7]
+                                    resourceType2  = $resourceSplitted[9]
+                                    resourceType3  = $resourceSplitted[11]
+                                })
+                            if ($resourceSplitted.Count -gt 13) {
+                                Write-Host " Unforeseen Resource type!"
+                                Write-Host " Please report this Resource type at $($GithubRepository): '$resource'"
+                            }
+                        }
+
+                        if ($arrayAdded.Count -gt 0) {
+                            $arrayGroupedByResourceType = $arrayAdded | group-object -Property resourceType0, resourceType1, resourceType2, resourceType3
+                            foreach ($resourceType in $arrayGroupedByResourceType) {
+                                $arrayGroupedBySubscription = $arrayGroupedByResourceType.where({ $_.Name -eq $resourceType.Name }).Group | Group-Object -Property subscriptionId | Select-Object -ExcludeProperty Group
+                                $null = $arrayResourceFluctuationFinal.Add([PSCustomObject]@{
+                                        Event                = 'Added'
+                                        ResourceType         = ($resourceType.Name -replace ", ", "/")
+                                        'Resource count'     = $resourceType.Count
+                                        'Subscription count' = ($arrayGroupedBySubscription | Measure-Object).Count
+                                    })
+                            }
+                        }
+
+                        #REMOVED
+                        $arrayRemoved = [System.Collections.ArrayList]@()
+                        foreach ($resource in $x.RefOnly) {
+                            $resourceSplitted = $resource.split('/')
+                            #$resourceSplitted
+
+                            $null = $arrayRemoved.Add([PSCustomObject]@{
+                                    subscriptionId = $resourceSplitted[2]
+                                    resourceType0  = $resourceSplitted[6]
+                                    resourceType1  = $resourceSplitted[7]
+                                    resourceType2  = $resourceSplitted[9]
+                                    resourceType3  = $resourceSplitted[11]
+                                })
+                            if ($resourceSplitted.Count -gt 13) {
+                                Write-Host " Unforeseen Resource type!"
+                                Write-Host " Please report this Resource type at $($GithubRepository): '$resource'"
+                            }
+                        }
+
+                        if ($arrayRemoved.Count -gt 0) {
+                            $arrayGroupedByResourceType = $arrayRemoved | group-object -Property resourceType0, resourceType1, resourceType2, resourceType3
+                            foreach ($resourceType in $arrayGroupedByResourceType) {
+                                $arrayGroupedBySubscription = $arrayGroupedByResourceType.where({ $_.Name -eq $resourceType.Name }).Group | Group-Object -Property subscriptionId | Select-Object -ExcludeProperty Group
+                                $null = $arrayResourceFluctuationFinal.Add([PSCustomObject]@{
+                                        Event                = 'Removed'
+                                        ResourceType         = ($resourceType.Name -replace ", ", "/")
+                                        'Resource count'     = $resourceType.Count
+                                        'Subscription count' = ($arrayGroupedBySubscription | Measure-Object).Count
+                                    })
+                            }
+                        }
+                    }
+                }
+                else {
+                    Write-Host " Process Resource fluctuation skipped, no previous output (*$($ManagementGroupId)_ResourcesAll.csv) found"
+                }
+
+                if ($arrayResourceFluctuationFinal.Count -gt 0 -and $doResourceFluctuation) {
+                    #DataCollection Export of Resource fluctuation
+                    Write-Host "Exporting ResourceFluctuation CSV '$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourceFluctuation.csv'"
+                    $arrayResourceFluctuationFinal | Sort-Object -Property ResourceType | Export-Csv -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourceFluctuation.csv" -Delimiter "$csvDelimiter" -NoTypeInformation
+                }
+                Write-Host "Process Resource fluctuation duration: $((NEW-TIMESPAN -Start $start -End (get-date)).TotalSeconds) seconds"
+
                 #DataCollection Export of All Resources
                 Write-Host "Exporting ResourcesAll CSV '$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourcesAll.csv'"
                 $resourcesIdsAll | Sort-Object -Property id | Export-Csv -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourcesAll.csv" -Delimiter "$csvDelimiter" -NoTypeInformation

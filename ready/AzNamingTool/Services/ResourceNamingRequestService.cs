@@ -12,14 +12,16 @@ namespace AzureNamingTool.Services
     {
         public static async Task<ResourceNameResponse> RequestName(ResourceNameRequest request)
         {
-            ResourceNameResponse response = new();
-            response.Success = false;
+            ResourceNameResponse response = new()
+            {
+                Success = false
+            };
 
             try
             {
                 bool valid = true;
                 bool ignoredelimeter = false;
-                List<Tuple<string, string>> lstComponents = new();
+                List<string[]> lstComponents = new();
 
                 // Get the specified resource type
                 //var resourceTypes = await GeneralHelper.GetList<ResourceType>();
@@ -104,17 +106,17 @@ namespace AzureNamingTool.Services
                             // Add property to aray for indivudal component validation
                             if (component.Name == "ResourceType")
                             {
-                                lstComponents.Add(new Tuple<string, string>(component.Name, prop.Resource + " (" + value + ")"));
+                                lstComponents.Add(new string[] { component.Name, prop.Resource + " (" + value + ")" });
                             }
                             else
                             {
                                 if (component.Name == "ResourceInstance")
                                 {
-                                    lstComponents.Add(new Tuple<string, string>(component.Name, prop));
+                                    lstComponents.Add(new string[] { component.Name, prop });
                                 }
                                 else
                                 {
-                                    lstComponents.Add(new Tuple<string, string>(component.Name, prop.Name + " (" + value + ")"));
+                                    lstComponents.Add(new string[] { component.Name, prop.Name + " (" + value + ")" });
                                 }
                             }
                         }
@@ -139,11 +141,11 @@ namespace AzureNamingTool.Services
                 }
 
                 // Check the Resource Instance value to ensure it's only nmumeric
-                if (lstComponents.FirstOrDefault(x => x.Item1 == "ResourceInstance") != null)
+                if (lstComponents.FirstOrDefault(x => x[0] == "ResourceInstance") != null)
                 {
-                    if (lstComponents.FirstOrDefault(x => x.Item1 == "ResourceInstance").Item2 != null)
+                    if (lstComponents.FirstOrDefault(x => x[0] == "ResourceInstance")[1] != null)
                     {
-                        if (!GeneralHelper.CheckNumeric(lstComponents.FirstOrDefault(x => x.Item1 == "ResourceInstance").Item2))
+                        if (!GeneralHelper.CheckNumeric(lstComponents.FirstOrDefault(x => x[0] == "ResourceInstance")[1]))
                         {
                             sbMessage.Append("Resource Instance must be a numeric value.");
                             sbMessage.Append(Environment.NewLine);

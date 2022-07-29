@@ -1,4 +1,4 @@
-﻿using AzureNamingTool.Models;
+using AzureNamingTool.Models;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -99,7 +99,7 @@ namespace AzureNamingTool.Helpers
 
                 return items;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 GeneralHelper.LogAdminMessage("ERROR", ex.Message);
                 throw;
@@ -143,7 +143,7 @@ namespace AzureNamingTool.Helpers
                         break;
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 GeneralHelper.LogAdminMessage("ERROR", ex.Message);
                 throw;
@@ -152,14 +152,14 @@ namespace AzureNamingTool.Helpers
 
         public static bool CheckNumeric(string value)
         {
-            Regex regx = new("^[0-9]+$");
+            Regex regx = new ("^[0-9]+$");
             Match match = regx.Match(value);
             return match.Success;
         }
 
         public static bool CheckAlphanumeric(string value)
         {
-            Regex regx = new("^[a-zA-Z0-9]+$");
+            Regex regx = new ("^[a-zA-Z0-9]+$");
             Match match = regx.Match(value);
             return match.Success;
         }
@@ -216,7 +216,7 @@ namespace AzureNamingTool.Helpers
             try
             {
                 // Get all the files in teh repository folder
-                DirectoryInfo dirRepository = new("repository");
+                DirectoryInfo dirRepository = new ("repository");
                 foreach (FileInfo file in dirRepository.GetFiles())
                 {
                     // Check if the file exists in the settings folder
@@ -244,7 +244,7 @@ namespace AzureNamingTool.Helpers
                     {
                         // Create a new SALT key 
                         const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-                        Random random = new();
+                        Random random = new ();
                         var salt = new string(Enumerable.Repeat(chars, 16)
                             .Select(s => s[random.Next(s.Length)]).ToArray());
 
@@ -517,7 +517,7 @@ namespace AzureNamingTool.Helpers
         {
             try
             {
-                AdminLogMessage adminmessage = new()
+                AdminLogMessage adminmessage = new ()
                 {
                     Id = 1,
                     CreatedOn = DateTime.Now,
@@ -560,10 +560,10 @@ namespace AzureNamingTool.Helpers
             string data;
             try
             {
-                HttpClient httpClient = new();
+                HttpClient httpClient = new ();
                 data = await httpClient.GetStringAsync(url);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 GeneralHelper.LogAdminMessage("ERROR", ex.Message);
                 data = "";

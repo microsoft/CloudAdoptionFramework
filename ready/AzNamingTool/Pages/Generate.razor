@@ -91,8 +91,43 @@
                                 }
                         </InputSelect>
 
-                        @((MarkupString)namingGuidelines)
-                    </div>
+                        @if (currentResourceType != null)
+                            {
+                                <div id="guidelines" class="card mt-3">
+                                    <div class="card-header bg-default text-black">
+                                        <a id="NamingGuidlines" class="link-dark text-decoration-none" data-toggle="collapse" href="#namingguidelines" role="button" aria-expanded="false" aria-controls="namingguidelines">
+                                            Naming Guidelines
+                                        </a>
+                                    </div>
+                                    <div class="collapse card card-body @theme.ThemeStyle" id="namingguidelines">
+                                        @if (currentResourceType.LengthMin != "")
+                                        {
+                                            <div><strong>Minimum Length:</strong> @currentResourceType.LengthMin</div>
+                                        }
+                                        @if (currentResourceType.LengthMax != "")
+                                        {
+                                            <div><strong>Maximum Length:</strong> @currentResourceType.LengthMax</div>
+                                        }
+                                        @if (currentResourceType.ValidText != "")
+                                        {
+                                            <div><strong>Valid Text:</strong> @currentResourceType.ValidText</div>
+                                        }
+                                        @if (currentResourceType.Optional != "")
+                                        {
+                                            <div><strong>Optional:</strong> @currentResourceType.Optional</div>
+                                        }
+                                        @if (currentResourceType.Exclude != "")
+                                        {
+                                            <div><strong>Excluded:</strong> @currentResourceType.Exclude</div>
+                                        }
+                                        @if (currentResourceType.Regx != "")
+                                        {
+                                            <div><strong>Regx:</strong> @currentResourceType.Regx</div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
                 </div>
 
 
@@ -339,6 +374,7 @@
     private string[] filteredscopes = new string[] { "resource group", "resource group & region", "region", "global", "subscription", "tenant" };
     private ResourceNameRequest resourceNameRequest = new();
     private ResourceNameResponse resourceNameRequestResponse;
+    private ResourceType currentResourceType;
 
     protected override async Task OnInitializedAsync()
     {
@@ -417,46 +453,7 @@
         if (selectedResourceType != "")
         {
             // Find the selected resoruce type
-            ResourceType currentResourceType = servicesData.ResourceTypes.Find((t) => t.Id == Convert.ToInt32(selectedResourceType));
-
-            // Create the naming guidelines HTML
-            //namingGuidelines = "<div class=\"mb-3\">";
-            //namingGuidelines += "<a class=\"btn btn-primary mb-3\" data-toggle=\"collapse\" href=\"#guidelines\" role=\"button\" aria-expanded=\"false\" aria-controls=\"guidelines\">";
-            //namingGuidelines += "Resource Naming Guidelines";
-            //namingGuidelines += "</a>";
-            namingGuidelines += "<div id=\"guidelines\" class=\"card mt-3\">";
-            namingGuidelines += "<div class=\"card-header bg-default text-black\">";
-            namingGuidelines += "<a id=\"NamingGuidlines\" class=\"link-dark text-decoration-none\" data-toggle=\"collapse\" href=\"#namingguidelines\" role=\"button\" aria-expanded=\"false\" aria-controls=\"namingguidelines\">";
-            namingGuidelines += "Naming Guidelines";
-            namingGuidelines += "</a>";
-            namingGuidelines += "</div>";
-            namingGuidelines += "<div class=\"collapse card card-body " + theme.ThemeStyle + "\"  id=\"namingguidelines\">";
-            if (currentResourceType.LengthMin != "")
-            {
-                namingGuidelines += "<div><strong>Minimum Length:</strong> " + currentResourceType.LengthMin + "</div>";
-            }
-            if (currentResourceType.LengthMax != "")
-            {
-                namingGuidelines += "<div><strong>Maximum Length:</strong> " + currentResourceType.LengthMax + "</div>";
-            }
-            if (currentResourceType.ValidText != "")
-            {
-                namingGuidelines += "<div><strong>Valid Text:</strong> " + currentResourceType.ValidText + "</div>";
-            }
-            if (currentResourceType.Optional != "")
-            {
-                namingGuidelines += "<div><strong>Optional:</strong> " + currentResourceType.Optional + "</div>";
-            }
-            if (currentResourceType.Exclude != "")
-            {
-                namingGuidelines += "<div><strong>Excluded:</strong> " + currentResourceType.Exclude + "</div>";
-            }
-            if (currentResourceType.Regx != "")
-            {
-                namingGuidelines += "<div><strong>Regx:</strong> " + currentResourceType.Regx + "</div>";
-            }
-            namingGuidelines += "</div></div>";
-            //namingGuidelines += "</div>";
+            currentResourceType = servicesData.ResourceTypes.Find((t) => t.Id == Convert.ToInt32(selectedResourceType));
 
             // Set the optional components
             selectedResourceTypeOptional = currentResourceType.Optional;

@@ -15,14 +15,6 @@ function cacheBuiltIn {
         $htCacheDefinitionsPolicySet = $using:htCacheDefinitionsPolicySet
         $htCacheDefinitionsRole = $using:htCacheDefinitionsRole
         $htRoleDefinitionIdsUsedInPolicy = $using:htRoleDefinitionIdsUsedInPolicy
-        #Functions
-        #AzAPICall
-        if ($azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
-            Import-Module ".\$($scriptPath)\AzAPICallModule\AzAPICall\$($azAPICallConf['htParameters'].azAPICallModuleVersion)\AzAPICall.psd1" -Force -ErrorAction Stop
-        }
-        else {
-            Import-Module -Name AzAPICall -RequiredVersion $azAPICallConf['htParameters'].azAPICallModuleVersion -Force -ErrorAction Stop
-        }
 
         if ($builtInCapability -eq 'PolicyDefinitions') {
             $currentTask = 'Caching built-in Policy definitions'
@@ -133,10 +125,13 @@ function cacheBuiltIn {
                 ($script:htCacheDefinitionsPolicySet).(($builtinPolicySetDefinition.Id).ToLower()).PolicyDefinitionId = ($builtinPolicySetDefinition.Id).ToLower()
                 ($script:htCacheDefinitionsPolicySet).(($builtinPolicySetDefinition.Id).ToLower()).LinkToAzAdvertizer = "<a class=`"externallink`" href=`"https://www.azadvertizer.net/azpolicyinitiativesadvertizer/$(($builtinPolicySetDefinition.Id -replace '.*/')).html`" target=`"_blank`" rel=`"noopener`">$($builtinPolicySetDefinition.Properties.displayname)</a>"
                 $arrayPolicySetPolicyIdsToLower = @()
-                $arrayPolicySetPolicyIdsToLower = foreach ($policySetPolicy in $builtinPolicySetDefinition.properties.policydefinitions.policyDefinitionId) {
-                    ($policySetPolicy).ToLower()
+                $htPolicySetPolicyRefIds = @{}
+                $arrayPolicySetPolicyIdsToLower = foreach ($policySetPolicy in $builtinPolicySetDefinition.properties.policydefinitions) {
+                    ($policySetPolicy.policyDefinitionId).ToLower()
+                    $htPolicySetPolicyRefIds.($policySetPolicy.policyDefinitionReferenceId) = ($policySetPolicy.policyDefinitionId)
                 }
                 ($script:htCacheDefinitionsPolicySet).(($builtinPolicySetDefinition.Id).ToLower()).PolicySetPolicyIds = $arrayPolicySetPolicyIdsToLower
+                ($script:htCacheDefinitionsPolicySet).(($builtinPolicySetDefinition.Id).ToLower()).PolicySetPolicyRefIds = $htPolicySetPolicyRefIds
                 if ($builtinPolicySetDefinition.Properties.metadata.deprecated -eq $true -or $builtinPolicySetDefinition.Properties.displayname -like "``[Deprecated``]*") {
                     ($script:htCacheDefinitionsPolicySet).(($builtinPolicySetDefinition.Id).ToLower()).Deprecated = $builtinPolicySetDefinition.Properties.metadata.deprecated
                 }
