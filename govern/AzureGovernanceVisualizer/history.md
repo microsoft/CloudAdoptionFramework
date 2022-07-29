@@ -4,6 +4,92 @@
 
 ### AzGovViz version 6
 
+__Changes__ (2022-Jul-22 / Minor)
+
+* New parameter `-PSRuleFailedOnly` - PSRule for Azure will only report on failed resource (may save some space/noise)
+
+__Changes__ (2022-Jul-17 / Major)
+
+* This change impacts __GitHub Actions only__: As the PSRule CSV output can become quite big and GitHub is actively blocking files larger than 100MB ([reference](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github#file-size-limits)), the file size of the export will be validated and in case the 100MB limit is exceeded a new export excluding the column 'description' will be initiated. If that still is too large then also the column 'recommendation' will be exluded. If even then the export is exceeding the limit then the export will be deleted in order not to break the workflow at push to repo. Issue ref: #121
+* New parameter `-CriticalMemoryUsage` - Define at what percentage of memory usage the garbage collection should kick in (default=90). Example: `.\pwsh\AzGovVizParallel.ps1 -CriticalMemoryUsage 70`   
+![alt text](img/criticalMemoryUsage.png "CriticalMemoryUsage")
+* Minor optimizations
+
+__Changes__ (2022-Jul-14 / Major)
+
+* New feature - Cloud Adoption Framework (CAF) [Recommended abbreviations for Azure resource types](https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations) compliance (HTML TenantSummary, ScopeInsights and CSV output)
+* Optimize PSRule data handling
+* Minor optimizations
+
+__Changes__ (2022-Jul-10 / Major)
+
+* Enhanced the 'Orphaned Resources' feature: if you run AzGovViz with parameter -DoAzureConsumption then the orphaned resources output will show you potential cost savings for orphaned resources with intent 'cost savings':  
+![alt text](img/orphanedResourcesCostSavings.png "orphanedResourcesCostSavings")  
+&#x1F4A1; use parameter `-AzureConsumptionPeriod 14` to get consumption data for the last 14 days (default = 1 day)
+* New feature HierarchyMap (HTML): save the HierarchyMap as image (.jpeg)
+* 2022-Jul-07 PR #117 - Updated GitHub Actions OIDC (Open ID Connect) workflow: establish new connection to Azure before the 'HTML to WebApp' publishing task - thanks Dimitri Zilber
+* Use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.1.18
+* Bugfixes
+* Minor optimizations
+
+__Changes__ (2022-Jul-01 / Major)
+
+* Fix change tracking date conversion issue with certain date format (removed ToString)
+* Minor optimizations
+
+__Changes__ (2022-Jun-22 / Major)
+
+* New feature 'Orphaned Resources' - Azure Resource Graph based reporting on orphaned resources (TenantSummary, ScopeInsights, CSV export). [Azure Orphan Resources - GitHub](https://github.com/dolevshor/azure-orphan-resources) ARG queries and workbooks by Dolev Shor
+* New feature 'Resource fluctuation' - Compare against Resources from previous run and output aggregated summary of the Resource fluctuation (TenantSummary, CSV export)
+* Fix `/providers/Microsoft.Authorization/roleAssignmentScheduleInstances` AzAPICall errorhandling (error 400, 500)
+* Optimize procedure to update the AzAPICall module
+* Use AzAPICall PowerShell module version 1.1.17
+* Updated [HTML Demo](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html)
+
+__Changes__ (2022-Jun-14 / Major)
+
+* Fix issue #110 / handle `DisallowedProvider` errorCode (Blueprints, PolicyInsights)
+* Fix issue #111 / replace .AddRange with foreach/.Add
+* Use AzAPICall PowerShell module version 1.1.16
+
+__Changes__ (2022-Jun-10 / Major)
+
+* Fix issue #110 / handle `DisallowedProvider` errorCode (Microsoft Defender for Cloud plans for Subscriptions)
+* Use AzAPICall PowerShell module version 1.1.15
+* Remove Azure DevOps 'PSRule for Azure' workaround / use latest PSRule.Rules.Azure PowerShell module version (current: 1.16.0)
+
+__Changes__ (2022-Jun-03 / Major)
+
+* Optimize Policy Exemption output (HTML TenantSummary, CSV output)
+* Update Azure DevOps variables YAML - add parameter `-DebugAzAPICall`
+* Update PSRule CSV output sorting
+
+__Changes__ (2022-Jun-02 / Major)
+
+* Fix ClassicAdministrators for non applicable Subscription offers
+* Use AzAPICall version 1.1.13
+
+__Changes__ (2022-May-31 / Major)
+
+* New feature - Report on 'Classic Administrators' for Subscriptions -> TenantSummary, ScopeInsights and CSV export
+* Fix consumption reporting (issue #101 - handle error: 'Management group `<ManagementGroupId>` does not have any valid subscriptions')
+* PSRule for Azure / Azure DevOps dependencies (Az.Resources) workaround -> use PSRule for Azure version 1.14.3 (else latest)
+
+__Changes__ (2022-May-21 / Major)
+
+> Note: Azure DevOps and GitHub users must update the YAML file(s) and PowerShell files (`AzGovVizParallel.ps1` and `prerequisites.ps1`)
+
+* Integration of [PSRule for Azure](#integrate-psrule-for-azure). This feature is optional, use new parameter `-DoPSRule`
+  * Provides a [Azure Well-Architected Framework](https://docs.microsoft.com/en-gb/azure/architecture/framework/) aligned suite of rules for validating Azure resources
+  * Provides meaningful information to allow remediation
+  * New parameter `-PSRuleVersion` - Define the PSRule..Rules.Azure PowerShell module version, if undefined then 'latest' will be used
+* Optional feature: publish HTML to Azure Web App (check the __[Setup Guide](setup.md)__) in Azure DevOps or GitHub Actions - thanks Wayne Meyer
+* New feature / report on [enabled Subscription Features](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features) TenantSummary, ScopeInsights and CSV export
+* Decomissioned Azure DevOps `.pipelines` - use the new YAML files `.azuredevops/pipelines/*` 
+* Fix [#issue92](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/92) -> pipeline .azuredevops/pipelines/AzGovViz.pipeline.yml
+* Update Azure DevOps pipelines / use AzurePowershell@5
+* Update prerequisites.ps1
+
 __Changes__ (2022-May-05 / Major)
 
 * fix: `using:scriptPath` variable in foreach parallel (this is only relevant for Azure DevOps and GitHub if you have a non default folder structure in your repository)

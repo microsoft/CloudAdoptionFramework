@@ -2,6 +2,11 @@ function stats {
     #region Stats
     if (-not $StatsOptOut) {
 
+        $dur = 0
+        if ($durationProduct.TotalMinutes -lt 5) {
+            $dur = 5
+        }
+        
         if ($azAPICallConf['htParameters'].onAzureDevOps) {
             if ($env:BUILD_REPOSITORY_ID) {
                 $hashTenantIdOrRepositoryId = [string]($env:BUILD_REPOSITORY_ID)
@@ -64,7 +69,6 @@ function stats {
             $statsCountSubscriptions = 'more than 100'
         }
 
-
         $tryCounter = 0
         do {
             if ($tryCounter -gt 0) {
@@ -110,7 +114,9 @@ function stats {
                 "statsParametersNoResources": "$($azAPICallConf['htParameters'].NoResources)",
                 "statsParametersPolicyAtScopeOnly": "$($azAPICallConf['htParameters'].PolicyAtScopeOnly)",
                 "statsParametersRBACAtScopeOnly": "$($azAPICallConf['htParameters'].RBACAtScopeOnly)",
-                "statsTry": "$($tryCounter)"
+                "statsParametersDoPSRule": "$($azAPICallConf['htParameters'].DoPSRule)",
+                "statsTry": "$($tryCounter)",
+                "statsDurationProduct": "$($dur)"
             }
         }
     }

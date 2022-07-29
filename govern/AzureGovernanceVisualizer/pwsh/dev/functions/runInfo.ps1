@@ -10,16 +10,16 @@ function runInfo {
         $script:paramsUsed += "Date: $startTimeUTC (UTC); Version: $ProductVersion &#13;"
 
         if ($azAPICallConf['htParameters'].accountType -eq 'ServicePrincipal') {
-            $script:paramsUsed += "ExecutedBy: $($azAPICallConf['accountId']) (App/ClientId) ($($azAPICallConf['htParameters'].accountType)) &#13;"
+            $script:paramsUsed += "ExecutedBy: $($azAPICallConf['checkContext'].Account.Id) (App/ClientId) ($($azAPICallConf['htParameters'].accountType)) &#13;"
         }
         elseif ($azAPICallConf['htParameters'].accountType -eq 'ManagedService') {
-            $script:paramsUsed += "ExecutedBy: $($azAPICallConf['accountId']) (Id) ($($azAPICallConf['htParameters'].accountType)) &#13;"
+            $script:paramsUsed += "ExecutedBy: $($azAPICallConf['checkContext'].Account.Id) (Id) ($($azAPICallConf['htParameters'].accountType)) &#13;"
         }
         elseif ($azAPICallConf['htParameters'].accountType -eq 'ClientAssertion') {
-            $script:paramsUsed += "ExecutedBy: $($azAPICallConf['accountId']) (App/ClientId) ($($azAPICallConf['htParameters'].accountType)) &#13;"
+            $script:paramsUsed += "ExecutedBy: $($azAPICallConf['checkContext'].Account.Id) (App/ClientId) ($($azAPICallConf['htParameters'].accountType)) &#13;"
         }
         else {
-            $script:paramsUsed += "ExecutedBy: $($azAPICallConf['accountId']) ($($azAPICallConf['htParameters'].accountType), $($azAPICallConf['htParameters'].userType)) &#13;"
+            $script:paramsUsed += "ExecutedBy: $($azAPICallConf['checkContext'].Account.Id) ($($azAPICallConf['htParameters'].accountType), $($azAPICallConf['htParameters'].userType)) &#13;"
         }
         #$script:paramsUsed += "ManagementGroupId: $($ManagementGroupId) &#13;"
         $script:paramsUsed += 'HierarchyMapOnly: false &#13;'
@@ -316,7 +316,6 @@ function runInfo {
             #$script:paramsUsed += "ChangeTrackingDays: $ChangeTrackingDays &#13;"
         }
 
-
         if ($azAPICallConf['htParameters'].NoResources) {
             Write-Host " NoResources = $($azAPICallConf['htParameters'].NoResources)" -ForegroundColor Green
             $script:paramsUsed += "NoResources: $($azAPICallConf['htParameters'].NoResources) &#13;"
@@ -325,6 +324,43 @@ function runInfo {
             Write-Host " NoResources = $($azAPICallConf['htParameters'].NoResources)" -ForegroundColor Yellow
             $script:paramsUsed += "NoResources: $($azAPICallConf['htParameters'].NoResources) &#13;"
         }
+
+        if ($ShowMemoryUsage) {
+            Write-Host " ShowMemoryUsage = $($ShowMemoryUsage)" -ForegroundColor Green
+            #$script:paramsUsed += "ShowMemoryUsage: $($ShowMemoryUsage) &#13;"
+        }
+        else {
+            Write-Host " ShowMemoryUsage = $($ShowMemoryUsage)" -ForegroundColor Yellow
+            #$script:paramsUsed += "ShowMemoryUsage: $($ShowMemoryUsage) &#13;"
+        }
+
+        if ($CriticalMemoryUsage -ne 90) {
+            Write-Host " CriticalMemoryUsage = $($CriticalMemoryUsage)%" -ForegroundColor green
+            #$script:paramsUsed += "ShowMemoryUsage: $($ShowMemoryUsage) &#13;"
+        }
+        else {
+            Write-Host " CriticalMemoryUsage = $($CriticalMemoryUsage)%" -ForegroundColor Yellow
+            #$script:paramsUsed += "ShowMemoryUsage: $($ShowMemoryUsage) &#13;"
+        }
+
+        if ($azAPICallConf['htParameters'].DoPSRule) {
+            Write-Host " DoPSRule = $($azAPICallConf['htParameters'].DoPSRule)" -ForegroundColor Green
+            $script:paramsUsed += "DoPSRule: $($azAPICallConf['htParameters'].DoPSRule) &#13;"
+
+            if ($azAPICallConf['htParameters'].PSRuleFailedOnly) {
+                Write-Host " PSRuleFailedOnly = $($azAPICallConf['htParameters'].PSRuleFailedOnly)" -ForegroundColor Green
+                $script:paramsUsed += "PSRuleFailedOnly: $($azAPICallConf['htParameters'].PSRuleFailedOnly) &#13;"
+            }
+            else {
+                Write-Host " PSRuleFailedOnly = $($azAPICallConf['htParameters'].PSRuleFailedOnly)" -ForegroundColor Yellow
+                $script:paramsUsed += "PSRuleFailedOnly: $($azAPICallConf['htParameters'].PSRuleFailedOnly) &#13;"
+            }
+        }
+        else {
+            Write-Host " DoPSRule = $($azAPICallConf['htParameters'].DoPSRule)" -ForegroundColor Yellow
+            $script:paramsUsed += "DoPSRule: $($azAPICallConf['htParameters'].DoPSRule) &#13;"
+        }
+
     }
     #endregion RunInfo
 }
