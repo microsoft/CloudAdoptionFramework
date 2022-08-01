@@ -1,4 +1,4 @@
-﻿using AzureNamingTool.Models;
+using AzureNamingTool.Models;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -380,30 +380,36 @@ namespace AzureNamingTool.Helpers
                 }
 
                 // Check min length
-                if (name.Length < int.Parse(resourceType.LengthMin))
+                if (int.TryParse(resourceType.LengthMin, out _))
                 {
-                    sbMessage.Append("Generated name is less than the minimum length for the selected resource type.");
-                    sbMessage.Append(Environment.NewLine);
-                    valid = false;
-                }
-
-                // Check max length
-                if (name.Length > int.Parse(resourceType.LengthMax))
-                {
-                    // Strip the delimiter in case that is causing the issue
-                    name = name.Replace(delimiter, "");
-                    if (name.Length > int.Parse(resourceType.LengthMax))
+                    if (name.Length < int.Parse(resourceType.LengthMin))
                     {
-                        sbMessage.Append("Generated name is more than the maximum length for the selected resource type.");
-                        sbMessage.Append(Environment.NewLine);
-                        sbMessage.Append("Please remove any optional components or contact your admin to update the required components for this resource type.");
+                        sbMessage.Append("Generated name is less than the minimum length for the selected resource type.");
                         sbMessage.Append(Environment.NewLine);
                         valid = false;
                     }
-                    else
+                }
+
+                // Check max length
+                if (int.TryParse(resourceType.LengthMax, out _))
+                {
+                    if (name.Length > int.Parse(resourceType.LengthMax))
                     {
-                        sbMessage.Append("Generated name with the selected delimiter is more than the maximum length for the selected resource type. The delimiter has been removed.");
-                        sbMessage.Append(Environment.NewLine);
+                        // Strip the delimiter in case that is causing the issue
+                        name = name.Replace(delimiter, "");
+                        if (name.Length > int.Parse(resourceType.LengthMax))
+                        {
+                            sbMessage.Append("Generated name is more than the maximum length for the selected resource type.");
+                            sbMessage.Append(Environment.NewLine);
+                            sbMessage.Append("Please remove any optional components or contact your admin to update the required components for this resource type.");
+                            sbMessage.Append(Environment.NewLine);
+                            valid = false;
+                        }
+                        else
+                        {
+                            sbMessage.Append("Generated name with the selected delimiter is more than the maximum length for the selected resource type. The delimiter has been removed.");
+                            sbMessage.Append(Environment.NewLine);
+                        }
                     }
                 }
 
