@@ -1,3 +1,5 @@
+[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md)
+
 # Azure Naming Tool v2 - Overview
 
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
@@ -9,12 +11,6 @@
 [Important Notes](#important-notes)
 
 [Pages](#pages)
-
-[How To Install](INSTALLATION.md)
-
-[How to Update](UPDATING.md)
-
-[How to use the API](USINGTHEAPI.md)
 
 ## Overview
 
