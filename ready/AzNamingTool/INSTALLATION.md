@@ -8,7 +8,7 @@
 
 * [Run as an Azure App Service Container](#run-as-an-azure-app-service-container)
 
-* [Run as a Stand-Alone Site](#run-as-a-stand--alone-site)
+* [Run as a Stand-Alone Site](#run-as-a-stand-alone-site)
 
 ## How To Install
 
