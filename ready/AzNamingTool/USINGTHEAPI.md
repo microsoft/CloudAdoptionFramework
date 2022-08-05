@@ -1,4 +1,6 @@
-﻿# Azure Naming Tool v2 - Using the API
+[Overview](README.md) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md)
+
+# Azure Naming Tool v2 - Using the API
 
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
