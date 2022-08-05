@@ -62,7 +62,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return ex;
             }
         }
@@ -87,7 +87,7 @@ namespace AzureNamingTool.Helpers
             }
             catch(Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
             }
             return result;
         }

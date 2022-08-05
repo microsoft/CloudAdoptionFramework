@@ -285,7 +285,7 @@
                 {
                     ModalInstance.CloseAsync();
                     toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " updated!", "SUCCESS");
-                    GeneralHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " updated!");
+                    LogHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " updated!");
                 }
                 else
                 {
