@@ -10,11 +10,11 @@
 
 [Pages](#pages)
 
-[How To Install](/INSTALLATION.md)
+[How To Install](INSTALLATION.md)
 
-[How to Update[(/UPDATING.md)
+[How to Update](UPDATING.md)
 
-[How to use the API](/USINGTHEAPI.md)
+[How to use the API](USINGTHEAPI.md)
 
 ## Overview
 
