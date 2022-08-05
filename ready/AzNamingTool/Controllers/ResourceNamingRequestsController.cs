@@ -24,7 +24,7 @@ namespace AzureNamingTool.Controllers
     {
         // POST api/<ResourceNamingRequestsController>
         /// <summary>
-        /// This function will generate a resoure type name for specifed component values. This function requires full definition for all components.  
+        /// This function will generate a resoure type name for specifed component values. This function requires full definition for all components. It is recommended to use the ResourceNameRequest API function for name generation.   
         /// </summary>
         /// <param name="request">json - Resource Name Request data</param>
         /// <returns>string - Name generation response</returns>
