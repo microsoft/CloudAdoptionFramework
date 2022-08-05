@@ -2,7 +2,7 @@
 
 namespace AzureNamingTool.Models
 {
-    public class ResourceNameRequest
+    public class ResourceNameRequestWithComponents
     {
         public ResourceDelimiter ResourceDelimiter { get; set; }
         public ResourceEnvironment? ResourceEnvironment { get; set; }

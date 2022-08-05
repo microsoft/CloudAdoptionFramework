@@ -21,7 +21,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
@@ -39,7 +39,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
@@ -98,7 +98,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }
@@ -122,7 +122,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }
@@ -155,7 +155,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
@@ -247,13 +247,13 @@ namespace AzureNamingTool.Services
                 }
                 else
                 {
-                    GeneralHelper.LogAdminMessage("ERROR", "There was a problem refreshing the resource types configuration.");
+                    LogHelper.LogAdminMessage("ERROR", "There was a problem refreshing the resource types configuration.");
 
                 }
             }
             catch(Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
             }
             return false;
         }

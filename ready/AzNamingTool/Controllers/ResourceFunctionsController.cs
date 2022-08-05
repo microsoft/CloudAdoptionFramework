@@ -44,7 +44,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return BadRequest(ex);
             }
         }
@@ -72,7 +72,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return BadRequest(ex);
             }
         }
@@ -100,7 +100,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return BadRequest(ex);
             }
         }
@@ -129,7 +129,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return BadRequest(ex);
             }
         }
@@ -157,7 +157,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return BadRequest(ex);
             }
         }
