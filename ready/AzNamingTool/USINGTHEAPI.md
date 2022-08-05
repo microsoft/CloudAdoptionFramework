@@ -10,17 +10,19 @@
 The Azure Naming Tool includes a fully-functional REST API for integrating with your existing systems. The API is enabled by default and an OpenAPI definition file is included, detailing all aspects of the API. 
 
 **NOTE**
+
 The current API is very developer-focused. We will continue to improve the functionality to expose more capabilities over time. 
 
 This page details how to integrate thew API into your existing architecture.
 
 **NOTE**
+
 All API calls require an API Key. This key can be found in the **Admin** section when authenticated to the site. 
 
-##How to use the API
-The OpenAPI definition (Swagger file) documents all the classes required to interact with the API.  The required models will varying, depending on which API function is being requested. The OpenAPI definition details the individual models required for each function. 
+## How to use the API
+The OpenAPI definition (Swagger file) documents all the classes required to interact with the API.  The required models will vary, depending on which API function is being requested. The OpenAPI definition details the individual models required for each function. 
 
-###Retrieving data
+### Retrieving data
 
 The following process details a sample API integration to return components and their options:
 
@@ -37,13 +39,14 @@ The following process details a sample API integration to return components and 
 				□ Component Name: ResourceOrg
 					§ Call the **ResourceOrgs(GET /api/ResourceOrgs)** function
 						□ API Key: [Your API Key]
-		○ Complete this action for all desired components
+		○ Complete this action for all desired components to retreive the availble options for the component
 
 
-###Generating Names
+### Generating Names
 To generate a resource type name programmatically, the API requires a JSON payload of all the components being requested. This includes all currently configured components and the desired resource type. 
 
 The process is as follows:
+
 	- API receives request for name generation, containing the desired components and their values
 		○ [ComponentType] : [Value]
 		○ Example
