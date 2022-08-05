@@ -71,7 +71,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
