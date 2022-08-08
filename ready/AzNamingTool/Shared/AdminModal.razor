@@ -248,11 +248,11 @@
             {
                 case MessageTypesEnum.INFORMATION:
                     toastService.ShowInfo(message.Message, "INFORMATION");
-                    GeneralHelper.LogAdminMessage(message.Type.ToString(), message.Message);
+                    LogHelper.LogAdminMessage(message.Type.ToString(), message.Message);
                     break;
                 case MessageTypesEnum.SUCCESS:
                     toastService.ShowSuccess(message.Message, "SUCCESS");
-                    GeneralHelper.LogAdminMessage(message.Type.ToString(), message.Message);
+                    LogHelper.LogAdminMessage(message.Type.ToString(), message.Message);
                     break;
                 case MessageTypesEnum.WARNING:
                     toastService.ShowWarning(message.Message, "WARNING");

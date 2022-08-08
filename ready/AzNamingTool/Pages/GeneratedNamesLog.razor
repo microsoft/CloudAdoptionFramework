@@ -106,7 +106,7 @@
         {
             var result = await session.GetAsync<bool>("admin");
             admin = (bool)result.Value;
-            lstNameRequests = await ResourceNamingRequestService.GetGeneratedNames();
+            lstNameRequests = await LogHelper.GetGeneratedNames();
             dataLoaded = true;
             StateHasChanged();
         }
@@ -130,10 +130,10 @@
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Generated Names log. Are you sure?");
         if (confirm)
         {
-            await ResourceNamingRequestService.PurgeGeneratedNames();
+            await LogHelper.PurgeGeneratedNames();
             toastService.ShowSuccess("Generated Log purged!", "SUCCESS");
-            GeneralHelper.LogAdminMessage("GENERATED NAMES LOG", "Generated Names log purged.");
-            lstNameRequests = await ResourceNamingRequestService.GetGeneratedNames();
+            LogHelper.LogAdminMessage("GENERATED NAMES LOG", "Generated Names log purged.");
+            lstNameRequests = await LogHelper.GetGeneratedNames();
             StateHasChanged();
         }
     }

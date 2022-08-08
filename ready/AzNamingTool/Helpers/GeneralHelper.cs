@@ -32,7 +32,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
             }
             return value;
         }
@@ -49,7 +49,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
             }
         }
 
@@ -62,7 +62,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return null;
             }
         }
@@ -101,7 +101,7 @@ namespace AzureNamingTool.Helpers
             }
             catch(Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 throw;
             }
         }
@@ -145,7 +145,7 @@ namespace AzureNamingTool.Helpers
             }
             catch(Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 throw;
             }
         }
@@ -229,7 +229,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
             }
         }
 
@@ -280,7 +280,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
             }
         }
 
@@ -487,71 +487,8 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return new Tuple<bool, string, StringBuilder>(false, name, new StringBuilder("There was a problem validating the name."));
-            }
-        }
-
-        public static async Task<List<AdminLogMessage>> GetAdminLog()
-        {
-            List<AdminLogMessage> lstAdminLogMessages = new();
-            try
-            {
-                string data = await FileSystemHelper.ReadFile("adminlog.json");
-                var items = new List<AdminLogMessage>();
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true
-                };
-                lstAdminLogMessages = JsonSerializer.Deserialize<List<AdminLogMessage>>(data, options).OrderByDescending(x => x.CreatedOn).ToList();
-            }
-            catch (Exception ex)
-            {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
-            }
-            return lstAdminLogMessages;
-        }
-
-        public static async void LogAdminMessage(string title, string message)
-        {
-            try
-            {
-                AdminLogMessage adminmessage = new ()
-                {
-                    Id = 1,
-                    CreatedOn = DateTime.Now,
-                    Title = title,
-                    Message = message
-                };
-
-                // Log the created name
-                var lstAdminLogMessages = new List<AdminLogMessage>();
-                lstAdminLogMessages = await GetAdminLog();
-
-                if (lstAdminLogMessages.Count > 0)
-                {
-                    adminmessage.Id = lstAdminLogMessages.Max(x => x.Id) + 1;
-                }
-
-                lstAdminLogMessages.Add(adminmessage);
-                var jsonAdminLogMessages = JsonSerializer.Serialize(lstAdminLogMessages);
-                await FileSystemHelper.WriteFile("adminlog.json", jsonAdminLogMessages);
-            }
-            catch (Exception)
-            {
-
-            }
-        }
-        public static async Task PurgeAdminLog()
-        {
-            try
-            {
-                await FileSystemHelper.WriteFile("adminlog.json", "[]");
-            }
-            catch (Exception ex)
-            {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
             }
         }
 
@@ -565,7 +502,7 @@ namespace AzureNamingTool.Helpers
             }
             catch(Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 data = "";
             }
             return data;

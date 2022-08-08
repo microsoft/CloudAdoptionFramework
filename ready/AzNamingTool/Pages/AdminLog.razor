@@ -104,7 +104,7 @@
 
         if (firstRender)
         {
-            lstAdminLogMessages = await GeneralHelper.GetAdminLog();
+            lstAdminLogMessages = await LogHelper.GetAdminLog();
             dataLoaded = true;
             StateHasChanged();
         }
@@ -127,10 +127,10 @@
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Admin Log. Are you sure?");
         if (confirm)
         {
-            await GeneralHelper.PurgeAdminLog();
+            await LogHelper.PurgeAdminLog();
             toastService.ShowSuccess("Admin Log purged!", "SUCCESS");
-            GeneralHelper.LogAdminMessage("ADMIN LOG", "Admin Log log purged.");
-            lstAdminLogMessages = await GeneralHelper.GetAdminLog();
+            LogHelper.LogAdminMessage("ADMIN LOG", "Admin Log log purged.");
+            lstAdminLogMessages = await LogHelper.GetAdminLog();
             dataLoaded = true;
             StateHasChanged();
         }

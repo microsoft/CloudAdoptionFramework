@@ -82,11 +82,11 @@
                                 {
                                 @if (type.Property != "")
                                     {
-                                    <option value="@type.Id">@type.Resource - @type.Property (@type.ShortName)</option>
+                                    <option value="@type.ShortName">@type.Resource - @type.Property (@type.ShortName)</option>
                                     }
                                     else
                                     {
-                                    <option value="@type.Id">@type.Resource (@type.ShortName)</option>
+                                    <option value="@type.ShortName">@type.Resource (@type.ShortName)</option>
                                     }
                                 }
                         </InputSelect>
@@ -402,15 +402,14 @@
         Logger.LogInformation("HandleValidSubmit called");
 
         // Create the name request
-        resourceNameRequest.ResourceDelimiter = resourceDelimiter;
-        resourceNameRequest.ResourceEnvironment = servicesData.ResourceEnvironments.FirstOrDefault(x => x.ShortName == selectedResourceEnvironment);
-        resourceNameRequest.ResourceFunction = servicesData.ResourceFunctions.FirstOrDefault(x => x.ShortName == selectedResourceFunction);
+        resourceNameRequest.ResourceEnvironment = selectedResourceEnvironment;
+        resourceNameRequest.ResourceFunction = selectedResourceFunction;
         resourceNameRequest.ResourceInstance = selectedResourceInstance;
-        resourceNameRequest.ResourceLocation = servicesData.ResourceLocations.FirstOrDefault(x => x.ShortName == selectedResourceLocation);
-        resourceNameRequest.ResourceOrg = servicesData.ResourceOrgs.FirstOrDefault(x => x.ShortName == selectedResourceOrg);
-        resourceNameRequest.ResourceProjAppSvc = servicesData.ResourceProjAppSvcs.FirstOrDefault(x => x.ShortName == selectedResourceProjAppSvc);
-        resourceNameRequest.ResourceType = servicesData.ResourceTypes.FirstOrDefault(x => x.Id == Convert.ToInt32(selectedResourceType));
-        resourceNameRequest.ResourceUnitDept = servicesData.ResourceUnitDepts.FirstOrDefault(x => x.ShortName == selectedResourceUnitDept);
+        resourceNameRequest.ResourceLocation = selectedResourceLocation;
+        resourceNameRequest.ResourceOrg = selectedResourceOrg;
+        resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
+        resourceNameRequest.ResourceType = selectedResourceType;
+        resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
 
         resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
 
@@ -453,7 +452,7 @@
         if (selectedResourceType != "")
         {
             // Find the selected resoruce type
-            currentResourceType = servicesData.ResourceTypes.Find((t) => t.Id == Convert.ToInt32(selectedResourceType));
+            currentResourceType = servicesData.ResourceTypes.Find((t) => t.ShortName == selectedResourceType);
 
             // Set the optional components
             selectedResourceTypeOptional = currentResourceType.Optional;

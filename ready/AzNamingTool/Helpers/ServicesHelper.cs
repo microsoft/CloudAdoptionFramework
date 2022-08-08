@@ -33,7 +33,7 @@ namespace AzureNamingTool.Helpers
             }
             catch(Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return servicesData;
             }
         }

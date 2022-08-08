@@ -24,7 +24,37 @@ namespace AzureNamingTool.Controllers
     {
         // POST api/<ResourceNamingRequestsController>
         /// <summary>
-        /// This function will generate a resoure type name for specifed component values. 
+        /// This function will generate a resoure type name for specifed component values. This function requires full definition for all components. It is recommended to use the RequestName API function for name generation.   
+        /// </summary>
+        /// <param name="request">json - Resource Name Request data</param>
+        /// <returns>string - Name generation response</returns>
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> RequestNameWithComponents([FromBody] ResourceNameRequestWithComponents request)
+        {
+            try
+            {
+                ResourceNameResponse resourceNameRequestResponse = await ResourceNamingRequestService.RequestNameWithComponents(request);
+
+                if (resourceNameRequestResponse.Success)
+                {
+                    return Ok(resourceNameRequestResponse);
+                }
+                else
+                {
+                    return BadRequest(resourceNameRequestResponse);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // POST api/<ResourceNamingRequestsController>
+        /// <summary>
+        /// This function will generate a resoure type name for specifed component values, using a simple data format.  
         /// </summary>
         /// <param name="request">json - Resource Name Request data</param>
         /// <returns>string - Name generation response</returns>
@@ -47,7 +77,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                GeneralHelper.LogAdminMessage("ERROR", ex.Message);
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
                 return BadRequest(ex.Message);
             }
         }
