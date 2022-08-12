@@ -5,7 +5,7 @@
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
 ## Version 2.1.1 (current)
-## Bug fixes
+### Bug fixes
 - Added logic to prevent duplicate resource type short names
 - Added notification to Configuration page for duplicate resource types short names to prompt for refresh
 - Updated Refresh Resource Types utility to refresh short names by default
@@ -13,7 +13,7 @@
 - Added enhanced Admin Log messaging
 - Moved Admin Log link to top of navigation
 - Added VERSIONHISTORY.md file
-## Notes
+### Notes
 - This update includes resource type configuration changes. It is recommended that users refresh their Resource Type configuration using the built-in tool on the Configuration page.
 
 ***
