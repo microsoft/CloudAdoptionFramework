@@ -161,7 +161,7 @@
                                             </div>
                                         </div>
                                         -->
-                        </div>
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -207,8 +207,8 @@
                                                             @if (item.Enabled)
                                                             {
                                                                 @* <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceDelimiter",item.Id,"disable"))" title="Disable">
-                                                                    <span class="oi oi-x" aria-hidden="true"></span>
-                                                                    </button>*@
+                                            <span class="oi oi-x" aria-hidden="true"></span>
+                                            </button>*@
                                                             }
                                                             else
                                                             {
@@ -630,36 +630,36 @@
                                         @if (admin)
                                         {
                                             @* <div class="card">
-                                                <div class="card card-header bg-default" style="font-weight:bold;">
-                                                New Location
-                                                </div>
-                                                <div class="card card-body">
-                                                <p>Add a new Location.</p>
-                                                <table class="table table-striped">
-                                                <tbody>
-                                                <tr>
-                                                <td>Name</td>
-                                                <td>
-                                                <input class="form-control" type="text" value="@newLocationName" @onchange="@((ui) => { SetFormValue("newLocationName",(string)ui.Value);})" />
-                                                </td>
-                                                </tr>
-                                                <tr>
-                                                <td>Short Name</td>
-                                                <td>
-                                                <input class="form-control" type="text" value="@newLocationShortName" @onchange="@((ui) => { SetFormValue("newLocationShortName",(string)ui.Value);})" />
-                                                </td>
-                                                </tr>
-                                                <tr>
-                                                <td colspan="2">
-                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceLocation",0,"add"))" title="Add">
-                                                <span class="oi oi-plus" aria-hidden="true"></span>
-                                                </button>
-                                                </td>
-                                                </tr>
-                                                </tbody>
-                                                </table>
-                                                </div>
-                                                </div>*@
+                    <div class="card card-header bg-default" style="font-weight:bold;">
+                    New Location
+                    </div>
+                    <div class="card card-body">
+                    <p>Add a new Location.</p>
+                    <table class="table table-striped">
+                    <tbody>
+                    <tr>
+                    <td>Name</td>
+                    <td>
+                    <input class="form-control" type="text" value="@newLocationName" @onchange="@((ui) => { SetFormValue("newLocationName",(string)ui.Value);})" />
+                    </td>
+                    </tr>
+                    <tr>
+                    <td>Short Name</td>
+                    <td>
+                    <input class="form-control" type="text" value="@newLocationShortName" @onchange="@((ui) => { SetFormValue("newLocationShortName",(string)ui.Value);})" />
+                    </td>
+                    </tr>
+                    <tr>
+                    <td colspan="2">
+                    <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceLocation",0,"add"))" title="Add">
+                    <span class="oi oi-plus" aria-hidden="true"></span>
+                    </button>
+                    </td>
+                    </tr>
+                    </tbody>
+                    </table>
+                    </div>
+                    </div>*@
                                             <div class="card mb-3">
                                                 <div class="card-header bg-default text-black">
                                                     <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href="#locationsconfig" role="button" aria-expanded="false" aria-controls="locationsconfig">
@@ -1145,7 +1145,7 @@
                                                         </div>
                                                         <div class="card card-body @theme.ThemeStyle">
                                                             <p>
-                                                                Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository. This will add any new resource types, as well as update existing type details. 
+                                                                Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository. This will add any new resource types, as well as update existing type details.
                                                             </p>
                                                             <p>
                                                                 All of your existing type configurations will be retained.
@@ -1157,7 +1157,7 @@
                                                                 <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceType",0,"refresh")) title="Refresh">
                                                                     <span class="oi oi-reload" aria-hidden="true"></span> Refresh
                                                                 </button>
-
+                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" value="" checked style="margin-top: 9px; margin-left:10px;" id="refreshshortnames"> Refresh short names?
                                                             </p>
                                                         </div>
                                                     </div>
@@ -1371,24 +1371,24 @@
                                     </p>
                                 </div>
                             </div>
-                                                    <div class="card  w-auto mb-3">
-                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
-                                                            Reset the Global Configuration
-                                                        </div>
-                                                        <div class="card card-body @theme.ThemeStyle">
-                                                            <p>
-                                                                Click <strong>Reset</strong> to reset the Global Configuration back to the default values at the time of installation. This will apply to all component configurations.
-                                                            </p>
-                                                            <p>
-                                                                <strong>NOTE: This will reset your current configuration and cannot be undone!</strong>
-                                                            </p>
-                                                            <p>
-                                                                <button type="button" class="btn btn-danger" @onclick=@(e => FormAction("Global",0,"reset")) title="Reset">
-                                                                    <span class="oi oi-loop-circular" aria-hidden="true"></span> Reset
-                                                                </button>
-                                                            </p>
-                                                        </div>
-                                                    </div>
+                            <div class="card  w-auto mb-3">
+                                <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                    Reset the Global Configuration
+                                </div>
+                                <div class="card card-body @theme.ThemeStyle">
+                                    <p>
+                                        Click <strong>Reset</strong> to reset the Global Configuration back to the default values at the time of installation. This will apply to all component configurations.
+                                    </p>
+                                    <p>
+                                        <strong>NOTE: This will reset your current configuration and cannot be undone!</strong>
+                                    </p>
+                                    <p>
+                                        <button type="button" class="btn btn-danger" @onclick=@(e => FormAction("Global",0,"reset")) title="Reset">
+                                            <span class="oi oi-loop-circular" aria-hidden="true"></span> Reset
+                                        </button>
+                                    </p>
+                                </div>
+                            </div>
                             <div class="card mb-3">
                                 <div class="card card-header bg-default text-black" style="font-weight:bold;">
                                     Import Global Configuration
@@ -1412,29 +1412,29 @@
                     </div>
 
                     @* <div class="card">
-                        <h5 class="card-header text-white bg-secondary">
-                        <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#policy" role="button" aria-expanded="false" aria-controls="policy">
-                        Policy
-                        </a>
-                        </h5>
-                        <div class="collapse card card-body @theme.ThemeStyle" id="policy">
-                        <div class="card">
-                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
-                        Export Azure Policy Definition
-                        </div>
-                        <div class="card card-body @theme.ThemeStyle">
-                        <p>
-                        Click <strong>Export Azure Policy Definition</strong> to export an Azure Policy definition to use within your subscription.
-                        </p>
-                        <p>
-                        <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("Policy",0,"download")) title="Export Azure Policy Definition">
-                        <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export Azure Policy Definition
-                        </button>
-                        </p>
-                        </div>
-                        </div>
-                        </div>
-                        </div>*@
+            <h5 class="card-header text-white bg-secondary">
+            <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#policy" role="button" aria-expanded="false" aria-controls="policy">
+            Policy
+            </a>
+            </h5>
+            <div class="collapse card card-body @theme.ThemeStyle" id="policy">
+            <div class="card">
+            <div class="card card-header bg-default text-black" style="font-weight:bold;">
+            Export Azure Policy Definition
+            </div>
+            <div class="card card-body @theme.ThemeStyle">
+            <p>
+            Click <strong>Export Azure Policy Definition</strong> to export an Azure Policy definition to use within your subscription.
+            </p>
+            <p>
+            <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("Policy",0,"download")) title="Export Azure Policy Definition">
+            <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export Azure Policy Definition
+            </button>
+            </p>
+            </div>
+            </div>
+            </div>
+            </div>*@
                 </div>
             }
         }
@@ -1445,7 +1445,7 @@
     [Inject]
     public IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
     [CascadingParameter]
-    public IModalService Modal { get; set; }        
+    public IModalService Modal { get; set; }
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
 
@@ -1498,6 +1498,21 @@
             categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
 
             dataLoaded = true;
+
+            if (admin)
+            {
+                // Check if the resource types contain duplicates
+                // Get the existing Resource Type items
+                ServiceResponse serviceResponse;
+                serviceResponse = await ResourceTypeService.GetItems();
+                List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
+                var dupes = types.GroupBy(x => x.ShortName).Any(g => g.Count() > 1);
+                if (dupes)
+                {
+                    ShowInformationModal("bg-navcolor", "ATTENTION", "Your resource types configuration contains duplicate short names values.<br /><br />This can cause an issue when generating names using the API. It is recommended that you refresh your resource types to the latest configuration.<br /><br />To refresh:<ul><li>Expand the Resource Types section</li><li>Epxand the Configuration section</li><li>Select the Refresh option, with the 'Refresh short anmes' option selected</li></ul><br />");
+                }
+            }
+
             StateHasChanged();
         }
     }
@@ -1537,6 +1552,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -1555,6 +1571,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "enable":
@@ -1571,6 +1588,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " enabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "disable":
@@ -1586,6 +1604,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "download":
@@ -1625,6 +1644,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Components config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -1666,6 +1686,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceDelimiter.Name + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "download":
@@ -1689,6 +1710,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Delimiters config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -1734,6 +1756,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceEnvironment.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -1752,6 +1775,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceEnvironment.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
@@ -1772,6 +1796,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceEnvironment.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -1816,6 +1841,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Environments config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -1845,6 +1871,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceFunction.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
 
                             break;
@@ -1864,6 +1891,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceFunction.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
@@ -1884,6 +1912,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceFunction.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -1928,6 +1957,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Functions configuration update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -1958,6 +1988,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceLocation.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -1999,6 +2030,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Locations config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2028,6 +2060,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceOrg.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -2046,6 +2079,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceOrg.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
@@ -2066,6 +2100,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceOrg.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -2110,6 +2145,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Orgs config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2139,6 +2175,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceProjAppSvc.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -2157,6 +2194,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceProjAppSvc.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
@@ -2177,6 +2215,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceProjAppSvc.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -2221,6 +2260,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "ProjAppSvcs configuration update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2245,7 +2285,10 @@
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will refresh your current Types configuration with the latest configuration!\n\nAre you sure?");
                             if (confirm)
                             {
-                                if (await ResourceTypeService.RefreshResourceTypes())
+                                bool ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "refreshshortnames");
+
+                                serviceResponse = await ResourceTypeService.RefreshResourceTypes(ischecked);
+                                if (serviceResponse.Success)
                                 {
                                     message.Type = MessageTypesEnum.SUCCESS;
                                     message.Message = "Types configuration refreshed!";
@@ -2253,7 +2296,8 @@
                                 else
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
-                                    message.Message = "Types configuration refresh failed!";
+                                    message.Message = "Types configuration refresh failed! ";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -2290,7 +2334,8 @@
                                     else
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
-                                        message.Message = "Types configuration update failed!";
+                                        message.Message = "Types configuration update failed! " + serviceResponse.ResponseObject;
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2320,6 +2365,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceUnitDept.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -2338,6 +2384,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceUnitDept.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
@@ -2358,6 +2405,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceUnitDept.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -2402,6 +2450,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Units/Depts configuration update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2463,14 +2512,14 @@
                                     message.Type = MessageTypesEnum.ERROR;
                                 }
 
-                                if(message.Type == MessageTypesEnum.ERROR)
+                                if (message.Type == MessageTypesEnum.ERROR)
                                 {
                                     message.Message = "Global configuration reset failed!";
                                 }
                                 else
                                 {
-                                        message.Type = MessageTypesEnum.SUCCESS;
-                                        message.Message = "Global configuration reset!";
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = "Global configuration reset!";
                                 }
                             }
                             break;
@@ -2491,6 +2540,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Global config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2526,7 +2576,6 @@
             message.Message = "There was a problem with the request.";
         }
 
-
         if (message.Message != null)
         {
             message.Message = "(" + type + ") " + message.Message;
@@ -2545,6 +2594,7 @@
                     break;
                 case MessageTypesEnum.ERROR:
                     toastService.ShowError(message.Message, "ERROR");
+                    LogHelper.LogAdminMessage("ERROR", message.Message + message.MessageDetails);
                     break;
             }
         }
@@ -2669,6 +2719,28 @@
         if (!result.Cancelled)
         {
             servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+            StateHasChanged();
+        }
+    }
+
+    async void ShowInformationModal(string headerstyle, string title, string message)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(InformationModal.message), message);
+        parameters.Add(nameof(InformationModal.title), title);
+        parameters.Add(nameof(InformationModal.headerstyle), headerstyle);
+        parameters.Add("theme", theme);
+
+        var options = new ModalOptions()
+            {
+                HideCloseButton = true,
+                UseCustomLayout = true
+            };
+
+        var modal = Modal.Show<InformationModal>(title, parameters, options);
+        var result = await modal.Result;
+        if (!result.Cancelled)
+        {
             StateHasChanged();
         }
     }

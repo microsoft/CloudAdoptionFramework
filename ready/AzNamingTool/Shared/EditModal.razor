@@ -289,7 +289,7 @@
                 }
                 else
                 {
-                    toastService.ShowError("There was an error updating the " + type.Replace("Resource", "Resource ") + "!", "ERROR");
+                    toastService.ShowError("There was an error updating the " + type.Replace("Resource", "Resource ") + "! " + serviceResponse.ResponseObject, "ERROR");
                 }
             }
             else

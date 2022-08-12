@@ -65,6 +65,57 @@ docker run -d -p 8081:80 --mount source=azurenamingtoolvol,target=/app/settings 
 
 ***
 
+### Run as an Azure Container App
+
+The Azure Naming Tool requires persistent storage for the configuration files when run as a container. The following processes will explain how to create this volume for your Azure App Service Container. All configuration JSON files will be stored in the volume to ensure the configuration is persisted.
+
+> **NOTE:**
+> For many of the steps, a sample process is provided, however, there are many ways to accomplish each step.
+
+1. Scroll up to the top, left corner of this page.
+2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
+3. Click the green **<>Code** button and select **Download ZIP**.
+4. Open your Downloads folder using File Explorer.
+5. Extract the contents of the ZIP archive.
+
+> **NOTE:**
+> Validate the project files extracted successfully and match the contents in the GitHub repository.
+
+6. Open a **Command Prompt**
+7. Change the directory to the **AzNamingTool** folder. For example:
+
+```cmd
+cd .\Downloads\CloudAdoptionFramework-master\CloudAdoptionFramework-master\ready\AzNamingTool
+```
+
+8. Run the following **Docker command** to build the image:
+
+```cmd
+docker build -t azurenamingtool .
+```
+  
+> **NOTE:**
+> Ensure the '.' is included in the command
+  
+9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
+10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
+11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
+  
+  ![FileShare](./wwwroot/Screenshots/FileShare.png)
+
+12. Create an Azure Container App: [Quickstart: Deploy an existing container image with the Azure CLI](https://docs.microsoft.com/en-us/azure/container-apps/get-started-existing-container-image?tabs=bash&pivots=container-apps-public-registry)
+
+> **NOTE:**
+> It is possible to deploy a contasiner app via the portal, however, setitng the volume for persistent storage is much easier using the CLI. 
+  
+13. Configure Container App to use Azure Storage File share for volume: [Use storage mounts in Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/storage-mounts?pivots=aca-cli#azure-files)
+15. Access the site using your Azure App Service URL
+
+> **NOTE:**
+> It is recommended that you enable authentication on your Container App to prevent un-authorized access. [Authentication and authorization in Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/authentication)
+
+***
+
 ### Run as an Azure App Service Container
 
 The Azure Naming Tool requires persistent storage for the configuration files when run as a container. The following processes will explain how to create this volume for your Azure App Service Container. All configuration JSON files will be stored in the volume to ensure the configuration is persisted.
@@ -110,6 +161,9 @@ docker build -t azurenamingtool .
 
 14. Deploy the image from the Azure Container Registry to the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/deploy-ci-cd-custom-container?tabs=acr&pivots=container-linux)
 15. Access the site using your Azure App Service URL
+
+> **NOTE:**
+> It is recommended that you enable authentication on your App Service to prevent un-authorized access. [Authentication and authorization in Azure App Service and Azure Functions](https://docs.microsoft.com/en-us/azure/app-service/overview-authentication-authorization)
 
 ***
 

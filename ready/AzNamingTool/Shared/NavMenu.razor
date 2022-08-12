@@ -20,7 +20,15 @@
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
-        </div>
+        </div>        
+        @if (admin)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="adminlog">
+                    <span class="oi oi-lock-locked" aria-hidden="true"></span> Admin Log
+                </NavLink>
+            </div>
+        }
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="instructions">
                 <span class="oi oi-info" aria-hidden="true"></span> Instructions
@@ -103,14 +111,6 @@
                     </div>
                 </div>
             }
-        }
-        @if (admin)
-        {
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="adminlog">
-                    <span class="oi oi-lock-locked" aria-hidden="true"></span> Admin Log
-                </NavLink>
-            </div>
         }
     </nav>
 </div>
