@@ -1,5 +1,6 @@
 ﻿using AzureNamingTool.Helpers;
 using AzureNamingTool.Models;
+using Microsoft.AspNetCore.Components;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
@@ -69,7 +70,7 @@ namespace AzureNamingTool.Services
                 var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
                 if(duplicateitems.Count > 0)
                 {
-                    serviceResponse.ResponseObject = "Please see the Admin Log for additional details.";
+                    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
                     serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
                     serviceResponse.Success = false;
                     return serviceResponse;
@@ -158,7 +159,7 @@ namespace AzureNamingTool.Services
                     var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
                     if (duplicateitems.Count > 0)
                     {
-                        serviceResponse.ResponseObject = "Please see the Admin Log for additional details.";
+                        serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
                         serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
                         serviceResponse.Success = false;
                         return serviceResponse;
