@@ -219,9 +219,8 @@ namespace AzureNamingTool.Services
                 ServiceResponse serviceResponse;
                 serviceResponse = await ResourceTypeService.GetItems();
                 List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
-                //string url = "https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/repository/resourcetypes.json";
-                string url = "https://raw.githubusercontent.com/BryanSoltis/CloudAdoptionFramework/master/ready/AzNamingTool/repository/resourcetypes.json";
-
+                string url = "https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/repository/resourcetypes.json";
+                
                 string refreshdata = await GeneralHelper.DownloadString(url);
                 if (refreshdata != "")
                 {
