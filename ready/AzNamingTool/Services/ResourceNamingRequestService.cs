@@ -386,8 +386,11 @@ namespace AzureNamingTool.Services
 
                             name += value;
 
-                            // Add property to aray for individual component validation
-                            lstComponents.Add(new string[] { component.Name, value });
+                            // Add property to array for individual component validation
+                            if (!resourceType.Exclude.ToLower().Contains(component.Name.Replace("Resource", "").ToLower()))
+                            {
+                                lstComponents.Add(new string[] { component.Name, value });
+                            }
                         }
                         else
                         {
@@ -441,7 +444,8 @@ namespace AzureNamingTool.Services
                     {
                         CreatedOn = DateTime.Now,
                         ResourceName = name.ToLower(),
-                        Components = lstComponents
+                        Components = lstComponents,
+                        ResourceTypeName = resourceType.Resource
                     };
                     LogHelper.LogGeneratedName(generatedName);
                     response.Success = true;

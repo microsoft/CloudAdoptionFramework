@@ -10,8 +10,10 @@
 - Added notification to Configuration page for duplicate resource types short names to prompt for refresh
 - Updated Refresh Resource Types utility to refresh short names by default
 - Updated /repository/resourcetypes.json with new data
+- Added abilityt o exlcude resource type 
 - Added enhanced Admin Log messaging
 - Moved Admin Log link to top of navigation
+- Added Resource Type to Generated Names Log
 - Added VERSIONHISTORY.md file
 ### Notes
 - This update includes resource type configuration changes. It is recommended that users refresh their Resource Type configuration using the built-in tool on the Configuration page.

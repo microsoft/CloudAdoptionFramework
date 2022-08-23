@@ -20,7 +20,7 @@
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
-        </div>        
+        </div>
         @if (admin)
         {
             <div class="nav-item px-3">
@@ -112,6 +112,15 @@
                 </div>
             }
         }
+        @if (PageType.ToString() == "AzureNamingTool.Pages.Index")
+        {
+            <hr />
+            <div class="nav-item px-3">
+                <div classclass="nav-link">
+                    <LatestNews></LatestNews>
+                </div>
+            </div>
+        }
     </nav>
 </div>
 
@@ -136,6 +145,7 @@
         {
             admin = (bool)result.Value;
             servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+
         }
         else
         {

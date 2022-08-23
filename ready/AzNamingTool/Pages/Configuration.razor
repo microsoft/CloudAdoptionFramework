@@ -1093,13 +1093,13 @@
                                                                         {
                                                                             @foreach (ResourceComponent component in @servicesData.ResourceComponents)
                                                                             {
-                                                                                if (component.Name != "ResourceType")
-                                                                                {
+                                                                                //if (component.Name != "ResourceType")
+                                                                                //{
                                                                                     @if (item.Exclude.ToLower().Contains(component.Name.Replace("Resource", "").ToLower()))
                                                                                     {
                                                                                         <div>@component.DisplayName</div>
                                                                                     }
-                                                                                }
+                                                                                //}
                                                                             }
                                                                         }
                                                                     </td>

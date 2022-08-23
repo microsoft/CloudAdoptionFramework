@@ -383,10 +383,10 @@
         // Filter out the types w/o the scope
         foreach (ResourceType type in servicesData.ResourceTypes)
         {
-            if (filteredscopes.Contains(type.Scope))
-            {
+            //if (filteredscopes.Contains(type.Scope))
+            //{
                 filteredtypes.Add(type);
-            }
+            //}
         }
         servicesData.ResourceTypes = filteredtypes;
 

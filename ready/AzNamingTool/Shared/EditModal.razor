@@ -82,25 +82,25 @@
                         <p>
                             @foreach (ResourceComponent resourceComponent in resourceComponents)
                             {
-                                @if (resourceComponent.Name != "ResourceType")
-                                {
-                                    <div class="form-check">
-                                        @if (exclude.ToLower().Contains(resourceComponent.Name.Replace("Resource", "").ToLower()))
-                                        {
-                                            <input title="Excluded Component" class="form-check-input" type="checkbox" id="exclude-@resourceComponent.Name.Replace("Resource", "").ToLower()" checked>
-                                            <label class="form-check-label" for="exclude-@resourceComponent.Name.Replace("Resource", "").ToLower()">
-                                                @resourceComponent.DisplayName
-                                            </label>
-                                        }
-                                        else
-                                        {
-                                            <input title="Excluded Component" class="form-check-input" type="checkbox" id="exclude-@resourceComponent.Name.Replace("Resource", "").ToLower()">
-                                            <label class="form-check-label" for="exclude-@resourceComponent.Name.Replace("Resource", "").ToLower()">
-                                                @resourceComponent.DisplayName
-                                            </label>
-                                        }
-                                    </div>
-                                }
+                                //@if (resourceComponent.Name != "ResourceType")
+                                //{
+                                <div class="form-check">
+                                    @if (exclude.ToLower().Contains(resourceComponent.Name.Replace("Resource", "").ToLower()))
+                                    {
+                                        <input title="Excluded Component" class="form-check-input" type="checkbox" id="exclude-@resourceComponent.Name.Replace("Resource", "").ToLower()" checked>
+                                        <label class="form-check-label" for="exclude-@resourceComponent.Name.Replace("Resource", "").ToLower()">
+                                            @resourceComponent.DisplayName
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <input title="Excluded Component" class="form-check-input" type="checkbox" id="exclude-@resourceComponent.Name.Replace("Resource", "").ToLower()">
+                                        <label class="form-check-label" for="exclude-@resourceComponent.Name.Replace("Resource", "").ToLower()">
+                                            @resourceComponent.DisplayName
+                                        </label>
+                                    }
+                                </div>
+                                //}
                             }
                         </p>
                     </div>
@@ -248,20 +248,21 @@
                                     }
                                     resourceType.Optional += resourceComponent.Name.Replace("Resource", "");
                                 }
+                            }
 
-                                // Exclude
-                                ischecked = false;
-                                ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "exclude-" + resourceComponent.Name.Replace("Resource", "").ToLower());
-                                if (ischecked)
+                            // Exclude
+                            ischecked = false;
+                            ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "exclude-" + resourceComponent.Name.Replace("Resource", "").ToLower());
+                            if (ischecked)
+                            {
+                                if (resourceType.Exclude != "")
                                 {
-                                    if (resourceType.Exclude != "")
-                                    {
-                                        resourceType.Exclude += ",";
-                                    }
-                                    resourceType.Exclude += resourceComponent.Name.Replace("Resource", "");
+                                    resourceType.Exclude += ",";
                                 }
+                                resourceType.Exclude += resourceComponent.Name.Replace("Resource", "");
                             }
                         }
+
 
                         serviceResponse = await ResourceTypeService.PostItem(resourceType);
                         break;
