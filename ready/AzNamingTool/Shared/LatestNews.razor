@@ -1,4 +1,5 @@
-﻿@using Microsoft.JSInterop
+﻿@using AzureNamingTool.Helpers
+@using Microsoft.JSInterop
 
 <a class="twitter-timeline" data-height="400" data-theme="dark" href="https://twitter.com/AzureNamingTool?ref_src=twsrc%5Etfw">Tweets by AzureNamingTool</a>
 
@@ -9,10 +10,17 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)        
+        if (firstRender)
         {
-            var targetUrl = "//platform.twitter.com/widgets.js";
-            await JsRuntime.InvokeVoidAsync("loadJs", targetUrl);
+            try
+            {
+                var targetUrl = "//platform.twitter.com/widgets.js";
+                await JsRuntime.InvokeVoidAsync("loadJs", targetUrl);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
+            }
         }
     }
 }
