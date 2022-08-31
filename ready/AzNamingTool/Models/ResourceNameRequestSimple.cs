@@ -10,5 +10,9 @@
         public string? ResourceProjAppSvc { get; set; }
         public string ResourceType { get; set; }
         public string? ResourceUnitDept { get; set; }
+        /// <summary>
+        /// Dictionary [Custom Component Type Name],[Custom Component Short Name Value]
+        /// </summary>
+        public Dictionary<string, string>? CustomComponents { get; set; }
     }
 }

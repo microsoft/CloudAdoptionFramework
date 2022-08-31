@@ -20,11 +20,13 @@
                     <label for="name">Name</label>
                     <input title="Name" value="@itemName" type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
                 </div>
-
-                <div class="form-group">
-                    <label for="shortName">Short Name</label>
-                    <input title="Short Name" value="@itemShortName" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemShortName = (string)ui.Value;})" />
-                </div>
+                @if (type != "ResourceComponent")
+                {
+                    <div class="form-group">
+                        <label for="shortName">Short Name</label>
+                        <input title="Short Name" value="@itemShortName" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemShortName = (string)ui.Value;})" />
+                    </div>
+                }
             </div>
             <div class="modal-footer">
                 <button title="Add" @onclick="Save" class="btn btn-success">Add</button>
@@ -45,6 +47,7 @@
     [Parameter] public string title { get; set; }
     [Parameter] public string message { get; set; }
     [Parameter] public string type { get; set; }
+    [Parameter] public string? parentcomponent { get; set; }
 
 
     private ServiceResponse serviceResponse = new();
@@ -58,95 +61,133 @@
 
     async void Save()
     {
-        if ((itemName != null) && (itemShortName != null))
+        bool valid = false;
+        if (type == "ResourceComponent")
         {
-            if ((itemName != "") && (itemShortName != ""))
+            if (itemName != null)
             {
-                if (GeneralHelper.ValidateShortName(itemShortName, type))
+                if (itemName != "")
                 {
-                    itemShortName = itemShortName.ToLower();
-                    switch (type)
-                    {
-                        case "ResourceEnvironment":
-                            ResourceEnvironment resourceEnvironment = new ResourceEnvironment()
-                                {
-                                    Name = itemName,
-                                    ShortName = itemShortName.ToLower()
-
-                                };
-                            serviceResponse = await ResourceEnvironmentService.PostItem(resourceEnvironment);
-                            break;
-                        case "ResourceLocation":
-                            ResourceLocation resourceLocation = new ResourceLocation()
-                                {
-                                    Name = itemName,
-                                    ShortName = itemShortName.ToLower()
-
-                                };
-                            serviceResponse = await ResourceLocationService.PostItem(resourceLocation);
-                            break;
-                        case "ResourceOrg":
-                            ResourceOrg resourceOrg = new ResourceOrg()
-                                {
-                                    Name = itemName,
-                                    ShortName = itemShortName.ToLower()
-
-                                };
-                            serviceResponse = await ResourceOrgService.PostItem(resourceOrg);
-                            break;
-                        case "ResourceProjAppSvc":
-                            ResourceProjAppSvc resourceProjAppSvc = new ResourceProjAppSvc()
-                                {
-                                    Name = itemName,
-                                    ShortName = itemShortName.ToLower()
-
-                                };
-                            serviceResponse = await ResourceProjAppSvcService.PostItem(resourceProjAppSvc);
-                            break;
-                        case "ResourceUnitDept":
-                            ResourceUnitDept resourceUnitDept = new ResourceUnitDept()
-                                {
-                                    Name = itemName,
-                                    ShortName = itemShortName.ToLower()
-
-                                };
-                            serviceResponse = await ResourceUnitDeptService.PostItem(resourceUnitDept);
-                            break;
-                        case "ResourceFunction":
-                            ResourceFunction ResourceFunction = new ResourceFunction()
-                                {
-                                    Name = itemName,
-                                    ShortName = itemShortName.ToLower()
-
-                                };
-                            serviceResponse = await ResourceFunctionService.PostItem(ResourceFunction);
-                            break;
-                    }
-
-                    if (serviceResponse.Success)
-                    {
-                        ModalInstance.CloseAsync();
-                        toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!", "SUCCESS");
-                        LogHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " added!");
-                    }
-                    else
-                    {
-                        toastService.ShowError("There was an error adding the " + type.Replace("Resource", "Resource ") + "!", "ERROR");
-                    }
+                    valid = true;
+                    ResourceComponent resourceComponent = new()
+                        {
+                            Name = itemName,
+                            DisplayName = itemName,
+                            IsCustom = true
+                        };
+                    serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a valid short name!", "ERROR");
+                    toastService.ShowError("You must enter a name!", "ERROR");
                 }
             }
             else
             {
-                toastService.ShowError("You must enter a name and short name!", "ERROR");
+                toastService.ShowError("You must enter a name!", "ERROR");
             }
         }
         else
         {
-            toastService.ShowError("You must enter a name and short name!", "ERROR");
+            if ((itemName != null) && (itemShortName != null))
+            {
+                if ((itemName != "") && (itemShortName != ""))
+                {
+                    if (GeneralHelper.ValidateShortName(itemShortName, type))
+                    {
+                        valid = true;
+                        itemShortName = itemShortName.ToLower();
+                        switch (type)
+                        {
+                            case "ResourceEnvironment":
+                                ResourceEnvironment resourceEnvironment = new ResourceEnvironment()
+                                    {
+                                        Name = itemName,
+                                        ShortName = itemShortName.ToLower()
+
+                                    };
+                                serviceResponse = await ResourceEnvironmentService.PostItem(resourceEnvironment);
+                                break;
+                            case "ResourceLocation":
+                                ResourceLocation resourceLocation = new ResourceLocation()
+                                    {
+                                        Name = itemName,
+                                        ShortName = itemShortName.ToLower()
+
+                                    };
+                                serviceResponse = await ResourceLocationService.PostItem(resourceLocation);
+                                break;
+                            case "ResourceOrg":
+                                ResourceOrg resourceOrg = new ResourceOrg()
+                                    {
+                                        Name = itemName,
+                                        ShortName = itemShortName.ToLower()
+
+                                    };
+                                serviceResponse = await ResourceOrgService.PostItem(resourceOrg);
+                                break;
+                            case "ResourceProjAppSvc":
+                                ResourceProjAppSvc resourceProjAppSvc = new ResourceProjAppSvc()
+                                    {
+                                        Name = itemName,
+                                        ShortName = itemShortName.ToLower()
+
+                                    };
+                                serviceResponse = await ResourceProjAppSvcService.PostItem(resourceProjAppSvc);
+                                break;
+                            case "ResourceUnitDept":
+                                ResourceUnitDept resourceUnitDept = new ResourceUnitDept()
+                                    {
+                                        Name = itemName,
+                                        ShortName = itemShortName.ToLower()
+
+                                    };
+                                serviceResponse = await ResourceUnitDeptService.PostItem(resourceUnitDept);
+                                break;
+                            case "ResourceFunction":
+                                ResourceFunction resourceFunction = new ResourceFunction()
+                                    {
+                                        Name = itemName,
+                                        ShortName = itemShortName.ToLower()
+
+                                    };
+                                serviceResponse = await ResourceFunctionService.PostItem(resourceFunction);
+                                break;
+                            case "CustomComponent":
+                                CustomComponent customComponent = new CustomComponent()
+                                    {
+                                        Name = itemName,
+                                        ShortName = itemShortName.ToLower(),
+                                        ParentComponent = GeneralHelper.NormalizeName(parentcomponent, true)
+                                    };
+                                serviceResponse = await CustomComponentService.PostItem(customComponent);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        toastService.ShowError("You must enter a name and short name!", "ERROR");
+                    }
+                }
+                else
+                {
+                    toastService.ShowError("You must enter a name and short name!", "ERROR");
+                }
+            }
+        }
+
+        if (valid)
+        {
+            if (serviceResponse.Success)
+            {
+                ModalInstance.CloseAsync();
+                toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!", "SUCCESS");
+                LogHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " added!");
+            }
+            else
+            {
+                toastService.ShowError("There was an error adding the " + GeneralHelper.NormalizeName(type, false) + "!", "ERROR");
+            }
         }
     }
 

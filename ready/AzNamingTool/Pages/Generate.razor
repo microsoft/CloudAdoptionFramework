@@ -70,28 +70,28 @@
                                 <option value="">Select a resource type provider (OPTIONAL)</option>
                                 @foreach (var category in @categories)
                                 {
-                                <option value="@category">@category</option>
+                                    <option value="@category">@category</option>
                                 }
-                        </InputSelect>
+                            </InputSelect>
 
-                        <InputSelect title="Resource Type" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceType)"
+                            <InputSelect title="Resource Type" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceType)"
                                      Value="@selectedResourceType"
                                      ValueChanged="@((string value) => OnTypeChanged(value))" aria-label="Select type">
-                            <option value="">Select a resource type</option>
-                            @foreach (var type in @ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, selectedResourceTypeCategory))
+                                <option value="">Select a resource type</option>
+                                @foreach (var type in @ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, selectedResourceTypeCategory))
                                 {
-                                @if (type.Property != "")
+                                    @if (type.Property != "")
                                     {
-                                    <option value="@type.ShortName">@type.Resource - @type.Property (@type.ShortName)</option>
+                                        <option value="@type.ShortName">@type.Resource - @type.Property (@type.ShortName)</option>
                                     }
                                     else
                                     {
-                                    <option value="@type.ShortName">@type.Resource (@type.ShortName)</option>
+                                        <option value="@type.ShortName">@type.Resource (@type.ShortName)</option>
                                     }
                                 }
-                        </InputSelect>
+                            </InputSelect>
 
-                        @if (currentResourceType != null)
+                            @if (currentResourceType != null)
                             {
                                 <div id="guidelines" class="card mt-3">
                                     <div class="card-header bg-default text-black">
@@ -128,10 +128,10 @@
                                 </div>
                             }
                         </div>
-                </div>
+                    </div>
 
 
-                @if (selectedResourceType != "")
+                    @if (selectedResourceType != "")
                     {
                         @if (componentsVisible == "collapse")
                         {
@@ -143,7 +143,7 @@
                         <div class="@componentsVisible" id="components">
                             @foreach (ResourceComponent resourceComponent in servicesData.ResourceComponents)
                             {
-                                if (!selectedResourceTypeExclude.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                                if (!selectedResourceTypeExclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                 {
                                     switch (resourceComponent.Name)
                                     {
@@ -151,7 +151,7 @@
 
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
-                                                    Environment
+                                                    @resourceComponent.DisplayName
                                                     @if (selectedResourceTypeOptional.ToLower().Contains("environment"))
                                                     {
                                                         @((MarkupString)optional)
@@ -164,16 +164,16 @@
                                                         <option value="">Select an environment</option>
                                                         @foreach (var item in @servicesData.ResourceEnvironments)
                                                         {
-                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                            <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
                                                         }
-                            </InputSelect>
-                        </div>
-                    </div>
+                                                    </InputSelect>
+                                                </div>
+                                            </div>
                                             break;
                                         case "ResourceFunction":
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
-                                                    Function
+                                                    @resourceComponent.DisplayName
                                                     @if (selectedResourceTypeOptional.ToLower().Contains("function"))
                                                     {
                                                         @((MarkupString)optional)
@@ -186,16 +186,16 @@
                                                         <option value="">Select a Function</option>
                                                         @foreach (var item in @servicesData.ResourceFunctions)
                                                         {
-                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                            <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
                                                         }
-                            </InputSelect>
-                        </div>
-                    </div>
+                                                    </InputSelect>
+                                                </div>
+                                            </div>
                                             break;
                                         case "ResourceInstance":
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
-                                                    Instance
+                                                    @resourceComponent.DisplayName
                                                     @if (selectedResourceTypeOptional.ToLower().Contains("instance"))
                                                     {
                                                         @((MarkupString)optional)
@@ -211,7 +211,7 @@
                                         case "ResourceLocation":
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
-                                                    Location
+                                                    @resourceComponent.DisplayName
                                                     @if (selectedResourceTypeOptional.ToLower().Contains("location"))
                                                     {
                                                         @((MarkupString)optional)
@@ -224,16 +224,16 @@
                                                         <option value="">Select a location</option>
                                                         @foreach (var item in @servicesData.ResourceLocations)
                                                         {
-                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                            <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
                                                         }
-                            </InputSelect>
-                        </div>
-                    </div>
+                                                    </InputSelect>
+                                                </div>
+                                            </div>
                                             break;
                                         case "ResourceOrg":
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
-                                                    Org
+                                                    @resourceComponent.DisplayName
                                                     @if (selectedResourceTypeOptional.ToLower().Contains("org"))
                                                     {
                                                         @((MarkupString)optional)
@@ -246,16 +246,16 @@
                                                         <option value="">Select an org</option>
                                                         @foreach (var item in @servicesData.ResourceOrgs)
                                                         {
-                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                            <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
                                                         }
-                            </InputSelect>
-                        </div>
-                    </div>
+                                                    </InputSelect>
+                                                </div>
+                                            </div>
                                             break;
                                         case "ResourceProjAppSvc":
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
-                                                    Project/App/Service
+                                                    @resourceComponent.DisplayName
                                                     @if (selectedResourceTypeOptional.ToLower().Contains("projappsvc"))
                                                     {
                                                         @((MarkupString)optional)
@@ -268,16 +268,16 @@
                                                         <option value="">Select a project/app/service</option>
                                                         @foreach (var item in @servicesData.ResourceProjAppSvcs)
                                                         {
-                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                            <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
                                                         }
-                            </InputSelect>
-                        </div>
-                    </div>
+                                                    </InputSelect>
+                                                </div>
+                                            </div>
                                             break;
                                         case "ResourceUnitDept":
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
-                                                    Unit/Dept
+                                                    @resourceComponent.DisplayName
                                                     @if (selectedResourceTypeOptional.ToLower().Contains("unitdept"))
                                                     {
                                                         @((MarkupString)optional)
@@ -290,11 +290,34 @@
                                                         <option value="">Select a unit/dept</option>
                                                         @foreach (var item in @servicesData.ResourceUnitDepts)
                                                         {
-                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                            <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
                                                         }
-                            </InputSelect>
-                        </div>
-                    </div>
+                                                    </InputSelect>
+                                                </div>
+                                            </div>
+                                            break;
+                                        default:
+                                            @if (resourceComponent.IsCustom)
+                                            {
+                                                <div class="card @theme.ThemeStyle mb-3">
+                                                    <h5 class="card-header text-white bg-secondary">
+                                                        @resourceComponent.Name
+                                                        @if (selectedResourceTypeOptional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                        {
+                                                            @((MarkupString)optional)
+                                                        }
+                                                    </h5>
+                                                    <div class="card card-body @theme.ThemeStyle">
+                                                        <select title="@resourceComponent.DisplayName" class="@GetControlStyle()" value="@selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)]" @onchange='(e  => OnCustomComponentChanged(e, GeneralHelper.NormalizeName(resourceComponent.Name, true)))'>
+                                                            <option value="">Select a component</option>
+                                                            @foreach (var item in @servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                            {
+                                                                <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            }
                                             break;
                                     }
                                 }
@@ -360,6 +383,7 @@
     private string? selectedResourceType = "";
     private string selectedResourceTypeExclude;
     private string selectedResourceTypeOptional;
+    private Dictionary<string, string> selectedCustomComponents = new();
     private List<string> categories = new List<string>();
     private string? selectedResourceUnitDept;
     private string? selectedResourceFunction;
@@ -385,7 +409,7 @@
         {
             //if (filteredscopes.Contains(type.Scope))
             //{
-                filteredtypes.Add(type);
+            filteredtypes.Add(type);
             //}
         }
         servicesData.ResourceTypes = filteredtypes;
@@ -410,6 +434,7 @@
         resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
         resourceNameRequest.ResourceType = selectedResourceType;
         resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
+        resourceNameRequest.CustomComponents = selectedCustomComponents;
 
         resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
 
@@ -472,6 +497,14 @@
             componentsVisible = "collapse show";
 
             // Check if all the components are optional for the resource type
+            selectedCustomComponents.Clear();
+            foreach (var component in servicesData.ResourceComponents)
+            {
+                if (component.IsCustom)
+                {
+                    selectedCustomComponents.Add(GeneralHelper.NormalizeName(component.Name, true), null);
+                }
+            }
 
             ValidateForm();
 
@@ -480,7 +513,7 @@
         return Task.CompletedTask;
     }
 
-    private Task OnComponentChanged(string sender, string value)
+    private Task OnComponentChanged(string sender, string value, string key = "")
     {
         switch (sender)
         {
@@ -505,10 +538,38 @@
             case "rvmr":
                 selectedResourceFunction = value;
                 break;
+            case "cc":
+                // Determine if the custom component aleady exists in the current collection
+                if (selectedCustomComponents.ContainsKey(key))
+                {
+                    selectedCustomComponents[key] = value;
+                }
+                else
+                {
+                    // Add the selection
+                    selectedCustomComponents.Add(key, value);
+                }
+                break;
         }
 
         ValidateForm();
         return Task.CompletedTask;
+    }
+
+    async void OnCustomComponentChanged(ChangeEventArgs e, string parentcomponent)
+    {
+        if (e.Value != "")
+        {
+            OnComponentChanged("cc", e.Value.ToString(), parentcomponent);
+        }
+        else
+        {
+            if (selectedCustomComponents.ContainsKey(parentcomponent))
+            {
+                selectedCustomComponents[parentcomponent] = null;
+            }
+            ValidateForm();
+        }
     }
 
     private void ValidateForm()
@@ -519,10 +580,10 @@
             @foreach (ResourceComponent resourceComponent in servicesData.ResourceComponents)
             {
                 // Check if the component is excluded for the resource type
-                if (!selectedResourceTypeExclude.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                if (!selectedResourceTypeExclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                 {
                     // Check if the component is optional for the resource type
-                    if (!selectedResourceTypeOptional.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                    if (!selectedResourceTypeOptional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                     {
                         switch (resourceComponent.Name)
                         {
@@ -569,6 +630,16 @@
                                     boolFormDisabled = true;
                                 }
                                 break;
+                            default:
+                                if (resourceComponent.IsCustom)
+                                {
+                                    // Make sure each component has a value
+                                    if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == null)
+                                    {
+                                        boolFormDisabled = true;
+                                    }
+                                }
+                                break;
                         }
                     }
                 }
@@ -585,4 +656,10 @@
     {
         return "form-control " + theme.ThemeStyle;
     }
+
+    private string GetCustomComponentValue(string key)
+    {
+        return selectedCustomComponents[key];
+    }
+
 }

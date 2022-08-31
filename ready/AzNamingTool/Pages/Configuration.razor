@@ -54,6 +54,14 @@
                                 </div>
                                 <div class="card card-body @theme.ThemeStyle">
                                     <p>The current Components.</p>
+                                    @if (admin)
+                                    {
+                                        <p>
+                                            <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",0,"add"))" title="Add Component">
+                                                <span class="oi oi-plus" aria-hidden="true"></span> Add Component
+                                            </button>
+                                        </p>
+                                    }
                                     <table class="table @theme.ThemeStyle">
                                         <thead>
                                             <tr>
@@ -81,15 +89,29 @@
                                                                 <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
                                                                     <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                 </button>
+                                                                @if (item.IsCustom)
+                                                                {
+                                                                    <span> </span>
+                                                                    <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"edit"))" title="Edit">
+                                                                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                                                                    </button>
+                                                                }
                                                                 <span> </span>
-                                                                <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
-                                                                    <span class="oi oi-x" aria-hidden="true"></span>
+                                                                <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
+                                                                    <span class="oi oi-ban" aria-hidden="true"></span>
                                                                 </button>
                                                             }
                                                             else
                                                             {
                                                                 <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",item.Id,"enable"))" title="Enable">
                                                                     <span class="oi oi-plus" aria-hidden="true"></span>
+                                                                </button>
+                                                            }
+                                                            @if (item.IsCustom)
+                                                            {
+                                                                <span> </span>
+                                                                <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceComponent",item.Id,"delete"))" title="Delete">
+                                                                    <span class="oi oi-x" aria-hidden="true"></span>
                                                                 </button>
                                                             }
                                                         </td>
@@ -350,7 +372,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceEnvironment",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceEnvironment",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                         @if (servicesData.ResourceEnvironments.Count > 1)
@@ -487,7 +509,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceFunction",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceFunction",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
 
@@ -609,7 +631,7 @@
                                                                 @if (admin)
                                                                 {
                                                                     <td>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceLocation",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceLocation",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                         @if (servicesData.ResourceLocations.Count > 1)
@@ -777,7 +799,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceOrg",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceOrg",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                         @if (servicesData.ResourceOrgs.Count > 1)
@@ -917,7 +939,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceProjAppSvc",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceProjAppSvc",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                         @if (servicesData.ResourceProjAppSvcs.Count > 1)
@@ -1080,7 +1102,7 @@
                                                                             {
                                                                                 if (component.Name != "ResourceType")
                                                                                 {
-                                                                                    @if (item.Optional.ToLower().Contains(component.Name.Replace("Resource", "").ToLower()))
+                                                                                    @if (item.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
                                                                                     {
                                                                                         <div>@component.DisplayName</div>
                                                                                     }
@@ -1095,16 +1117,16 @@
                                                                             {
                                                                                 //if (component.Name != "ResourceType")
                                                                                 //{
-                                                                                    @if (item.Exclude.ToLower().Contains(component.Name.Replace("Resource", "").ToLower()))
-                                                                                    {
-                                                                                        <div>@component.DisplayName</div>
-                                                                                    }
+                                                                                @if (item.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
+                                                                                {
+                                                                                    <div>@component.DisplayName</div>
+                                                                                }
                                                                                 //}
                                                                             }
                                                                         }
                                                                     </td>
                                                                     <td>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceType",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceType",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                     </td>
@@ -1256,7 +1278,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceUnitDept",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceUnitDept",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
 
@@ -1330,6 +1352,128 @@
                                                             </p>
                                                             <p>
                                                                 <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceUnitDept",0,"update"))" title="Import">
+                                                                    <span class="oi oi-data-transfer-upload" aria-hidden="true"></span> Import
+                                                                </button>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            break;
+                        default:
+                            @if ((servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)) != null) && (resourceComponent.Name != "ResourceInstance"))
+                            {
+                                <div class="card">
+                                    <h5 class="card-header bg-secondary text-white">
+                                        <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href=@("#custom" + resourceComponent.Id.ToString()) role="button" aria-expanded="false" aria-controls="@("custom" + resourceComponent.Id.ToString())">
+                                            @resourceComponent.DisplayName
+                                        </a>
+                                    </h5>
+                                    <div class="collapse card card-body @theme.ThemeStyle" id=@("custom" + resourceComponent.Id.ToString())>
+                                        <div class="card mb-3">
+                                            <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                Current Components
+                                            </div>
+                                            <div class="card card-body @theme.ThemeStyle">
+                                                <p>The current components.</p>
+                                                @if (admin)
+                                                {
+                                                    <p>
+                                                        <button type="button" class="btn btn-success" @onclick="@(e => FormAction("CustomComponent",0,"add", resourceComponent.Name))" title="@("Add " + resourceComponent.DisplayName)">
+                                                            <span class="oi oi-plus" aria-hidden="true"></span> Add Component
+                                                        </button>
+                                                    </p>
+                                                }
+                                                <table class="table @theme.ThemeStyle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Short Name</th>
+                                                            @if (admin)
+                                                            {
+                                                                <th>Actions</th>
+                                                            }
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in @servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                        {
+                                                            <tr>
+                                                                <td>@item.Name</td>
+                                                                <td>@item.ShortName</td>
+                                                                @if (admin)
+                                                                {
+                                                                    <td>
+                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("CustomComponent",item.Id,"up"))" title="Move up">
+                                                                            <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
+                                                                        </button>
+                                                                        <span> </span>
+                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("CustomComponent",item.Id,"down"))" title="Move down">
+                                                                            <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
+                                                                        </button>
+                                                                        <span> </span>
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("CustomComponent",item.Id,"edit"))" title="Edit">
+                                                                            <span class="oi oi-pencil" aria-hidden="true"></span>
+                                                                        </button>
+                                                                        @if (servicesData.ResourceEnvironments.Count > 1)
+                                                                        {
+                                                                            <span> </span>
+                                                                            <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("CustomComponent",item.Id,"delete"))" title="Delete">
+                                                                                <span class="oi oi-x" aria-hidden="true"></span>
+                                                                            </button>
+                                                                        }
+                                                                    </td>
+                                                                }
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        @if (admin)
+                                        {
+                                            <div class="card mb-3">
+                                                <div class="card-header bg-default text-black">
+                                                    <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href=@("#custom" + resourceComponent.Id.ToString() + "config") role="button" aria-expanded="false" aria-controls="@("custom" + resourceComponent.Id.ToString() + "config")">
+                                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Configuration
+                                                    </a>
+                                                </div>
+                                                <div class="collapse card card-body @theme.ThemeStyle" id=@("custom" + resourceComponent.Id.ToString() + "config")>
+                                                    <div class="card w-auto mb-3">
+                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                            Export the current Custom Components Configuration
+                                                        </div>
+                                                        <div class="card card-body @theme.ThemeStyle">
+                                                            <p>
+                                                                Click <strong>Export</strong> to export the current Custom Components Configuration.
+                                                            </p>
+                                                            <p>
+                                                                <strong>NOTE:</strong> All custom component types and values will be exported to a single file.
+                                                            </p>
+                                                            <p>
+                                                                <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("CustomComponent",0,"download")) title="Export">
+                                                                    <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export
+                                                                </button>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card mb-3">
+                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                            Import Custom Components Configuration
+                                                        </div>
+                                                        <div class="card card-body @theme.ThemeStyle">
+                                                            <p>
+                                                                Enter the new Custom Components Configuration JSON below and click <strong>Import</strong> to import the CUstom Components Configuration. <strong>NOTE:</strong> This will overwrite the existing Custom Components Configuration.
+                                                            </p>
+                                                            <p>
+                                                                <textarea title="Configuration" class="form-control @theme.ThemeStyle" rows="8" type="text" @onchange="@((ui) => { SetFormValue("newCustomComponentConfig",(string)ui.Value);})">@newCustomComponentConfig</textarea>
+                                                            </p>
+                                                            <p>
+                                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("CustomComponent",0,"update"))" title="Import">
                                                                     <span class="oi oi-data-transfer-upload" aria-hidden="true"></span> Import
                                                                 </button>
                                                             </p>
@@ -1478,6 +1622,7 @@
     private string? newFunctionName;
     private string? newFunctionShortName;
     private string? newFunctionConfig;
+    private string? newCustomComponentConfig;
     private string? newGlobalConfig;
 
     private ResponseMessage message = new();
@@ -1522,7 +1667,7 @@
         StateHasChanged();
     }
 
-    private async Task FormAction(string type, long id, string action)
+    private async Task FormAction(string type, long id, string action, string parentcomponent = "")
     {
         message = new ResponseMessage();
         bool confirm = false;
@@ -1605,6 +1750,32 @@
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " disabling failed!";
                                 message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "add":
+                            ShowAddModal((int)id, "ResourceComponent", "Add Component", "<p>Add a Component.</p>");
+                            break;
+
+                        case "edit":
+                            ShowEditModal((int)id, "ResourceComponent", "Edit Component", "Edit the Component.");
+                            break;
+                        case "delete":
+                            confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+                            if (confirm)
+                            {
+                                resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
+                                serviceResponse = await ResourceComponentService.DeleteItem(Convert.ToInt32(resourceComponent.Id));
+                                if (serviceResponse.Success)
+                                {
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = resourceComponent.Name + " deleted!";
+                                }
+                                else
+                                {
+                                    message.Type = MessageTypesEnum.ERROR;
+                                    message.Message = resourceComponent.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
+                                }
                             }
                             break;
                         case "download":
@@ -2459,6 +2630,121 @@
                     serviceResponse = await ResourceUnitDeptService.GetItems();
                     servicesData.ResourceUnitDepts = (List<ResourceUnitDept>)serviceResponse.ResponseObject;
                     break;
+                case "CustomComponent":
+                    CustomComponent customComponent;
+                    switch (action)
+                    {
+                        case "up":
+                            // Get the component in the list
+                            customComponent = servicesData.CustomComponents.Find(x => x.Id == id);
+                            if (customComponent.SortOrder > 1)
+                            {
+                                customComponent.SortOrder += -1;
+                            }
+                            serviceResponse = await CustomComponentService.PostItem(customComponent);
+                            if (serviceResponse.Success)
+                            {
+                                message.Type = MessageTypesEnum.SUCCESS;
+                                message.Message = customComponent.Name + " moved up!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = customComponent.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "down":
+                            customComponent = servicesData.CustomComponents.Find(x => x.Id == id);
+                            if (customComponent.SortOrder <= servicesData.CustomComponents.Count)
+                            {
+                                customComponent.SortOrder += 1;
+                            }
+                            serviceResponse = await CustomComponentService.PostItem(customComponent);
+                            if (serviceResponse.Success)
+                            {
+                                message.Type = MessageTypesEnum.SUCCESS;
+                                message.Message = customComponent.Name + " moved down!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = customComponent.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "add":
+                            ShowAddModal((int)id, "CustomComponent", "Add Custom Component", "<p>Add a Custom Component.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", parentcomponent);
+                            break;
+                        case "edit":
+                            ShowEditModal((int)id, "CustomComponent", "Edit Custom Component", "Edit the Custom Component.<br /><br />Short Name must be 1-10 characters.");
+                            break;
+                        case "delete":
+                            confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+                            if (confirm)
+                            {
+                                customComponent = servicesData.CustomComponents.Find(x => x.Id == id);
+                                serviceResponse = await CustomComponentService.DeleteItem(Convert.ToInt32(customComponent.Id));
+                                if (serviceResponse.Success)
+                                {
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = customComponent.Name + " deleted!";
+                                }
+                                else
+                                {
+                                    message.Type = MessageTypesEnum.ERROR;
+                                    message.Message = customComponent.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
+                                }
+                            }
+                            break;
+                        case "download":
+                            serviceResponse = await CustomComponentService.GetItems();
+                            var customcomponentjson = serviceResponse.ResponseObject;
+                            await BlazorDownloadFileService.DownloadFileFromText("customcomponents.json", JsonSerializer.Serialize(customcomponentjson).ToString(), System.Text.Encoding.UTF8, "application/octet-stream");
+                            break;
+                        case "reset":
+                            confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will reset your current Custom Components configuration and cannot be undone!\n\nAre you sure?");
+                            if (confirm)
+                            {
+                                if (FileSystemHelper.ResetConfiguration("customcomponents.json"))
+                                {
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = "Custom Components configuration reset!";
+                                }
+                                else
+                                {
+                                    message.Type = MessageTypesEnum.ERROR;
+                                    message.Message = "Custom Components configuration reset failed!";
+                                }
+                            }
+                            break;
+                        case "update":
+                            if (newUnitDeptConfig != null)
+                            {
+                                confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will update your current Custom Components configuration and cannot be undone!\n\nAre you sure?");
+                                if (confirm)
+                                {
+                                    serviceResponse = await CustomComponentService.PostConfig(JsonSerializer.Deserialize<List<CustomComponent>>(newCustomComponentConfig));
+                                    if (serviceResponse.Success)
+                                    {
+                                        message.Type = MessageTypesEnum.SUCCESS;
+                                        message.Message = "Custom Components configuration update succeeded!";
+                                        newFunctionConfig = null;
+                                    }
+                                    else
+                                    {
+                                        message.Type = MessageTypesEnum.ERROR;
+                                        message.Message = "Custom Components configuration update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                    serviceResponse = await CustomComponentService.GetItems();
+                    servicesData.CustomComponents = (List<CustomComponent>)serviceResponse.ResponseObject;
+                    break;
                 case "Global":
                     switch (action)
                     {
@@ -2673,13 +2959,17 @@
         }
     }
 
-    async void ShowAddModal(int id, string type, string title, string message)
+    async void ShowAddModal(int id, string type, string title, string message, string parentcomponent = "")
     {
         var parameters = new ModalParameters();
         parameters.Add(nameof(AddModal.id), id);
         parameters.Add(nameof(AddModal.type), type);
         parameters.Add(nameof(AddModal.message), message);
         parameters.Add(nameof(AddModal.title), title);
+        if (parentcomponent != null)
+        {
+            parameters.Add(nameof(AddModal.parentcomponent), parentcomponent);
+        }
         parameters.Add("theme", theme);
 
         var options = new ModalOptions()
