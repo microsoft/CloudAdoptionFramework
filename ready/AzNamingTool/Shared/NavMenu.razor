@@ -4,6 +4,8 @@
 @inject ProtectedSessionStorage session
 @inject IJSRuntime JsRuntime
 @inject ILogger<NavMenu> Logger
+@state._reloadnav
+
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -141,24 +143,23 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         var result = await session.GetAsync<bool>("admin");
+        admin = (bool)result.Value;
         if (firstRender)
         {
-            admin = (bool)result.Value;
             servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
 
         }
         else
         {
-
-            if ((admin != (bool)result.Value) || (servicesData == null))
+            if ((admin != (bool)result.Value) || (servicesData == null) || (state._reloadnav))
             {
-                admin = (bool)result.Value;
                 servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+                state.SetNavReload(false);
             }
         }
         StateHasChanged();
     }
-
+    
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;

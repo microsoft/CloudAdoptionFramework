@@ -205,29 +205,36 @@
 
     async void Save()
     {
-        bool valid = false;
-        if (type == "ResourceComponent")
+        try
         {
-            if (itemName != null)
+            bool valid = false;
+            if (type == "ResourceComponent")
             {
-                if (itemName != "")
+                if (itemName != null)
                 {
-                    valid = true;
-                    serviceResponse = await ResourceComponentService.GetItem(id);
-                    ResourceComponent resourceComponent = (ResourceComponent)serviceResponse.ResponseObject;
-
-                    // Update any references in the custom components configuration to be the new custom component type name
-                    serviceResponse = await CustomComponentService.GetItemsByParent(GeneralHelper.NormalizeName(resourceComponent.Name, true));
-                    var customcomponents = (List<CustomComponent>)serviceResponse.ResponseObject;
-                    foreach(var customcomponent in customcomponents)
+                    if (itemName != "")
                     {
-                        customcomponent.ParentComponent = GeneralHelper.NormalizeName(itemName, true);
-                        serviceResponse = await CustomComponentService.PostItem(customcomponent);
+                        valid = true;
+                        serviceResponse = await ResourceComponentService.GetItem(id);
+                        ResourceComponent resourceComponent = (ResourceComponent)serviceResponse.ResponseObject;
+
+                        // Update any references in the custom components configuration to be the new custom component type name
+                        serviceResponse = await CustomComponentService.GetItemsByParent(GeneralHelper.NormalizeName(resourceComponent.Name, true));
+                        var customcomponents = (List<CustomComponent>)serviceResponse.ResponseObject;
+                        foreach (var customcomponent in customcomponents)
+                        {
+                            customcomponent.ParentComponent = GeneralHelper.NormalizeName(itemName, true);
+                            serviceResponse = await CustomComponentService.PostItem(customcomponent);
+                        }
+
+                        resourceComponent.Name = itemName;
+                        resourceComponent.DisplayName = itemName;
+                        serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
                     }
-                    
-                    resourceComponent.Name = itemName;
-                    resourceComponent.DisplayName = itemName;
-                    serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                    else
+                    {
+                        toastService.ShowError("You must enter a name!", "ERROR");
+                    }
                 }
                 else
                 {
@@ -236,130 +243,131 @@
             }
             else
             {
-                toastService.ShowError("You must enter a name!", "ERROR");
-            }
-        }
-        else
-        {
-            if ((itemName != "") && (itemShortName != ""))
-            {
-                if (GeneralHelper.ValidateShortName(itemShortName, type))
+                if ((itemName != "") && (itemShortName != ""))
                 {
-                    valid = true;
-                    switch (type)
+                    if (GeneralHelper.ValidateShortName(itemShortName, type))
                     {
-                        case "ResourceEnvironment":
-                            serviceResponse = await ResourceEnvironmentService.GetItem(id);
-                            ResourceEnvironment resourceEnvironment = (ResourceEnvironment)serviceResponse.ResponseObject;
-                            resourceEnvironment.Name = itemName;
-                            resourceEnvironment.ShortName = itemShortName;
-                            serviceResponse = await ResourceEnvironmentService.PostItem(resourceEnvironment);
-                            break;
-                        case "ResourceLocation":
-                            serviceResponse = await ResourceLocationService.GetItem(id);
-                            ResourceLocation resourceLocation = (ResourceLocation)serviceResponse.ResponseObject;
-                            resourceLocation.ShortName = itemShortName;
-                            serviceResponse = await ResourceLocationService.PostItem(resourceLocation);
-                            break;
-                        case "ResourceOrg":
-                            serviceResponse = await ResourceOrgService.GetItem(id);
-                            ResourceOrg resourceOrg = (ResourceOrg)serviceResponse.ResponseObject;
-                            resourceOrg.Name = itemName;
-                            resourceOrg.ShortName = itemShortName;
-                            serviceResponse = await ResourceOrgService.PostItem(resourceOrg);
-                            break;
-                        case "ResourceProjAppSvc":
-                            serviceResponse = await ResourceProjAppSvcService.GetItem(id);
-                            ResourceProjAppSvc resourceProjAppSvc = (ResourceProjAppSvc)serviceResponse.ResponseObject;
-                            resourceProjAppSvc.Name = itemName;
-                            resourceProjAppSvc.ShortName = itemShortName;
-                            serviceResponse = await ResourceProjAppSvcService.PostItem(resourceProjAppSvc);
-                            break;
-                        case "ResourceType":
-                            serviceResponse = await ResourceTypeService.GetItem(id);
-                            ResourceType resourceType = (ResourceType)serviceResponse.ResponseObject;
-                            resourceType.ShortName = itemShortName;
-                            resourceType.Optional = "";
-                            resourceType.Exclude = "";
+                        valid = true;
+                        switch (type)
+                        {
+                            case "ResourceEnvironment":
+                                serviceResponse = await ResourceEnvironmentService.GetItem(id);
+                                ResourceEnvironment resourceEnvironment = (ResourceEnvironment)serviceResponse.ResponseObject;
+                                resourceEnvironment.Name = itemName;
+                                resourceEnvironment.ShortName = itemShortName;
+                                serviceResponse = await ResourceEnvironmentService.PostItem(resourceEnvironment);
+                                break;
+                            case "ResourceLocation":
+                                serviceResponse = await ResourceLocationService.GetItem(id);
+                                ResourceLocation resourceLocation = (ResourceLocation)serviceResponse.ResponseObject;
+                                resourceLocation.ShortName = itemShortName;
+                                serviceResponse = await ResourceLocationService.PostItem(resourceLocation);
+                                break;
+                            case "ResourceOrg":
+                                serviceResponse = await ResourceOrgService.GetItem(id);
+                                ResourceOrg resourceOrg = (ResourceOrg)serviceResponse.ResponseObject;
+                                resourceOrg.Name = itemName;
+                                resourceOrg.ShortName = itemShortName;
+                                serviceResponse = await ResourceOrgService.PostItem(resourceOrg);
+                                break;
+                            case "ResourceProjAppSvc":
+                                serviceResponse = await ResourceProjAppSvcService.GetItem(id);
+                                ResourceProjAppSvc resourceProjAppSvc = (ResourceProjAppSvc)serviceResponse.ResponseObject;
+                                resourceProjAppSvc.Name = itemName;
+                                resourceProjAppSvc.ShortName = itemShortName;
+                                serviceResponse = await ResourceProjAppSvcService.PostItem(resourceProjAppSvc);
+                                break;
+                            case "ResourceType":
+                                serviceResponse = await ResourceTypeService.GetItem(id);
+                                ResourceType resourceType = (ResourceType)serviceResponse.ResponseObject;
+                                resourceType.ShortName = itemShortName;
+                                resourceType.Optional = "";
+                                resourceType.Exclude = "";
 
-                            // Update the Optional and Exclude components
-                            foreach (ResourceComponent resourceComponent in resourceComponents)
-                            {
-                                if (resourceComponent.Name != "ResourceType")
+                                // Update the Optional and Exclude components
+                                foreach (ResourceComponent resourceComponent in resourceComponents)
                                 {
-                                    // Optional
+                                    if (resourceComponent.Name != "ResourceType")
+                                    {
+                                        // Optional
+                                        ischecked = false;
+                                        ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "optional-" + GeneralHelper.NormalizeName(resourceComponent.Name, true));
+                                        if (ischecked)
+                                        {
+                                            if (resourceType.Optional != "")
+                                            {
+                                                resourceType.Optional += ",";
+                                            }
+                                            resourceType.Optional += GeneralHelper.NormalizeName(resourceComponent.Name, false);
+                                        }
+                                    }
+
+                                    // Exclude
                                     ischecked = false;
-                                    ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "optional-" + GeneralHelper.NormalizeName(resourceComponent.Name, true));
+                                    ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "exclude-" + GeneralHelper.NormalizeName(resourceComponent.Name, true));
                                     if (ischecked)
                                     {
-                                        if (resourceType.Optional != "")
+                                        if (resourceType.Exclude != "")
                                         {
-                                            resourceType.Optional += ",";
+                                            resourceType.Exclude += ",";
                                         }
-                                        resourceType.Optional += GeneralHelper.NormalizeName(resourceComponent.Name, false);
+                                        resourceType.Exclude += GeneralHelper.NormalizeName(resourceComponent.Name, false);
                                     }
                                 }
-
-                                // Exclude
-                                ischecked = false;
-                                ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "exclude-" + GeneralHelper.NormalizeName(resourceComponent.Name, true));
-                                if (ischecked)
-                                {
-                                    if (resourceType.Exclude != "")
-                                    {
-                                        resourceType.Exclude += ",";
-                                    }
-                                    resourceType.Exclude += GeneralHelper.NormalizeName(resourceComponent.Name, false);
-                                }
-                            }
-                            serviceResponse = await ResourceTypeService.PostItem(resourceType);
-                            break;
-                        case "ResourceUnitDept":
-                            serviceResponse = await ResourceUnitDeptService.GetItem(id);
-                            ResourceUnitDept resourceUnitDept = (ResourceUnitDept)serviceResponse.ResponseObject;
-                            resourceUnitDept.Name = itemName;
-                            resourceUnitDept.ShortName = itemShortName;
-                            serviceResponse = await ResourceUnitDeptService.PostItem(resourceUnitDept);
-                            break;
-                        case "ResourceFunction":
-                            serviceResponse = await ResourceFunctionService.GetItem(id);
-                            ResourceFunction resourceFunction = (ResourceFunction)serviceResponse.ResponseObject;
-                            resourceFunction.Name = itemName;
-                            resourceFunction.ShortName = itemShortName;
-                            serviceResponse = await ResourceFunctionService.PostItem(resourceFunction);
-                            break;
-                        case "CustomComponent":
-                            serviceResponse = await CustomComponentService.GetItem(id);
-                            CustomComponent customComponent = (CustomComponent)serviceResponse.ResponseObject;
-                            customComponent.Name = itemName;
-                            customComponent.ShortName = itemShortName;
-                            serviceResponse = await CustomComponentService.PostItem(customComponent);
-                            break;
+                                serviceResponse = await ResourceTypeService.PostItem(resourceType);
+                                break;
+                            case "ResourceUnitDept":
+                                serviceResponse = await ResourceUnitDeptService.GetItem(id);
+                                ResourceUnitDept resourceUnitDept = (ResourceUnitDept)serviceResponse.ResponseObject;
+                                resourceUnitDept.Name = itemName;
+                                resourceUnitDept.ShortName = itemShortName;
+                                serviceResponse = await ResourceUnitDeptService.PostItem(resourceUnitDept);
+                                break;
+                            case "ResourceFunction":
+                                serviceResponse = await ResourceFunctionService.GetItem(id);
+                                ResourceFunction resourceFunction = (ResourceFunction)serviceResponse.ResponseObject;
+                                resourceFunction.Name = itemName;
+                                resourceFunction.ShortName = itemShortName;
+                                serviceResponse = await ResourceFunctionService.PostItem(resourceFunction);
+                                break;
+                            case "CustomComponent":
+                                serviceResponse = await CustomComponentService.GetItem(id);
+                                CustomComponent customComponent = (CustomComponent)serviceResponse.ResponseObject;
+                                customComponent.Name = itemName;
+                                customComponent.ShortName = itemShortName;
+                                serviceResponse = await CustomComponentService.PostItem(customComponent);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        toastService.ShowError("You must enter a valid short name!", "ERROR");
                     }
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a valid short name!", "ERROR");
+                    toastService.ShowError("You must enter a name and short name!", "ERROR");
                 }
             }
-            else
+
+            if (valid)
             {
-                toastService.ShowError("You must enter a name and short name!", "ERROR");
+                if (serviceResponse.Success)
+                {
+                    ModalInstance.CloseAsync();
+                    toastService.ShowSuccess(GeneralHelper.NormalizeName(type, false) + " updated!", "SUCCESS");
+                    LogHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " updated!");
+                }
+                else
+                {
+                    toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + serviceResponse.ResponseObject, "ERROR");
+                }
             }
         }
-
-        if (valid)
+        catch(Exception ex)
         {
-            if (serviceResponse.Success)
-            {
-                ModalInstance.CloseAsync();
-                toastService.ShowSuccess(GeneralHelper.NormalizeName(type, false) + " updated!", "SUCCESS");
-                LogHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " updated!");
-            }
-            else
-            {
-                toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + serviceResponse.ResponseObject, "ERROR");
-            }
+            LogHelper.LogAdminMessage("ERROR", ex.Message);
+            toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + ex.Message, "ERROR");
         }
     }
 

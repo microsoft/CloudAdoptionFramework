@@ -8,6 +8,7 @@ namespace AzureNamingTool.Helpers
         private bool? _admin;
         private bool? _password;
         private string _apptheme;
+        public bool _reloadnav;
 
         public bool Verified
         {
@@ -74,6 +75,13 @@ namespace AzureNamingTool.Helpers
             _apptheme = value;
             NotifyStateChanged();
         }
+
+        public void SetNavReload(bool reloadnav)
+        {
+            _reloadnav = reloadnav;
+            NotifyStateChanged();
+        }
+
 
         public event Action? OnChange;
 
