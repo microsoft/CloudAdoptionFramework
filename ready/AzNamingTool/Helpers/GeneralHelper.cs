@@ -317,10 +317,16 @@ namespace AzureNamingTool.Helpers
             switch (type)
             {
                 case "ResourceEnvironment":
-                    valid = true;
+                    if (value.Length < 6)
+                    {
+                        valid = true;
+                    }
                     break;
                 case "ResourceLocation":
-                    valid = true;
+                    if (value.Length < 11)
+                    {
+                        valid = true;
+                    }
                     break;
                 case "ResourceOrg":
                     if (value.Length < 6)
@@ -335,7 +341,10 @@ namespace AzureNamingTool.Helpers
                     }
                     break;
                 case "ResourceType":
-                    valid = true;
+                    if (value.Length < 11)
+                    {
+                        valid = true;
+                    }
                     break;
                 case "ResourceUnitDept":
                     if (value.Length < 4)

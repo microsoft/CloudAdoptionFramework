@@ -434,26 +434,37 @@ namespace AzureNamingTool.Services
                                 {
                                     // Get the value from the provided custom components
                                     var componentvalue = request.CustomComponents[GeneralHelper.NormalizeName(component.Name, true)];
-
-                                    // Check to make sure it is a valid custom component
-                                    var customComponents = await GeneralHelper.GetList<CustomComponent>();
-                                    var validcustomComponent = customComponents.Find(x => x.ParentComponent == GeneralHelper.NormalizeName(component.Name, true) && x.ShortName == componentvalue);
-                                    if (validcustomComponent == null)
+                                    if (componentvalue == null)
                                     {
-                                        valid = false;
-                                        sbMessage.Append(component.Name + " value is not a valid custom component short name. ");
+                                        // Check if the prop is optional
+                                        if (!resourceType.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
+                                        {
+                                            valid = false;
+                                            sbMessage.Append(component.Name + " value was not provided. ");
+                                        }
                                     }
                                     else
                                     {
-                                        if (name != "")
+                                        // Check to make sure it is a valid custom component
+                                        var customComponents = await GeneralHelper.GetList<CustomComponent>();
+                                        var validcustomComponent = customComponents.Find(x => x.ParentComponent == GeneralHelper.NormalizeName(component.Name, true) && x.ShortName == componentvalue);
+                                        if (validcustomComponent == null)
                                         {
-                                            name += resourceDelimiter.Delimiter;
+                                            valid = false;
+                                            sbMessage.Append(component.Name + " value is not a valid custom component short name. ");
                                         }
+                                        else
+                                        {
+                                            if (name != "")
+                                            {
+                                                name += resourceDelimiter.Delimiter;
+                                            }
 
-                                        name += componentvalue;
+                                            name += componentvalue;
 
-                                        // Add property to array for individual component validation
-                                        lstComponents.Add(new string[] { component.Name, componentvalue });
+                                            // Add property to array for individual component validation
+                                            lstComponents.Add(new string[] { component.Name, componentvalue });
+                                        }
                                     }
                                 }
                             }

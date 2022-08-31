@@ -76,7 +76,15 @@
                                             @foreach (var item in @servicesData.ResourceComponents)
                                             {
                                                 <tr>
-                                                    <td>@item.DisplayName</td>
+                                                    <td>
+                                                        @item.DisplayName
+                                                        @if(item.IsCustom)
+                                                        {
+                                                            <span>
+                                                             (CUSTOM)       
+                                                            </span>
+                                                        }
+                                                    </td>
                                                     @if (admin)
                                                     {
                                                         <td>
@@ -1950,7 +1958,7 @@
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceEnvironment", "Edit Environment", "Edit the Environment.");
+                            ShowEditModal((int)id, "ResourceEnvironment", "Edit Environment", "<p>Edit the Environment.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-5 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -1972,7 +1980,7 @@
                             }
                             break;
                         case "add":
-                            ShowAddModal((int)id, "ResourceEnvironment", "Add Environment", "<p>Add an Environment.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li></ul>");
+                            ShowAddModal((int)id, "ResourceEnvironment", "Add Environment", "<p>Add an Environment.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-5 characters.</li></ul>");
                             break;
                         case "download":
                             serviceResponse = await ResourceEnvironmentService.GetItems();
@@ -2066,7 +2074,7 @@
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceFunction", "Edit Function", "Edit the Function.<br /><br />Short Name must be 1-10 characters.");
+                            ShowEditModal((int)id, "ResourceFunction", "Edit Function", "<p>Edit the Function.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2088,7 +2096,7 @@
                             }
                             break;
                         case "add":
-                            ShowAddModal((int)id, "ResourceFunction", "Add Function", "<p>Add an Function.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>");
+                            ShowAddModal((int)id, "ResourceFunction", "Add Function", "<p>Add a Function.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>");
                             break;
                         case "download":
                             serviceResponse = await ResourceFunctionService.GetItems();
@@ -2142,7 +2150,7 @@
                     switch (action)
                     {
                         case "edit":
-                            ShowEditModal((int)id, "ResourceLocation", "Edit Location", "Edit the Location.", true);
+                            ShowEditModal((int)id, "ResourceLocation", "Edit Location", "<p>Edit the Location.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", true);
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2254,7 +2262,7 @@
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceOrg", "Edit Org", "Edit the Org.<br /><br />Short Name must be 1-5 characters.");
+                            ShowEditModal((int)id, "ResourceOrg", "Edit Org", "<p>Edit the Org.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-5 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2369,7 +2377,7 @@
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceProjAppSvc", "Edit Project/App/Service", "Edit the Project/App/Service.<br /><br />Short Name must be 1-3 characters.");
+                            ShowEditModal((int)id, "ResourceProjAppSvc", "Edit Project/App/Service", "<p>Edit the Project/App/Service.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-3 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2445,7 +2453,7 @@
                     switch (action)
                     {
                         case "edit":
-                            ShowEditModal((int)id, "ResourceType", "Edit Resource Type", "Edit the Resource Type.", true);
+                            ShowEditModal((int)id, "ResourceType", "Edit Resource Type", "<p>Edit the Resource Type.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", true);
                             break;
                         case "download":
                             serviceResponse = await ResourceTypeService.GetItems();
@@ -2559,7 +2567,7 @@
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceUnitDept", "Edit Unit/Dept", "Edit the Unit/Dept.<br /><br />Short Name must be 1-3 characters.");
+                            ShowEditModal((int)id, "ResourceUnitDept", "Edit Unit/Dept", "<p>Edit the Unit/Dept.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-3 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2677,7 +2685,7 @@
                             ShowAddModal((int)id, "CustomComponent", "Add Custom Component", "<p>Add a Custom Component.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", parentcomponent);
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "CustomComponent", "Edit Custom Component", "Edit the Custom Component.<br /><br />Short Name must be 1-10 characters.");
+                            ShowEditModal((int)id, "CustomComponent", "Edit Custom Component", "<p>Edit the Custom Component.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
