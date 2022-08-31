@@ -258,6 +258,18 @@ namespace AzureNamingTool.Services
                     return response;
                 }
 
+                // Make sure the passed custom component names are normalized
+                if (request.CustomComponents != null)
+                {
+                    Dictionary<string, string> newComponents = new();
+                    foreach (var cc in request.CustomComponents)
+                    {
+                        string value = cc.Value;
+                        newComponents.Add(GeneralHelper.NormalizeName(cc.Key, true), value);
+                    }
+                    request.CustomComponents = newComponents;
+                }
+
                 // Get the current components
                 serviceresponse = await ResourceComponentService.GetItems(false);
                 var currentResourceComponents = serviceresponse.ResponseObject;
@@ -429,7 +441,7 @@ namespace AzureNamingTool.Services
                                     if (validcustomComponent == null)
                                     {
                                         valid = false;
-                                        sbMessage.Append(component.Name + " is not a valid custom component. ");
+                                        sbMessage.Append(component.Name + " value is not a valid custom component short name. ");
                                     }
                                     else
                                     {
@@ -445,11 +457,15 @@ namespace AzureNamingTool.Services
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            valid = false;
-                            sbMessage.Append(component.Name + " value was not provided. ");
+                            else
+                            {
+                                // Check if the prop is optional
+                                if (!resourceType.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
+                                {
+                                    valid = false;
+                                    sbMessage.Append(component.Name + " value was not provided. ");
+                                }
+                            }
                         }
                     }
                 }

@@ -4,7 +4,7 @@
     {
         public string? ResourceEnvironment { get; set; }
         public string? ResourceFunction { get; set; }
-        public string ResourceInstance { get; set; }
+        public string? ResourceInstance { get; set; }
         public string? ResourceLocation { get; set; }
         public string? ResourceOrg { get; set; }
         public string? ResourceProjAppSvc { get; set; }

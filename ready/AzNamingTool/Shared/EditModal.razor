@@ -180,7 +180,7 @@
                 exclude = resourceType.Exclude;
                 serviceResponse = await ResourceComponentService.GetItems(true);
                 resourceComponents = (List<ResourceComponent>)serviceResponse.ResponseObject;
-                resourceComponents = resourceComponents.OrderBy(x => x.Name).Where(y => y.Enabled).ToList();
+                resourceComponents = resourceComponents.OrderBy(x => x.Name).ToList();
                 break;
             case "ResourceUnitDept":
                 serviceResponse = await ResourceUnitDeptService.GetItem(id);
