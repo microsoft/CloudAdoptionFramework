@@ -1427,7 +1427,7 @@
                                                                         <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("CustomComponent",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
-                                                                        @if (servicesData.ResourceEnvironments.Count > 1)
+                                                                        @if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 1)
                                                                         {
                                                                             <span> </span>
                                                                             <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("CustomComponent",item.Id,"delete"))" title="Delete">

@@ -215,6 +215,16 @@
                     valid = true;
                     serviceResponse = await ResourceComponentService.GetItem(id);
                     ResourceComponent resourceComponent = (ResourceComponent)serviceResponse.ResponseObject;
+
+                    // Update any references in the custom components configuration to be the new custom component type name
+                    serviceResponse = await CustomComponentService.GetItemsByParent(GeneralHelper.NormalizeName(resourceComponent.Name, true));
+                    var customcomponents = (List<CustomComponent>)serviceResponse.ResponseObject;
+                    foreach(var customcomponent in customcomponents)
+                    {
+                        customcomponent.ParentComponent = GeneralHelper.NormalizeName(itemName, true);
+                        serviceResponse = await CustomComponentService.PostItem(customcomponent);
+                    }
+                    
                     resourceComponent.Name = itemName;
                     resourceComponent.DisplayName = itemName;
                     serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
