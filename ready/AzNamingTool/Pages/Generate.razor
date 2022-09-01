@@ -588,6 +588,13 @@
                                 {
                                     boolFormDisabled = true;
                                 }
+                                else
+                                {
+                                    if (selectedResourceEnvironment == "")
+                                    {
+                                        boolFormDisabled = true;
+                                    }
+                                }
                                 break;
 
                             case "ResourceInstance":
@@ -595,11 +602,25 @@
                                 {
                                     boolFormDisabled = true;
                                 }
+                                else
+                                {
+                                    if (selectedResourceInstance == "")
+                                    {
+                                        boolFormDisabled = true;
+                                    }
+                                }
                                 break;
                             case "ResourceLocation":
                                 if (selectedResourceLocation == null)
                                 {
                                     boolFormDisabled = true;
+                                }
+                                else
+                                {
+                                    if (selectedResourceLocation == "")
+                                    {
+                                        boolFormDisabled = true;
+                                    }
                                 }
                                 break;
                             case "ResourceOrg":
@@ -607,11 +628,25 @@
                                 {
                                     boolFormDisabled = true;
                                 }
+                                else
+                                {
+                                    if (selectedResourceOrg == "")
+                                    {
+                                        boolFormDisabled = true;
+                                    }
+                                }
                                 break;
                             case "ResourceProjAppSvc":
                                 if (selectedResourceProjAppSvc == null)
                                 {
                                     boolFormDisabled = true;
+                                }
+                                else
+                                {
+                                    if (selectedResourceProjAppSvc == "")
+                                    {
+                                        boolFormDisabled = true;
+                                    }
                                 }
                                 break;
                             case "ResourceUnitDept":
@@ -619,11 +654,24 @@
                                 {
                                     boolFormDisabled = true;
                                 }
+                                else
+                                {
+                                    if (selectedResourceUnitDept == "")
+                                    {
+                                        boolFormDisabled = true;
+                                    }
+                                }
                                 break;
                             case "ResourceFunction":
                                 if (selectedResourceFunction == null)
                                 {
                                     boolFormDisabled = true;
+                                }
+                                else{
+                                    if (selectedResourceFunction == "")
+                                    {
+                                        boolFormDisabled = true;
+                                    }
                                 }
                                 break;
                             default:
@@ -633,6 +681,13 @@
                                     if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == null)
                                     {
                                         boolFormDisabled = true;
+                                    }
+                                    else
+                                    {
+                                        if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == "")
+                                        {
+                                            boolFormDisabled = true;
+                                        }
                                     }
                                 }
                                 break;
@@ -657,5 +712,4 @@
     {
         return selectedCustomComponents[key];
     }
-
 }
