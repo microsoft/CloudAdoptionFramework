@@ -8,7 +8,7 @@ namespace AzureNamingTool.Helpers
         /// <summary>
         /// This function gets the gernated names log. 
         /// </summary>
-        /// <returns>List<GeneratedName> - List of generated names</returns>
+        /// <returns>List of GeneratedNames - List of generated names</returns>
         public static async Task<List<GeneratedName>> GetGeneratedNames()
         {
             List<GeneratedName> lstGeneratedNames = new();
@@ -80,7 +80,7 @@ namespace AzureNamingTool.Helpers
         /// <summary>
         /// This function returns the Admin log. 
         /// </summary>
-        /// <returns>List<AdminLogMessage> - List of Adming Log messages.</returns>
+        /// <returns>List of AdminLogMessages - List of Adming Log messages.</returns>
         public static async Task<List<AdminLogMessage>> GetAdminLog()
         {
             List<AdminLogMessage> lstAdminLogMessages = new();

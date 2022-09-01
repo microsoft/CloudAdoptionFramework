@@ -54,12 +54,12 @@ namespace AzureNamingTool.Controllers
         /// <param name = "parentcomponent" > string - Parent Component Type Name</param>
         /// <returns>json - Current custom components data</returns>
         [HttpGet("{parent}")]
-        public async Task<IActionResult> GetByParent(string parent)
+        public async Task<IActionResult> GetByParent(string parentcomponent)
         {
             try
             {
                 // Get list of items
-                serviceResponse = await CustomComponentService.GetItemsByParent(GeneralHelper.NormalizeName(parent, true));
+                serviceResponse = await CustomComponentService.GetItemsByParent(GeneralHelper.NormalizeName(parentcomponent, true));
                 if (serviceResponse.Success)
                 {
                     return Ok(serviceResponse.ResponseObject);

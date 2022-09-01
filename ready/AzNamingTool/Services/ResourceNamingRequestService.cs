@@ -219,7 +219,6 @@ namespace AzureNamingTool.Services
                 bool valid = true;
                 bool ignoredelimeter = false;
                 List<string[]> lstComponents = new();
-                string delimiterstring = "";
                 ServiceResponse serviceresponse = new();
                 ResourceDelimiter resourceDelimiter = new();
 

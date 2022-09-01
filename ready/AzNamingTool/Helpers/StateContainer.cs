@@ -7,7 +7,7 @@ namespace AzureNamingTool.Helpers
         private bool? _verified;
         private bool? _admin;
         private bool? _password;
-        private string _apptheme;
+        private string? _apptheme;
         public bool _reloadnav;
 
         public bool Verified

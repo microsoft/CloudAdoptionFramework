@@ -4,8 +4,6 @@
 @inject ProtectedSessionStorage session
 @inject IJSRuntime JsRuntime
 @inject ILogger<NavMenu> Logger
-@state._reloadnav
-
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -126,15 +124,13 @@
     </nav>
 </div>
 
-@code {
+@code {    
+    [Parameter]
+    public Type? PageType { get; set; }
     private bool collapseNavMenu = true;
     private ServicesData servicesData = new();
     private bool admin;
-
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    [Parameter]
-    public Type? PageType { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

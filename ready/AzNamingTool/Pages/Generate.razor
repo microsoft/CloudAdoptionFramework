@@ -390,7 +390,6 @@
     private bool boolFormDisabled = true;
     private string? generatedName;
     private string? message;
-    private string? namingGuidelines;
     private string? resultClass;
     private string? resultHeader;
     private string? componentsVisible = "collapse in";
@@ -461,7 +460,6 @@
     {
         selectedResourceTypeCategory = value;
         selectedResourceType = "";
-        namingGuidelines = "";
         componentsVisible = "collapse show";
     }
 
@@ -470,8 +468,6 @@
         resourceNameRequestResponse = null;
         // Assign the selected value to the Model
         selectedResourceType = value;
-
-        namingGuidelines = "";
         componentsVisible = "collapse show";
 
         if (selectedResourceType != "")
