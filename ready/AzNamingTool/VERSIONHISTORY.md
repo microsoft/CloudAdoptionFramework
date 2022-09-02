@@ -24,6 +24,7 @@
 - Moved Admin Log link to top of navigation
 - Added Resource Type to Generated Names Log
 - Updated Configuration page button styling
+- Updated Generate page component selection logic
 
 ### Notes
 - This update includes resource type configuration changes. It is recommended that users refresh their Resource Type configuration using the built-in tool on the Configuration page.
