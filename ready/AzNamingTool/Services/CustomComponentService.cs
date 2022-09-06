@@ -1,26 +1,37 @@
 ﻿using AzureNamingTool.Helpers;
 using AzureNamingTool.Models;
-using System.Net.WebSockets;
 
 namespace AzureNamingTool.Services
 {
-    public class ResourceComponentService
+    public class CustomComponentService
     {
         private static ServiceResponse serviceResponse = new();
 
-        public static async Task<ServiceResponse> GetItems(bool admin)
+        public static async Task<ServiceResponse> GetItems()
         {
             try
             {
-                var items = await GeneralHelper.GetList<ResourceComponent>();
-                if (!admin)
-                {
-                    serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(y => y.SortOrder).ToList();
-                }
-                else
-                {
-                    serviceResponse.ResponseObject = items.OrderBy(y => y.SortOrder).OrderByDescending(y => y.Enabled).ToList();
-                }
+                // Get list of items
+                var items = await GeneralHelper.GetList<CustomComponent>();
+                serviceResponse.ResponseObject = items.OrderBy(x => x.SortOrder).ToList();
+                serviceResponse.Success = true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
+            }
+            return serviceResponse;
+        }
+
+        public static async Task<ServiceResponse> GetItemsByParent(string parentcomponent)
+        {
+            try
+            {
+                // Get list of items
+                var items = await GeneralHelper.GetList<CustomComponent>();
+                serviceResponse.ResponseObject = items.Where(x => x.ParentComponent == parentcomponent).OrderBy(x => x.SortOrder).ToList();
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -37,7 +48,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var data = await GeneralHelper.GetList<ResourceComponent>();
+                var data = await GeneralHelper.GetList<CustomComponent>();
                 var item = data.Find(x => x.Id == id);
                 serviceResponse.ResponseObject = item;
                 serviceResponse.Success = true;
@@ -51,12 +62,23 @@ namespace AzureNamingTool.Services
             return serviceResponse;
         }
 
-        public static async Task<ServiceResponse> PostItem(ResourceComponent item)
+        public static async Task<ServiceResponse> PostItem(CustomComponent item)
         {
             try
             {
+                // Make sure the new item short name only contains letters/numbers
+                if (!GeneralHelper.CheckAlphanumeric(item.ShortName))
+                {
+                    serviceResponse.Success = false;
+                    serviceResponse.ResponseObject = "Short name must be alphanumeric.";
+                    return serviceResponse;
+                }
+
+                // Force lowercase on the shortname
+                item.ShortName = item.ShortName.ToLower();
+
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceComponent>();
+                var items = await GeneralHelper.GetList<CustomComponent>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -69,11 +91,15 @@ namespace AzureNamingTool.Services
 
                 if (item.SortOrder == 0)
                 {
-                    item.SortOrder = items.Count + 1;
+                    if (items.Count > 0)
+                    {
+                        item.Id = items.Max(t => t.Id) + 1;
+                    }
                 }
 
                 // Determine new item id
                 if (items.Count > 0)
+
                 {
                     // Check if the item already exists
                     if (items.Exists(x => x.Id == item.Id))
@@ -85,7 +111,7 @@ namespace AzureNamingTool.Services
                     }
 
                     // Reset the sort order of the list
-                    foreach (ResourceComponent thisitem in items.OrderBy(x => x.SortOrder).OrderByDescending(x => x.Enabled).ToList())
+                    foreach (CustomComponent thisitem in items.OrderBy(x => x.SortOrder).ToList())
                     {
                         thisitem.SortOrder = position;
                         position += 1;
@@ -111,21 +137,22 @@ namespace AzureNamingTool.Services
                 }
 
                 position = 1;
-                foreach (ResourceComponent thisitem in items.OrderBy(x => x.SortOrder).OrderByDescending(x => x.Enabled).ToList())
+                foreach (CustomComponent thisitem in items.OrderBy(x => x.SortOrder).ToList())
                 {
                     thisitem.SortOrder = position;
                     position += 1;
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(items);
+                await GeneralHelper.WriteList<CustomComponent>(items);
+                serviceResponse.ResponseObject = "Item added!";
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
             {
                 LogHelper.LogAdminMessage("ERROR", ex.Message);
-                serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
+                serviceResponse.Success = false;
             }
             return serviceResponse;
         }
@@ -135,28 +162,22 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceComponent>();
+                var items = await GeneralHelper.GetList<CustomComponent>();
                 // Get the specified item
                 var item = items.Find(x => x.Id == id);
-
-                // Delete any custom components for this resource component
-                var components = await GeneralHelper.GetList<CustomComponent>();
-                components.RemoveAll(x => x.ParentComponent == GeneralHelper.NormalizeName(item.Name, true));
-                await GeneralHelper.WriteList<CustomComponent>(components);
-
                 // Remove the item from the collection
                 items.Remove(item);
 
                 // Update all the sort order values to reflect the removal
                 int position = 1;
-                foreach (ResourceComponent thisitem in items.OrderBy(x => x.SortOrder).ToList())
+                foreach (CustomComponent thisitem in items.OrderBy(x => x.SortOrder).ToList())
                 {
                     thisitem.SortOrder = position;
                     position += 1;
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(items);
+                await GeneralHelper.WriteList<CustomComponent>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -168,60 +189,43 @@ namespace AzureNamingTool.Services
             return serviceResponse;
         }
 
-
-        public static async Task<ServiceResponse> PostConfig(List<ResourceComponent> items)
+        public static async Task<ServiceResponse> PostConfig(List<CustomComponent> items)
         {
             try
             {
-                string[] componentnames = new string[8] { "ResourceEnvironment", "ResourceInstance", "ResourceLocation", "ResourceOrg", "ResourceProjAppSvc", "ResourceType", "ResourceUnitDept", "ResourceFunction" };
-                var newitems = new List<ResourceComponent>();
-
-                // Examine the current items
-                foreach (ResourceComponent item in items)
-                {
-                    // Check if the item is valid
-                    if (!componentnames.Contains(item.Name))
-                    {
-                        item.IsCustom = true;
-                    }
-                    // Add the item to the update list
-                    newitems.Add(item);
-                }
-
-                // Make sure all the component names are present
-                foreach (string name in componentnames)
-                {
-                    if (!newitems.Exists(x => x.Name == name))
-                    {
-                        // Create a component object 
-                        ResourceComponent newitem = new()
-                        {
-                            Name = name,
-                            Enabled = false
-                        };
-                        newitems.Add(newitem);
-                    }
-                }
-
-                // Determine new item ids
+                // Get list of items
+                var newitems = new List<CustomComponent>();
                 int i = 1;
 
-                foreach (ResourceComponent item in newitems.OrderByDescending(x => x.Enabled).OrderBy(x => x.SortOrder))
+                // Determine new item id
+                foreach (CustomComponent item in items)
                 {
+                    // Make sure the new item short name only contains letters/numbers
+                    if (!GeneralHelper.CheckAlphanumeric(item.ShortName))
+                    {
+                        serviceResponse.Success = false;
+                        serviceResponse.ResponseObject = "Short name must be alphanumeric.";
+                        return serviceResponse;
+                    }
+
+                    // Force lowercase on the shortname
+                    item.ShortName = item.ShortName.ToLower();
+
                     item.Id = i;
                     item.SortOrder = i;
+                    newitems.Add(item);
                     i += 1;
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(newitems);
+                await GeneralHelper.WriteList<CustomComponent>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
             {
                 LogHelper.LogAdminMessage("ERROR", ex.Message);
-                serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
+                serviceResponse.Success = false;
             }
             return serviceResponse;
         }

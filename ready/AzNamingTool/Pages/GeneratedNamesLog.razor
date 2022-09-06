@@ -51,6 +51,7 @@
                                 <tr>
                                     <th scope="col">Created On</th>
                                     <th scope="col">Generated Name</th>
+                                    <th scope="col">Resource Type</th>
                                     <th scope="col">Components</th>
                                 </tr>
                             </thead>
@@ -63,6 +64,12 @@
                                         </td>
                                         <td class="align-top">
                                             @nameRequest.ResourceName
+                                        </td>
+                                        <td class="align-top">
+                                            @if (nameRequest.ResourceTypeName != null)
+                                            {
+                                                @nameRequest.ResourceTypeName
+                                            }
                                         </td>
                                         <td class="align-top">
                                             @foreach (string[] component in nameRequest.Components.ToList<string[]>())

@@ -54,6 +54,14 @@
                                 </div>
                                 <div class="card card-body @theme.ThemeStyle">
                                     <p>The current Components.</p>
+                                    @if (admin)
+                                    {
+                                        <p>
+                                            <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",0,"add"))" title="Add Component">
+                                                <span class="oi oi-plus" aria-hidden="true"></span> Add Component
+                                            </button>
+                                        </p>
+                                    }
                                     <table class="table @theme.ThemeStyle">
                                         <thead>
                                             <tr>
@@ -68,7 +76,15 @@
                                             @foreach (var item in @servicesData.ResourceComponents)
                                             {
                                                 <tr>
-                                                    <td>@item.DisplayName</td>
+                                                    <td>
+                                                        @item.DisplayName
+                                                        @if(item.IsCustom)
+                                                        {
+                                                            <span>
+                                                             (CUSTOM)       
+                                                            </span>
+                                                        }
+                                                    </td>
                                                     @if (admin)
                                                     {
                                                         <td>
@@ -81,15 +97,36 @@
                                                                 <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
                                                                     <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                 </button>
+                                                                @if (item.IsCustom)
+                                                                {
+                                                                    <span> </span>
+                                                                    <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"edit"))" title="Edit">
+                                                                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                                                                    </button>
+                                                                }
                                                                 <span> </span>
-                                                                <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
-                                                                    <span class="oi oi-x" aria-hidden="true"></span>
+                                                                <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
+                                                                    <span class="oi oi-ban" aria-hidden="true"></span>
                                                                 </button>
                                                             }
                                                             else
                                                             {
                                                                 <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",item.Id,"enable"))" title="Enable">
                                                                     <span class="oi oi-plus" aria-hidden="true"></span>
+                                                                </button>                                                                
+                                                                @if (item.IsCustom)
+                                                                {
+                                                                    <span> </span>
+                                                                    <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"edit"))" title="Edit">
+                                                                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                                                                    </button>
+                                                                }
+                                                            }
+                                                            @if (item.IsCustom)
+                                                            {
+                                                                <span> </span>
+                                                                <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceComponent",item.Id,"delete"))" title="Delete">
+                                                                    <span class="oi oi-x" aria-hidden="true"></span>
                                                                 </button>
                                                             }
                                                         </td>
@@ -161,7 +198,7 @@
                                             </div>
                                         </div>
                                         -->
-                        </div>
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -207,8 +244,8 @@
                                                             @if (item.Enabled)
                                                             {
                                                                 @* <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceDelimiter",item.Id,"disable"))" title="Disable">
-                                                                    <span class="oi oi-x" aria-hidden="true"></span>
-                                                                    </button>*@
+                                            <span class="oi oi-x" aria-hidden="true"></span>
+                                            </button>*@
                                                             }
                                                             else
                                                             {
@@ -350,7 +387,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceEnvironment",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceEnvironment",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                         @if (servicesData.ResourceEnvironments.Count > 1)
@@ -487,7 +524,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceFunction",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceFunction",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
 
@@ -609,7 +646,7 @@
                                                                 @if (admin)
                                                                 {
                                                                     <td>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceLocation",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceLocation",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                         @if (servicesData.ResourceLocations.Count > 1)
@@ -630,36 +667,36 @@
                                         @if (admin)
                                         {
                                             @* <div class="card">
-                                                <div class="card card-header bg-default" style="font-weight:bold;">
-                                                New Location
-                                                </div>
-                                                <div class="card card-body">
-                                                <p>Add a new Location.</p>
-                                                <table class="table table-striped">
-                                                <tbody>
-                                                <tr>
-                                                <td>Name</td>
-                                                <td>
-                                                <input class="form-control" type="text" value="@newLocationName" @onchange="@((ui) => { SetFormValue("newLocationName",(string)ui.Value);})" />
-                                                </td>
-                                                </tr>
-                                                <tr>
-                                                <td>Short Name</td>
-                                                <td>
-                                                <input class="form-control" type="text" value="@newLocationShortName" @onchange="@((ui) => { SetFormValue("newLocationShortName",(string)ui.Value);})" />
-                                                </td>
-                                                </tr>
-                                                <tr>
-                                                <td colspan="2">
-                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceLocation",0,"add"))" title="Add">
-                                                <span class="oi oi-plus" aria-hidden="true"></span>
-                                                </button>
-                                                </td>
-                                                </tr>
-                                                </tbody>
-                                                </table>
-                                                </div>
-                                                </div>*@
+                    <div class="card card-header bg-default" style="font-weight:bold;">
+                    New Location
+                    </div>
+                    <div class="card card-body">
+                    <p>Add a new Location.</p>
+                    <table class="table table-striped">
+                    <tbody>
+                    <tr>
+                    <td>Name</td>
+                    <td>
+                    <input class="form-control" type="text" value="@newLocationName" @onchange="@((ui) => { SetFormValue("newLocationName",(string)ui.Value);})" />
+                    </td>
+                    </tr>
+                    <tr>
+                    <td>Short Name</td>
+                    <td>
+                    <input class="form-control" type="text" value="@newLocationShortName" @onchange="@((ui) => { SetFormValue("newLocationShortName",(string)ui.Value);})" />
+                    </td>
+                    </tr>
+                    <tr>
+                    <td colspan="2">
+                    <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceLocation",0,"add"))" title="Add">
+                    <span class="oi oi-plus" aria-hidden="true"></span>
+                    </button>
+                    </td>
+                    </tr>
+                    </tbody>
+                    </table>
+                    </div>
+                    </div>*@
                                             <div class="card mb-3">
                                                 <div class="card-header bg-default text-black">
                                                     <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href="#locationsconfig" role="button" aria-expanded="false" aria-controls="locationsconfig">
@@ -777,7 +814,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceOrg",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceOrg",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                         @if (servicesData.ResourceOrgs.Count > 1)
@@ -917,7 +954,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceProjAppSvc",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceProjAppSvc",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                         @if (servicesData.ResourceProjAppSvcs.Count > 1)
@@ -1080,7 +1117,7 @@
                                                                             {
                                                                                 if (component.Name != "ResourceType")
                                                                                 {
-                                                                                    @if (item.Optional.ToLower().Contains(component.Name.Replace("Resource", "").ToLower()))
+                                                                                    @if (item.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
                                                                                     {
                                                                                         <div>@component.DisplayName</div>
                                                                                     }
@@ -1093,18 +1130,18 @@
                                                                         {
                                                                             @foreach (ResourceComponent component in @servicesData.ResourceComponents)
                                                                             {
-                                                                                if (component.Name != "ResourceType")
+                                                                                //if (component.Name != "ResourceType")
+                                                                                //{
+                                                                                @if (item.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
                                                                                 {
-                                                                                    @if (item.Exclude.ToLower().Contains(component.Name.Replace("Resource", "").ToLower()))
-                                                                                    {
-                                                                                        <div>@component.DisplayName</div>
-                                                                                    }
+                                                                                    <div>@component.DisplayName</div>
                                                                                 }
+                                                                                //}
                                                                             }
                                                                         }
                                                                     </td>
                                                                     <td>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceType",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceType",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
                                                                     </td>
@@ -1145,7 +1182,7 @@
                                                         </div>
                                                         <div class="card card-body @theme.ThemeStyle">
                                                             <p>
-                                                                Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository. This will add any new resource types, as well as update existing type details. 
+                                                                Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository. This will add any new resource types, as well as update existing type details.
                                                             </p>
                                                             <p>
                                                                 All of your existing type configurations will be retained.
@@ -1157,7 +1194,7 @@
                                                                 <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceType",0,"refresh")) title="Refresh">
                                                                     <span class="oi oi-reload" aria-hidden="true"></span> Refresh
                                                                 </button>
-
+                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" value="" checked style="margin-top: 9px; margin-left:10px;" id="refreshshortnames"> Refresh short names?
                                                             </p>
                                                         </div>
                                                     </div>
@@ -1256,7 +1293,7 @@
                                                                             <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                                         </button>
                                                                         <span> </span>
-                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceUnitDept",item.Id,"edit"))" title="Edit">
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceUnitDept",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
 
@@ -1342,6 +1379,128 @@
                                 </div>
                             }
                             break;
+                        default:
+                            @if ((servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)) != null) && (resourceComponent.Name != "ResourceInstance"))
+                            {
+                                <div class="card">
+                                    <h5 class="card-header bg-secondary text-white">
+                                        <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href=@("#custom" + resourceComponent.Id.ToString()) role="button" aria-expanded="false" aria-controls="@("custom" + resourceComponent.Id.ToString())">
+                                            @resourceComponent.DisplayName
+                                        </a>
+                                    </h5>
+                                    <div class="collapse card card-body @theme.ThemeStyle" id=@("custom" + resourceComponent.Id.ToString())>
+                                        <div class="card mb-3">
+                                            <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                Current Components
+                                            </div>
+                                            <div class="card card-body @theme.ThemeStyle">
+                                                <p>The current components.</p>
+                                                @if (admin)
+                                                {
+                                                    <p>
+                                                        <button type="button" class="btn btn-success" @onclick="@(e => FormAction("CustomComponent",0,"add", resourceComponent.Name))" title="@("Add " + resourceComponent.DisplayName)">
+                                                            <span class="oi oi-plus" aria-hidden="true"></span> Add Component
+                                                        </button>
+                                                    </p>
+                                                }
+                                                <table class="table @theme.ThemeStyle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Short Name</th>
+                                                            @if (admin)
+                                                            {
+                                                                <th>Actions</th>
+                                                            }
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in @servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                        {
+                                                            <tr>
+                                                                <td>@item.Name</td>
+                                                                <td>@item.ShortName</td>
+                                                                @if (admin)
+                                                                {
+                                                                    <td>
+                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("CustomComponent",item.Id,"up"))" title="Move up">
+                                                                            <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
+                                                                        </button>
+                                                                        <span> </span>
+                                                                        <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("CustomComponent",item.Id,"down"))" title="Move down">
+                                                                            <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
+                                                                        </button>
+                                                                        <span> </span>
+                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("CustomComponent",item.Id,"edit"))" title="Edit">
+                                                                            <span class="oi oi-pencil" aria-hidden="true"></span>
+                                                                        </button>
+                                                                        @if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 1)
+                                                                        {
+                                                                            <span> </span>
+                                                                            <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("CustomComponent",item.Id,"delete"))" title="Delete">
+                                                                                <span class="oi oi-x" aria-hidden="true"></span>
+                                                                            </button>
+                                                                        }
+                                                                    </td>
+                                                                }
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        @if (admin)
+                                        {
+                                            <div class="card mb-3">
+                                                <div class="card-header bg-default text-black">
+                                                    <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href=@("#custom" + resourceComponent.Id.ToString() + "config") role="button" aria-expanded="false" aria-controls="@("custom" + resourceComponent.Id.ToString() + "config")">
+                                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Configuration
+                                                    </a>
+                                                </div>
+                                                <div class="collapse card card-body @theme.ThemeStyle" id=@("custom" + resourceComponent.Id.ToString() + "config")>
+                                                    <div class="card w-auto mb-3">
+                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                            Export the current Custom Components Configuration
+                                                        </div>
+                                                        <div class="card card-body @theme.ThemeStyle">
+                                                            <p>
+                                                                Click <strong>Export</strong> to export the current Custom Components Configuration.
+                                                            </p>
+                                                            <p>
+                                                                <strong>NOTE:</strong> All custom component types and values will be exported to a single file.
+                                                            </p>
+                                                            <p>
+                                                                <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("CustomComponent",0,"download")) title="Export">
+                                                                    <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export
+                                                                </button>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card mb-3">
+                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                            Import Custom Components Configuration
+                                                        </div>
+                                                        <div class="card card-body @theme.ThemeStyle">
+                                                            <p>
+                                                                Enter the new Custom Components Configuration JSON below and click <strong>Import</strong> to import the CUstom Components Configuration. <strong>NOTE:</strong> This will overwrite the existing Custom Components Configuration.
+                                                            </p>
+                                                            <p>
+                                                                <textarea title="Configuration" class="form-control @theme.ThemeStyle" rows="8" type="text" @onchange="@((ui) => { SetFormValue("newCustomComponentConfig",(string)ui.Value);})">@newCustomComponentConfig</textarea>
+                                                            </p>
+                                                            <p>
+                                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("CustomComponent",0,"update"))" title="Import">
+                                                                    <span class="oi oi-data-transfer-upload" aria-hidden="true"></span> Import
+                                                                </button>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            break;
                     }
                 }
             </div>
@@ -1371,24 +1530,24 @@
                                     </p>
                                 </div>
                             </div>
-                                                    <div class="card  w-auto mb-3">
-                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
-                                                            Reset the Global Configuration
-                                                        </div>
-                                                        <div class="card card-body @theme.ThemeStyle">
-                                                            <p>
-                                                                Click <strong>Reset</strong> to reset the Global Configuration back to the default values at the time of installation. This will apply to all component configurations.
-                                                            </p>
-                                                            <p>
-                                                                <strong>NOTE: This will reset your current configuration and cannot be undone!</strong>
-                                                            </p>
-                                                            <p>
-                                                                <button type="button" class="btn btn-danger" @onclick=@(e => FormAction("Global",0,"reset")) title="Reset">
-                                                                    <span class="oi oi-loop-circular" aria-hidden="true"></span> Reset
-                                                                </button>
-                                                            </p>
-                                                        </div>
-                                                    </div>
+                            <div class="card  w-auto mb-3">
+                                <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                    Reset the Global Configuration
+                                </div>
+                                <div class="card card-body @theme.ThemeStyle">
+                                    <p>
+                                        Click <strong>Reset</strong> to reset the Global Configuration back to the default values at the time of installation. This will apply to all component configurations.
+                                    </p>
+                                    <p>
+                                        <strong>NOTE: This will reset your current configuration and cannot be undone!</strong>
+                                    </p>
+                                    <p>
+                                        <button type="button" class="btn btn-danger" @onclick=@(e => FormAction("Global",0,"reset")) title="Reset">
+                                            <span class="oi oi-loop-circular" aria-hidden="true"></span> Reset
+                                        </button>
+                                    </p>
+                                </div>
+                            </div>
                             <div class="card mb-3">
                                 <div class="card card-header bg-default text-black" style="font-weight:bold;">
                                     Import Global Configuration
@@ -1412,29 +1571,29 @@
                     </div>
 
                     @* <div class="card">
-                        <h5 class="card-header text-white bg-secondary">
-                        <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#policy" role="button" aria-expanded="false" aria-controls="policy">
-                        Policy
-                        </a>
-                        </h5>
-                        <div class="collapse card card-body @theme.ThemeStyle" id="policy">
-                        <div class="card">
-                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
-                        Export Azure Policy Definition
-                        </div>
-                        <div class="card card-body @theme.ThemeStyle">
-                        <p>
-                        Click <strong>Export Azure Policy Definition</strong> to export an Azure Policy definition to use within your subscription.
-                        </p>
-                        <p>
-                        <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("Policy",0,"download")) title="Export Azure Policy Definition">
-                        <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export Azure Policy Definition
-                        </button>
-                        </p>
-                        </div>
-                        </div>
-                        </div>
-                        </div>*@
+            <h5 class="card-header text-white bg-secondary">
+            <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#policy" role="button" aria-expanded="false" aria-controls="policy">
+            Policy
+            </a>
+            </h5>
+            <div class="collapse card card-body @theme.ThemeStyle" id="policy">
+            <div class="card">
+            <div class="card card-header bg-default text-black" style="font-weight:bold;">
+            Export Azure Policy Definition
+            </div>
+            <div class="card card-body @theme.ThemeStyle">
+            <p>
+            Click <strong>Export Azure Policy Definition</strong> to export an Azure Policy definition to use within your subscription.
+            </p>
+            <p>
+            <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("Policy",0,"download")) title="Export Azure Policy Definition">
+            <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export Azure Policy Definition
+            </button>
+            </p>
+            </div>
+            </div>
+            </div>
+            </div>*@
                 </div>
             }
         }
@@ -1445,7 +1604,7 @@
     [Inject]
     public IBlazorDownloadFileService BlazorDownloadFileService { get; set; }
     [CascadingParameter]
-    public IModalService Modal { get; set; }        
+    public IModalService Modal { get; set; }
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
 
@@ -1455,8 +1614,6 @@
 
     private List<string> categories = new List<string>();
     private string? selectedResourceTypeCategory = "";
-    private string? selectedResourceType = "";
-
     private string? newComponentConfig;
     private string? newDelimiterConfig;
     private string? newEnvironmentName;
@@ -1478,6 +1635,7 @@
     private string? newFunctionName;
     private string? newFunctionShortName;
     private string? newFunctionConfig;
+    private string? newCustomComponentConfig;
     private string? newGlobalConfig;
 
     private ResponseMessage message = new();
@@ -1498,6 +1656,21 @@
             categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
 
             dataLoaded = true;
+
+            if (admin)
+            {
+                // Check if the resource types contain duplicates
+                // Get the existing Resource Type items
+                ServiceResponse serviceResponse;
+                serviceResponse = await ResourceTypeService.GetItems();
+                List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
+                var dupes = types.GroupBy(x => x.ShortName).Any(g => g.Count() > 1);
+                if (dupes)
+                {
+                    ShowInformationModal("bg-navcolor", "ATTENTION", "Your resource types configuration contains duplicate short names. This can cause an issue when generating names using the API.<br /><br />It is recommended that you refresh your resource types to the latest configuration.<br /><br />To refresh:<ul><li>Expand the Resource Types section</li><li>Epxand the Configuration section</li><li>Select the Refresh option, with the 'Refresh short names?' option selected</li></ul><br />");
+                }
+            }
+
             StateHasChanged();
         }
     }
@@ -1507,7 +1680,7 @@
         StateHasChanged();
     }
 
-    private async Task FormAction(string type, long id, string action)
+    private async Task FormAction(string type, long id, string action, string parentcomponent = "")
     {
         message = new ResponseMessage();
         bool confirm = false;
@@ -1537,6 +1710,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -1555,6 +1729,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "enable":
@@ -1571,6 +1746,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " enabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "disable":
@@ -1586,6 +1762,33 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceComponent.Name + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "add":
+                            ShowAddModal((int)id, "ResourceComponent", "Add Component", "<p>Add a Component.</p>");
+                            break;
+                        case "edit":
+                            ShowEditModal((int)id, "ResourceComponent", "Edit Component", "Edit the Component.");
+                            break;
+                        case "delete":
+                            confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+                            if (confirm)
+                            {
+                                resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
+                                serviceResponse = await ResourceComponentService.DeleteItem(Convert.ToInt32(resourceComponent.Id));
+                                if (serviceResponse.Success)
+                                {
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = resourceComponent.Name + " deleted!";
+                                    state.SetNavReload(true);
+                                }
+                                else
+                                {
+                                    message.Type = MessageTypesEnum.ERROR;
+                                    message.Message = resourceComponent.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
+                                }
                             }
                             break;
                         case "download":
@@ -1625,6 +1828,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Components config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -1666,6 +1870,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceDelimiter.Name + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "download":
@@ -1689,6 +1894,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Delimiters config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -1734,6 +1940,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceEnvironment.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -1752,10 +1959,11 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceEnvironment.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceEnvironment", "Edit Environment", "Edit the Environment.");
+                            ShowEditModal((int)id, "ResourceEnvironment", "Edit Environment", "<p>Edit the Environment.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-5 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -1772,11 +1980,12 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceEnvironment.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
                         case "add":
-                            ShowAddModal((int)id, "ResourceEnvironment", "Add Environment", "<p>Add an Environment.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li></ul>");
+                            ShowAddModal((int)id, "ResourceEnvironment", "Add Environment", "<p>Add an Environment.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-5 characters.</li></ul>");
                             break;
                         case "download":
                             serviceResponse = await ResourceEnvironmentService.GetItems();
@@ -1816,6 +2025,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Environments config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -1845,6 +2055,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceFunction.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
 
                             break;
@@ -1864,10 +2075,11 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceFunction.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceFunction", "Edit Function", "Edit the Function.<br /><br />Short Name must be 1-10 characters.");
+                            ShowEditModal((int)id, "ResourceFunction", "Edit Function", "<p>Edit the Function.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -1884,11 +2096,12 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceFunction.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
                         case "add":
-                            ShowAddModal((int)id, "ResourceFunction", "Add Function", "<p>Add an Function.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>");
+                            ShowAddModal((int)id, "ResourceFunction", "Add Function", "<p>Add a Function.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>");
                             break;
                         case "download":
                             serviceResponse = await ResourceFunctionService.GetItems();
@@ -1928,6 +2141,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Functions configuration update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -1941,7 +2155,7 @@
                     switch (action)
                     {
                         case "edit":
-                            ShowEditModal((int)id, "ResourceLocation", "Edit Location", "Edit the Location.", true);
+                            ShowEditModal((int)id, "ResourceLocation", "Edit Location", "<p>Edit the Location.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", true);
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -1958,6 +2172,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceLocation.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -1999,6 +2214,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Locations config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2028,6 +2244,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceOrg.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -2046,10 +2263,11 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceOrg.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceOrg", "Edit Org", "Edit the Org.<br /><br />Short Name must be 1-5 characters.");
+                            ShowEditModal((int)id, "ResourceOrg", "Edit Org", "<p>Edit the Org.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-5 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2066,6 +2284,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceOrg.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -2110,6 +2329,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Resource Orgs config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2139,6 +2359,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceProjAppSvc.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -2157,10 +2378,11 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceProjAppSvc.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceProjAppSvc", "Edit Project/App/Service", "Edit the Project/App/Service.<br /><br />Short Name must be 1-3 characters.");
+                            ShowEditModal((int)id, "ResourceProjAppSvc", "Edit Project/App/Service", "<p>Edit the Project/App/Service.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-3 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2177,6 +2399,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceProjAppSvc.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -2221,6 +2444,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "ProjAppSvcs configuration update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2234,7 +2458,7 @@
                     switch (action)
                     {
                         case "edit":
-                            ShowEditModal((int)id, "ResourceType", "Edit Resource Type", "Edit the Resource Type.", true);
+                            ShowEditModal((int)id, "ResourceType", "Edit Resource Type", "<p>Edit the Resource Type.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", true);
                             break;
                         case "download":
                             serviceResponse = await ResourceTypeService.GetItems();
@@ -2245,7 +2469,10 @@
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will refresh your current Types configuration with the latest configuration!\n\nAre you sure?");
                             if (confirm)
                             {
-                                if (await ResourceTypeService.RefreshResourceTypes())
+                                bool ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "refreshshortnames");
+
+                                serviceResponse = await ResourceTypeService.RefreshResourceTypes(ischecked);
+                                if (serviceResponse.Success)
                                 {
                                     message.Type = MessageTypesEnum.SUCCESS;
                                     message.Message = "Types configuration refreshed!";
@@ -2253,7 +2480,8 @@
                                 else
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
-                                    message.Message = "Types configuration refresh failed!";
+                                    message.Message = "Types configuration refresh failed! ";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -2290,7 +2518,8 @@
                                     else
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
-                                        message.Message = "Types configuration update failed!";
+                                        message.Message = "Types configuration update failed! " + serviceResponse.ResponseObject;
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2320,6 +2549,7 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceUnitDept.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "down":
@@ -2338,10 +2568,11 @@
                             {
                                 message.Type = MessageTypesEnum.ERROR;
                                 message.Message = resourceUnitDept.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
                             }
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceUnitDept", "Edit Unit/Dept", "Edit the Unit/Dept.<br /><br />Short Name must be 1-3 characters.");
+                            ShowEditModal((int)id, "ResourceUnitDept", "Edit Unit/Dept", "<p>Edit the Unit/Dept.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-3 characters.</li></ul>");
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2358,6 +2589,7 @@
                                 {
                                     message.Type = MessageTypesEnum.ERROR;
                                     message.Message = resourceUnitDept.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
                                 }
                             }
                             break;
@@ -2402,6 +2634,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Units/Depts configuration update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2409,6 +2642,121 @@
                     }
                     serviceResponse = await ResourceUnitDeptService.GetItems();
                     servicesData.ResourceUnitDepts = (List<ResourceUnitDept>)serviceResponse.ResponseObject;
+                    break;
+                case "CustomComponent":
+                    CustomComponent customComponent;
+                    switch (action)
+                    {
+                        case "up":
+                            // Get the component in the list
+                            customComponent = servicesData.CustomComponents.Find(x => x.Id == id);
+                            if (customComponent.SortOrder > 1)
+                            {
+                                customComponent.SortOrder += -1;
+                            }
+                            serviceResponse = await CustomComponentService.PostItem(customComponent);
+                            if (serviceResponse.Success)
+                            {
+                                message.Type = MessageTypesEnum.SUCCESS;
+                                message.Message = customComponent.Name + " moved up!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = customComponent.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "down":
+                            customComponent = servicesData.CustomComponents.Find(x => x.Id == id);
+                            if (customComponent.SortOrder <= servicesData.CustomComponents.Count)
+                            {
+                                customComponent.SortOrder += 1;
+                            }
+                            serviceResponse = await CustomComponentService.PostItem(customComponent);
+                            if (serviceResponse.Success)
+                            {
+                                message.Type = MessageTypesEnum.SUCCESS;
+                                message.Message = customComponent.Name + " moved down!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = customComponent.Name + " move failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "add":
+                            ShowAddModal((int)id, "CustomComponent", "Add Custom Component", "<p>Add a Custom Component.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", parentcomponent);
+                            break;
+                        case "edit":
+                            ShowEditModal((int)id, "CustomComponent", "Edit Custom Component", "<p>Edit the Custom Component.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>");
+                            break;
+                        case "delete":
+                            confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+                            if (confirm)
+                            {
+                                customComponent = servicesData.CustomComponents.Find(x => x.Id == id);
+                                serviceResponse = await CustomComponentService.DeleteItem(Convert.ToInt32(customComponent.Id));
+                                if (serviceResponse.Success)
+                                {
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = customComponent.Name + " deleted!";
+                                }
+                                else
+                                {
+                                    message.Type = MessageTypesEnum.ERROR;
+                                    message.Message = customComponent.Name + " deletion failed!";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
+                                }
+                            }
+                            break;
+                        case "download":
+                            serviceResponse = await CustomComponentService.GetItems();
+                            var customcomponentjson = serviceResponse.ResponseObject;
+                            await BlazorDownloadFileService.DownloadFileFromText("customcomponents.json", JsonSerializer.Serialize(customcomponentjson).ToString(), System.Text.Encoding.UTF8, "application/octet-stream");
+                            break;
+                        case "reset":
+                            confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will reset your current Custom Components configuration and cannot be undone!\n\nAre you sure?");
+                            if (confirm)
+                            {
+                                if (FileSystemHelper.ResetConfiguration("customcomponents.json"))
+                                {
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = "Custom Components configuration reset!";
+                                }
+                                else
+                                {
+                                    message.Type = MessageTypesEnum.ERROR;
+                                    message.Message = "Custom Components configuration reset failed!";
+                                }
+                            }
+                            break;
+                        case "update":
+                            if (newUnitDeptConfig != null)
+                            {
+                                confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will update your current Custom Components configuration and cannot be undone!\n\nAre you sure?");
+                                if (confirm)
+                                {
+                                    serviceResponse = await CustomComponentService.PostConfig(JsonSerializer.Deserialize<List<CustomComponent>>(newCustomComponentConfig));
+                                    if (serviceResponse.Success)
+                                    {
+                                        message.Type = MessageTypesEnum.SUCCESS;
+                                        message.Message = "Custom Components configuration update succeeded!";
+                                        newFunctionConfig = null;
+                                    }
+                                    else
+                                    {
+                                        message.Type = MessageTypesEnum.ERROR;
+                                        message.Message = "Custom Components configuration update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                    serviceResponse = await CustomComponentService.GetItems();
+                    servicesData.CustomComponents = (List<CustomComponent>)serviceResponse.ResponseObject;
                     break;
                 case "Global":
                     switch (action)
@@ -2463,14 +2811,14 @@
                                     message.Type = MessageTypesEnum.ERROR;
                                 }
 
-                                if(message.Type == MessageTypesEnum.ERROR)
+                                if (message.Type == MessageTypesEnum.ERROR)
                                 {
                                     message.Message = "Global configuration reset failed!";
                                 }
                                 else
                                 {
-                                        message.Type = MessageTypesEnum.SUCCESS;
-                                        message.Message = "Global configuration reset!";
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = "Global configuration reset!";
                                 }
                             }
                             break;
@@ -2491,6 +2839,7 @@
                                     {
                                         message.Type = MessageTypesEnum.ERROR;
                                         message.Message = "Global config update failed!";
+                                        message.MessageDetails = serviceResponse.ResponseMessage;
                                     }
                                 }
                             }
@@ -2517,7 +2866,7 @@
                     }
                     break;
             }
-            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);            
         }
         catch (Exception ex)
         {
@@ -2525,7 +2874,6 @@
             message.Type = MessageTypesEnum.ERROR;
             message.Message = "There was a problem with the request.";
         }
-
 
         if (message.Message != null)
         {
@@ -2545,6 +2893,7 @@
                     break;
                 case MessageTypesEnum.ERROR:
                     toastService.ShowError(message.Message, "ERROR");
+                    LogHelper.LogAdminMessage("ERROR", message.Message + message.MessageDetails);
                     break;
             }
         }
@@ -2623,13 +2972,17 @@
         }
     }
 
-    async void ShowAddModal(int id, string type, string title, string message)
+    async void ShowAddModal(int id, string type, string title, string message, string parentcomponent = "")
     {
         var parameters = new ModalParameters();
         parameters.Add(nameof(AddModal.id), id);
         parameters.Add(nameof(AddModal.type), type);
         parameters.Add(nameof(AddModal.message), message);
         parameters.Add(nameof(AddModal.title), title);
+        if (parentcomponent != null)
+        {
+            parameters.Add(nameof(AddModal.parentcomponent), parentcomponent);
+        }
         parameters.Add("theme", theme);
 
         var options = new ModalOptions()
@@ -2643,6 +2996,7 @@
         if (!result.Cancelled)
         {
             servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+            state.SetNavReload(true);
             StateHasChanged();
         }
     }
@@ -2669,6 +3023,29 @@
         if (!result.Cancelled)
         {
             servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+            state.SetNavReload(true);
+            StateHasChanged();
+        }
+    }
+
+    async void ShowInformationModal(string headerstyle, string title, string message)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(InformationModal.message), message);
+        parameters.Add(nameof(InformationModal.title), title);
+        parameters.Add(nameof(InformationModal.headerstyle), headerstyle);
+        parameters.Add("theme", theme);
+
+        var options = new ModalOptions()
+            {
+                HideCloseButton = true,
+                UseCustomLayout = true
+            };
+
+        var modal = Modal.Show<InformationModal>(title, parameters, options);
+        var result = await modal.Result;
+        if (!result.Cancelled)
+        {
             StateHasChanged();
         }
     }

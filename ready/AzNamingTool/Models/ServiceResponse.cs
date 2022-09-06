@@ -6,5 +6,6 @@ namespace AzureNamingTool.Models
     {
         public bool Success { get; set; }
         public dynamic ResponseObject { get; set; }
+        public string? ResponseMessage { get; set; }
     }
 }

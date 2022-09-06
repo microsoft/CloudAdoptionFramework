@@ -12,5 +12,6 @@ namespace AzureNamingTool.Models
         [Required()]
         public bool Enabled { get; set; }
         public int SortOrder { get; set; } = 0;
+        public bool IsCustom { get; set; } = false;
     }
 }
