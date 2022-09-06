@@ -53,7 +53,8 @@ namespace AzureNamingTool.Controllers
         /// </summary>
         /// <param name = "parentcomponent" > string - Parent Component Type Name</param>
         /// <returns>json - Current custom components data</returns>
-        [HttpGet("{parent}")]
+        [Route("[action]/{parentcomponent}")]
+        [HttpGet]
         public async Task<IActionResult> GetByParent(string parentcomponent)
         {
             try
