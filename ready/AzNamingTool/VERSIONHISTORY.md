@@ -14,6 +14,7 @@
 	- Updated Reference page to display custom components, if present
 	- Updated Generate page to display custom components, if present
 	- Updated API - RequestName function to accept Custom Components
+	- Added new API functions for Custom Components
 
 ### Bug fixes
 - Updated Refresh Resource Types utility to refresh short names by default
