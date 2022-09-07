@@ -421,7 +421,10 @@
             if (!match.Success)
             {
                 // Strip the delimiter in case that is causing the issue
-                name = name.Replace(resourceDelimiter.Delimiter, "");
+                if (resourceDelimiter.Delimiter != "")
+                {
+                    name = name.Replace(resourceDelimiter.Delimiter, "");
+                }
             }
         }
         else

@@ -1657,19 +1657,20 @@
 
             dataLoaded = true;
 
-            if (admin)
-            {
-                // Check if the resource types contain duplicates
-                // Get the existing Resource Type items
-                ServiceResponse serviceResponse;
-                serviceResponse = await ResourceTypeService.GetItems();
-                List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
-                var dupes = types.GroupBy(x => x.ShortName).Any(g => g.Count() > 1);
-                if (dupes)
-                {
-                    ShowInformationModal("bg-navcolor", "ATTENTION", "Your resource types configuration contains duplicate short names. This can cause an issue when generating names using the API.<br /><br />It is recommended that you refresh your resource types to the latest configuration.<br /><br />To refresh:<ul><li>Expand the Resource Types section</li><li>Epxand the Configuration section</li><li>Select the Refresh option, with the 'Refresh short names?' option selected</li></ul><br />");
-                }
-            }
+            // V2.2.1
+            //if (admin)
+            //{
+            //    // Check if the resource types contain duplicates
+            //    // Get the existing Resource Type items
+            //    ServiceResponse serviceResponse;
+            //    serviceResponse = await ResourceTypeService.GetItems();
+            //    List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
+            //    var dupes = types.GroupBy(x => x.ShortName).Any(g => g.Count() > 1);
+            //    if (dupes)
+            //    {
+            //        ShowInformationModal("bg-navcolor", "ATTENTION", "Your resource types configuration contains duplicate short names. This can cause an issue when generating names using the API.<br /><br />It is recommended that you refresh your resource types to the latest configuration.<br /><br />To refresh:<ul><li>Expand the Resource Types section</li><li>Epxand the Configuration section</li><li>Select the Refresh option, with the 'Refresh short names?' option selected</li></ul><br />");
+            //    }
+            //}
 
             StateHasChanged();
         }

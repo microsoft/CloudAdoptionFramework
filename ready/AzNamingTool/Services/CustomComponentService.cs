@@ -25,13 +25,13 @@ namespace AzureNamingTool.Services
             return serviceResponse;
         }
 
-        public static async Task<ServiceResponse> GetItemsByParent(string parentcomponent)
+        public static async Task<ServiceResponse> GetItemsByParentType(string parenttype)
         {
             try
             {
                 // Get list of items
                 var items = await GeneralHelper.GetList<CustomComponent>();
-                serviceResponse.ResponseObject = items.Where(x => x.ParentComponent == parentcomponent).OrderBy(x => x.SortOrder).ToList();
+                serviceResponse.ResponseObject = items.Where(x => x.ParentComponent == parenttype).OrderBy(x => x.SortOrder).ToList();
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

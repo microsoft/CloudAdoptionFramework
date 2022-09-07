@@ -51,15 +51,16 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will return the custom components data for the specifc parent component type.
         /// </summary>
-        /// <param name = "parentcomponent" > string - Parent Component Type Name</param>
+        /// <param name = "parenttype" > string - Parent Component Type Name</param>
         /// <returns>json - Current custom components data</returns>
-        [HttpGet("{parent}")]
-        public async Task<IActionResult> GetByParent(string parentcomponent)
+        [Route("[action]/{parenttype}")]
+        [HttpGet]
+        public async Task<IActionResult> GetByParentType(string parenttype)
         {
             try
             {
                 // Get list of items
-                serviceResponse = await CustomComponentService.GetItemsByParent(GeneralHelper.NormalizeName(parentcomponent, true));
+                serviceResponse = await CustomComponentService.GetItemsByParentType(GeneralHelper.NormalizeName(parenttype, true));
                 if (serviceResponse.Success)
                 {
                     return Ok(serviceResponse.ResponseObject);

@@ -382,14 +382,23 @@ namespace AzureNamingTool.Helpers
                 if (!match.Success)
                 {
                     // Strip the delimiter in case that is causing the issue
-                    name = name.Replace(delimiter, "");
-
-                    Match match2 = regx.Match(name);
-                    if (!match2.Success)
+                    if (delimiter != "")
                     {
-                        sbMessage.Append("Regex failed - Please review the Resource Type Naming Guidelines.");
-                        sbMessage.Append(Environment.NewLine);
-                        valid = false;
+                        // Strip the delimiter in case that is causing the issue
+                        name = name.Replace(delimiter, "");
+
+                        Match match2 = regx.Match(name);
+                        if (!match2.Success)
+                        {
+                            sbMessage.Append("Regex failed - Please review the Resource Type Naming Guidelines.");
+                            sbMessage.Append(Environment.NewLine);
+                            valid = false;
+                        }
+                        else
+                        {
+                            sbMessage.Append("The specified delimiter is not allowed for this resource type and has been removed.");
+                            sbMessage.Append(Environment.NewLine);
+                        }
                     }
                     else
                     {
