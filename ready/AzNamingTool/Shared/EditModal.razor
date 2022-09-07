@@ -219,7 +219,7 @@
                         ResourceComponent resourceComponent = (ResourceComponent)serviceResponse.ResponseObject;
 
                         // Update any references in the custom components configuration to be the new custom component type name
-                        serviceResponse = await CustomComponentService.GetItemsByParent(GeneralHelper.NormalizeName(resourceComponent.Name, true));
+                        serviceResponse = await CustomComponentService.GetItemsByParentType(GeneralHelper.NormalizeName(resourceComponent.Name, true));
                         var customcomponents = (List<CustomComponent>)serviceResponse.ResponseObject;
                         foreach (var customcomponent in customcomponents)
                         {
