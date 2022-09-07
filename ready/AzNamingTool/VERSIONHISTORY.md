@@ -10,7 +10,7 @@
 - Added ability to exclude resource type component for resource types
 - Added Latest Azure Naming Tool News feed to Home page (from twitter.com/azurenamingtool feed)
 - Added Custom Component functionality
-	- Updated Configuration page with new functionaliuty
+	- Updated Configuration page with new functionality
 	- Updated Reference page to display custom components, if present
 	- Updated Generate page to display custom components, if present
 	- Updated API - RequestName function to accept Custom Components
