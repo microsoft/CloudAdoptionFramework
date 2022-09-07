@@ -1,7 +1,9 @@
 ﻿using AzureNamingTool.Helpers;
 using AzureNamingTool.Models;
+using Microsoft.AspNetCore.Components;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 
 namespace AzureNamingTool.Services
@@ -63,6 +65,17 @@ namespace AzureNamingTool.Services
 
                 // Get list of items
                 var items = await GeneralHelper.GetList<ResourceType>();
+
+                // V2.2.1
+                // Confirm the short name value is unique
+                //var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
+                //if(duplicateitems.Count > 0)
+                //{
+                //    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
+                //    serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
+                //    serviceResponse.Success = false;
+                //    return serviceResponse;
+                //}
 
                 // Set the new id
                 if (item.Id == 0)
@@ -140,9 +153,19 @@ namespace AzureNamingTool.Services
                 // Determine new item id
                 foreach (ResourceType item in items)
                 {
-
                     // Force lowercase on the shortname
                     item.ShortName = item.ShortName.ToLower();
+
+                    // V2.1.1
+                    //// Confirm the short name value is unique
+                    //var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
+                    //if (duplicateitems.Count > 0)
+                    //{
+                    //    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
+                    //    serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
+                    //    serviceResponse.Success = false;
+                    //    return serviceResponse;
+                    //}
 
                     item.Id = i;
                     newitems.Add(item);
@@ -190,7 +213,7 @@ namespace AzureNamingTool.Services
             return filteredtypes;
         }
 
-        public static async Task<bool> RefreshResourceTypes()
+        public static async Task<ServiceResponse> RefreshResourceTypes(bool shortNameReset = false)
         {
             try
             {
@@ -224,7 +247,10 @@ namespace AzureNamingTool.Services
                             // Update the Resaource Type Information
                             newtype.Exclude = oldtype.Exclude;
                             newtype.Optional = oldtype.Optional;
-                            newtype.ShortName = oldtype.ShortName;
+                            if (!shortNameReset)
+                            {
+                                newtype.ShortName = oldtype.ShortName;
+                            }
                             // Remove the old type
                             types.RemoveAt(i);
                             // Add the new type
@@ -238,12 +264,10 @@ namespace AzureNamingTool.Services
                     }
 
                     // Update the settings file
-                    await PostConfig(types);
+                    serviceResponse = await PostConfig(types);
 
                     // Update the repository file
                     File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repository/resourcetypes.json"), refreshdata);
-
-                    return true;
                 }
                 else
                 {
@@ -251,11 +275,13 @@ namespace AzureNamingTool.Services
 
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogHelper.LogAdminMessage("ERROR", ex.Message);
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
             }
-            return false;
+            return serviceResponse;
         }
     }
 }

@@ -49,7 +49,6 @@
     protected ThemeInfo? theme { get; set; }
 
     private string? appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-    private string? apptheme;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {  

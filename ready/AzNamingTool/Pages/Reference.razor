@@ -116,9 +116,9 @@
                                                                 </tr>
                                                                 @foreach (var resourceComponent in servicesData.ResourceComponents)
                                                                 {
-                                                                    if (!resourcetype.Exclude.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                                                                    if (!resourcetype.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                                                     {
-                                                                        if (!resourcetype.Optional.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                                                                        if (!resourcetype.Optional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                                                         {
                                                                             switch (resourceComponent.Name)
                                                                             {
@@ -201,6 +201,19 @@
                                                                                             @servicesData.ResourceFunctions[0].Name (@servicesData.ResourceFunctions[0].ShortName)
                                                                                         </td>
                                                                                     </tr>
+                                                                                    break;
+                                                                                default:
+                                                                                    if (resourceComponent.IsCustom)
+                                                                                    {
+                                                                                        <tr>
+                                                                                            <td class="align-top w-25">
+                                                                                                @resourceComponent.Name:
+                                                                                            </td>
+                                                                                            <td style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;" class="align-top">
+                                                                                                @servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().Name (@servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName)
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    }
                                                                                     break;
                                                                             }
                                                                         }
@@ -327,18 +340,16 @@
     private ServicesData servicesData = new();
     private ResourceDelimiter? resourceDelimiter;
     private string? selectedResourceTypeCategory = "";
-    private string? selectedResourceType;
-    private string? searchText;
     private string[] filteredscopes = new string[] { "resource group", "resource group & region", "region", "global", "subscription", "tenant" };
     private List<string> categories = new List<string>();
 
     protected override async Task OnInitializedAsync()
     {
-            servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
-            resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
+        servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
+        resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
 
-            // Get the list of categories
-            categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+        // Get the list of categories
+        categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -353,10 +364,10 @@
             foreach (ResourceComponent resourceComponent in servicesData.ResourceComponents)
             {
                 // Check if the component is excluded for the resource type
-                if (!type.Exclude.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                if (!type.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                 {
                     // Remove any optional components
-                    if (!type.Optional.ToLower().Contains(resourceComponent.Name.ToLower().Replace("resource", "")))
+                    if (!type.Optional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                     {
                         if (name != "")
                         {
@@ -384,6 +395,12 @@
                                 case "ResourceUnitDept":
                                     name += servicesData.ResourceUnitDepts[0].ShortName;
                                     break;
+                                default:
+                                    if (resourceComponent.IsCustom)
+                                    {
+                                        name += servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName;
+                                    }
+                                    break;
                             }
                         }
                         else
@@ -404,7 +421,10 @@
             if (!match.Success)
             {
                 // Strip the delimiter in case that is causing the issue
-                name = name.Replace(resourceDelimiter.Delimiter, "");
+                if (resourceDelimiter.Delimiter != "")
+                {
+                    name = name.Replace(resourceDelimiter.Delimiter, "");
+                }
             }
         }
         else

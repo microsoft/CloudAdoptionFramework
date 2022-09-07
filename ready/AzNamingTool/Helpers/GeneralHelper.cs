@@ -83,6 +83,7 @@ namespace AzureNamingTool.Helpers
                     nameof(ResourceUnitDept) => await FileSystemHelper.ReadFile("resourceunitdepts.json"),
                     nameof(ResourceFunction) => await FileSystemHelper.ReadFile("resourcefunctions.json"),
                     nameof(ResourceDelimiter) => await FileSystemHelper.ReadFile("resourcedelimiters.json"),
+                    nameof(CustomComponent) => await FileSystemHelper.ReadFile("customcomponents.json"),
                     _ => "[]",
                 };
                 var items = new List<T>();
@@ -99,7 +100,7 @@ namespace AzureNamingTool.Helpers
 
                 return items;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogHelper.LogAdminMessage("ERROR", ex.Message);
                 throw;
@@ -139,11 +140,14 @@ namespace AzureNamingTool.Helpers
                     case nameof(ResourceDelimiter):
                         await FileSystemHelper.WriteConfiguation(items, "resourcedelimiters.json");
                         break;
+                    case nameof(CustomComponent):
+                        await FileSystemHelper.WriteConfiguation(items, "customcomponents.json");
+                        break;
                     default:
                         break;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogHelper.LogAdminMessage("ERROR", ex.Message);
                 throw;
@@ -152,14 +156,14 @@ namespace AzureNamingTool.Helpers
 
         public static bool CheckNumeric(string value)
         {
-            Regex regx = new ("^[0-9]+$");
+            Regex regx = new("^[0-9]+$");
             Match match = regx.Match(value);
             return match.Success;
         }
 
         public static bool CheckAlphanumeric(string value)
         {
-            Regex regx = new ("^[a-zA-Z0-9]+$");
+            Regex regx = new("^[a-zA-Z0-9]+$");
             Match match = regx.Match(value);
             return match.Success;
         }
@@ -216,7 +220,7 @@ namespace AzureNamingTool.Helpers
             try
             {
                 // Get all the files in teh repository folder
-                DirectoryInfo dirRepository = new ("repository");
+                DirectoryInfo dirRepository = new("repository");
                 foreach (FileInfo file in dirRepository.GetFiles())
                 {
                     // Check if the file exists in the settings folder
@@ -244,7 +248,7 @@ namespace AzureNamingTool.Helpers
                     {
                         // Create a new SALT key 
                         const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-                        Random random = new ();
+                        Random random = new();
                         var salt = new string(Enumerable.Repeat(chars, 16)
                             .Select(s => s[random.Next(s.Length)]).ToArray());
 
@@ -313,10 +317,16 @@ namespace AzureNamingTool.Helpers
             switch (type)
             {
                 case "ResourceEnvironment":
-                    valid = true;
+                    if (value.Length < 6)
+                    {
+                        valid = true;
+                    }
                     break;
                 case "ResourceLocation":
-                    valid = true;
+                    if (value.Length < 11)
+                    {
+                        valid = true;
+                    }
                     break;
                 case "ResourceOrg":
                     if (value.Length < 6)
@@ -331,7 +341,10 @@ namespace AzureNamingTool.Helpers
                     }
                     break;
                 case "ResourceType":
-                    valid = true;
+                    if (value.Length < 11)
+                    {
+                        valid = true;
+                    }
                     break;
                 case "ResourceUnitDept":
                     if (value.Length < 4)
@@ -340,6 +353,12 @@ namespace AzureNamingTool.Helpers
                     }
                     break;
                 case "ResourceFunction":
+                    if (value.Length < 11)
+                    {
+                        valid = true;
+                    }
+                    break;
+                case "CustomComponent":
                     if (value.Length < 11)
                     {
                         valid = true;
@@ -363,14 +382,23 @@ namespace AzureNamingTool.Helpers
                 if (!match.Success)
                 {
                     // Strip the delimiter in case that is causing the issue
-                    name = name.Replace(delimiter, "");
-
-                    Match match2 = regx.Match(name);
-                    if (!match2.Success)
+                    if (delimiter != "")
                     {
-                        sbMessage.Append("Regex failed - Please review the Resource Type Naming Guidelines.");
-                        sbMessage.Append(Environment.NewLine);
-                        valid = false;
+                        // Strip the delimiter in case that is causing the issue
+                        name = name.Replace(delimiter, "");
+
+                        Match match2 = regx.Match(name);
+                        if (!match2.Success)
+                        {
+                            sbMessage.Append("Regex failed - Please review the Resource Type Naming Guidelines.");
+                            sbMessage.Append(Environment.NewLine);
+                            valid = false;
+                        }
+                        else
+                        {
+                            sbMessage.Append("The specified delimiter is not allowed for this resource type and has been removed.");
+                            sbMessage.Append(Environment.NewLine);
+                        }
                     }
                     else
                     {
@@ -497,15 +525,25 @@ namespace AzureNamingTool.Helpers
             string data;
             try
             {
-                HttpClient httpClient = new ();
+                HttpClient httpClient = new();
                 data = await httpClient.GetStringAsync(url);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogHelper.LogAdminMessage("ERROR", ex.Message);
                 data = "";
             }
             return data;
+        }
+
+        public static string NormalizeName(string name, bool lowercase)
+        {
+            string newname = name.Replace("Resource", "").Replace(" ", "");
+            if (lowercase)
+            {
+                newname = newname.ToLower();
+            }
+            return newname;
         }
     }
 }

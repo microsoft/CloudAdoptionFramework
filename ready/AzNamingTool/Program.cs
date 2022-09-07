@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<CustomHeaderSwaggerAttribute>();
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Version = "v2",
+        Version = "v" + Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion,
         Title = "Azure Naming Tool API",
         Description = "An ASP.NET Core Web API for managing the Azure Naming tool configuration. All API requests require the configured API Key (found in the site Admin configuration)."
     });

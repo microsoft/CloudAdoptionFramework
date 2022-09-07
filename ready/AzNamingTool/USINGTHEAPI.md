@@ -1,4 +1,4 @@
-[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md)
+[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Version History](VERSIONHISTORY.md) 
 
 # Azure Naming Tool v2 - Using the API
 
@@ -50,7 +50,7 @@ To generate a resource type name programmatically, the API requires a JSON paylo
 The process is as follows:
 
 	- API receives request for name generation, containing the desired components and their values
-		○ [ComponentType] : [Value]
+		○ [ComponentType] : [Short Name Value]
 		○ Example
 			§ "ResourceLocation":"eu"
 	- The API will validate the following

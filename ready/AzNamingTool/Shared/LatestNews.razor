@@ -1,0 +1,26 @@
+﻿@using AzureNamingTool.Helpers
+@using Microsoft.JSInterop
+
+<a class="twitter-timeline" data-height="400" data-theme="dark" href="https://twitter.com/AzureNamingTool?ref_src=twsrc%5Etfw">Tweets by AzureNamingTool</a>
+
+@code {
+
+    [Inject]
+    public IJSRuntime JsRuntime { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var targetUrl = "//platform.twitter.com/widgets.js";
+                await JsRuntime.InvokeVoidAsync("loadJs", targetUrl);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogAdminMessage("ERROR", ex.Message);
+            }
+        }
+    }
+}
