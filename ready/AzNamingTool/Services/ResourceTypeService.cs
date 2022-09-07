@@ -66,15 +66,16 @@ namespace AzureNamingTool.Services
                 // Get list of items
                 var items = await GeneralHelper.GetList<ResourceType>();
 
+                // V2.2.1
                 // Confirm the short name value is unique
-                var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
-                if(duplicateitems.Count > 0)
-                {
-                    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
-                    serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
-                    serviceResponse.Success = false;
-                    return serviceResponse;
-                }
+                //var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
+                //if(duplicateitems.Count > 0)
+                //{
+                //    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
+                //    serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
+                //    serviceResponse.Success = false;
+                //    return serviceResponse;
+                //}
 
                 // Set the new id
                 if (item.Id == 0)
@@ -155,15 +156,16 @@ namespace AzureNamingTool.Services
                     // Force lowercase on the shortname
                     item.ShortName = item.ShortName.ToLower();
 
-                    // Confirm the short name value is unique
-                    var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
-                    if (duplicateitems.Count > 0)
-                    {
-                        serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
-                        serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
-                        serviceResponse.Success = false;
-                        return serviceResponse;
-                    }
+                    // V2.1.1
+                    //// Confirm the short name value is unique
+                    //var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
+                    //if (duplicateitems.Count > 0)
+                    //{
+                    //    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
+                    //    serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
+                    //    serviceResponse.Success = false;
+                    //    return serviceResponse;
+                    //}
 
                     item.Id = i;
                     newitems.Add(item);

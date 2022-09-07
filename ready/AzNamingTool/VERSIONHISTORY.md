@@ -16,8 +16,6 @@
 	- Updated API - RequestName function to accept Custom Components
 
 ### Bug fixes
-- Added logic to prevent duplicate resource type short names
-- Added notification to Configuration page for duplicate resource types short names to prompt for refresh
 - Updated Refresh Resource Types utility to refresh short names by default
 - Updated /repository/resourcetypes.json with new data
 - Added enhanced Admin Log messaging
@@ -25,9 +23,7 @@
 - Added Resource Type to Generated Names Log
 - Updated Configuration page button styling
 - Updated Generate page component selection logic
-
-### Notes
-- This update includes resource type configuration changes. It is recommended that users refresh their Resource Type configuration using the built-in tool on the Configuration page.
+- Updated generated name validation to handle empty delimiter
 
 ***
 
