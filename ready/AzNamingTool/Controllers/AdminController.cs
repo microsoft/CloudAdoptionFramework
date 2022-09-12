@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using AzureNamingTool.Services;
 using AzureNamingTool.Attributes;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,18 +32,33 @@ namespace AzureNamingTool.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public async Task<IActionResult> UpdatePassword([FromBody] string password)
+        public async Task<IActionResult> UpdatePassword([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword, [FromBody] string password)
         {
             try
             {
-                serviceResponse = await AdminService.UpdatePassword(password);
-                if (serviceResponse.Success)
+                if (adminpassword != "")
                 {
-                    return Ok("SUCCESS");
+                    if (adminpassword == GeneralHelper.DecryptString(config.AdminPassword, config.SALTKey))
+                    {
+                        serviceResponse = await AdminService.UpdatePassword(password);
+                        if (serviceResponse.Success)
+                        {
+                            return Ok("SUCCESS");
+                        }
+                        else
+                        {
+                            return Ok("FAILURE - There was a problem updating the password.");
+                        }
+                    }
+                    else
+                    {
+                        return Ok("FAILURE - Incorrect Admin Password.");
+                    }
+
                 }
                 else
                 {
-                    return Ok("FAILURE - There was a problem updating the password.");
+                    return Ok("FAILURE - You must provide teh Admin Password.");
                 }
             }
             catch (Exception ex)
@@ -61,18 +77,33 @@ namespace AzureNamingTool.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public async Task<IActionResult> UpdateAPIKey([FromBody] string apikey)
+        public async Task<IActionResult> UpdateAPIKey([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword, [FromBody] string apikey)
         {
             try
             {
-                serviceResponse = await AdminService.UpdateAPIKey(apikey);
-                if (serviceResponse.Success)
+                if (adminpassword != "")
                 {
-                    return Ok("SUCCESS");
+                    if (adminpassword == GeneralHelper.DecryptString(config.AdminPassword, config.SALTKey))
+                    {
+                        serviceResponse = await AdminService.UpdateAPIKey(apikey);
+                        if (serviceResponse.Success)
+                        {
+                            return Ok("SUCCESS");
+                        }
+                        else
+                        {
+                            return Ok("FAILURE - There was a problem updating the API Key.");
+                        }
+                    }
+                    else
+                    {
+                        return Ok("FAILURE - Incorrect Admin Password.");
+                    }
+
                 }
                 else
                 {
-                    return Ok("FAILURE - There was a problem updating the API Key.");
+                    return Ok("FAILURE - You must provide teh Admin Password.");
                 }
             }
             catch (Exception ex)
@@ -91,18 +122,33 @@ namespace AzureNamingTool.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public async Task<IActionResult> GenerateAPIKey()
+        public async Task<IActionResult> GenerateAPIKey([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
         {
             try
             {
-                serviceResponse = await AdminService.GenerateAPIKey();
-                if (serviceResponse.Success)
+                if (adminpassword != "")
                 {
-                    return Ok("SUCCESS - API Key: " + serviceResponse.ResponseObject);
+                    if (adminpassword == GeneralHelper.DecryptString(config.AdminPassword, config.SALTKey))
+                    {
+                        serviceResponse = await AdminService.GenerateAPIKey();
+                        if (serviceResponse.Success)
+                        {
+                            return Ok("SUCCESS - API Key: " + serviceResponse.ResponseObject);
+                        }
+                        else
+                        {
+                            return Ok("FAILURE - There was a problem generating the API Key.");
+                        }
+                    }
+                    else
+                    {
+                        return Ok("FAILURE - Incorrect Admin Password.");
+                    }
+
                 }
                 else
                 {
-                    return Ok("FAILURE - There was a problem generating the API Key.");
+                    return Ok("FAILURE - You must provide teh Admin Password.");
                 }
             }
             catch (Exception ex)
