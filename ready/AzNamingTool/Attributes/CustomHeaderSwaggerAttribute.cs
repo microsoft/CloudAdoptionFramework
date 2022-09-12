@@ -13,6 +13,7 @@ namespace AzureNamingTool.Attributes
             operation.Parameters.Add(new OpenApiParameter
             {
                 Name = "APIKey",
+                Description = "Current API Key",
                 In = ParameterLocation.Header,
                 Required = true,
                 Schema = new OpenApiSchema
