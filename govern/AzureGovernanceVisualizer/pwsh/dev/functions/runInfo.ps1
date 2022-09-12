@@ -361,6 +361,51 @@ function runInfo {
             $script:paramsUsed += "DoPSRule: $($azAPICallConf['htParameters'].DoPSRule) &#13;"
         }
 
+        if ($NoPIMEligibility) {
+            Write-Host " NoPIMEligibility = $($NoPIMEligibility)" -ForegroundColor Green
+            $script:paramsUsed += "NoPIMEligibility: $($NoPIMEligibility) &#13;"
+        }
+        else {
+            Write-Host " NoPIMEligibility = $($NoPIMEligibility)" -ForegroundColor Yellow
+            $script:paramsUsed += "NoPIMEligibility: $($NoPIMEligibility) &#13;"
+        }
+
+        if ($PIMEligibilityIgnoreScope) {
+            Write-Host " PIMEligibilityIgnoreScope = $($PIMEligibilityIgnoreScope)" -ForegroundColor Green
+            #$script:paramsUsed += "PIMEligibilityIgnoreScope: $($PIMEligibilityIgnoreScope) &#13;"
+        }
+        else {
+            Write-Host " PIMEligibilityIgnoreScope = $($PIMEligibilityIgnoreScope)" -ForegroundColor Yellow
+            #$script:paramsUsed += "PIMEligibilityIgnoreScope: $($PIMEligibilityIgnoreScope) &#13;"
+        }
+
+        if ($NoPIMEligibilityIntegrationRoleAssignmentsAll) {
+            Write-Host " NoPIMEligibilityIntegrationRoleAssignmentsAll = $($NoPIMEligibilityIntegrationRoleAssignmentsAll)" -ForegroundColor Green
+            #$script:paramsUsed += "NoPIMEligibilityIntegrationRoleAssignmentsAll: $($NoPIMEligibilityIntegrationRoleAssignmentsAll) &#13;"
+        }
+        else {
+            Write-Host " NoPIMEligibilityIntegrationRoleAssignmentsAll = $($NoPIMEligibilityIntegrationRoleAssignmentsAll)" -ForegroundColor Yellow
+            #$script:paramsUsed += "NoPIMEligibilityIntegrationRoleAssignmentsAll: $($NoPIMEligibilityIntegrationRoleAssignmentsAll) &#13;"
+        }
+
+        if ($NoDefinitionInsightsDedicatedHTML) {
+            Write-Host " NoDefinitionInsightsDedicatedHTML = $($NoDefinitionInsightsDedicatedHTML)" -ForegroundColor Green
+            #$script:paramsUsed += "NoDefinitionInsightsDedicatedHTML: $($NoDefinitionInsightsDedicatedHTML) &#13;"
+        }
+        else {
+            Write-Host " NoDefinitionInsightsDedicatedHTML = $($NoDefinitionInsightsDedicatedHTML)" -ForegroundColor Yellow
+            #$script:paramsUsed += "NoDefinitionInsightsDedicatedHTML: $($NoDefinitionInsightsDedicatedHTML) &#13;"
+        }
+
+        if ($NoALZEvergreen) {
+            Write-Host " NoALZEvergreen = $($NoALZEvergreen)" -ForegroundColor Green
+            #$script:paramsUsed += "NoALZEvergreen: $($NoALZEvergreen) &#13;"
+        }
+        else {
+            Write-Host " NoALZEvergreen = $($NoALZEvergreen)" -ForegroundColor Yellow
+            #$script:paramsUsed += "NoALZEvergreen: $($NoALZEvergreen) &#13;"
+        }
+
     }
     #endregion RunInfo
 }
