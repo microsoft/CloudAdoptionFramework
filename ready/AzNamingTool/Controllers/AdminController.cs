@@ -24,10 +24,10 @@ namespace AzureNamingTool.Controllers
 
         // POST api/<AdminController>
         /// <summary>
-        /// THis function will update the admin password. 
+        /// This function will update the admin password. 
         /// </summary>
-        /// <param name="newpassword">string - New admin password.</param>
-        /// <returns>bool - Successful update</returns>
+        /// <param name="password">string - New admin password.</param>
+        /// <returns>string - Successful update</returns>
 
         [HttpPost]
         [Route("[action]")]
@@ -54,10 +54,10 @@ namespace AzureNamingTool.Controllers
 
         // POST api/<AdminController>
         /// <summary>
-        /// THis function will update the admin password. 
+        /// This function will update the admin password. 
         /// </summary>
-        /// <param name="newpassword">string - New API Key.</param>
-        /// <returns>bool - Successful update</returns>
+        /// <param name="apikey">string - New API Key.</param>
+        /// <returns>dttring - Successful update</returns>
 
         [HttpPost]
         [Route("[action]")]
@@ -84,7 +84,7 @@ namespace AzureNamingTool.Controllers
 
         // POST api/<AdminController>
         /// <summary>
-        /// THis function will update the admin password. 
+        /// This function will update the admin password. 
         /// </summary>
         /// <param name="newpassword">string - New API Key.</param>
         /// <returns>string - Successful update</returns>
