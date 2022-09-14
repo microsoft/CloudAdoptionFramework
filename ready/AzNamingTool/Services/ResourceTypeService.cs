@@ -156,7 +156,7 @@ namespace AzureNamingTool.Services
                     // Force lowercase on the shortname
                     item.ShortName = item.ShortName.ToLower();
 
-                    // V2.1.1
+                    // V2.2.1
                     //// Confirm the short name value is unique
                     //var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
                     //if (duplicateitems.Count > 0)
