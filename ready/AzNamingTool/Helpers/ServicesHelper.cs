@@ -29,6 +29,8 @@ namespace AzureNamingTool.Helpers
                 servicesData.ResourceUnitDepts = (List<ResourceUnitDept>)serviceReponse.ResponseObject;
                 serviceReponse = await ResourceFunctionService.GetItems();
                 servicesData.ResourceFunctions = (List<ResourceFunction>)serviceReponse.ResponseObject;
+                serviceReponse = await CustomComponentService.GetItems();
+                servicesData.CustomComponents = (List<CustomComponent>)serviceReponse.ResponseObject;
                 return servicesData;
             }
             catch(Exception ex)

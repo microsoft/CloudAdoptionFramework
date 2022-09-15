@@ -52,6 +52,10 @@ namespace AzureNamingTool.Services
                 serviceResponse = await ResourceUnitDeptService.GetItems();
                 configdata.ResourceUnitDepts = serviceResponse.ResponseObject;
 
+                // CustomComponents
+                serviceResponse = await CustomComponentService.GetItems();
+                configdata.CustomComponents = serviceResponse.ResponseObject;
+
                 // Get the security settings
                 var config = GeneralHelper.GetConfigurationData();
                 configdata.SALTKey = config.SALTKey;
@@ -84,6 +88,7 @@ namespace AzureNamingTool.Services
                 await ResourceProjAppSvcService.PostConfig(configdata.ResourceProjAppSvcs);
                 await ResourceTypeService.PostConfig(configdata.ResourceTypes);
                 await ResourceUnitDeptService.PostConfig(configdata.ResourceUnitDepts);
+                await CustomComponentService.PostConfig(configdata.CustomComponents);
 
                 // Set the security settings
                 var config = GeneralHelper.GetConfigurationData();
