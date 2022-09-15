@@ -7,7 +7,7 @@ namespace AzureNamingTool.Models
         public ResourceDelimiter ResourceDelimiter { get; set; }
         public ResourceEnvironment? ResourceEnvironment { get; set; }
         public ResourceFunction? ResourceFunction { get; set; }
-        public string ResourceInstance { get; set; }
+        public string? ResourceInstance { get; set; }
         public ResourceLocation? ResourceLocation { get; set; }
         public ResourceOrg? ResourceOrg { get; set; }
         public ResourceProjAppSvc? ResourceProjAppSvc { get; set; }
