@@ -28,7 +28,7 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
- defaults:
+defaults:
   run:
     working-directory: ready/AzNamingTool
     
