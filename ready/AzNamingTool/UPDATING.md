@@ -10,11 +10,11 @@
 
 [Restore Settings](#restore-settings)
 
-[How to update - Using GitHub Action](#how-to-update-using-github-action)
+[How to update - Using GitHub Action](#how-to-update---using-github-action)
 
-[How to update - Running as a container](#how-to-update-running-as-a-container)
+[How to update - Running as a container](#how-to-update---running-as-a-container)
 
-[How to update - Running as .NET site](#how-to-update-running-as-net-site)
+[How to update - Running as .NET site](#how-to-update---running-as-net-site)
 
 ## Overview
 
