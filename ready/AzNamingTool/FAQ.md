@@ -17,7 +17,7 @@ The Azure Naming Tool is IT admins and engineers looking to define and manage th
 
 
 #### Is there a cost?
-The Azure Naming Tool is 100% free and open source. 
+There is no cost to install and use the Azure Naming Tool. Your only costs will be the hosting environment where you choose to run the tool.  
 
 
 #### How do I install the tool?
