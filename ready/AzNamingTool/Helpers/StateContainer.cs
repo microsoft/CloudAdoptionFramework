@@ -52,7 +52,7 @@ namespace AzureNamingTool.Helpers
                 NotifyStateChanged();
             }
         }
-
+        
         public void SetPassword(bool password)
         {
             _password = password;

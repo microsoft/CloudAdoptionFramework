@@ -17,13 +17,13 @@ namespace AzureNamingTool.Helpers
                 servicesData.ResourceDelimiters = (List<ResourceDelimiter>)serviceReponse.ResponseObject;
                 serviceReponse = await ResourceEnvironmentService.GetItems();
                 servicesData.ResourceEnvironments = (List<ResourceEnvironment>)serviceReponse.ResponseObject;
-                serviceReponse = await ResourceLocationService.GetItems();
+                serviceReponse = await ResourceLocationService.GetItems(admin);
                 servicesData.ResourceLocations = (List<ResourceLocation>)serviceReponse.ResponseObject;
                 serviceReponse = await ResourceOrgService.GetItems();
                 servicesData.ResourceOrgs = (List<ResourceOrg>)serviceReponse.ResponseObject;
                 serviceReponse = await ResourceProjAppSvcService.GetItems();
                 servicesData.ResourceProjAppSvcs = (List<ResourceProjAppSvc>)serviceReponse.ResponseObject;
-                serviceReponse = await ResourceTypeService.GetItems();
+                serviceReponse = await ResourceTypeService.GetItems(admin);
                 servicesData.ResourceTypes = (List<ResourceType>)serviceReponse.ResponseObject;
                 serviceReponse = await ResourceUnitDeptService.GetItems();
                 servicesData.ResourceUnitDepts = (List<ResourceUnitDept>)serviceReponse.ResponseObject;
@@ -31,11 +31,15 @@ namespace AzureNamingTool.Helpers
                 servicesData.ResourceFunctions = (List<ResourceFunction>)serviceReponse.ResponseObject;
                 serviceReponse = await CustomComponentService.GetItems();
                 servicesData.CustomComponents = (List<CustomComponent>)serviceReponse.ResponseObject;
+                serviceReponse = await GeneratedNamesService.GetItems();
+                servicesData.GeneratedNames = (List<GeneratedName>)serviceReponse.ResponseObject;
+                serviceReponse = await AdminLogService.GetItems();
+                servicesData.AdminLogMessages = (List<AdminLogMessage>)serviceReponse.ResponseObject;
                 return servicesData;
             }
             catch(Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 return servicesData;
             }
         }

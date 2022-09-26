@@ -7,6 +7,16 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Microsoft.Extensions.Caching.Memory;
+using System.Linq.Expressions;
+using System.Security.AccessControl;
+using System.Runtime.Caching;
+using MemoryCache = System.Runtime.Caching.MemoryCache;
+using System.Net.Http.Json;
+using AzureNamingTool.Services;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 
 namespace AzureNamingTool.Helpers
 {
@@ -32,7 +42,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
             return value;
         }
@@ -49,7 +59,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
 
@@ -62,7 +72,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 return null;
             }
         }
@@ -72,20 +82,31 @@ namespace AzureNamingTool.Helpers
             try
             {
                 String data = String.Empty;
-                data = typeof(T).Name switch
+                // Check if the data is already in cache
+                if (GetCacheObject(typeof(T).Name) == null)
                 {
-                    nameof(ResourceComponent) => await FileSystemHelper.ReadFile("resourcecomponents.json"),
-                    nameof(ResourceEnvironment) => await FileSystemHelper.ReadFile("resourceenvironments.json"),
-                    nameof(ResourceLocation) => await FileSystemHelper.ReadFile("resourcelocations.json"),
-                    nameof(ResourceOrg) => await FileSystemHelper.ReadFile("resourceorgs.json"),
-                    nameof(ResourceProjAppSvc) => await FileSystemHelper.ReadFile("resourceprojappsvcs.json"),
-                    nameof(ResourceType) => await FileSystemHelper.ReadFile("resourcetypes.json"),
-                    nameof(ResourceUnitDept) => await FileSystemHelper.ReadFile("resourceunitdepts.json"),
-                    nameof(ResourceFunction) => await FileSystemHelper.ReadFile("resourcefunctions.json"),
-                    nameof(ResourceDelimiter) => await FileSystemHelper.ReadFile("resourcedelimiters.json"),
-                    nameof(CustomComponent) => await FileSystemHelper.ReadFile("customcomponents.json"),
-                    _ => "[]",
-                };
+                    data = typeof(T).Name switch
+                    {
+                        nameof(ResourceComponent) => await FileSystemHelper.ReadFile("resourcecomponents.json"),
+                        nameof(ResourceEnvironment) => await FileSystemHelper.ReadFile("resourceenvironments.json"),
+                        nameof(ResourceLocation) => await FileSystemHelper.ReadFile("resourcelocations.json"),
+                        nameof(ResourceOrg) => await FileSystemHelper.ReadFile("resourceorgs.json"),
+                        nameof(ResourceProjAppSvc) => await FileSystemHelper.ReadFile("resourceprojappsvcs.json"),
+                        nameof(Models.ResourceType) => await FileSystemHelper.ReadFile("resourcetypes.json"),
+                        nameof(ResourceUnitDept) => await FileSystemHelper.ReadFile("resourceunitdepts.json"),
+                        nameof(ResourceFunction) => await FileSystemHelper.ReadFile("resourcefunctions.json"),
+                        nameof(ResourceDelimiter) => await FileSystemHelper.ReadFile("resourcedelimiters.json"),
+                        nameof(CustomComponent) => await FileSystemHelper.ReadFile("customcomponents.json"),
+                        nameof(AdminLogMessage) => await FileSystemHelper.ReadFile("adminlogmessages.json"),
+                        nameof(GeneratedName) => await FileSystemHelper.ReadFile("generatednames.json"),
+                        _ => "[]",
+                    };
+                    SetCacheObject(typeof(T).Name, data);
+                }
+                else
+                {
+                    data = (string)GetCacheObject(typeof(T).Name);
+                }
                 var items = new List<T>();
                 if (data != "[]")
                 {
@@ -102,7 +123,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 throw;
             }
         }
@@ -128,7 +149,7 @@ namespace AzureNamingTool.Helpers
                     case nameof(ResourceProjAppSvc):
                         await FileSystemHelper.WriteConfiguation(items, "resourceprojappsvcs.json");
                         break;
-                    case nameof(ResourceType):
+                    case nameof(Models.ResourceType):
                         await FileSystemHelper.WriteConfiguation(items, "resourcetypes.json");
                         break;
                     case nameof(ResourceUnitDept):
@@ -143,13 +164,40 @@ namespace AzureNamingTool.Helpers
                     case nameof(CustomComponent):
                         await FileSystemHelper.WriteConfiguation(items, "customcomponents.json");
                         break;
+                    case nameof(AdminLogMessage):
+                        await FileSystemHelper.WriteConfiguation(items, "adminlogmessages.json");
+                        break;
+                    case nameof(GeneratedName):
+                        await FileSystemHelper.WriteConfiguation(items, "generatednames.json");
+                        break;
                     default:
                         break;
                 }
+
+                String data = String.Empty;
+                data = typeof(T).Name switch
+                {
+                    nameof(ResourceComponent) => await FileSystemHelper.ReadFile("resourcecomponents.json"),
+                    nameof(ResourceEnvironment) => await FileSystemHelper.ReadFile("resourceenvironments.json"),
+                    nameof(ResourceLocation) => await FileSystemHelper.ReadFile("resourcelocations.json"),
+                    nameof(ResourceOrg) => await FileSystemHelper.ReadFile("resourceorgs.json"),
+                    nameof(ResourceProjAppSvc) => await FileSystemHelper.ReadFile("resourceprojappsvcs.json"),
+                    nameof(Models.ResourceType) => await FileSystemHelper.ReadFile("resourcetypes.json"),
+                    nameof(ResourceUnitDept) => await FileSystemHelper.ReadFile("resourceunitdepts.json"),
+                    nameof(ResourceFunction) => await FileSystemHelper.ReadFile("resourcefunctions.json"),
+                    nameof(ResourceDelimiter) => await FileSystemHelper.ReadFile("resourcedelimiters.json"),
+                    nameof(CustomComponent) => await FileSystemHelper.ReadFile("customcomponents.json"),
+                    nameof(AdminLogMessage) => await FileSystemHelper.ReadFile("adminlogmessages.json"),
+                    nameof(GeneratedName) => await FileSystemHelper.ReadFile("generatednames.json"),
+                    _ => "[]",
+                };
+
+                // Update the cache with the latest data
+                SetCacheObject(typeof(T).Name, data);
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 throw;
             }
         }
@@ -188,6 +236,7 @@ namespace AzureNamingTool.Helpers
                 aes.KeySize = 256;
                 aes.Key = Encoding.UTF8.GetBytes(keyString);
                 aes.IV = iv;
+                aes.Padding = PaddingMode.PKCS7;
                 ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
                 using MemoryStream memoryStream = new();
                 using CryptoStream cryptoStream = new((Stream)memoryStream, encryptor, CryptoStreamMode.Write);
@@ -208,6 +257,7 @@ namespace AzureNamingTool.Helpers
             aes.KeySize = 256;
             aes.Key = Encoding.UTF8.GetBytes(keyString);
             aes.IV = iv;
+            aes.Padding = PaddingMode.PKCS7;
             ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
             using MemoryStream memoryStream = new(buffer);
             using CryptoStream cryptoStream = new((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
@@ -220,8 +270,8 @@ namespace AzureNamingTool.Helpers
             try
             {
                 // Get all the files in teh repository folder
-                DirectoryInfo dirRepository = new("repository");
-                foreach (FileInfo file in dirRepository.GetFiles())
+                DirectoryInfo repositoryDir = new("repository");
+                foreach (FileInfo file in repositoryDir.GetFiles())
                 {
                     // Check if the file exists in the settings folder
                     if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + file.Name)))
@@ -230,10 +280,18 @@ namespace AzureNamingTool.Helpers
                         file.CopyTo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + file.Name));
                     }
                 }
+
+                // Migrate old data to new files, if needed
+                // Check if the admin log file exists in the settings folder and the adminmessages does not
+                if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/adminlog.json")) && !File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/adminlogmessages.json")))
+                {
+                    // Migrate the data
+                    FileSystemHelper.MigrateDataToFile("adminlog.json", "settings/", "adminlogmessages.json", "settings/", true);                    
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
 
@@ -284,11 +342,11 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
 
-        public static void UpdateSettings(Config config)
+        public static async void UpdateSettings(Config config)
         {
             var jsonWriteOptions = new JsonSerializerOptions()
             {
@@ -297,9 +355,9 @@ namespace AzureNamingTool.Helpers
             jsonWriteOptions.Converters.Add(new JsonStringEnumConverter());
 
             var newJson = JsonSerializer.Serialize(config, jsonWriteOptions);
-
+            
             var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/appsettings.json");
-            File.WriteAllText(appSettingsPath, newJson);
+            await FileSystemHelper.WriteFile("appsettings.json", newJson);
         }
 
         public static void ResetState(StateContainer state)
@@ -369,7 +427,7 @@ namespace AzureNamingTool.Helpers
             return valid;
         }
 
-        public static Tuple<bool, string, StringBuilder> ValidateGeneratedName(ResourceType resourceType, string name, string delimiter)
+        public static Tuple<bool, string, StringBuilder> ValidateGeneratedName(Models.ResourceType resourceType, string name, string delimiter)
         {
             try
             {
@@ -515,7 +573,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 return new Tuple<bool, string, StringBuilder>(false, name, new StringBuilder("There was a problem validating the name."));
             }
         }
@@ -530,7 +588,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 data = "";
             }
             return data;
@@ -544,6 +602,93 @@ namespace AzureNamingTool.Helpers
                 newname = newname.ToLower();
             }
             return newname;
+        }
+
+        public static async Task<string> GetLatestVersion()
+        {
+            try
+            {
+                var response = await DownloadString("https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/AzureNamingTool.csproj");
+                XDocument xdoc = XDocument.Parse(response);
+                string result = xdoc
+                    .Descendants("PropertyGroup")
+                    .Descendants("Version")
+                    .First()
+                    .Value;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return null;
+            }
+        }
+
+
+        public static object GetCacheObject(string cachekey)
+        {
+            try
+            {
+                ObjectCache memoryCache = MemoryCache.Default;
+                var encodedCache = memoryCache.Get(cachekey);
+                if (encodedCache == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return (object)encodedCache;
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return null;
+            }
+        }
+
+
+        public static void SetCacheObject(string cachekey, object cachedata)
+        {
+            try
+            {
+                ObjectCache memoryCache = MemoryCache.Default;
+                var cacheItemPolicy = new CacheItemPolicy
+                {
+                    AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(300.0),
+
+                };
+                memoryCache.Set(cachekey, cachedata, cacheItemPolicy);
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+        }
+
+        public static void InvalidateCacheObject(string cachekey)
+        {
+            try
+            {
+                ObjectCache memoryCache = MemoryCache.Default;
+                memoryCache.Remove(cachekey);
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+        }
+
+        public static string SetTextEnabledClass(bool enabled)
+        {
+            if (enabled)
+            {
+                return "";
+            }
+            else
+            {
+                return "disabled-text";
+            }
         }
     }
 }

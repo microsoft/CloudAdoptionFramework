@@ -45,6 +45,46 @@
                             </button>
                         </div>
                     }
+
+                    <div class="card">
+                        <div class="card-header bg-default text-black">
+                            <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter
+                            </a>
+                        </div>
+                        <div class="collapse card card-body @theme.ThemeStyle" id="filter">
+                            <div class="form-group row mb-3">
+                                <div style="width:auto;">
+                                    <input class="form-control" type="date" style="width: 150px;" @bind="startdate" @bind:event="oninput" />
+                                </div>
+                                <div style="width:auto;padding-top:7px;">
+                                    to
+                                </div>
+                                <div style="width:auto;">
+                                    <input class="form-control" type="date" style="width: 150px;" @bind="enddate" @bind:event="oninput" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="input-group flex-nowrap mb-3">
+                                    <div class="input-group flex-nowrap mb-3">
+                                        <span class="input-group-text" id="addon-wrapping">
+                                            <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
+                                        </span>
+                                        <input class="form-control" type="search" placeholder="Filter by Generated Name, Resource Type, Components"
+                                       @bind="filterData"
+                                       @bind:event="oninput">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div>
+                                    <button class="btn btn-success" title="Reset" @onclick="@(e => OnResetClick())">
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table @theme.ThemeStyle">
                             <thead>
@@ -56,23 +96,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (GeneratedName nameRequest in lstNameRequests)
+                                @foreach (GeneratedName name in lstNameRequests)
                                 {
+                                    if (!IsVisible(name))
+                                        continue;
                                     <tr>
                                         <td class="align-top">
-                                            @nameRequest.CreatedOn.ToString()
+                                            @name.CreatedOn.ToString()
                                         </td>
                                         <td class="align-top">
-                                            @nameRequest.ResourceName
+                                            @name.ResourceName
                                         </td>
                                         <td class="align-top">
-                                            @if (nameRequest.ResourceTypeName != null)
+                                            @if (name.ResourceTypeName != null)
                                             {
-                                                @nameRequest.ResourceTypeName
+                                                @name.ResourceTypeName
                                             }
                                         </td>
                                         <td class="align-top">
-                                            @foreach (string[] component in nameRequest.Components.ToList<string[]>())
+                                            @foreach (string[] component in name.Components.ToList<string[]>())
                                             {
                                                 <div style="line-break:anywhere;">
                                                     @component[0] : @component[1]
@@ -97,23 +139,29 @@
 </div>
 
 @code {
-    
+
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
     private bool admin;
     private bool dataLoaded = false;
     List<GeneratedName> lstNameRequests = new();
+    public string filterData { get; set; }
+    public DateTime startdate { get; set; } = DateTime.Today.AddDays(-30);
+    public DateTime enddate { get; set; } = DateTime.Today;
     protected override async Task OnInitializedAsync()
     {
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        ServiceResponse serviceResponse = new();
+
         if (firstRender)
         {
             var result = await session.GetAsync<bool>("admin");
             admin = (bool)result.Value;
-            lstNameRequests = await LogHelper.GetGeneratedNames();
+            serviceResponse = await GeneratedNamesService.GetItems();
+            lstNameRequests = (List<GeneratedName>)serviceResponse.ResponseObject;
             dataLoaded = true;
             StateHasChanged();
         }
@@ -133,14 +181,18 @@
 
     private async Task OnPurgeLogClick()
     {
+        ServiceResponse serviceResponse = new();
+
         bool confirm = false;
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Generated Names log. Are you sure?");
         if (confirm)
         {
-            await LogHelper.PurgeGeneratedNames();
+            await GeneratedNamesService.DeleteAllItems();
             toastService.ShowSuccess("Generated Log purged!", "SUCCESS");
-            LogHelper.LogAdminMessage("GENERATED NAMES LOG", "Generated Names log purged.");
-            lstNameRequests = await LogHelper.GetGeneratedNames();
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Names log purged." });
+            GeneralHelper.InvalidateCacheObject("GeneratedName");
+            serviceResponse = await GeneratedNamesService.GetItems();
+            lstNameRequests = (List<GeneratedName>)serviceResponse.ResponseObject;
             StateHasChanged();
         }
     }
@@ -148,5 +200,35 @@
     private async Task OnExportLogClick()
     {
         await JsRuntime.InvokeVoidAsync("htmlToCSV", "generatednameslog.csv");
+    }
+
+    public bool IsVisible(GeneratedName name)
+    {
+        bool visible = true;
+        if (startdate != null)
+        {
+            if (name.CreatedOn < startdate)
+                visible = false;
+        }
+
+        if (enddate != null)
+        {
+            if (name.CreatedOn > (enddate + new TimeSpan(23, 59, 59)))
+                visible = false;
+        }
+
+        if (!string.IsNullOrEmpty(filterData))
+        {
+            if ((!name.ResourceName.ToLower().Contains(filterData)) && (!name.ResourceTypeName.ToLower().Contains(filterData)) && (!string.Join(",", name.Components).ToLower().Contains(filterData)))
+                visible = false;
+        }
+        return visible;
+    }
+
+    private async Task OnResetClick()
+    {
+        startdate = DateTime.Today.AddDays(-30);
+        enddate = DateTime.Today;
+        filterData = "";
     }
 }

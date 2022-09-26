@@ -12,5 +12,7 @@
         public List<ResourceUnitDept>? ResourceUnitDepts { get; set; }
         public List<ResourceFunction>? ResourceFunctions { get; set; }
         public List<CustomComponent>? CustomComponents { get; set; }
+        public List<GeneratedName>? GeneratedNames { get; set; }
+        public List<AdminLogMessage>? AdminLogMessages { get; set; }
     }
 }

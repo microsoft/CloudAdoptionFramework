@@ -58,12 +58,26 @@
                             }
                         }
                     </select>
+                    <div class="form-group row mt-3">
+                        <div class="input-group flex-nowrap">
+                            <div class="input-group flex-nowrap mb-3">
+                                <span class="input-group-text" id="addon-wrapping">
+                                    <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
+                                </span>
+                                <input class="form-control" type="search" placeholder="Filter by Name, Short Name"
+                                   @bind="filterData"
+                                   @bind:event="oninput">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <table class="table table-responsive  @theme.ThemeStyle w-100">
                 <tbody>
                     @foreach (var resourcetype in servicesData.ResourceTypes)
                     {
+                        if (!IsTypeVisible(resourcetype))
+                            continue;
                         <tr>
                             <td>
                                 <table class="table table-responsive">
@@ -339,6 +353,7 @@
     protected ThemeInfo? theme { get; set; }
     private ServicesData servicesData = new();
     private ResourceDelimiter? resourceDelimiter;
+    public string filterData { get; set; }
     private string? selectedResourceTypeCategory = "";
     private string[] filteredscopes = new string[] { "resource group", "resource group & region", "region", "global", "subscription", "tenant" };
     private List<string> categories = new List<string>();
@@ -449,5 +464,17 @@
     private async Task OnInstructionsClick()
     {
         NavigationManager.NavigateTo("/instructions");
+    }
+
+    public bool IsTypeVisible(ResourceType type)
+    {
+        bool visible = true;
+
+        if (!string.IsNullOrEmpty(filterData))
+        {
+            if ((!type.Resource.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!type.ShortName.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+                visible = false;
+        }
+        return visible;
     }
 }

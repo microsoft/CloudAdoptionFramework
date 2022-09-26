@@ -12,23 +12,31 @@ namespace AzureNamingTool.Services
     {
         private static ServiceResponse serviceResponse = new();
 
-        public static async Task<ServiceResponse> GetItems()
+        public static async Task<ServiceResponse> GetItems(bool admin = true)
         {
             try
             {
                 // Get list of items
                 var items = await GeneralHelper.GetList<ResourceType>();
-                serviceResponse.ResponseObject = items.OrderBy(x => x.Resource).ToList(); ;
+                if (!admin)
+                {
+                    serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(x => x.Resource).ToList();
+                }
+                else
+                {
+                    serviceResponse.ResponseObject = items.OrderBy(x => x.Resource).ToList();
+                }
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
             return serviceResponse;
         }
+
         public static async Task<ServiceResponse> GetItem(int id)
         {
             try
@@ -41,7 +49,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
@@ -68,14 +76,14 @@ namespace AzureNamingTool.Services
 
                 // V2.2.1
                 // Confirm the short name value is unique
-                //var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
-                //if(duplicateitems.Count > 0)
-                //{
-                //    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
-                //    serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
-                //    serviceResponse.Success = false;
-                //    return serviceResponse;
-                //}
+                var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
+                if (duplicateitems.Count > 0)
+                {
+                    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
+                    serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
+                    serviceResponse.Success = false;
+                    return serviceResponse;
+                }
 
                 // Set the new id
                 if (item.Id == 0)
@@ -111,7 +119,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }
@@ -135,7 +143,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }
@@ -155,18 +163,6 @@ namespace AzureNamingTool.Services
                 {
                     // Force lowercase on the shortname
                     item.ShortName = item.ShortName.ToLower();
-
-                    // V2.2.1
-                    //// Confirm the short name value is unique
-                    //var duplicateitems = items.FindAll(x => x.ShortName.ToLower() == item.ShortName && x.Id != item.Id);
-                    //if (duplicateitems.Count > 0)
-                    //{
-                    //    serviceResponse.ResponseObject = "Please see the <a href=\"/adminlog\">AdminLogMessage Log</a> for additional details.";
-                    //    serviceResponse.ResponseMessage = "The specified short name value (" + item.ShortName + ") for " + item.Resource + " is already in use by " + duplicateitems[0].Resource + ". Please enter a unique value.";
-                    //    serviceResponse.Success = false;
-                    //    return serviceResponse;
-                    //}
-
                     item.Id = i;
                     newitems.Add(item);
                     i += 1;
@@ -178,7 +174,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
@@ -209,7 +205,8 @@ namespace AzureNamingTool.Services
 
         public static List<ResourceType> GetFilteredResourceTypes(List<ResourceType> types, string filter)
         {
-            List<ResourceType> filteredtypes = types.Where(x => x.Resource.StartsWith(filter)).ToList();
+            // Filter out resource types that should have name generation
+            List<ResourceType> filteredtypes = types.Where(x => x.Resource.StartsWith(filter) && x.Property.ToLower() != "display name" && x.ShortName != "").ToList();
             return filteredtypes;
         }
 
@@ -243,10 +240,11 @@ namespace AzureNamingTool.Services
                         int i = types.FindIndex(x => x.Resource == newtype.Resource);
                         if (i > -1)
                         {
+                            // Update the Resource Type Information
                             ResourceType oldtype = types[i];
-                            // Update the Resaource Type Information
                             newtype.Exclude = oldtype.Exclude;
                             newtype.Optional = oldtype.Optional;
+                            newtype.Enabled= oldtype.Enabled;
                             if (!shortNameReset)
                             {
                                 newtype.ShortName = oldtype.ShortName;
@@ -265,19 +263,18 @@ namespace AzureNamingTool.Services
 
                     // Update the settings file
                     serviceResponse = await PostConfig(types);
-
+                    
                     // Update the repository file
-                    File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repository/resourcetypes.json"), refreshdata);
+                    await FileSystemHelper.WriteFile("resourcetypes.json", refreshdata, "repository/");
                 }
                 else
                 {
-                    LogHelper.LogAdminMessage("ERROR", "There was a problem refreshing the resource types configuration.");
-
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = "There was a problem refreshing the resource types configuration." });
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }

@@ -14,5 +14,9 @@
         /// Dictionary [Custom Component Type Name],[Custom Component Short Name Value]
         /// </summary>
         public Dictionary<string, string>? CustomComponents { get; set; }
+        /// <summary>
+        /// String - Resource name (example: ApiManagement/service)
+        /// </summary>
+        public string? Resource {get; set;}
     }
 }
