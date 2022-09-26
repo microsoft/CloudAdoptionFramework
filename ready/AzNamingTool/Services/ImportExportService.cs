@@ -10,7 +10,7 @@ namespace AzureNamingTool.Services
     {
         private static ServiceResponse serviceResponse = new();
 
-        public static async Task<ServiceResponse> ExportConfig()
+        public static async Task<ServiceResponse> ExportConfig(bool includeadmin = false)
         {
             try
             {
@@ -56,18 +56,29 @@ namespace AzureNamingTool.Services
                 serviceResponse = await CustomComponentService.GetItems();
                 configdata.CustomComponents = serviceResponse.ResponseObject;
 
+                //GeneratedNames
+                serviceResponse = await GeneratedNamesService.GetItems();
+                configdata.GeneratedNames = serviceResponse.ResponseObject;
+
+                //AdminLogs
+                serviceResponse = await AdminLogService.GetItems();
+                configdata.AdminLogs = serviceResponse.ResponseObject;
+
                 // Get the security settings
-                var config = GeneralHelper.GetConfigurationData();
-                configdata.SALTKey = config.SALTKey;
-                configdata.AdminPassword = config.AdminPassword;
-                configdata.APIKey = config.APIKey;
+                if (includeadmin)
+                {
+                    var config = GeneralHelper.GetConfigurationData();
+                    configdata.SALTKey = config.SALTKey;
+                    configdata.AdminPassword = config.AdminPassword;
+                    configdata.APIKey = config.APIKey;
+                }
 
                 serviceResponse.ResponseObject = configdata;
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
@@ -89,13 +100,24 @@ namespace AzureNamingTool.Services
                 await ResourceTypeService.PostConfig(configdata.ResourceTypes);
                 await ResourceUnitDeptService.PostConfig(configdata.ResourceUnitDepts);
                 await CustomComponentService.PostConfig(configdata.CustomComponents);
-
+                await GeneratedNamesService.PostConfig(configdata.GeneratedNames);
+                await AdminLogService.PostConfig(configdata.AdminLogs);
+                
                 // Set the security settings
                 var config = GeneralHelper.GetConfigurationData();
 
-                config.SALTKey = configdata.SALTKey;
-                config.AdminPassword = configdata.AdminPassword;
-                config.APIKey = configdata.APIKey;
+                if (configdata.SALTKey != null)
+                {
+                    config.SALTKey = configdata.SALTKey;
+                }
+                if(configdata.AdminPassword != null)
+                {
+                    config.AdminPassword = configdata.AdminPassword;
+                }
+                if (configdata.APIKey != null)
+                {
+                    config.APIKey = configdata.APIKey;
+                }
 
                 var jsonWriteOptions = new JsonSerializerOptions()
                 {
@@ -112,12 +134,11 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
             return serviceResponse;
         }
-
     }
 }

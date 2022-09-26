@@ -30,5 +30,6 @@ namespace AzureNamingTool.Models
         public string InvalidCharactersConsecutive{ get; set; }
         public string Regx { get; set; }
         public string StaticValues { get; set; }
+        public bool Enabled { get; set; } = true;
     }
 }

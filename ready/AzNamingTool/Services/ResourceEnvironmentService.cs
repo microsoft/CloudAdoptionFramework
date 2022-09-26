@@ -18,12 +18,13 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
             return serviceResponse;
         }
+
         public static async Task<ServiceResponse> GetItem(int id)
         {
             try
@@ -36,12 +37,13 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
             return serviceResponse;
         }
+
         public static async Task<ServiceResponse> PostItem(ResourceEnvironment item)
         {
             try
@@ -133,12 +135,13 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }
             return serviceResponse;
         }
+
         public static async Task<ServiceResponse> DeleteItem(int id)
         {
             try
@@ -164,12 +167,13 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }
             return serviceResponse;
         }
+
         public static async Task<ServiceResponse> PostConfig(List<ResourceEnvironment> items)
         {
             try
@@ -204,7 +208,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }

@@ -356,7 +356,7 @@
                 {
                     ModalInstance.CloseAsync();
                     toastService.ShowSuccess(GeneralHelper.NormalizeName(type, false) + " updated!", "SUCCESS");
-                    LogHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " updated!");
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "SUCCESS", Message = GeneralHelper.NormalizeName(type, false) + " updated!" });
                 }
                 else
                 {
@@ -366,7 +366,7 @@
         }
         catch(Exception ex)
         {
-            LogHelper.LogAdminMessage("ERROR", ex.Message);
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + ex.Message, "ERROR");
         }
     }

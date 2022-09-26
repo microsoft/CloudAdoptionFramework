@@ -75,28 +75,27 @@
                                         <tbody>
                                             @foreach (var item in @servicesData.ResourceComponents)
                                             {
-                                                <tr>
+                                                <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
                                                     <td>
                                                         @item.DisplayName
-                                                        @if(item.IsCustom)
+                                                        @if (item.IsCustom)
                                                         {
                                                             <span>
-                                                             (CUSTOM)       
+                                                                (CUSTOM)
                                                             </span>
                                                         }
                                                     </td>
                                                     @if (admin)
                                                     {
                                                         <td>
-                                                            @if (item.Enabled)
-                                                            {
-                                                                <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"up"))" title="Move up">
-                                                                    <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
-                                                                </button>
-                                                                <span> </span>
-                                                                <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
-                                                                    <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
-                                                                </button>
+                                                            <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"up"))" title="Move up">
+                                                                <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
+                                                            </button>
+                                                            <span> </span>
+                                                            <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
+                                                                <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
+                                                            </button>
+                                                            
                                                                 @if (item.IsCustom)
                                                                 {
                                                                     <span> </span>
@@ -104,6 +103,8 @@
                                                                         <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                     </button>
                                                                 }
+                                                            @if (item.Enabled)
+                                                            {
                                                                 <span> </span>
                                                                 <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
                                                                     <span class="oi oi-ban" aria-hidden="true"></span>
@@ -111,16 +112,10 @@
                                                             }
                                                             else
                                                             {
+                                                                <span> </span>
                                                                 <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",item.Id,"enable"))" title="Enable">
                                                                     <span class="oi oi-plus" aria-hidden="true"></span>
-                                                                </button>                                                                
-                                                                @if (item.IsCustom)
-                                                                {
-                                                                    <span> </span>
-                                                                    <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"edit"))" title="Edit">
-                                                                        <span class="oi oi-pencil" aria-hidden="true"></span>
-                                                                    </button>
-                                                                }
+                                                                </button>
                                                             }
                                                             @if (item.IsCustom)
                                                             {
@@ -235,7 +230,7 @@
                                         <tbody>
                                             @foreach (var item in @servicesData.ResourceDelimiters)
                                             {
-                                                <tr style="height:55px;">
+                                                <tr style="height:55px;" class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
                                                     <td>@item.Name</td>
                                                     <td>@item.Delimiter</td>
                                                     @if (admin)
@@ -640,7 +635,7 @@
                                                     <tbody>
                                                         @foreach (var item in @servicesData.ResourceLocations)
                                                         {
-                                                            <tr>
+                                                            <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
                                                                 <td>@item.Name</td>
                                                                 <td>@item.ShortName</td>
                                                                 @if (admin)
@@ -651,10 +646,25 @@
                                                                         </button>
                                                                         @if (servicesData.ResourceLocations.Count > 1)
                                                                         {
-                                                                            <span> </span>
-                                                                            <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceLocation",item.Id,"delete"))" title="Delete">
-                                                                                <span class="oi oi-x" aria-hidden="true"></span>
-                                                                            </button>
+                                                                            @if (item.Enabled)
+                                                                            {
+                                                                                <span> </span>
+                                                                                <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceLocation",item.Id,"disable"))" title="Disable">
+                                                                                    <span class="oi oi-ban" aria-hidden="true"></span>
+                                                                                </button>
+                                                                                @*<span> </span>
+                                            <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceLocation",item.Id,"delete"))" title="Delete">
+                                            <span class="oi oi-x" aria-hidden="true"></span>
+                                            </button>*@
+                                                                            }
+                                                                            else
+                                                                            {
+
+                                                                                <span> </span>
+                                                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceLocation",item.Id,"enable"))" title="Enable">
+                                                                                    <span class="oi oi-plus" aria-hidden="true"></span>
+                                                                                </button>
+                                                                            }
                                                                         }
                                                                     </td>
                                                                 }
@@ -716,6 +726,28 @@
                                                                 <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("ResourceLocation",0,"download")) title="Export">
                                                                     <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export
                                                                 </button>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card  w-auto mb-3">
+                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                            Refresh the Resource Locations Configuration
+                                                        </div>
+                                                        <div class="card card-body @theme.ThemeStyle">
+                                                            <p>
+                                                                Click <strong>Refresh</strong> to download the latest Resource Locations Configuration file from the Azure Naming Tool GitHub repository. This will add any new resource locations.
+                                                            </p>
+                                                            <p>
+                                                                All of your existing location configurations will be retained.
+                                                            </p>
+                                                            <p>
+                                                                <strong>NOTE: This will refresh your current configuration and cannot be undone!</strong>
+                                                            </p>
+                                                            <p>
+                                                                <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceLocation",0,"refresh")) title="Refresh">
+                                                                    <span class="oi oi-reload" aria-hidden="true"></span> Refresh
+                                                                </button>
+                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" value="" checked style="margin-top: 9px; margin-left:10px;" id="refreshshortnames"> Refresh short names?
                                                             </p>
                                                         </div>
                                                     </div>
@@ -1066,7 +1098,6 @@
                                                             <option value="@category">@category</option>
                                                         }
                                                     </select>
-
                                                     <select @onchange="OnTypeChanged" class="form-control @theme.ThemeStyle">
                                                         <option value="">Select a resource type</option>
                                                         @foreach (var type in @ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, selectedResourceTypeCategory))
@@ -1081,6 +1112,19 @@
                                                             }
                                                         }
                                                     </select>
+
+                                                    <div class="form-group row mt-3">
+                                                        <div class="input-group flex-nowrap mb-3">
+                                                            <div class="input-group flex-nowrap mb-3">
+                                                                <span class="input-group-text" id="addon-wrapping">
+                                                                    <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
+                                                                </span>
+                                                                <input class="form-control" type="search" placeholder="Filter by Name, Short Name"
+                                                   @bind="filterData"
+                                                   @bind:event="oninput">
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </p>
                                                 <table class="table @theme.ThemeStyle">
                                                     <thead>
@@ -1098,7 +1142,9 @@
                                                     <tbody>
                                                         @foreach (var item in @servicesData.ResourceTypes)
                                                         {
-                                                            <tr>
+                                                            if (!IsTypeVisible(item))
+                                                                continue;
+                                                            <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
                                                                 @if (item.Property != "")
                                                                 {
                                                                     <td>@item.Resource - @item.Property<a id="@item.Id"></a></td>
@@ -1144,6 +1190,21 @@
                                                                         <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceType",item.Id,"edit"))" title="Edit">
                                                                             <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                         </button>
+                                                                        @if (item.Enabled)
+                                                                        {
+                                                                            <span> </span>
+                                                                            <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceType",item.Id,"disable"))" title="Disable">
+                                                                                <span class="oi oi-ban" aria-hidden="true"></span>
+                                                                            </button>
+                                                                        }
+                                                                        else
+                                                                        {
+
+                                                                            <span> </span>
+                                                                            <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceType",item.Id,"enable"))" title="Enable">
+                                                                                <span class="oi oi-plus" aria-hidden="true"></span>
+                                                                            </button>
+                                                                        }
                                                                     </td>
                                                                 }
                                                             </tr>
@@ -1527,6 +1588,7 @@
                                         <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("Global",0,"download")) title="Export">
                                             <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export
                                         </button>
+                                        <input title="Include Admin Configuration" class="form-check-input" type="checkbox" value="" style="margin-top: 9px; margin-left:10px;" id="includeadminconfiguration"> Include Admin Configuration?
                                     </p>
                                 </div>
                             </div>
@@ -1612,6 +1674,8 @@
     private bool dataLoaded = false;
     private bool admin;
 
+    public string filterData { get; set; }
+
     private List<string> categories = new List<string>();
     private string? selectedResourceTypeCategory = "";
     private string? newComponentConfig;
@@ -1657,21 +1721,6 @@
 
             dataLoaded = true;
 
-            // V2.2.1
-            //if (admin)
-            //{
-            //    // Check if the resource types contain duplicates
-            //    // Get the existing Resource Type items
-            //    ServiceResponse serviceResponse;
-            //    serviceResponse = await ResourceTypeService.GetItems();
-            //    List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
-            //    var dupes = types.GroupBy(x => x.ShortName).Any(g => g.Count() > 1);
-            //    if (dupes)
-            //    {
-            //        ShowInformationModal("bg-navcolor", "ATTENTION", "Your resource types configuration contains duplicate short names. This can cause an issue when generating names using the API.<br /><br />It is recommended that you refresh your resource types to the latest configuration.<br /><br />To refresh:<ul><li>Expand the Resource Types section</li><li>Epxand the Configuration section</li><li>Select the Refresh option, with the 'Refresh short names?' option selected</li></ul><br />");
-            //    }
-            //}
-
             StateHasChanged();
         }
     }
@@ -1679,6 +1728,18 @@
     public void Dispose()
     {
         StateHasChanged();
+    }
+
+    public bool IsTypeVisible(ResourceType type)
+    {
+        bool visible = true;
+
+        if (!string.IsNullOrEmpty(filterData))
+        {
+            if ((!type.Resource.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!type.ShortName.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+                visible = false;
+        }
+        return visible;
     }
 
     private async Task FormAction(string type, long id, string action, string parentcomponent = "")
@@ -2155,6 +2216,38 @@
                     ResourceLocation resourceLocation;
                     switch (action)
                     {
+                        case "enable":
+                            resourceLocation = servicesData.ResourceLocations.Find(x => x.Id == id);
+                            resourceLocation.Enabled = true;
+                            serviceResponse = await ResourceLocationService.PostItem(resourceLocation);
+                            if (serviceResponse.Success)
+                            {
+                                message.Type = MessageTypesEnum.SUCCESS;
+                                message.Message = resourceLocation.Name + " enabled!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = resourceLocation.Name + " enabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "disable":
+                            resourceLocation = servicesData.ResourceLocations.Find(x => x.Id == id);
+                            resourceLocation.Enabled = false;
+                            serviceResponse = await ResourceLocationService.PostItem(resourceLocation);
+                            if (serviceResponse.Success)
+                            {
+                                message.Type = MessageTypesEnum.SUCCESS;
+                                message.Message = resourceLocation.Name + " disabled!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = resourceLocation.Name + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
                         case "edit":
                             ShowEditModal((int)id, "ResourceLocation", "Edit Location", "<p>Edit the Location.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", true);
                             break;
@@ -2181,6 +2274,26 @@
                             serviceResponse = await ResourceLocationService.GetItems();
                             var locationjson = serviceResponse.ResponseObject;
                             await BlazorDownloadFileService.DownloadFileFromText("locationsconfig.json", JsonSerializer.Serialize(locationjson).ToString(), System.Text.Encoding.UTF8, "application/octet-stream");
+                            break;
+                        case "refresh":
+                            confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will refresh your current Locations configuration with the latest configuration!\n\nAre you sure?");
+                            if (confirm)
+                            {
+                                bool ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "refreshshortnames");
+
+                                serviceResponse = await ResourceLocationService.RefreshResourceLocations(ischecked);
+                                if (serviceResponse.Success)
+                                {
+                                    message.Type = MessageTypesEnum.SUCCESS;
+                                    message.Message = "Locations configuration refreshed!";
+                                }
+                                else
+                                {
+                                    message.Type = MessageTypesEnum.ERROR;
+                                    message.Message = "Locations configuration refresh failed! ";
+                                    message.MessageDetails = serviceResponse.ResponseMessage;
+                                }
+                            }
                             break;
                         case "reset":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will reset your current Locations configuration and cannot be undone!\n\nAre you sure?");
@@ -2458,6 +2571,38 @@
                     ResourceType resourceType = new();
                     switch (action)
                     {
+                        case "enable":
+                            resourceType = servicesData.ResourceTypes.Find(x => x.Id == id);
+                            resourceType.Enabled = true;
+                            serviceResponse = await ResourceTypeService.PostItem(resourceType);
+                            if (serviceResponse.Success)
+                            {
+                                message.Type = MessageTypesEnum.SUCCESS;
+                                message.Message = resourceType.Resource + " enabled!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = resourceType.Resource + " enabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "disable":
+                            resourceType = servicesData.ResourceTypes.Find(x => x.Id == id);
+                            resourceType.Enabled = false;
+                            serviceResponse = await ResourceTypeService.PostItem(resourceType);
+                            if (serviceResponse.Success)
+                            {
+                                message.Type = MessageTypesEnum.SUCCESS;
+                                message.Message = resourceType.Resource + " disabled!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = resourceType.Resource + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
                         case "edit":
                             ShowEditModal((int)id, "ResourceType", "Edit Resource Type", "<p>Edit the Resource Type.</p><p><strong>NOTES</strong></p><ul><li>Short Name value will be converted to lower case.</li><li>Short Name must be 1-10 characters.</li></ul>", true);
                             break;
@@ -2486,7 +2631,6 @@
                                 }
                             }
                             break;
-
                         case "reset":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will reset your current Types configuration and cannot be undone!\n\nAre you sure?");
                             if (confirm)
@@ -2867,11 +3011,11 @@
                     }
                     break;
             }
-            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);            
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
         }
         catch (Exception ex)
         {
-            LogHelper.LogAdminMessage("ERROR", ex.Message);
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             message.Type = MessageTypesEnum.ERROR;
             message.Message = "There was a problem with the request.";
         }
@@ -2883,20 +3027,18 @@
             {
                 case MessageTypesEnum.INFORMATION:
                     toastService.ShowInfo(message.Message, "INFORMATION");
-                    LogHelper.LogAdminMessage(message.Type.ToString(), message.Message);
                     break;
                 case MessageTypesEnum.SUCCESS:
                     toastService.ShowSuccess(message.Message, "SUCCESS");
-                    LogHelper.LogAdminMessage(message.Type.ToString(), message.Message);
                     break;
                 case MessageTypesEnum.WARNING:
                     toastService.ShowWarning(message.Message, "WARNING");
                     break;
                 case MessageTypesEnum.ERROR:
                     toastService.ShowError(message.Message, "ERROR");
-                    LogHelper.LogAdminMessage("ERROR", message.Message + message.MessageDetails);
                     break;
             }
+            AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message });
         }
     }
 

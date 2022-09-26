@@ -4,6 +4,7 @@
 @inject ProtectedSessionStorage session
 @inject IJSRuntime JsRuntime
 @inject ILogger<NavMenu> Logger
+@inject ProtectedLocalStorage storage
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -115,22 +116,37 @@
         @if (PageType.ToString() == "AzureNamingTool.Pages.Index")
         {
             <hr />
+
             <div class="nav-item px-3">
-                <div classclass="nav-link">
-                    <LatestNews></LatestNews>
+                <div class="nav-link">
+                    <label title="Latest News" style="font-weight:bold;">
+                    Latest News
+                    </label>
+                    <label class="switch" title="Latest News Switch" style="top:-5px; float:right;">
+                        <input type="checkbox" checked="@newsenabled" @oninput="NewsChanged">
+                        <span class="slider round"></span>
+                    </label>
+                    <div style="clear:both"></div>
+                    @if (newsenabled)
+                    {
+                        <div classclass="nav-link" style="padding-top:10px">
+                            <LatestNews></LatestNews>
+                        </div>
+                    }
                 </div>
             </div>
         }
     </nav>
 </div>
 
-@code {    
+@code {
     [Parameter]
     public Type? PageType { get; set; }
     private bool collapseNavMenu = true;
     private ServicesData servicesData = new();
     private bool admin;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private bool newsenabled = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -143,7 +159,18 @@
         if (firstRender)
         {
             servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
-
+            try
+            {
+                result = await storage.GetAsync<bool>("newsenabled");
+                newsenabled = result.Success ? result.Value : true;
+            }
+            catch
+            {
+                newsenabled = true;
+            }
+            state.NewsEnabled = newsenabled;
+            StateHasChanged();
+            
         }
         else
         {
@@ -155,7 +182,7 @@
         }
         StateHasChanged();
     }
-    
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
@@ -164,5 +191,13 @@
     private async void OnConfigNavClick(string e)
     {
         await JsRuntime.InvokeVoidAsync("scrollIntoView", e);
+    }
+
+    private async void NewsChanged(ChangeEventArgs e)
+    {
+        newsenabled = (bool)e.Value;
+        await storage.SetAsync("newsenabled", newsenabled);
+        state.NewsEnabled = newsenabled;
+        StateHasChanged();
     }
 }

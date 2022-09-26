@@ -1,4 +1,4 @@
-[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Version History](VERSIONHISTORY.md) 
+[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
 
 # Azure Naming Tool v2 - Updating
 
@@ -16,7 +16,7 @@
 
 ## Overview
 
-The Azure Naming Tool is designed for easy updates, regardless of the hosting scenario. The tool will receive regular updates, often requiring refreshing the local version with updated functionality. All configurations files are stored in the **/settings** folder. This folder can be backed up/restored manually, or via the **Configuration Page** to ensure all settings are retained during updating. This page details the updating process.
+The Azure Naming Tool is designed for easy updates, regardless of the hosting scenario. The tool will receive regular updates, often requiring refreshing the local version with updated functionality. All configuration files are stored in the **/settings** folder. This folder can be backed up/restored manually, or via the **Configuration Page** to ensure all settings are retained during updating. This page details the updating process.
 
 ## Backup Settings
 
@@ -45,11 +45,11 @@ To restore the settings:
 
 ## Update Container
 
-When running as a container, the Azure Naming Tool utilizes  a separate volume for storage of the configuration files. When updating, this volume should not be modified to prevent any loss of the existing configuration. 
+When running as a container, the Azure Naming Tool utilizes a separate volume for storage of the configuration files. When updating, this volume should not be modified to prevent any loss of the existing configuration. 
 
 To update the Azure Naming Tool running as a container within a Docker environment:
 
-	1. Complete the Back up Settings instructions above.
+	1. Complete the Backup Settings instructions above.
 	2. Complete the Run as a Docker container instructions to update your local codebase and Docker image
 	3. Once the process is complete, confirm the site is running
 	4. Login in using the existing Admin password
@@ -63,7 +63,7 @@ When running the Azure Naming Tool as a stand-alone application, all configurati
 
 To update the Azure Naming Tool running a stand-alone site:
 
-	1. Complete the Back up Settings instructions above
+	1. Complete the Backup Settings instructions above
 	2. In your site directory, copy the /settings folder to a safe location
 	3. Complete the Run as a Stand-Alone Site instructions to update your local codebase
 	4. Copy the /settings folder from your safe location back to the application root
@@ -72,5 +72,3 @@ To update the Azure Naming Tool running a stand-alone site:
 	7. On the Configuration Page, confirm your existing configuration is applied
 
 If the settings are not applied, please see the **[Restore Settings](#restore-settings)** instructions. 
-
-	

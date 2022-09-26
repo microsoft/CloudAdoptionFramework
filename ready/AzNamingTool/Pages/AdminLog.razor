@@ -43,6 +43,45 @@
                             Purge Admin Log
                         </button>
                     </div>
+                    <div class="card">
+                        <div class="card-header bg-default text-black">
+                            <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter
+                            </a>
+                        </div>
+                        <div class="collapse card card-body @theme.ThemeStyle" id="filter">
+                            <div class="form-group row mb-3">
+                                <div style="width:auto;">
+                                    <input class="form-control" type="date" style="width: 150px;" @bind="startdate" @bind:event="oninput" />
+                                </div>
+                                <div style="width:auto;padding-top:7px;">
+                                    to
+                                </div>
+                                <div style="width:auto;">
+                                    <input class="form-control" type="date" style="width: 150px;" @bind="enddate" @bind:event="oninput" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="input-group flex-nowrap mb-3">
+                                    <div class="input-group flex-nowrap mb-3">
+                                        <span class="input-group-text" id="addon-wrapping">
+                                            <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
+                                        </span>
+                                        <input class="form-control" type="search" placeholder="Filter by Title, Message"
+                                       @bind="filterData"
+                                       @bind:event="oninput">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div>
+                                    <button class="btn btn-success" title="Reset" @onclick="@(e => OnResetClick())">
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table @theme.ThemeStyle">
                             <thead>
@@ -55,6 +94,8 @@
                             <tbody>
                                 @foreach (AdminLogMessage message in lstAdminLogMessages)
                                 {
+                                    if (!IsVisible(message))
+                                        continue;
                                     <tr>
                                         <td class="align-top">
                                             @message.CreatedOn.ToString()
@@ -83,18 +124,23 @@
 </div>
 
 @code {
-    
+
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
     private bool admin;
     private bool dataLoaded = false;
     List<AdminLogMessage> lstAdminLogMessages = new();
+    public string filterData { get; set; }
+    public DateTime startdate { get; set; } = DateTime.Today.AddDays(-30);
+    public DateTime enddate { get; set; } = DateTime.Today;
+
     protected override async Task OnInitializedAsync()
     {
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        ServiceResponse serviceResponse = new();
         var result = await session.GetAsync<bool>("admin");
         admin = (bool)result.Value;
         if (!admin)
@@ -104,7 +150,9 @@
 
         if (firstRender)
         {
-            lstAdminLogMessages = await LogHelper.GetAdminLog();
+            serviceResponse = await AdminLogService.GetItems();
+            lstAdminLogMessages = (List<AdminLogMessage>)serviceResponse.ResponseObject;
+
             dataLoaded = true;
             StateHasChanged();
         }
@@ -123,14 +171,17 @@
 
     private async Task OnPurgeLogClick()
     {
+        ServiceResponse serviceResponse = new();
         bool confirm = false;
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Admin Log. Are you sure?");
         if (confirm)
         {
-            await LogHelper.PurgeAdminLog();
+            await AdminLogService.DeleteAllItems();
             toastService.ShowSuccess("Admin Log purged!", "SUCCESS");
-            LogHelper.LogAdminMessage("ADMIN LOG", "Admin Log log purged.");
-            lstAdminLogMessages = await LogHelper.GetAdminLog();
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Admin Log log purged." });
+            GeneralHelper.InvalidateCacheObject("AdminLogMessage");
+            serviceResponse = await AdminLogService.GetItems();
+            lstAdminLogMessages = (List<AdminLogMessage>)serviceResponse.ResponseObject;
             dataLoaded = true;
             StateHasChanged();
         }
@@ -139,5 +190,35 @@
     private async Task OnExportLogClick()
     {
         await JsRuntime.InvokeVoidAsync("htmlToCSV", "adminlog.csv");
+    }
+
+    public bool IsVisible(AdminLogMessage message)
+    {
+        bool visible = true;
+        if (startdate != null)
+        {
+            if (message.CreatedOn < startdate)
+                visible = false;
+        }
+
+        if (enddate != null)
+        {
+            if (message.CreatedOn > (enddate + new TimeSpan(23, 59, 59)))
+                visible = false;
+        }
+
+        if (!string.IsNullOrEmpty(filterData))
+        {
+            if ((!message.Title.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!message.Message.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+                visible = false;
+        }
+        return visible;
+    }
+
+    private async Task OnResetClick()
+    {
+        startdate = DateTime.Today.AddDays(-30);
+        enddate = DateTime.Today;
+        filterData = "";
     }
 }
