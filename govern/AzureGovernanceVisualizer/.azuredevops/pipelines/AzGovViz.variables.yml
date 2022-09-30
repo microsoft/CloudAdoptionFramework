@@ -1,4 +1,4 @@
-# AzGovViz v6_major_20220603_1
+# AzGovViz v6_major_20220930_1
 # First things first:
 # 1. Replace <YourServiceConnection> with the name of your service connection
 # 2. Replace <YourManagementGroupId> with the your ManagementGroupId
@@ -28,6 +28,26 @@ parameters:
     default:
       - undefined
 
+    # Subscription Tag names for Storage Account Access Analysis
+  - name: StorageAccountAccessAnalysisSubscriptionTagsParameters
+    type: object
+    # example:
+    #   default:
+    #     - Responsible
+    #     - <TagName>
+    default:
+      - undefined
+
+    # Storage Account Tag names for Storage Account Access Analysis
+  - name: StorageAccountAccessAnalysisStorageAccountTagsParameters
+    type: object
+    # example:
+    #   default:
+    #     - SAOwner
+    #     - <TagName>
+    default:
+      - undefined
+
 variables:
 ### Required Variables
 
@@ -36,10 +56,10 @@ variables:
     # String | example: value: 'azure-ado-serviceconnection'
     value: '<YourServiceConnection>'
 
-  # The Management Group ID for the script to start processing with
+  # The Management Group ID for the script to process
   - name: ManagementGroupId
-    # String | example: value: 'MyManagementGroup'
-    value: '<YourManagementGroupId>'
+    # String | example: value: 'MyManagementGroupId'
+    value: '<YourManagementGroupId>' #provide the Management Group Id, not the displayName
 
 ### Default Variables - Modify as Needed
 
@@ -94,12 +114,12 @@ variables:
   # Define if Azure Consumption data should be reported
   - name: DoAzureConsumption
     # Switch | example: value: true
-    value:
+    value: true
 
   # If DoAzureConsumption == true then you may define for which time period (days) Azure Consumption data should be gathered
   - name: AzureConsumptionPeriod
     # Integer | default = 1 | example: value: 7
-    value:
+    value: 14
 
   # Do not include Role assignments on ResourceGroups and Resources
   - name: DoNotIncludeResourceGroupsAndResourcesOnRBAC
@@ -264,9 +284,45 @@ variables:
     # String | example: value: "<Name of the WebApp>"
     value: <Name> e.g. MyAzGovVizWebApp
 
+# Do not report on PIM (Privileged Identity Management) Eligible Role assignments
+  - name: NoPIMEligibility
+    # Switch | example: value: true
+    value:
+
+# Ignore the current scope (ManagementGrouId) and get all PIM (Privileged Identity Management) eligible Role assignments
+  - name: PIMEligibilityIgnoreScope
+    # Switch | example: value: true
+    value:
+  
+# Prevent integration of PIM eligible assignments with RoleAssignmentsAll (HTML, CSV)
+  - name: NoPIMEligibilityIntegrationRoleAssignmentsAll
+    # Switch | example: value: true
+    value:
+
+# Do not execute Azure Landing Zones (ALZ) Policy Version Checker
+  - name: noALZPolicyVersionChecker
+    # Switch | example: value: true
+    value:
+
+# Create a dedicated DefinitionInsights HTML file 
+  - name: NoDefinitionInsightsDedicatedHTML
+    # Switch | example: value: true
+    value:
+
+# Do not execute Storage Account Access Analysis
+  - name: NoStorageAccountAccessAnalysis
+    # Switch | example: value: true
+    value:
+
 # Dynamic Variables - Do Not Modify Anything Below this line!
   - name: ExcludedResourceTypesDiagnosticsCapable
     value: ${{ join(',',parameters.ExcludedResourceTypesDiagnosticsCapableParameters) }}
 
   - name: SubscriptionQuotaIdWhitelist
     value: ${{ join(',',parameters.SubscriptionQuotaIdWhitelistParameters) }}
+
+  - name: StorageAccountAccessAnalysisSubscriptionTags
+    value: ${{ join(',',parameters.StorageAccountAccessAnalysisSubscriptionTagsParameters) }}
+
+  - name: StorageAccountAccessAnalysisStorageAccountTags
+    value: ${{ join(',',parameters.StorageAccountAccessAnalysisStorageAccountTagsParameters) }}
