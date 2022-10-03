@@ -361,6 +361,75 @@ function runInfo {
             $script:paramsUsed += "DoPSRule: $($azAPICallConf['htParameters'].DoPSRule) &#13;"
         }
 
+        if ($NoPIMEligibility) {
+            Write-Host " NoPIMEligibility = $($NoPIMEligibility)" -ForegroundColor Green
+            $script:paramsUsed += "NoPIMEligibility: $($NoPIMEligibility) &#13;"
+        }
+        else {
+            Write-Host " NoPIMEligibility = $($NoPIMEligibility)" -ForegroundColor Yellow
+            $script:paramsUsed += "NoPIMEligibility: $($NoPIMEligibility) &#13;"
+        }
+
+        if ($PIMEligibilityIgnoreScope) {
+            Write-Host " PIMEligibilityIgnoreScope = $($PIMEligibilityIgnoreScope)" -ForegroundColor Green
+            #$script:paramsUsed += "PIMEligibilityIgnoreScope: $($PIMEligibilityIgnoreScope) &#13;"
+        }
+        else {
+            Write-Host " PIMEligibilityIgnoreScope = $($PIMEligibilityIgnoreScope)" -ForegroundColor Yellow
+            #$script:paramsUsed += "PIMEligibilityIgnoreScope: $($PIMEligibilityIgnoreScope) &#13;"
+        }
+
+        if ($NoPIMEligibilityIntegrationRoleAssignmentsAll) {
+            Write-Host " NoPIMEligibilityIntegrationRoleAssignmentsAll = $($NoPIMEligibilityIntegrationRoleAssignmentsAll)" -ForegroundColor Green
+            #$script:paramsUsed += "NoPIMEligibilityIntegrationRoleAssignmentsAll: $($NoPIMEligibilityIntegrationRoleAssignmentsAll) &#13;"
+        }
+        else {
+            Write-Host " NoPIMEligibilityIntegrationRoleAssignmentsAll = $($NoPIMEligibilityIntegrationRoleAssignmentsAll)" -ForegroundColor Yellow
+            #$script:paramsUsed += "NoPIMEligibilityIntegrationRoleAssignmentsAll: $($NoPIMEligibilityIntegrationRoleAssignmentsAll) &#13;"
+        }
+
+        if ($NoDefinitionInsightsDedicatedHTML) {
+            Write-Host " NoDefinitionInsightsDedicatedHTML = $($NoDefinitionInsightsDedicatedHTML)" -ForegroundColor Green
+            #$script:paramsUsed += "NoDefinitionInsightsDedicatedHTML: $($NoDefinitionInsightsDedicatedHTML) &#13;"
+        }
+        else {
+            Write-Host " NoDefinitionInsightsDedicatedHTML = $($NoDefinitionInsightsDedicatedHTML)" -ForegroundColor Yellow
+            #$script:paramsUsed += "NoDefinitionInsightsDedicatedHTML: $($NoDefinitionInsightsDedicatedHTML) &#13;"
+        }
+
+        if ($NoALZPolicyVersionChecker) {
+            Write-Host " NoALZPolicyVersionChecker = $($NoALZPolicyVersionChecker)" -ForegroundColor Green
+            #$script:paramsUsed += "NoALZPolicyVersionChecker: $($NoALZPolicyVersionChecker) &#13;"
+        }
+        else {
+            Write-Host " NoALZPolicyVersionChecker = $($NoALZPolicyVersionChecker)" -ForegroundColor Yellow
+            #$script:paramsUsed += "NoALZPolicyVersionChecker: $($NoALZPolicyVersionChecker) &#13;"
+        }
+
+        if ($NoStorageAccountAccessAnalysis) {
+            Write-Host " NoStorageAccountAccessAnalysis = $($NoStorageAccountAccessAnalysis)" -ForegroundColor Green
+            #$script:paramsUsed += "NoStorageAccountAccessAnalysis: $($NoStorageAccountAccessAnalysis) &#13;"
+        }
+        else {
+            Write-Host " NoStorageAccountAccessAnalysis = $($NoStorageAccountAccessAnalysis)" -ForegroundColor Yellow
+            #$script:paramsUsed += "NoStorageAccountAccessAnalysis: $($NoStorageAccountAccessAnalysis) &#13;"
+            if ($StorageAccountAccessAnalysisSubscriptionTags[0] -ne 'undefined' -and $StorageAccountAccessAnalysisSubscriptionTags.Count -gt 0) {
+                Write-Host "   StorageAccountAccessAnalysisSubscriptionTags: $($StorageAccountAccessAnalysisSubscriptionTags -join ', ')" -ForegroundColor Green
+            }
+            if ($StorageAccountAccessAnalysisStorageAccountTags[0] -ne 'undefined' -and $StorageAccountAccessAnalysisStorageAccountTags.Count -gt 0) {
+                Write-Host "   StorageAccountAccessAnalysisStorageAccountTags: $($StorageAccountAccessAnalysisStorageAccountTags -join ', ')" -ForegroundColor Green
+            }
+        }
+
+        if ($GitHubActionsOIDC) {
+            Write-Host " GitHubActionsOIDC = $($GitHubActionsOIDC)" -ForegroundColor Green
+            #$script:paramsUsed += "GitHubActionsOIDC: $($GitHubActionsOIDC) &#13;"
+        }
+        else {
+            Write-Host " GitHubActionsOIDC = $($GitHubActionsOIDC)" -ForegroundColor Yellow
+            #$script:paramsUsed += "GitHubActionsOIDC: $($GitHubActionsOIDC) &#13;"
+        }
+
     }
     #endregion RunInfo
 }

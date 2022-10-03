@@ -32,7 +32,10 @@ function addHtParameters {
         PolicyAtScopeOnly                            = [bool]$PolicyAtScopeOnly
         RBACAtScopeOnly                              = [bool]$RBACAtScopeOnly
         DoPSRule                                     = [bool]$DoPSRule
-        PSRuleFailedOnly                             = [bool]$PSRuleFailedOnly 
+        PSRuleFailedOnly                             = [bool]$PSRuleFailedOnly
+        NoALZPolicyVersionChecker                    = [bool]$NoALZPolicyVersionChecker
+        NoStorageAccountAccessAnalysis               = [bool]$NoStorageAccountAccessAnalysis
+        GitHubActionsOIDC                            = [bool]$GitHubActionsOIDC
     }
     Write-Host 'htParameters:'
     $azAPICallConf['htParameters'] | format-table -AutoSize | Out-String

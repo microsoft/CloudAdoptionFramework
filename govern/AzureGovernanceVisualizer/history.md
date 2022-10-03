@@ -4,6 +4,90 @@
 
 ### AzGovViz version 6
 
+__Changes__ (2022-Sep-30 / Major)
+
+* Fix issue #135 
+  * Embedded GitHub Actions OIDC (Open ID Connect) specific functionality to reconnect and get new token ([AzAPICall](https://aka.ms/AzAPICall))
+  * New parameter `-GitHubActionsOIDC` which is only to be used for GitHub Actions `/.github/workflows/AzGovViz_OIDC.yml`
+  * Updated `/.github/workflows/AzGovViz_OIDC.yml` to use the new parameter `-GitHubActionsOIDC`
+* Fix issue #136
+  * Handle return for Storage Accounts located in managed Resource Groups  
+  &#127800; Call for contribution: Please review the list of known [managed Resource Groups](https://github.com/JulianHayward/AzSchnitzels/blob/main/info/managedResourceGroups.txt) and contribute if you can, thanks!
+* Added missing variable `NoStorageAccountAccessAnalysis` in `.azuredevops/pipelines/AzGovViz.variables.yml`
+* Use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.1.30
+
+__Changes__ (2022-Sep-28 / Major)
+
+* New feature 'Storage Account Access Analysis' - provides insights on Storage Accounts with focus on anonymous access (containers/blobs and 'Static website' feature). Data is provided in the HTML __TenantSummary__ (Subscriptions, Resources & Defender) and as CSV export
+  * New parameter `-NoStorageAccountAccessAnalysis` - do not execute the feature
+  * New parameter `-StorageAccountAccessAnalysisSubscriptionTags` - define the Subscription tags that should be added to the CSV output
+  * New parameter `-StorageAccountAccessAnalysisStorageAccountTags` - define the Storage Account (resource) tags that should be added to the CSV output
+  * Updated `.azuredevops/pipelines/AzGovViz.variables.yml` accordingly
+* Rename 'ALZ EverGreen' feature to 'Azure Landing Zones (ALZ) Policy Version Checker'
+  * Replaced parameter ~~`-NoALZEverGreen`~~ with `-NoALZPolicyVersionChecker`
+* Use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.1.24
+* Optimizations
+
+__Changes__ (2022-Sep-17 / Major)
+
+* Fix Azure DevOps Pipeline correct addressing of NoDefinitionInsights variable in YAML
+* Fix issue #132
+* Add __[Contribution Guide](contributionGuide.md)__
+
+__Changes__ (2022-Sep-12 / Major)
+
+* New feature 'ALZ EverGreen' - Azure Landing Zones EverGreen for Policy and Set definitions. AzGovViz will clone the ALZ GitHub repository and collect the ALZ policy and set definitions history. The ALZ data will be compared with the data from your tenant so that you can get lifecycle management recommendations for ALZ policy and set definitions that already exist in your tenant plus a list of ALZ policy and set definitions that do not exist in your tenant. The ALZ EverGreen results will be displayed in the __TenantSummary__ and a CSV export `*_ALZEverGreen.csv` will be provided. Thanks! ALZ Team 
+  * New parameter `-NoALZEverGreen` - Do not execute the ALZ EverGreen feature
+* Update: Per default __DefinitionInsights__ will be written to a separate HTML file. This will improve the html file handling (browser memory usage /response time / user experience). 
+  * Note: Please update your Azure DevOps and GitHub YAML files with the latest versions if you are using the webApp publishing feature
+  * New parameter `-NoDefinitionInsightsDedicatedHTML` (__DefinitionInsights__ will NOT be written to a separate HTML file `*_DefinitionInsights.html`)
+* Add Resource fluctuation detailed (`*_ResourceFluctuationDetailed.csv`) CSV output (add/remove, scope details, resource details)
+* Fix consumption reporting for large tenants with more than 3k subscriptions (_Management Group abc has too many subscriptions <count>, exceeding CCM API Current Limit 3000_)
+* Fix CSV export `*_PolicySetDefinitions.csv` - Builtin Policy definitions contained in PolicySet definitions will only show the GUID instead of the full ID as for large PolicySet definitions the field size limit in Excel may be exceeded (column: PoliciesUsed4CSV)
+* BuiltIn definitions collection - add 'Static' Policy definitions (part of __DefinitionInsights__ and `*_PolicyDefinitions.csv`)
+* Fix __HierarchyMap__ image quality (now .png (aka 'peng')). Thanks! Brooks Vaughn
+* Use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.1.23
+* Optimizations
+__Changes__ (2022-Aug-17 / Major)
+
+* __Update: IMPORTANT Fix__ for custom Role definitions / missing DataActions and NotDataActions
+  * Update [API reference](#api-reference) roleDefinitions use API version 2018-07-01 (API version 2022-04-01 not available in sovereign clouds)
+* BugFix
+
+__Changes__ (2022-Aug-03 / Major)
+
+* __IMPORTANT Fix__ for custom Role definitions / missing DataActions and NotDataActions
+  * Update [API reference](#api-reference) roleDefinitions use API version 2022-04-01
+* BugFix
+
+__Changes__ (2022-Jul-31 / Major)
+
+* Update on feature 'PIM (Privileged Identity Management) eligible Role assignments'
+    * Integrate with RoleAssignmentsAll (HTML, CSV)  
+    ![alt text](img/pimeligibilityIntegrateRoleassignmentsall.png "PIMEligibleIntegrationRoleAssignmentsAll")  
+    * New parameter `-NoPIMEligibilityIntegrationRoleAssignmentsAll` - Prevent integration of PIM eligible assignments with RoleAssignmentsAll (HTML, CSV)
+* Fix: PIM 'Assigned' and 'Activated' Role assignments now also reflect inheritance for lower scopes
+* Bugfixes & optimizations
+
+__Changes__ (2022-Jul-28 / Major)
+
+* Update on feature 'PIM (Privileged Identity Management) eligible Role assignments'
+    * new parameter `-PIMEligibilityIgnoreScope` - By default will only report for PIM Elibility for the scope (`ManagementGroupId`) that was provided. If you use the new switch parameter then PIM Eligibility for all onboarded scopes (Management Groups and Subscriptions) will be reported.
+    * Add CSV output
+    * Add inheritance information
+* Use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.1.21
+* Bugfixes
+
+__Changes__ (2022-Jul-26 / Major)
+
+* New feature 'PIM (Privileged Identity Management) eligible Role assignments' (TenantSummary)  
+&#x26D4; ___Breaking Change!___ requires API permissions update!
+    * Get a full report of all PIM eligible Role assignments for Management Groups and Subscriptions, including resolved User members of AAD Groups that have assigned eligibility
+    * Spoiler: Next iteration will include ScopeInsights, showing entire eligible Role assignments on Subscriptions including from upper Management Group scopes
+    * &#x1F4A1; Note: this feature requires to execute as Service Principal with `Application` API permission `PrivilegedAccess.Read.AzureResources`
+* Use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.1.19
+* Bugfixes
+
 __Changes__ (2022-Jul-22 / Minor)
 
 * New parameter `-PSRuleFailedOnly` - PSRule for Azure will only report on failed resource (may save some space/noise)
@@ -96,7 +180,7 @@ __Changes__ (2022-May-05 / Major)
 
 __Changes__ (2022-May-02 / Minor)
 
-* __Tenant Summary__ Change Tracking - RBAC Role assignments: add PIM (Priviledged Identity Management) information
+* __Tenant Summary__ Change Tracking - RBAC Role assignments: add PIM (Privileged Identity Management) information
 * Azure DevOps pipeline YAML - change `vmImage: 'ubuntu-18.04'` to  `vmImage: 'ubuntu-20.04'`
 * Published new HTML [demo](https://www.azadvertizer.net/azgovvizv4/demo/AzGovViz_demo.html)
 
@@ -242,7 +326,7 @@ __Changes__ (2021-Sep-01 / Major)
 
 __Changes__ (2021-Aug-30 / Major)
 
-* Adding feature for RBAC Role assignments: determine 'standing' from PIM (Priviledged Identity Mangement) managed Role assignments
+* Adding feature for RBAC Role assignments: determine 'standing' from PIM (Privileged Identity Mangement) managed Role assignments
 * New parameter `-NoResources` - this will speed up the processing time but information like Resource diagnostics capability and resource type stats will not be made available (featured for large tenants)
 * Integrate AzGovViz with AzOps (after 'AzOps - Push' run AzGovViz) - (line 77 AzGovViz.yml). Checkout [AzOps Accellerator](https://github.com/Azure/AzOps-Accelerator)
 * Performance optimization

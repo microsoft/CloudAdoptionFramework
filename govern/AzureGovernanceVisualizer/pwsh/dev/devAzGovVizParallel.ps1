@@ -140,6 +140,40 @@
 .PARAMETER ExcludedResourceTypesDiagnosticsCapable
     Resource Types to be excluded from processing analysis for diagnostic settings capability (default: microsoft.web/certificates)
 
+.PARAMETER NoPIMEligibility
+    Do not report on PIM (Privileged Identity Management) eligible Role assignments
+    Note: this feature requires you to execute as Service Principal with `Application` API permission `PrivilegedAccess.Read.AzureResources`
+
+.PARAMETER PIMEligibilityIgnoreScope
+    Ignore the current scope (ManagementGrouId) and get all PIM (Privileged Identity Management) eligible Role assignments
+    By default will only report for PIM Elibility for the scope (ManagementGroupId) that was provided. If you use the new switch parameter then PIM Eligibility for all onboarded scopes (Management Groups and Subscriptions) will be reported
+
+.PARAMETER NoPIMEligibilityIntegrationRoleAssignmentsAll
+    Prevent integration of PIM eligible assignments with RoleAssignmentsAll (HTML, CSV)
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoPIMEligibilityIntegrationRoleAssignmentsAll
+
+.PARAMETER NoALZPolicyVersionChecker
+    'Azure Landing Zones (ALZ) Policy Version Checker' for Policy and Set definitions. AzGovViz will clone the ALZ GitHub repository and collect the ALZ policy and set definitions history. The ALZ data will be compared with the data from your tenant so that you can get lifecycle management recommendations for ALZ policy and set definitions that already exist in your tenant plus a list of ALZ policy and set definitions that do not exist in your tenant. The 'Azure Landing Zones (ALZ) Policy Version Checker' results will be displayed in the TenantSummary and a CSV export `*_ALZPolicyVersionChecker.csv` will be provided.
+    If you do not want to execute the 'Azure Landing Zones (ALZ) Policy Version Checker' feature then use this parameter
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoALZPolicyVersionChecker 
+
+.PARAMETER NoDefinitionInsightsDedicatedHTML
+    DefinitionInsights will be written to a separate HTML file `*_DefinitionInsights.html`. If you want to keep DefinitionInsights in the main html file then use this parameter
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoDefinitionInsightsDedicatedHTML  
+
+.PARAMETER NoStorageAccountAccessAnalysis
+    Analysis on Storage Accounts, specially focused on anonymous access.
+    If you do not want to execute this feature then use this parameter
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoStorageAccountAccessAnalysis
+
+.PARAMETER StorageAccountAccessAnalysisSubscriptionTags
+    If the Storage Account Access Analysis feature is executed with this parameter you can define the subscription tags that should be added to the CSV output
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -StorageAccountAccessAnalysisSubscriptionTags @('Responsible', 'TeamEmail')
+
+.PARAMETER StorageAccountAccessAnalysisStorageAccountTags
+    If the Storage Account Access Analysis feature is executed with this parameter you can define the Storage Account (resource) tags that should be added to the CSV output
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -StorageAccountAccessAnalysisStorageAccountTags @('SAResponsible', 'DataOfficer')
+
 .EXAMPLE
     Define the ManagementGroup ID
     PS C:\> .\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id>
@@ -267,7 +301,27 @@
     Define Resource Types to be excluded from processing analysis for diagnostic settings capability (default: microsoft.web/certificates)
     PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -ExcludedResourceTypesDiagnosticsCapable @('microsoft.web/certificates')
 
-    .NOTES
+    Define if report on PIM (Privileged Identity Management) eligible Role assignments should be created. Note: this feature requires you to execute as Service Principal with `Application` API permission `PrivilegedAccess.Read.AzureResources`
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoPIMEligibility
+
+    Define if the current scope (ManagementGroupId) should be ignored and therefore and get all PIM (Privileged Identity Management) eligible Role assignments. Note: this feature requires you to execute as Service Principal with `Application` API permission `PrivilegedAccess.Read.AzureResources`
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -PIMEligibilityIgnoreScope
+
+    Define if PIM Eligible assignments should not be integrated with RoleAssignmentsAll outputs (HTML, CSV)
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoPIMEligibilityIntegrationRoleAssignmentsAll
+
+    Define if the 'Azure Landing Zones (ALZ) Policy Version Checker' feature should not be executed
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoALZPolicyVersionChecker
+
+    Define if DefinitionInsights should not be written to a seperate html file (*_DefinitionInsights.html)
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoDefinitionInsightsDedicatedHTML
+
+    Define if Storage Account Access Analysis (focus on anonymous access) should be executed
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoStorageAccountAccessAnalysis
+    Additionally you can define Subscription and/or Storage Account Tag names that should be added to the CSV output per Storage Account
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> --StorageAccountAccessAnalysisSubscriptionTags @('Responsible', 'TeamEmail') -StorageAccountAccessAnalysisStorageAccountTags @('SAResponsible', 'DataOfficer')
+
+.NOTES
     AUTHOR: Julian Hayward - Customer Engineer - Customer Success Unit | Azure Infrastucture/Automation/Devops/Governance | Microsoft
 
 .LINK
@@ -283,10 +337,10 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $AzAPICallVersion = '1.1.18',
+    $AzAPICallVersion = '1.1.30',
 
     [string]
-    $ProductVersion = 'v6_minor_20220722_1',
+    $ProductVersion = 'v6_major_20220930_2',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
@@ -443,6 +497,33 @@ Param
     [string]
     $PSRuleVersion,
 
+    [switch]
+    $NoPIMEligibility,
+
+    [switch]
+    $PIMEligibilityIgnoreScope,
+
+    [switch]
+    $NoPIMEligibilityIntegrationRoleAssignmentsAll,
+
+    [switch]
+    $NoALZPolicyVersionChecker,
+
+    [switch]
+    $NoDefinitionInsightsDedicatedHTML,
+
+    [switch]
+    $NoStorageAccountAccessAnalysis,
+
+    [array]
+    $StorageAccountAccessAnalysisSubscriptionTags = @('undefined'),
+
+    [array]
+    $StorageAccountAccessAnalysisStorageAccountTags = @('undefined'),
+
+    [switch]
+    $GitHubActionsOIDC,
+
     #https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/azure-subscription-service-limits#role-based-access-control-limits
     [int]
     $LimitRBACCustomRoleDefinitionsTenant = 5000,
@@ -504,6 +585,9 @@ if ($ManagementGroupId -match " ") {
 }
 
 #region Functions
+. ".\$($ScriptPath)\functions\processStorageAccountAnalysis.ps1"
+. ".\$($ScriptPath)\functions\processALZPolicyVersionChecker.ps1"
+. ".\$($ScriptPath)\functions\getPIMEligible.ps1"
 . ".\$($ScriptPath)\functions\testGuid.ps1"
 . ".\$($ScriptPath)\functions\apiCallTracking.ps1"
 . ".\$($ScriptPath)\functions\addRowToTable.ps1"
@@ -566,6 +650,8 @@ $funcTestGuid = $function:testGuid.ToString()
 
 testPowerShellVersion
 showMemoryUsage
+
+$outputPathGiven = $OutputPath
 setOutput
 if ($DoTranscript) {
     setTranscript
@@ -596,6 +682,7 @@ if ($DoPSRule) {
             ModulePathPipeline = 'PSRuleModule'
         })
 }
+
 verifyModules3rd -modules $modules
 #endregion verifyModules3rd
 
@@ -626,8 +713,8 @@ if ($azGovVizNewerVersionAvailable) {
 
 handleCloudEnvironment
 
-#region recommendPSRule
 if (-not $HierarchyMapOnly) {
+    #region recommendPSRule
     if (-not $azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
         if (-not $DoPSRule) {
             Write-Host ""
@@ -639,8 +726,25 @@ if (-not $HierarchyMapOnly) {
             pause
         }
     }
+    #endregion recommendPSRule
+
+    #region hintPIMEligibility
+    if ($azAPICallConf['htParameters'].accountType -eq 'User') {
+        if (-not $NoPIMEligibility) {
+            Write-Host ""
+            Write-Host " * * * HINT: PIM (Privileged Identity Management) Eligibility reporting * * *" -ForegroundColor DarkBlue
+            Write-Host "Parameter -NoPIMEligibility == '$NoPIMEligibility'"
+            Write-Host "Executing principal accountType: '$($azAPICallConf['htParameters'].accountType)'"
+            Write-Host "PIM Eligibility reporting requires to execute the script as ServicePrincipal. API Permission 'PrivilegedAccess.Read.AzureResources' is required"
+            Write-Host "For this run we switch the parameter -NoPIMEligibility from '$NoPIMEligibility' to 'True'"
+            $NoPIMEligibility = $true
+            Write-Host "Parameter -NoPIMEligibility == '$NoPIMEligibility'"
+            Write-Host " * * * * * * * * * * * * * * * * * * * * * *" -ForegroundColor DarkBlue
+            pause
+        }
+    }
+    #endregion hintPIMEligibility
 }
-#endregion recommendPSRule
 
 addHtParameters
 
@@ -673,6 +777,7 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $htCacheDefinitionsRole = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $htCacheDefinitionsBlueprint = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $htRoleDefinitionIdsUsedInPolicy = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htRoleAssignmentsPIM = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $htPoliciesUsedInPolicySets = @{}
     $htSubscriptionTags = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $htCacheAssignmentsPolicyOnResourceGroupsAndResources = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
@@ -748,7 +853,6 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $htManagedIdentityDisplayName = @{}
     $htAppDetails = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     if (-not $NoAADGroupsResolveMembers) {
-
         $htAADGroupsDetails = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
         $htAADGroupsExeedingMemberLimit = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
         $arrayGroupRoleAssignmentsOnServicePrincipals = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
@@ -762,6 +866,42 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $arrayPSRuleTracking = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htClassicAdministrators = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
     $arrayOrphanedResources = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
+    $arrayPIMEligible = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
+    $alzPolicies = @{}
+    $alzPolicySets = @{}
+    $alzPolicyHashes = @{}
+    $alzPolicySetHashes = @{}
+    $htDoARMRoleAssignmentScheduleInstances = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htDoARMRoleAssignmentScheduleInstances.Do = $true
+    $storageAccounts = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
+    $arrayStorageAccountAnalysisResults = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
+}
+
+if (-not $HierarchyMapOnly) {
+    if (-not $NoALZPolicyVersionChecker) {
+        switch ($azAPICallConf['checkContext'].Environment.Name) {
+            'Azurecloud' { 
+                Write-Host "'Azure Landing Zones (ALZ) Policy Version Checker' feature supported for Cloud environment '$($azAPICallConf['checkContext'].Environment.Name)'"
+                processALZPolicyVersionChecker 
+            }
+            'AzureChinaCloud' { 
+                Write-Host "'Azure Landing Zones (ALZ) Policy Version Checker' feature supported for Cloud environment '$($azAPICallConf['checkContext'].Environment.Name)'"
+                processALZPolicyVersionChecker
+            }
+            'AzureUSGovernment' { 
+                Write-Host "'Azure Landing Zones (ALZ) Policy Version Checker' feature supported for Cloud environment '$($azAPICallConf['checkContext'].Environment.Name)'"
+                processALZPolicyVersionChecker 
+            }
+            Default {
+                Write-Host "'Azure Landing Zones (ALZ) Policy Version Checker' feature NOT supported for Cloud environment '$($azAPICallConf['checkContext'].Environment.Name)'"
+                Write-Host "Setting parameter -NoALZPolicyVersionChecker to 'true'"
+                $NoALZPolicyVersionChecker = $true
+            }
+        }
+    }
+    else {
+        #Write-Host "Skipping 'Azure Landing Zones (ALZ) Policy Version Checker' (parameter -NoALZPolicyVersionChecker = $NoALZPolicyVersionChecker)"
+    }
 }
 
 getEntities
@@ -778,8 +918,6 @@ runInfo
 
 if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
 
-    #checkContextSubscriptionQuotaId -AADQuotaId $AADQuotaId
-    #testAzContext
     getSubscriptions
     detailSubscriptions
     showMemoryUsage
@@ -802,6 +940,11 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
 
     processDataCollection -mgId $ManagementGroupId
     showMemoryUsage
+
+    if (-not $NoPIMEligibility) {
+        getPIMEligible
+        showMemoryUsage
+    }
 
     exportBaseCSV
 
@@ -834,6 +977,11 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
 
     createTagList
     showMemoryUsage
+
+    if ($azAPICallConf['htParameters'].NoStorageAccountAccessAnalysis -eq $false) {
+        processStorageAccountAnalysis
+        showMemoryUsage
+    }
 
     if ($azAPICallConf['htParameters'].NoResources -eq $false) {
         getResourceDiagnosticsCapability
@@ -1382,6 +1530,70 @@ $html = @"
 "@
 
 if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
+
+    if (-not $NoDefinitionInsightsDedicatedHTML){
+        $htmlDefinitionInsightsDedicatedStart = $html
+        $htmlDefinitionInsightsDedicatedStart += @'
+    <body>
+        <div class="se-pre-con"></div>
+
+        <div class="hierprnt" id="hierprnt">
+            <div class="definitioninsightsprnt" id="definitioninsightsprnt" style="width:100%;height:100%;overflow-y:auto;resize: none;">
+                <div class="definitioninsights" id="definitioninsights"><p class="pbordered">DefinitionInsights</p>
+
+'@
+
+        $htmlDefinitionInsightsDedicatedEnd = @"
+                </div><!--definitionInsights-->
+            </div><!--definitionInsightsprnt-->
+
+        </div>
+        <div class="footer">
+            <div class="VersionDiv VersionLatest"></div>
+            <div class="VersionDiv VersionThis"></div>
+            <div class="VersionAlert"></div>
+        </div>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/toggle_v004_004.js"></script>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/collapsetable_v004_001.js"></script>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/fitty_v004_001.min.js"></script>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/version_v004_002.js"></script>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/autocorrectOff_v004_001.js"></script>
+        <script>
+            fitty('#fitme', {
+                minSize: 7,
+                maxSize: 10
+            });
+        </script>
+        <script>
+            `$("#getImage").on('click', function () {
+
+            element = document.getElementById('saveAsImageArea')
+            var images = element.getElementsByTagName('img');
+            var l = images.length;
+            for (var i = 0; i < l; i++) {
+                images[0].parentNode.removeChild(images[0]);
+            }
+
+            var scale = 3;
+            domtoimage.toPng(element, { quality: 0.95 , width: element.clientWidth * scale,
+                height: element.clientHeight * scale,
+                style: {
+                    transform: 'scale('+scale+')',
+                    transformOrigin: 'top left'
+            }})          
+                .then(function (dataUrl) {
+                var link = document.createElement('a');
+                link.download = '$($fileName).png';
+                link.href = dataUrl;
+                link.click();
+            });
+                    
+            })
+        </script>
+    </body>
+</html>
+"@
+    }
     if (-not $NoSingleSubscriptionOutput) {
 
         if ($azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
@@ -1402,9 +1614,6 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
         $htmlSubscriptionOnlyStart += @'
     <body>
         <div class="se-pre-con"></div>
-        <div class="tree">
-
-        </div>
 
         <div class="hierprnt" id="hierprnt">
             <div class="hierarchyTables" id="hierarchyTables">
@@ -1413,47 +1622,52 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
 '@
 
         $htmlSubscriptionOnlyEnd = @"
-</table>
-</div>
-    </div>
-    <div class="footer">
-        <div class="VersionDiv VersionLatest"></div>
-        <div class="VersionDiv VersionThis"></div>
-        <div class="VersionAlert"></div>
-    </div>
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/toggle_v004_004.js"></script>
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/collapsetable_v004_001.js"></script>
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/fitty_v004_001.min.js"></script>
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/version_v004_002.js"></script>
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/autocorrectOff_v004_001.js"></script>
-    <script>
-        fitty('#fitme', {
-            minSize: 7,
-            maxSize: 10
-        });
-    </script>
-    <script>
-        `$("#getImage").on('click', function () {
+            </table>
+        </div>
+        </div>
+        <div class="footer">
+            <div class="VersionDiv VersionLatest"></div>
+            <div class="VersionDiv VersionThis"></div>
+            <div class="VersionAlert"></div>
+        </div>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/toggle_v004_004.js"></script>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/collapsetable_v004_001.js"></script>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/fitty_v004_001.min.js"></script>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/version_v004_002.js"></script>
+        <script src="https://www.azadvertizer.net/azgovvizv4/js/autocorrectOff_v004_001.js"></script>
+        <script>
+            fitty('#fitme', {
+                minSize: 7,
+                maxSize: 10
+            });
+        </script>
+        <script>
+            `$("#getImage").on('click', function () {
 
-        element = document.getElementById('first')
-        var images = element.getElementsByTagName('img');
-        var l = images.length;
-        for (var i = 0; i < l; i++) {
-            images[0].parentNode.removeChild(images[0]);
-        }
+            element = document.getElementById('saveAsImageArea')
+            var images = element.getElementsByTagName('img');
+            var l = images.length;
+            for (var i = 0; i < l; i++) {
+                images[0].parentNode.removeChild(images[0]);
+            }
 
-        domtoimage.toJpeg(element)
-            .then(function (dataUrl) {
+            var scale = 3;
+            domtoimage.toPng(element, { quality: 0.95 , width: element.clientWidth * scale,
+                height: element.clientHeight * scale,
+                style: {
+                    transform: 'scale('+scale+')',
+                    transformOrigin: 'top left'
+            }})          
+                .then(function (dataUrl) {
                 var link = document.createElement('a');
-                link.download = '$($fileName)';
+                link.download = '$($fileName).png';
                 link.href = dataUrl;
                 link.click();
             });
-                
-        })
-    </script>
-</body>
-
+                    
+            })
+        </script>
+    </body>
 </html>
 "@
     }
@@ -1494,6 +1708,7 @@ $html += @"
 
 $html += @'
 <ul>
+    <div id="saveAsImageArea">
     <li id="first" style="background-color:white">
 '@
 
@@ -1685,6 +1900,7 @@ else {
                         </li>
                     </ul>
                 </li>
+                </div>
             </ul>
         </div>
     </div>
@@ -1721,13 +1937,13 @@ if ($azAPICallConf['htParameters'].HierarchyMapOnly -eq $false) {
     $endSummary = Get-Date
     Write-Host " Building TenantSummary duration: $((NEW-TIMESPAN -Start $startSummary -End $endSummary).TotalMinutes) minutes ($((NEW-TIMESPAN -Start $startSummary -End $endSummary).TotalSeconds) seconds)"
 
-    $html += @'
+    $html += @"
     </div><!--summary-->
     </div><!--summprnt-->
 
     <div class="definitioninsightsprnt" id="definitioninsightsprnt">
     <div class="definitioninsights" id="definitioninsights"><p class="pbordered">DefinitionInsights</p>
-'@
+"@
     $html | Add-Content -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName).html" -Encoding utf8 -Force
     $html = $null
 
@@ -1824,22 +2040,36 @@ $html += @"
     <script>
         `$("#getImage").on('click', function () {
     
-        element = document.getElementById('first')
-        var images = element.getElementsByTagName('img');
-        var l = images.length;
-        for (var i = 0; i < l; i++) {
-            images[0].parentNode.removeChild(images[0]);
-        }
-
-        domtoimage.toJpeg(element)
-            .then(function (dataUrl) {
+            element = document.getElementById('saveAsImageArea')
+            var images = element.getElementsByTagName('img');
+            var l = images.length;
+            for (var i = 0; i < l; i++) {
+                images[0].parentNode.removeChild(images[0]);
+            }
+    
+            var scale = 3;
+            domtoimage.toPng(element, { quality: 0.95 , width: element.clientWidth * scale,
+                height: element.clientHeight * scale,
+                style: {
+                    transform: 'scale('+scale+')',
+                    transformOrigin: 'top left'
+            }})          
+                .then(function (dataUrl) {
                 var link = document.createElement('a');
-                link.download = '$($fileName).jpeg';
+                link.download = '$($fileName).png';
                 link.href = dataUrl;
                 link.click();
             });
-                
-        })
+    
+            // domtoimage.toJpeg(element)
+            //     .then(function (dataUrl) {
+            //         var link = document.createElement('a');
+            //         link.download = '$($fileName).jpeg';
+            //         link.href = dataUrl;
+            //         link.click();
+            //     });
+                    
+            })
     </script>
 </body>
 </html>
