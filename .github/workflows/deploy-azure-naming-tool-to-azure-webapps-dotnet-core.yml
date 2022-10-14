@@ -30,7 +30,7 @@ on:
   
 defaults:
   run:
-    working-directory: ready/AzNamingTool
+    working-directory: /ready/AzNamingTool
     
 permissions:
   contents: read
