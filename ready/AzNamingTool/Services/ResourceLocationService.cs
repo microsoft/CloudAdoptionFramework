@@ -215,7 +215,7 @@ namespace AzureNamingTool.Services
                             ResourceLocation oldlocation = locations[i];
                             newlocation.Enabled = oldlocation.Enabled;
                             
-                            if (!shortNameReset)
+                            if ((!shortNameReset) || (oldlocation.ShortName == ""))
                             {
                                 newlocation.ShortName = oldlocation.ShortName;
                             }
@@ -236,6 +236,12 @@ namespace AzureNamingTool.Services
 
                     // Update the repository file
                     await FileSystemHelper.WriteFile("resourcelocations.json", refreshdata, "repository/");
+                    
+                    // Clear cached data
+                    GeneralHelper.InvalidateCacheObject("ResourceLocation");
+
+                    // Update the current configuration file version data information
+                    await GeneralHelper.UpdateConfigurationFileVersion("resourcelocations");
                 }
                 else
                 {

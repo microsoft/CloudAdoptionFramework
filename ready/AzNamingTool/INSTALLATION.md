@@ -105,22 +105,35 @@ docker run -d -p 8081:80 --mount source=azurenamingtoolvol,target=/app/settings 
 
 (.NET application, non-container)
 
-This process will allow you to deploy the Azure Naming Tool as a .NET application as an Azure Web App. This is the fastest deployment option and allows you to deploy and utilize your installation in minutes. This process includes creating a fork of the repository, then creating an Azure Web App. The provided GitHub Action will deploy your repository code on every commit. 
+This process will allow you to deploy the Azure Naming Tool as a .NET application as an Azure Web App. This is the fastest deployment option and allows you to deploy and utilize your installation in minutes. This process includes **Creating a fork of the repository**, **Creating an Azure Web App**, and **Enabling Authentication**. The provided GitHub Action will deploy your repository code on every commit. 
 
-**Fork the Cloud Adoption Frameowrk Repository**
+**Fork the Cloud Adoption Framework Repository**
 1. Scroll up to the top, left corner of this page.
 2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
 3. Click the **Fork** option in the top right menu.
 4. Select your desired **Owner** and **Repository name** and click **Create fork**.
-5. Click the green **<>Code** button and open the **.github/workflows/deploy-azure-naming-tool-to-azure-webapps-dotnet-core.yml** file.
-6. Review the instructions for creating the required GitHub secrets.
+5. Click the green **<>Code** button
+6. Click the **.github/workflows** link.
+
+  ![Run as Azure Web App 1](./wwwroot/Screenshots/RunAsWebApp1.png)
+
+7. Click the **.deploy-azure-naming-tool-to-azure-webapps-dotnet-core.yml** link.
+
+  ![Run as Azure Web App 2](./wwwroot/Screenshots/RunAsWebApp2.png)
+
+8. Review the instructions for creating the required GitHub secrets.
 
 > **NOTES:**
-> The GitHub Action will not successfull.y deploy until the secrets are created.
+> The GitHub Action will not successfully deploy until the secrets are created.
 > You must create an Azure Web App and configure the GitHub Action secrets to deploy to your Azure Web App.
 
-**Create an Azure Web App** (if needed)
-1. Create a new Web App in the Azure portal.
+**Create an Azure Web App** (if needed)  
+For an automated deployment of a Web App, utilize the button below and fill in the required information. Then proceed to step 4.    
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
+[![Deploy to Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
+
+1. Create a new Azure Web App in the Azure portal.
 2. For the **Publish** option, select **Code**.
 3. For the **Runtime stack**, select **.NET 6**.
 
@@ -128,7 +141,46 @@ This process will allow you to deploy the Azure Naming Tool as a .NET applicatio
 
 4. Download the **Publish Profile** for use within the GitHub Action secret.
 
+```PowerShell
+Get-AzWebApp -Name <webappname> | Get-AzWebAppPublishingProfile -OutputFile <filename> | Out-Null
+```  
+
+**OR**
+
   ![Web App Details](./wwwroot/Screenshots/WebAppInstallation2.png)
+
+**Enable Azure Web App Authentication** (using Azure AD)
+
+1. In the Azure Portal for your Azure Web App, Navigate to the **Authentication** blade.
+2. Select **Add identity provider**.
+3. In the **Identity provider** section, select **Microsoft**.
+4. Enter the desired **Name**. All other options can be left as default.
+5. Click **Add**.
+
+  ![Web App Authentication](./wwwroot/Screenshots/WebAppAuthentication1.png)
+
+**Get Azure Web App Credentials**  
+1. In a command prompt, execute the following command to create credentials for the Azure Web App:
+
+```Azure CLI
+az ad sp create-for-rbac --name "[YOUR CREDENTIAL NAME]" --role contributor --scopes /subscriptions/[YOUR SUBSCRIPTION ID]/resourceGroups/[YOUR RESORUCE GROUP NAME] --sdk-auth
+
+3. Copy the returned value for later use.
+
+``` JSON
+{
+  "clientId": "[YOUR CLIENT ID]",
+  "clientSecret": "[YOUR CLIENT SECRET]",
+  "subscriptionId": "[YOUR SUBSCRIPTION ID]",
+  "tenantId": "[YOUR TENANT ID]",
+  "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+  "resourceManagerEndpointUrl": "https://management.azure.com/",
+  "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+  "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+  "galleryEndpointUrl": "https://gallery.azure.com/",
+  "managementEndpointUrl": "https://management.core.windows.net/"
+}
+```
 
 **Create GitHub Secrets**
 1. In your GitHub repository, click **Settings** in the top menu.
@@ -141,15 +193,23 @@ This process will allow you to deploy the Azure Naming Tool as a .NET applicatio
 8. Enter **AZURE_WEBAPP_NAME** as the **Name**.
 9. Enter the name of your Azure Web App as the **Value**.
 10. Click **Add secret**.
+11. Click **New repository secret**.
+12. Enter **AZURE_CREDENTIALS** as the **Name**.
+13. Enter the ***Azure Wwb App Credentials** JSON as the **Value**:
 
   ![GitHub Secrets](./wwwroot/Screenshots/GitHubActionInstallation1.png)
 
-11. In your GitHub repository, click **Actions** in the top menu.
-12. Click **Azure Naming Tool - Build and deploy to an Azure Web App** in the left menu.
-13. Access the site using your Azure App Service URL
+**Enable GitHub Workflow**
 
-> **NOTE:**
-> It is recommended that you enable authentication on your Web App to prevent un-authorized access. [Configure your App Service or Azure Functions app to use Azure AD login](https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-provider-aad)
+1. In your GitHub reposiutory, click the **Actions** tab.
+2. Click on **I understand my workflows, go ahead and enable them**.
+3. Select the **Azure Naming Tool - Build and deploy to an Azure Web App** workflow in the left navigation. 
+4. Click **Run workflow**.
+5. Confirm the workflow completes successfully.
+
+  ![GitHub Workflow](./wwwroot/Screenshots/GitHubActionInstallation2.png)
+
+6. Access your Azure App Web App to cnofirm the site is successfully deployed.
 
 ***
 

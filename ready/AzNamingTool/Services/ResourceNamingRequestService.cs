@@ -240,14 +240,14 @@ namespace AzureNamingTool.Services
                     if(resourceTypesByShortName.Count > 1)
                     {
                         // Check that the request includes a resource name
-                        if(request.Resource != null)
+                        if(request.ResourceId != 0)
                         {
                             // Check if the resource value is valid
-                            resourceType = resourceTypesByShortName.Find(x => x.Resource.ToLower() == request.Resource.ToLower());
+                            resourceType = resourceTypesByShortName.Find(x => x.Id == request.ResourceId);
                             if(resourceType == null)
                             {
                                 valid = false;
-                                response.Message = "Resource value is invalid.";
+                                response.Message = "Resource Id value is invalid.";
                                 response.Success = false;
                                 return response;
                             }
@@ -255,7 +255,7 @@ namespace AzureNamingTool.Services
                         else
                         {
                             valid = false;
-                            response.Message = "Your configuration contains multiple resource types for the provided short name. You must supply the Resource value for the resource type in your request.(Example: resource: ApiManagement/service)";
+                            response.Message = "Your configuration contains multiple resource types for the provided short name. You must supply the Resource Id value for the resource type in your request.(Example: resourceId: 14)";
                             response.Success = false;
                             return response;
                         }
@@ -326,7 +326,7 @@ namespace AzureNamingTool.Services
                             // Add property value to name, if exists
                             if (value != null)
                             {
-                                // Validate that the value is a valid  option for the component
+                                // Validate that the value is a valid option for the component
                                 switch (component.Name.ToLower())
                                 {
                                     case "resourcetype":

@@ -95,14 +95,14 @@
                                                             <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
                                                                 <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                             </button>
-                                                            
-                                                                @if (item.IsCustom)
-                                                                {
-                                                                    <span> </span>
-                                                                    <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"edit"))" title="Edit">
-                                                                        <span class="oi oi-pencil" aria-hidden="true"></span>
-                                                                    </button>
-                                                                }
+
+                                                            @if (item.IsCustom)
+                                                            {
+                                                                <span> </span>
+                                                                <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"edit"))" title="Edit">
+                                                                    <span class="oi oi-pencil" aria-hidden="true"></span>
+                                                                </button>
+                                                            }
                                                             @if (item.Enabled)
                                                             {
                                                                 <span> </span>
@@ -735,19 +735,31 @@
                                                         </div>
                                                         <div class="card card-body @theme.ThemeStyle">
                                                             <p>
-                                                                Click <strong>Refresh</strong> to download the latest Resource Locations Configuration file from the Azure Naming Tool GitHub repository. This will add any new resource locations.
+                                                                Click <strong>Refresh</strong> to download the latest Resource Locations Configuration file from the Azure Naming Tool GitHub repository.
                                                             </p>
                                                             <p>
-                                                                All of your existing location configurations will be retained.
-                                                            </p>
-                                                            <p>
-                                                                <strong>NOTE: This will refresh your current configuration and cannot be undone!</strong>
+                                                                <strong>NOTES:</strong>
+                                                                <ul>
+                                                                    <li><strong>This will refresh your current configuration and cannot be undone!</strong></li>
+                                                                    <li>New location configurations will be added.</li>
+                                                                    @if (refreshlocationshortnames)
+                                                                    {
+                                                                        <li>All location configurations will be updated.</li>
+                                                                        <li><span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span></li>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <li>
+                                                                            All of your existing location configurations will be retained.
+                                                                        </li>
+                                                                    }
+                                                                </ul>
                                                             </p>
                                                             <p>
                                                                 <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceLocation",0,"refresh")) title="Refresh">
                                                                     <span class="oi oi-reload" aria-hidden="true"></span> Refresh
                                                                 </button>
-                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" value="" checked style="margin-top: 9px; margin-left:10px;" id="refreshshortnames"> Refresh short names?
+                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" @bind="@refreshlocationshortnames" onclick="checkboxConfirmChange(this, '** ATTENTION ***\n\nThis will reset your location short names to match the latest Azure Naming Tool values.\n\nThis cannot be undone!\n\nAre you sure?');" style="margin-top: 9px; margin-left:10px;"> Refresh short names?
                                                             </p>
                                                         </div>
                                                     </div>
@@ -1243,20 +1255,36 @@
                                                         </div>
                                                         <div class="card card-body @theme.ThemeStyle">
                                                             <p>
-                                                                Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository. This will add any new resource types, as well as update existing type details.
+                                                                Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository.
                                                             </p>
                                                             <p>
-                                                                All of your existing type configurations will be retained.
-                                                            </p>
-                                                            <p>
-                                                                <strong>NOTE: This will refresh your current configuration and cannot be undone!</strong>
+                                                                <strong>NOTES:</strong>
+                                                                <ul>
+                                                                    <li><strong>This will refresh your current configuration and cannot be undone!</strong></li>
+                                                                    <li>New resource type configurations will be added.</li>
+                                                                    @if (refreshtypeshortnames)
+                                                                    {
+                                                                        <li>
+                                                                            All resource type configurations will be updated, but all of your existing resource type configuration (except the short name value) customizations will be retained.</li>
+                                                                            <li><span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span>
+                                                                        </li>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <li>
+                                                                            Resource type configurations will be updated, but all of your existing resource type configuration customizations will be retained.
+                                                                        </li>
+                                                                    }
+                                                                </ul>
                                                             </p>
                                                             <p>
                                                                 <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceType",0,"refresh")) title="Refresh">
                                                                     <span class="oi oi-reload" aria-hidden="true"></span> Refresh
                                                                 </button>
-                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" value="" checked style="margin-top: 9px; margin-left:10px;" id="refreshshortnames"> Refresh short names?
+                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" @bind="@refreshtypeshortnames" onclick="checkboxConfirmChange(this, '** ATTENTION ***\n\nThis will reset your type short names to match the latest Azure Naming Tool values.\n\nThis cannot be undone!\n\nAre you sure?');" style="margin-top: 9px; margin-left:10px;"> Refresh short names?
                                                             </p>
+
+
                                                         </div>
                                                     </div>
                                                     <div class="card  w-auto mb-3">
@@ -1701,6 +1729,8 @@
     private string? newFunctionConfig;
     private string? newCustomComponentConfig;
     private string? newGlobalConfig;
+    private bool refreshtypeshortnames = false;
+    private bool refreshlocationshortnames = false;
 
     private ResponseMessage message = new();
 
@@ -1721,6 +1751,23 @@
 
             dataLoaded = true;
 
+            // Configuration File Check
+            // Determine if the installed version of the configuration files are up to date
+            if (admin)
+            {
+                // Get a list of any configurations that are out of date
+                List<string> versiondata = await GeneralHelper.VerifyConfigurationFileVersionData();
+                if (versiondata.Count > 0)
+                {
+                    string versionmessage = "";
+                    foreach (string message in versiondata)
+                    {
+                        versionmessage += message;
+                    }
+                    // Display a notification of the files requiring updating
+                    await ShowInformationModal("bg-navcolor", "ATTENTION", versionmessage);
+                }
+            }
             StateHasChanged();
         }
     }
@@ -2279,9 +2326,7 @@
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will refresh your current Locations configuration with the latest configuration!\n\nAre you sure?");
                             if (confirm)
                             {
-                                bool ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "refreshshortnames");
-
-                                serviceResponse = await ResourceLocationService.RefreshResourceLocations(ischecked);
+                                serviceResponse = await ResourceLocationService.RefreshResourceLocations(refreshlocationshortnames);
                                 if (serviceResponse.Success)
                                 {
                                     message.Type = MessageTypesEnum.SUCCESS;
@@ -2615,9 +2660,7 @@
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will refresh your current Types configuration with the latest configuration!\n\nAre you sure?");
                             if (confirm)
                             {
-                                bool ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "refreshshortnames");
-
-                                serviceResponse = await ResourceTypeService.RefreshResourceTypes(ischecked);
+                                serviceResponse = await ResourceTypeService.RefreshResourceTypes(refreshtypeshortnames);
                                 if (serviceResponse.Success)
                                 {
                                     message.Type = MessageTypesEnum.SUCCESS;
@@ -3011,6 +3054,9 @@
                     }
                     break;
             }
+
+            // Reset cache items
+            GeneralHelper.InvalidateCacheObject(type);
             servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
         }
         catch (Exception ex)
@@ -3171,7 +3217,7 @@
         }
     }
 
-    async void ShowInformationModal(string headerstyle, string title, string message)
+    async Task ShowInformationModal(string headerstyle, string title, string message)
     {
         var parameters = new ModalParameters();
         parameters.Add(nameof(InformationModal.message), message);

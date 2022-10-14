@@ -84,6 +84,8 @@ namespace AzureNamingTool.Helpers
                         // Copy the repository file to the settings folder
                         file.CopyTo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + file.Name), true);
                         result = true;
+                        // Clear any cached data
+                        
                         break;
                     }
                 }

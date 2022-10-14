@@ -10,20 +10,21 @@
 - Added Search functionality to Generated Names Log
 - Added caching throughout application for performance/optimization
 - Added functionality to check for latest version. Admins will be prompted if the installed version is out of date.
+- Added functionality to check for Resource Type and Location file versions. Admins will be prompted if the installed version is out of date.
 - Added FAQ.md in GitHub
 - Added CONTRIBUTORS.md in GitHub
-- Added "Azure Naming Tool - Build and deploy to an Azure Web App" GitHub Action to repo
-- Added instructions for deploying as an Azure Web App using GitHub Action to INSTALLATION.md
+- Added GitHub Action for deployment to Azure Web App
+- Added "Deploy to Azure" options for installation
 
 ### Bug fixes
 - Fixed grammar/formatting issues in GitHub documentation
 - Updated resourcetypes.json with latest Azure resources
 - Added information/update prompt to Configuration page if resaourcetypes.json contains types with duplicate short names
-- Added option to enable/disable Latest News feed on Home page
-- Added option to exclude Admin configuration from Global Backup functionality
+- Added option to enable/disbale Latest News feed on Home page
+- Added option to exlcude Admin configuration from Global Backup functionality
 - Updated API to handle resource types with duplicate names
 - Added Admin Log and Generated Names log data to Global Configuration backup/restore functionality
-- Migrated logging to settings/adminlogmessages.json for file name consistency
+- Updated Installation.md with new guidance
 
 ***
 
