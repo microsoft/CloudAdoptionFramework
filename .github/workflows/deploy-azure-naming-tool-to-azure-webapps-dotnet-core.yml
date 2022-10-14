@@ -30,7 +30,7 @@ on:
   
 defaults:
   run:
-    working-directory: CloudAdoptionFramework/ready/AzNamingTool
+    working-directory: /home/runner/work/CloudAdoptionFramework/ready/AzNamingTool
     
 permissions:
   contents: read
@@ -40,7 +40,7 @@ jobs:
       runs-on: ubuntu-latest
       defaults:
         run:
-          working-directory: CloudAdoptionFramework/ready/AzNamingTool
+          working-directory: /home/runner/work/CloudAdoptionFramework/ready/AzNamingTool
       outputs:
         secrets-valid: ${{ steps.secrets-valid.outputs.isvalid }}
       steps:      
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: /CloudAdoptionFramework/ready/AzNamingTool    
+        working-directory: /home/runner/work/CloudAdoptionFramework/ready/AzNamingTool    
     needs: [check-secrets]
     if: needs.check-secrets.outputs.secrets-valid == 'true'
     steps:
@@ -88,7 +88,7 @@ jobs:
   deploy: 
     defaults:
       run:
-        working-directory: /CloudAdoptionFramework/ready/AzNamingTool 
+        working-directory: /home/runner/work/CloudAdoptionFramework/ready/AzNamingTool 
     permissions:
       contents: none
     runs-on: ubuntu-latest
