@@ -30,7 +30,7 @@ on:
   
 defaults:
   run:
-    working-directory: ready
+    working-directory: ready/AzNamingTool
     
 permissions:
   contents: read
@@ -38,22 +38,26 @@ permissions:
 jobs:
   check-secrets:
       runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: ready    
       outputs:
         secrets-valid: ${{ steps.secrets-valid.outputs.isvalid }}
-      steps:      
-          - id: secrets-valid
-            env: 
-              azure-webapp-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-              azure-webapp-publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-              azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
-            if: (env.azure-webapp-name != null && env.azure-webapp-publish-profile != null && env.azure-credentials != null)
-            run: echo "::set-output name=isvalid::true"
+      steps:
+        - uses: actions/checkout@v3      
+        - id: secrets-valid
+          env: 
+            azure-webapp-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+            azure-webapp-publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+            azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          if: (env.azure-webapp-name != null && env.azure-webapp-publish-profile != null && env.azure-credentials != null)
+          run: echo "::set-output name=isvalid::true"
             
   build:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ready    
+        working-directory: ready/AzNamingTool    
     needs: [check-secrets]
     if: needs.check-secrets.outputs.secrets-valid == 'true'
     steps:
@@ -85,7 +89,7 @@ jobs:
   deploy: 
     defaults:
       run:
-        working-directory: ready 
+        working-directory: ready/AzNamingTool 
     permissions:
       contents: none
     runs-on: ubuntu-latest
