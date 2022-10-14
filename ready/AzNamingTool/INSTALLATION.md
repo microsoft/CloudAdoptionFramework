@@ -162,8 +162,9 @@ Get-AzWebApp -Name <webappname> | Get-AzWebAppPublishingProfile -OutputFile <fil
 **Get Azure Web App Credentials**  
 1. In a command prompt, execute the following command to create credentials for the Azure Web App:
 
-```Azure CLI
+```
 az ad sp create-for-rbac --name "[YOUR CREDENTIAL NAME]" --role contributor --scopes /subscriptions/[YOUR SUBSCRIPTION ID]/resourceGroups/[YOUR RESORUCE GROUP NAME] --sdk-auth
+```
 
 3. Copy the returned value for later use.
 
