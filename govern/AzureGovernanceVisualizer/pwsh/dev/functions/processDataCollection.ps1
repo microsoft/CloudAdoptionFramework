@@ -80,6 +80,12 @@ function processDataCollection {
             $htPrincipals = $using:htPrincipals
             $htServicePrincipals = $using:htServicePrincipals
             $htUserTypesGuest = $using:htUserTypesGuest
+            $htRoleAssignmentsPIM = $using:htRoleAssignmentsPIM
+            $alzPolicies = $using:alzPolicies
+            $alzPolicySets = $using:alzPolicySets
+            $alzPolicyHashes = $using:alzPolicyHashes
+            $alzPolicySetHashes = $using:alzPolicySetHashes
+            $htDoARMRoleAssignmentScheduleInstances = $using:htDoARMRoleAssignmentScheduleInstances
             #other
             $function:addRowToTable = $using:funcAddRowToTable
             $function:namingValidation = $using:funcNamingValidation
@@ -289,6 +295,7 @@ function processDataCollection {
                 $scriptPath = $using:ScriptPath
                 #Array&HTs
                 $newTable = $using:newTable
+                $storageAccounts = $using:storageAccounts
                 $resourcesAll = $using:resourcesAll
                 $resourcesIdsAll = $using:resourcesIdsAll
                 $resourceGroupsAll = $using:resourceGroupsAll
@@ -339,6 +346,12 @@ function processDataCollection {
                 $arrayPsRule = $using:arrayPsRule
                 $arrayPSRuleTracking = $using:arrayPSRuleTracking
                 $htClassicAdministrators = $using:htClassicAdministrators
+                $htRoleAssignmentsPIM = $using:htRoleAssignmentsPIM
+                $alzPolicies = $using:alzPolicies
+                $alzPolicySets = $using:alzPolicySets
+                $alzPolicyHashes = $using:alzPolicyHashes
+                $alzPolicySetHashes = $using:alzPolicySetHashes
+                $htDoARMRoleAssignmentScheduleInstances = $using:htDoARMRoleAssignmentScheduleInstances
                 #other
                 $function:addRowToTable = $using:funcAddRowToTable
                 $function:namingValidation = $using:funcNamingValidation
@@ -348,6 +361,7 @@ function processDataCollection {
                 $function:dataCollectionDefenderPlans = $using:funcDataCollectionDefenderPlans
                 $function:dataCollectionDiagnosticsSub = $using:funcDataCollectionDiagnosticsSub
                 $function:dataCollectionResources = $using:funcDataCollectionResources
+                $function:dataCollectionStorageAccounts = $using:funcDataCollectionStorageAccounts
                 $function:dataCollectionResourceGroups = $using:funcDataCollectionResourceGroups
                 $function:dataCollectionResourceProviders = $using:funcDataCollectionResourceProviders
                 $function:dataCollectionFeatures = $using:funcDataCollectionFeatures
@@ -423,6 +437,14 @@ function processDataCollection {
                         }
                         DataCollectionDiagnosticsSub @baseParameters @dataCollectionDiagnosticsSubParameters
 
+                        if ($azAPICallConf['htParameters'].NoStorageAccountAccessAnalysis -eq $false) {
+                            #resources
+                            $dataCollectionStorageAccountsParameters = @{
+                                ChildMgMgPath = $childMgMgPath
+                                ChildMgParentNameChainDelimited = $childMgParentNameChainDelimited
+                            }
+                            DataCollectionStorageAccounts @baseParameters @dataCollectionStorageAccountsParameters
+                        }
 
                         if ($azAPICallConf['htParameters'].NoResources -eq $false) {
                             #resources
@@ -604,13 +626,12 @@ function processDataCollection {
                     
                     try {
                         $previous = Get-ChildItem -Path $outputPath -Filter "*$($ManagementGroupId)_ResourcesAll.csv" | Sort-Object -Descending -Property LastWriteTime | Select-Object -First 1 -ErrorAction Stop
-                        $importPrevious = Import-Csv -LiteralPath "$($outputPath)$($DirectorySeparatorChar)$($previous.Name)" -Encoding utf8 -Delimiter ";" | Select-Object -ExpandProperty id
+                        $importPrevious = Import-Csv -LiteralPath "$($outputPath)$($DirectorySeparatorChar)$($previous.Name)" -Encoding utf8 -Delimiter $CsvDelimiter | Select-Object -ExpandProperty id
                         Write-Host " Import previous ($($previous.Name)) duration: $((NEW-TIMESPAN -Start $startImportPrevious -End (get-date)).TotalSeconds)"
                     }
                     catch {
-                        Write-Host " FAILED: Import-Csv '$($outputPath)$($DirectorySeparatorChar)$($previous.Name)'"
+                        Write-Host " FAILED: importing previous CSV '$($outputPath)$($DirectorySeparatorChar)$($previous.Name)' OR it does not exist (*$($ManagementGroupId)_ResourcesAll.csv)"
                         $doResourceFluctuation = $false
-
                     }
 
                     if ($doResourceFluctuation) {
@@ -718,6 +739,7 @@ function processDataCollection {
 
                         #ADDED
                         $arrayAdded = [System.Collections.ArrayList]@()
+                        $arrayAddedAndRemoved = [System.Collections.ArrayList]@()
                         foreach ($resource in $x.DiffOnly) {
                             $resourceSplitted = $resource.split('/')
                             #$resourceSplitted
@@ -729,6 +751,20 @@ function processDataCollection {
                                     resourceType2  = $resourceSplitted[9]
                                     resourceType3  = $resourceSplitted[11]
                                 })
+                            
+                            $subDetails = $htSubscriptionsMgPath.($resourceSplitted[2])
+                            $null = $arrayAddedAndRemoved.Add([pscustomobject]@{
+                                    action = 'add'
+                                    subscriptionId = $resourceSplitted[2]
+                                    subscriptionName = $subDetails.displayName
+                                    mgPath = $subDetails.pathDelimited
+                                    resourceId = $resource
+                                    resourceType0  = $resourceSplitted[6]
+                                    resourceType1  = $resourceSplitted[7]
+                                    resourceType2  = $resourceSplitted[9]
+                                    resourceType3  = $resourceSplitted[11]
+                                })
+
                             if ($resourceSplitted.Count -gt 13) {
                                 Write-Host " Unforeseen Resource type!"
                                 Write-Host " Please report this Resource type at $($GithubRepository): '$resource'"
@@ -761,6 +797,20 @@ function processDataCollection {
                                     resourceType2  = $resourceSplitted[9]
                                     resourceType3  = $resourceSplitted[11]
                                 })
+
+                            $subDetails = $htSubscriptionsMgPath.($resourceSplitted[2])
+                            $null = $arrayAddedAndRemoved.Add([pscustomobject]@{
+                                action = 'remove'
+                                subscriptionId = $resourceSplitted[2]
+                                subscriptionName = $subDetails.displayName
+                                mgPath = $subDetails.pathDelimited
+                                resourceId = $resource
+                                resourceType0  = $resourceSplitted[6]
+                                resourceType1  = $resourceSplitted[7]
+                                resourceType2  = $resourceSplitted[9]
+                                resourceType3  = $resourceSplitted[11]
+                            })
+
                             if ($resourceSplitted.Count -gt 13) {
                                 Write-Host " Unforeseen Resource type!"
                                 Write-Host " Please report this Resource type at $($GithubRepository): '$resource'"
@@ -789,12 +839,20 @@ function processDataCollection {
                     #DataCollection Export of Resource fluctuation
                     Write-Host "Exporting ResourceFluctuation CSV '$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourceFluctuation.csv'"
                     $arrayResourceFluctuationFinal | Sort-Object -Property ResourceType | Export-Csv -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourceFluctuation.csv" -Delimiter "$csvDelimiter" -NoTypeInformation
+
+                    Write-Host "Exporting ResourceFluctuation detailed CSV '$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourceFluctuationDetailed.csv'"
+                    $arrayAddedAndRemoved | Sort-Object -Property Resource | Export-Csv -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourceFluctuationDetailed.csv" -Delimiter "$csvDelimiter" -NoTypeInformation
                 }
                 Write-Host "Process Resource fluctuation duration: $((NEW-TIMESPAN -Start $start -End (get-date)).TotalSeconds) seconds"
 
                 #DataCollection Export of All Resources
-                Write-Host "Exporting ResourcesAll CSV '$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourcesAll.csv'"
-                $resourcesIdsAll | Sort-Object -Property id | Export-Csv -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourcesAll.csv" -Delimiter "$csvDelimiter" -NoTypeInformation
+                if ($resourcesIdsAll.Count -gt 0) {
+                    Write-Host "Exporting ResourcesAll CSV '$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourcesAll.csv'"
+                    $resourcesIdsAll | Sort-Object -Property id | Export-Csv -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName)_ResourcesAll.csv" -Delimiter "$csvDelimiter" -NoTypeInformation
+                }
+                else {
+                    Write-Host "Not Exporting ResourcesAll CSV, as there are $($resourcesIdsAll.Count) resources"
+                }
             }
         }
     }
