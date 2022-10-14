@@ -38,6 +38,9 @@ permissions:
 jobs:
   check-secrets:
       runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: my_folder
       outputs:
         secrets-valid: ${{ steps.secrets-valid.outputs.isvalid }}
       steps:      
@@ -51,6 +54,9 @@ jobs:
             
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: my_folder    
     needs: [check-secrets]
     if: needs.check-secrets.outputs.secrets-valid == 'true'
     steps:
@@ -79,7 +85,10 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
-  deploy:  
+  deploy: 
+    defaults:
+      run:
+        working-directory: my_folder  
     permissions:
       contents: none
     runs-on: ubuntu-latest
