@@ -17,6 +17,9 @@ using System.Net.Http.Json;
 using AzureNamingTool.Services;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
+using System.Reflection;
+using System.Net.NetworkInformation;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace AzureNamingTool.Helpers
 {
@@ -89,7 +92,7 @@ namespace AzureNamingTool.Helpers
                     {
                         nameof(ResourceComponent) => await FileSystemHelper.ReadFile("resourcecomponents.json"),
                         nameof(ResourceEnvironment) => await FileSystemHelper.ReadFile("resourceenvironments.json"),
-                        nameof(ResourceLocation) => await FileSystemHelper.ReadFile("resourcelocations.json"),
+                        nameof(Models.ResourceLocation) => await FileSystemHelper.ReadFile("resourcelocations.json"),
                         nameof(ResourceOrg) => await FileSystemHelper.ReadFile("resourceorgs.json"),
                         nameof(ResourceProjAppSvc) => await FileSystemHelper.ReadFile("resourceprojappsvcs.json"),
                         nameof(Models.ResourceType) => await FileSystemHelper.ReadFile("resourcetypes.json"),
@@ -140,7 +143,7 @@ namespace AzureNamingTool.Helpers
                     case nameof(ResourceEnvironment):
                         await FileSystemHelper.WriteConfiguation(items, "resourceenvironments.json");
                         break;
-                    case nameof(ResourceLocation):
+                    case nameof(Models.ResourceLocation):
                         await FileSystemHelper.WriteConfiguation(items, "resourcelocations.json");
                         break;
                     case nameof(ResourceOrg):
@@ -179,7 +182,7 @@ namespace AzureNamingTool.Helpers
                 {
                     nameof(ResourceComponent) => await FileSystemHelper.ReadFile("resourcecomponents.json"),
                     nameof(ResourceEnvironment) => await FileSystemHelper.ReadFile("resourceenvironments.json"),
-                    nameof(ResourceLocation) => await FileSystemHelper.ReadFile("resourcelocations.json"),
+                    nameof(Models.ResourceLocation) => await FileSystemHelper.ReadFile("resourcelocations.json"),
                     nameof(ResourceOrg) => await FileSystemHelper.ReadFile("resourceorgs.json"),
                     nameof(ResourceProjAppSvc) => await FileSystemHelper.ReadFile("resourceprojappsvcs.json"),
                     nameof(Models.ResourceType) => await FileSystemHelper.ReadFile("resourcetypes.json"),
@@ -286,7 +289,7 @@ namespace AzureNamingTool.Helpers
                 if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/adminlog.json")) && !File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/adminlogmessages.json")))
                 {
                     // Migrate the data
-                    FileSystemHelper.MigrateDataToFile("adminlog.json", "settings/", "adminlogmessages.json", "settings/", true);                    
+                    FileSystemHelper.MigrateDataToFile("adminlog.json", "settings/", "adminlogmessages.json", "settings/", true);
                 }
             }
             catch (Exception ex)
@@ -355,7 +358,7 @@ namespace AzureNamingTool.Helpers
             jsonWriteOptions.Converters.Add(new JsonStringEnumConverter());
 
             var newJson = JsonSerializer.Serialize(config, jsonWriteOptions);
-            
+
             var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/appsettings.json");
             await FileSystemHelper.WriteFile("appsettings.json", newJson);
         }
@@ -604,7 +607,7 @@ namespace AzureNamingTool.Helpers
             return newname;
         }
 
-        public static async Task<string> GetLatestVersion()
+        public static async Task<string> GetToolVersion()
         {
             try
             {
@@ -623,7 +626,6 @@ namespace AzureNamingTool.Helpers
                 return null;
             }
         }
-
 
         public static object GetCacheObject(string cachekey)
         {
@@ -688,6 +690,123 @@ namespace AzureNamingTool.Helpers
             else
             {
                 return "disabled-text";
+            }
+        }
+
+        public static async Task<string> GetOfficalConfigurationFileVersionData()
+        {
+            string versiondata = null;
+            try
+            {
+                versiondata = await DownloadString("https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/configurationfileversions.json");
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+            return versiondata;
+        }
+
+        public static async Task<string> GetCurrentConfigFileVersionData()
+        {
+            string versiondatajson = null;
+            try
+            {
+                versiondatajson = await FileSystemHelper.ReadFile("configurationfileversions.json");
+                // Check if the user has any version data. This value will be '[]' if not.
+                if (versiondatajson == "[]")
+                {
+                    // Create new version data with default values in /settings file
+                    ConfigurationFileVersionData? versiondata = new();
+                    await FileSystemHelper.WriteFile("configurationfileversions.json", JsonSerializer.Serialize(versiondata), "settings/");
+                    versiondatajson = JsonSerializer.Serialize(versiondata);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+            return versiondatajson;
+        }
+
+        public static async Task<List<string>> VerifyConfigurationFileVersionData()
+        {
+            List<string> versiondata = new();
+            try
+            {
+                // Get the official version from GitHub
+                ConfigurationFileVersionData? officialversiondata = new();
+                var officialdatajson = await GetOfficalConfigurationFileVersionData();
+
+                // Get the current version
+                ConfigurationFileVersionData? currentversiondata = new();
+                var currentdatajson = await GetCurrentConfigFileVersionData();
+
+                // Determine if the version data is different
+                if ((officialdatajson != null) && (currentdatajson != null))
+                {
+                    officialversiondata = JsonSerializer.Deserialize<ConfigurationFileVersionData>(officialdatajson);
+                    currentversiondata = JsonSerializer.Deserialize<ConfigurationFileVersionData>(currentdatajson);
+
+                    // Compare the versions
+                    // Resource Types
+                    if (officialversiondata.resourcetypes != currentversiondata.resourcetypes)
+                    {
+                        versiondata.Add("<h5>Resource Types</h5><hr /><div>Your resource types configuration is out of date!<br /><br />It is recommended that you refresh your resource types to the latest configuration.<br /><br /><strong>To Refresh:</strong><ul><li>Expand the <strong>Types</strong> section</li><li>Expand the <strong>Configuration</strong> section</li><li>Select the <strong>Refresh</strong> option</li></ul></div><br />");
+                    }
+
+                    // Resource Locations
+                    if (officialversiondata.resourcelocations != currentversiondata.resourcelocations)
+                    {
+                        versiondata.Add("<h5>Resource Locations</h5><hr /><div>Your resource locations configuration is out of date!<br /><br />It is recommended that you refresh your resource locations to the latest configuration.<br /><br /><strong>To Refresh:</strong><ul><li>Expand the <strong>Locations</strong> section</li><li>Expand the <strong>Configuration</strong> section</li><li>Select the <strong>Refresh</strong> option</li></ul></div><br />");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+            return versiondata;
+        }
+
+
+        public static async Task UpdateConfigurationFileVersion(string fileName)
+        {
+            try
+            {
+                // Get the official version from GitHub
+                ConfigurationFileVersionData? officialversiondata = new();
+                var officialdatajson = await GetOfficalConfigurationFileVersionData();
+
+                // Get the current version
+                ConfigurationFileVersionData? currentversiondata = new();
+                var currentdatajson = await GetCurrentConfigFileVersionData();
+
+                // Determine if the version data is different
+                if ((officialdatajson != null) && (currentdatajson != null))
+                {
+                    officialversiondata = JsonSerializer.Deserialize<ConfigurationFileVersionData>(officialdatajson);
+                    currentversiondata = JsonSerializer.Deserialize<ConfigurationFileVersionData>(currentdatajson);
+
+                    switch (fileName)
+                    {
+                        case "resourcetypes":
+                            currentversiondata.resourcetypes = officialversiondata.resourcetypes;
+                            break;
+                        case "resourcelocations":
+                            currentversiondata.resourcelocations = officialversiondata.resourcelocations;
+                            break;
+                    }
+
+                    //  Update the current configuration file version data
+                    await FileSystemHelper.WriteFile("configurationfileversions.json", JsonSerializer.Serialize(currentversiondata), "settings/");
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
     }

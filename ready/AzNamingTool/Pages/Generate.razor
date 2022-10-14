@@ -427,7 +427,7 @@
         resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
         ResourceType resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(selectedResourceType)); 
         resourceNameRequest.ResourceType = resourceType.ShortName;
-        resourceNameRequest.Resource = resourceType.Resource;
+        resourceNameRequest.ResourceId = resourceType.Id;
         resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
         resourceNameRequest.CustomComponents = selectedCustomComponents;
 

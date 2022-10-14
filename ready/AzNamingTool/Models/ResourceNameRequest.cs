@@ -15,8 +15,8 @@
         /// </summary>
         public Dictionary<string, string>? CustomComponents { get; set; }
         /// <summary>
-        /// String - Resource name (example: ApiManagement/service)
+        /// long - Resource Id (example: 14)
         /// </summary>
-        public string? Resource {get; set;}
+        public long? ResourceId { get; set; } = 0;
     }
 }
