@@ -2,6 +2,7 @@
 @using System.Reflection
 @using AzureNamingTool.Helpers
 @using AzureNamingTool.Models
+@using AzureNamingTool.Services
 @inject ILogger<Index> Logger
 @inject NavigationManager NavigationManager
 @inject StateContainer state
@@ -82,7 +83,7 @@
             }
             catch (Exception ex)
             {
-
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
     }

@@ -41,19 +41,15 @@ namespace AzureNamingTool.Services
             {
                 /// Get the previously generated names
                 var items = await GeneralHelper.GetList<GeneratedName>();
-
-                if (items != null)
+                if ((items != null) && (items.Count > 0))
                 {
-                    if (items.Count > 0)
-                    {
-                        generatedName.Id = items.Max(x => x.Id) + 1;
-                    }
-                    else
-                    {
-                        generatedName.Id = 1;
-                    }
+                    generatedName.Id = items.Max(x => x.Id) + 1;
                 }
-
+                else
+                {
+                    generatedName.Id = 1;
+                }
+                
                 items.Add(generatedName);
 
                 // Write items to file

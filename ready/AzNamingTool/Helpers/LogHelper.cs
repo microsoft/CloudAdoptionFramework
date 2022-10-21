@@ -114,7 +114,6 @@ namespace AzureNamingTool.Helpers
                 AdminLogMessage adminmessage = new()
                 {
                     Id = 1,
-                    CreatedOn = DateTime.Now,
                     Title = title,
                     Message = message
                 };

@@ -36,19 +36,12 @@ namespace AzureNamingTool.Controllers
         {
             try
             {
-                if (adminpassword != "")
+                if (!String.IsNullOrEmpty(adminpassword))
                 {
                     if (adminpassword == GeneralHelper.DecryptString(config.AdminPassword, config.SALTKey))
                     {
                         serviceResponse = await AdminService.UpdatePassword(password);
-                        if (serviceResponse.Success)
-                        {
-                            return Ok("SUCCESS");
-                        }
-                        else
-                        {
-                            return Ok("FAILURE - There was a problem updating the password.");
-                        }
+                        return (serviceResponse.Success ? Ok("SUCCESS"): Ok("FAILURE - There was a problem updating the password."));
                     }
                     else
                     {
@@ -81,19 +74,12 @@ namespace AzureNamingTool.Controllers
         {
             try
             {
-                if (adminpassword != "")
+                if (!String.IsNullOrEmpty(adminpassword))
                 {
                     if (adminpassword == GeneralHelper.DecryptString(config.AdminPassword, config.SALTKey))
                     {
                         serviceResponse = await AdminService.UpdateAPIKey(apikey);
-                        if (serviceResponse.Success)
-                        {
-                            return Ok("SUCCESS");
-                        }
-                        else
-                        {
-                            return Ok("FAILURE - There was a problem updating the API Key.");
-                        }
+                        return (serviceResponse.Success ? Ok("SUCCESS") : Ok("FAILURE - There was a problem updating the API Key."));
                     }
                     else
                     {
@@ -126,19 +112,12 @@ namespace AzureNamingTool.Controllers
         {
             try
             {
-                if (adminpassword != "")
+                if (!String.IsNullOrEmpty(adminpassword))
                 {
                     if (adminpassword == GeneralHelper.DecryptString(config.AdminPassword, config.SALTKey))
                     {
                         serviceResponse = await AdminService.GenerateAPIKey();
-                        if (serviceResponse.Success)
-                        {
-                            return Ok("SUCCESS - API Key: " + serviceResponse.ResponseObject);
-                        }
-                        else
-                        {
-                            return Ok("FAILURE - There was a problem generating the API Key.");
-                        }
+                        return (serviceResponse.Success ? Ok("SUCCESS") : Ok("FAILURE - There was a problem generating the API Key."));
                     }
                     else
                     {
