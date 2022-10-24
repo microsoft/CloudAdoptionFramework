@@ -2,7 +2,7 @@
 
 # Azure Naming Tool v2 - Installation
 
-<img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
+<img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Image representing the Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
 [Choosing an Installation Option](#choosing-an-installation-option)
 
@@ -108,9 +108,9 @@ docker run -d -p 8081:80 --mount source=azurenamingtoolvol,target=/app/settings 
 This process will allow you to deploy the Azure Naming Tool as a .NET application as an Azure Web App. This is the fastest deployment option and allows you to deploy and utilize your installation in minutes. This process includes **Creating a fork of the repository**, **Creating an Azure Web App**, and **Enabling Authentication**. The provided GitHub Action will deploy your repository code on every commit. 
 
 **Fork the Cloud Adoption Framework Repository**
-1. Scroll up to the top, left corner of this page.
+1. Scroll up to the top-left corner of this page.
 2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
-3. Click the **Fork** option in the top right menu.
+3. Click the **Fork** option in the top-right menu.
 4. Select your desired **Owner** and **Repository name** and click **Create fork**.
 5. Click the green **<>Code** button
 6. Click the **.github/workflows** link.
@@ -210,7 +210,7 @@ az ad sp create-for-rbac --name "[YOUR CREDENTIAL NAME]" --role contributor --sc
 
   ![GitHub Workflow](./wwwroot/Screenshots/GitHubActionInstallation2.png)
 
-6. Access your Azure App Web App to cnofirm the site is successfully deployed.
+6. Access your Azure Web App to confirm the site is successfully deployed.
 
 ***
 
@@ -220,9 +220,9 @@ az ad sp create-for-rbac --name "[YOUR CREDENTIAL NAME]" --role contributor --sc
 The Azure Naming Tool requires persistent storage for the configuration files when run as a container. The following processes will explain how to create this volume for your Azure App Service Container. All configuration JSON files will be stored in the volume to ensure the configuration is persisted.
 
 > **NOTE:**
-> For many of the steps, a sample process is provided, however, there are many ways to accomplish each step.
+> For many of the steps, a sample process is provided. However, there are many ways to accomplish each step.
 
-1. Scroll up to the top, left corner of this page.
+1. Scroll up to the top-left corner of this page.
 2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
 3. Click the green **<>Code** button and select **Download ZIP**.
 4. Open your Downloads folder using File Explorer.
@@ -231,7 +231,7 @@ The Azure Naming Tool requires persistent storage for the configuration files wh
 > **NOTE:**
 > Validate the project files extracted successfully and match the contents in the GitHub repository.
 
-6. Open a **Command Prompt**
+6. Open a **Command Prompt**.
 7. Change the directory to the **AzNamingTool** folder. For example:
 
 ```cmd
@@ -247,22 +247,22 @@ docker build -t azurenamingtool .
 > **NOTE:**
 > Ensure the '.' is included in the command
   
-9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
-10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
-11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
+9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
+10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
+11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
   
   ![FileShare](./wwwroot/Screenshots/FileShare.png)
 
-12. Create an Azure App Service - Web App: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux)
-13. Mount the file share as local storage for the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/configure-connect-to-azure-storage?tabs=portal&pivots=container-linux)
+12. Create an Azure App Service - Web App: [Microsoft Docs reference](https://docs.microsoft.com/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux)
+13. Mount the file share as local storage for the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/azure/app-service/configure-connect-to-azure-storage?tabs=portal&pivots=container-linux)
   
   ![MountStorage](./wwwroot/Screenshots/MountStorage.png)
 
-14. Deploy the image from the Azure Container Registry to the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/deploy-ci-cd-custom-container?tabs=acr&pivots=container-linux)
-15. Access the site using your Azure App Service URL
+14. Deploy the image from the Azure Container Registry to the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/azure/app-service/deploy-ci-cd-custom-container?tabs=acr&pivots=container-linux)
+15. Access the site using your Azure App Service URL.
 
 > **NOTE:**
-> It is recommended that you enable authentication on your Container App to prevent un-authorized access. [Authentication and authorization in Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/authentication)
+> It is recommended that you enable authentication on your Container App to prevent un-authorized access. [Authentication and authorization in Azure Container Apps](https://docs.microsoft.com/azure/container-apps/authentication)
 
 ***
 
@@ -298,22 +298,22 @@ docker build -t azurenamingtool .
 > **NOTE:**
 > Ensure the '.' is included in the command
   
-9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
-10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
-11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
+9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
+10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
+11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
   
   ![FileShare](./wwwroot/Screenshots/FileShare.png)
 
-12. Create an Azure Container App: [Quickstart: Deploy an existing container image with the Azure CLI](https://docs.microsoft.com/en-us/azure/container-apps/get-started-existing-container-image?tabs=bash&pivots=container-apps-public-registry)
+12. Create an Azure Container App: [Quickstart: Deploy an existing container image with the Azure CLI](https://docs.microsoft.com/azure/container-apps/get-started-existing-container-image?tabs=bash&pivots=container-apps-public-registry)
 
 > **NOTE:**
 > It is possible to deploy a container app via the portal, however, setting the volume for persistent storage is much easier using the CLI. 
   
-13. Configure Container App to use Azure Storage File share for volume: [Use storage mounts in Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/storage-mounts?pivots=aca-cli#azure-files)
-15. Access the site using your Azure App Service URL
+13. Configure Container App to use Azure Storage File share for volume: [Use storage mounts in Azure Container Apps](https://docs.microsoft.com/azure/container-apps/storage-mounts?pivots=aca-cli#azure-files)
+15. Access the site using your Azure App Service URL.
 
 > **NOTE:**
-> It is recommended that you enable authentication on your Container App to prevent un-authorized access. [Authentication and authorization in Azure Container Apps](https://docs.microsoft.com/en-us/azure/container-apps/authentication)
+> It is recommended that you enable authentication on your Container App to prevent un-authorized access. [Authentication and authorization in Azure Container Apps](https://docs.microsoft.com/azure/container-apps/authentication)
 
 ***
 
@@ -349,22 +349,22 @@ docker build -t azurenamingtool .
 > **NOTE:**
 > Ensure the '.' is included in the command
   
-9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
-10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
-11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
+9. Create an Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/azure/container-registry/container-registry-get-started-portal#:~:text=%20Quickstart%3A%20Create%20an%20Azure%20container%20registry%20using,must%20log%20in%20to%20the%20registry...%20More%20)
+10. Build and publish your image to the Azure Container Registry: [Microsoft Docs reference](https://docs.microsoft.com/azure/container-registry/container-registry-get-started-docker-cli?tabs=azure-cli)
+11. Create an Azure Files file share for persistent storage: [Microsoft Docs reference](https://docs.microsoft.com/azure/storage/files/storage-how-to-create-file-share?tabs=azure-portal)
   
   ![FileShare](./wwwroot/Screenshots/FileShare.png)
 
-12. Create an Azure App Service - Web App: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux)
-13. Mount the file share as local storage for the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/configure-connect-to-azure-storage?tabs=portal&pivots=container-linux)
+12. Create an Azure App Service - Web App: [Microsoft Docs reference](https://docs.microsoft.com/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux)
+13. Mount the file share as local storage for the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/azure/app-service/configure-connect-to-azure-storage?tabs=portal&pivots=container-linux)
   
   ![MountStorage](./wwwroot/Screenshots/MountStorage.png)
 
-14. Deploy the image from the Azure Container Registry to the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/en-us/azure/app-service/deploy-ci-cd-custom-container?tabs=acr&pivots=container-linux)
-15. Access the site using your Azure App Service URL
+14. Deploy the image from the Azure Container Registry to the Azure App Service: [Microsoft Docs reference](https://docs.microsoft.com/azure/app-service/deploy-ci-cd-custom-container?tabs=acr&pivots=container-linux)
+15. Access the site using your Azure App Service URL.
 
 > **NOTE:**
-> It is recommended that you enable authentication on your App Service to prevent un-authorized access. [Authentication and authorization in Azure App Service and Azure Functions](https://docs.microsoft.com/en-us/azure/app-service/overview-authentication-authorization)
+> It is recommended that you enable authentication on your App Service to prevent un-authorized access. [Authentication and authorization in Azure App Service and Azure Functions](https://docs.microsoft.com/azure/app-service/overview-authentication-authorization)
 
 ***
 
