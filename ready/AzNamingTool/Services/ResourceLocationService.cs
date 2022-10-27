@@ -1,5 +1,6 @@
 ﻿using AzureNamingTool.Helpers;
 using AzureNamingTool.Models;
+using System.Text.Json;
 
 namespace AzureNamingTool.Services
 {
@@ -7,23 +8,31 @@ namespace AzureNamingTool.Services
     {
         private static ServiceResponse serviceResponse = new();
 
-        public static async Task<ServiceResponse> GetItems()
+        public static async Task<ServiceResponse> GetItems(bool admin = true)
         {
             try
             {
                 // Get list of items
                 var items = await GeneralHelper.GetList<ResourceLocation>();
-                serviceResponse.ResponseObject = items.OrderBy(x => x.Name).ToList(); ;
+                if (!admin)
+                {
+                    serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(x => x.Name).ToList();
+                }
+                else
+                {
+                    serviceResponse.ResponseObject = items.OrderBy(x => x.Name).ToList();
+                }
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
             return serviceResponse;
         }
+
         public static async Task<ServiceResponse> GetItem(int id)
         {
             try
@@ -36,12 +45,13 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
                 serviceResponse.ResponseObject = ex;
             }
             return serviceResponse;
         }
+
         public static async Task<ServiceResponse> PostItem(ResourceLocation item)
         {
             try
@@ -100,7 +110,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }
@@ -124,7 +134,7 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
             }
@@ -164,9 +174,85 @@ namespace AzureNamingTool.Services
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 serviceResponse.ResponseObject = ex;
                 serviceResponse.Success = false;
+            }
+            return serviceResponse;
+        }
+
+        public static async Task<ServiceResponse> RefreshResourceLocations(bool shortNameReset = false)
+        {
+            try
+            {
+                // Get the existing Resource location items
+                ServiceResponse serviceResponse;
+                serviceResponse = await ResourceLocationService.GetItems();
+                List<ResourceLocation> locations = (List<ResourceLocation>)serviceResponse.ResponseObject;
+                string url = "https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/repository/resourcelocations.json";
+
+                string refreshdata = await GeneralHelper.DownloadString(url);
+                if (refreshdata != "")
+                {
+                    var newlocations = new List<ResourceLocation>();
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    newlocations = JsonSerializer.Deserialize<List<ResourceLocation>>(refreshdata, options);
+
+                    // Loop through the new items
+                    // Add any new resource location and update any existing locations
+                    foreach (ResourceLocation newlocation in newlocations)
+                    {
+                        // Check if the existing locations contain the current location
+                        int i = locations.FindIndex(x => x.Name == newlocation.Name);
+                        if (i > -1)
+                        {
+                            // Update the Resource location Information
+                            ResourceLocation oldlocation = locations[i];
+                            newlocation.Enabled = oldlocation.Enabled;
+                            
+                            if ((!shortNameReset) || (oldlocation.ShortName == ""))
+                            {
+                                newlocation.ShortName = oldlocation.ShortName;
+                            }
+                            // Remove the old location
+                            locations.RemoveAt(i);
+                            // Add the new location
+                            locations.Add(newlocation);
+                        }
+                        else
+                        {
+                            // Add a new resource location
+                            locations.Add(newlocation);
+                        }
+                    }
+
+                    // Update the settings file
+                    serviceResponse = await PostConfig(locations);
+
+                    // Update the repository file
+                    await FileSystemHelper.WriteFile("resourcelocations.json", refreshdata, "repository/");
+                    
+                    // Clear cached data
+                    GeneralHelper.InvalidateCacheObject("ResourceLocation");
+
+                    // Update the current configuration file version data information
+                    await GeneralHelper.UpdateConfigurationFileVersion("resourcelocations");
+                }
+                else
+                {
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = "There was a problem refreshing the resource locations configuration." });
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
             }
             return serviceResponse;
         }

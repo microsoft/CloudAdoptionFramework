@@ -5,17 +5,13 @@
 @inject ILogger<Generate> Logger
 @inject NavigationManager NavigationManager
 @inject StateContainer state
+@inject IToastService toastService
 
 <PageTitle>Azure Naming Tool - Generate</PageTitle>
 <div class="card @theme.ThemeStyle">
     <div class="card-body">
         <h1>Generate</h1>
         <div class="mb-3">This page generates a name for the selected resource type.</div>
-        @*        <div class="mb-3">
-        <button class="btn btn-primary" title="Instructions" @onclick="@(e => OnInstructionsClick())">
-        View Instructions
-        </button>
-        </div>*@
         <p>
             <strong>Instructions</strong>
             <ol>
@@ -31,7 +27,6 @@
                 <li>
                     Click <strong>Generate</strong> to generate the Azure resource name
                 </li>
-
             </ol>
         </p>
 
@@ -82,11 +77,11 @@
                                 {
                                     @if (type.Property != "")
                                     {
-                                        <option value="@type.ShortName">@type.Resource - @type.Property (@type.ShortName)</option>
+                                        <option value="@type.Id">@type.Resource - @type.Property (@type.ShortName)</option>
                                     }
                                     else
                                     {
-                                        <option value="@type.ShortName">@type.Resource (@type.ShortName)</option>
+                                        <option value="@type.Id">@type.Resource (@type.ShortName)</option>
                                     }
                                 }
                             </InputSelect>
@@ -129,7 +124,6 @@
                             }
                         </div>
                     </div>
-
 
                     @if (selectedResourceType != "")
                     {
@@ -182,7 +176,7 @@
                                                 <div class="card card-body @theme.ThemeStyle">
                                                     <InputSelect title="@resourceComponent.DisplayName" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceFunction)"
                                          Value="@selectedResourceFunction"
-                                         ValueChanged="@((string value) => OnComponentChanged("rvmr",value))">
+                                         ValueChanged="@((string value) => OnComponentChanged("rf",value))">
                                                         <option value="">Select a Function</option>
                                                         @foreach (var item in @servicesData.ResourceFunctions)
                                                         {
@@ -431,7 +425,9 @@
         resourceNameRequest.ResourceLocation = selectedResourceLocation;
         resourceNameRequest.ResourceOrg = selectedResourceOrg;
         resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
-        resourceNameRequest.ResourceType = selectedResourceType;
+        ResourceType resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(selectedResourceType)); 
+        resourceNameRequest.ResourceType = resourceType.ShortName;
+        resourceNameRequest.ResourceId = resourceType.Id;
         resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
         resourceNameRequest.CustomComponents = selectedCustomComponents;
 
@@ -465,45 +461,52 @@
 
     private Task OnTypeChanged(string value)
     {
-        resourceNameRequestResponse = null;
-        // Assign the selected value to the Model
-        selectedResourceType = value;
-        componentsVisible = "collapse show";
-
-        if (selectedResourceType != "")
+        try
         {
-            // Find the selected resoruce type
-            currentResourceType = servicesData.ResourceTypes.Find((t) => t.ShortName == selectedResourceType);
-
-            // Set the optional components
-            selectedResourceTypeOptional = currentResourceType.Optional;
-
-            // Set the excluded components
-            selectedResourceTypeExclude = currentResourceType.Exclude;
-
-            // Reset the selected items
-            selectedResourceEnvironment = null;
-            selectedResourceInstance = null;
-            selectedResourceLocation = null;
-            selectedResourceOrg = null;
-            selectedResourceProjAppSvc = null;
-            selectedResourceUnitDept = null;
-            selectedResourceFunction = null;
-
+            resourceNameRequestResponse = null;
+            // Assign the selected value to the Model
+            selectedResourceType = value;
             componentsVisible = "collapse show";
 
-            // Check if all the components are optional for the resource type
-            selectedCustomComponents.Clear();
-            foreach (var component in servicesData.ResourceComponents)
+            if (selectedResourceType != "")
             {
-                if (component.IsCustom)
+                // Find the selected resoruce type
+                currentResourceType = servicesData.ResourceTypes.Find((t) => t.Id == Convert.ToInt32(selectedResourceType));
+
+                // Set the optional components
+                selectedResourceTypeOptional = currentResourceType.Optional;
+
+                // Set the excluded components
+                selectedResourceTypeExclude = currentResourceType.Exclude;
+
+                // Reset the selected items
+                selectedResourceEnvironment = null;
+                selectedResourceInstance = null;
+                selectedResourceLocation = null;
+                selectedResourceOrg = null;
+                selectedResourceProjAppSvc = null;
+                selectedResourceUnitDept = null;
+                selectedResourceFunction = null;
+
+                componentsVisible = "collapse show";
+
+                // Check if all the components are optional for the resource type
+                selectedCustomComponents.Clear();
+                foreach (var component in servicesData.ResourceComponents)
                 {
-                    selectedCustomComponents.Add(GeneralHelper.NormalizeName(component.Name, true), null);
+                    if (component.IsCustom)
+                    {
+                        selectedCustomComponents.Add(GeneralHelper.NormalizeName(component.Name, true), null);
+                    }
                 }
+
+                ValidateForm();
             }
-
-            ValidateForm();
-
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError("There was an error setting the resource type! Please try again.", "ERROR");
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
         }
 
         return Task.CompletedTask;
@@ -531,7 +534,7 @@
             case "rud":
                 selectedResourceUnitDept = value;
                 break;
-            case "rvmr":
+            case "rf":
                 selectedResourceFunction = value;
                 break;
             case "cc":
@@ -667,7 +670,8 @@
                                 {
                                     boolFormDisabled = true;
                                 }
-                                else{
+                                else
+                                {
                                     if (selectedResourceFunction == "")
                                     {
                                         boolFormDisabled = true;

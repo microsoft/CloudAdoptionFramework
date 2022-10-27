@@ -1,7 +1,10 @@
-﻿using System;
+﻿using AzureNamingTool.Models;
+using AzureNamingTool.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.NetworkInformation;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,31 +15,31 @@ namespace AzureNamingTool.Helpers
 {
     public class FileSystemHelper
     {
-        public static async Task<string> ReadFile(string fileName)
+        public static async Task<string> ReadFile(string fileName, string folderName = "settings/")
         {
-            await CheckFile(fileName);
-            string data = await File.ReadAllTextAsync(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + fileName));
+            await CheckFile(folderName + fileName);
+            string data = await File.ReadAllTextAsync(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName));
             return data;
         }
 
-        public static async Task WriteFile(string fileName, string content)
+        public static async Task WriteFile(string fileName, string content, string folderName = "settings/")
         {
-            await CheckFile(fileName);
-            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + fileName), content);
+            await CheckFile(folderName + fileName);
+            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName), content);
         }
 
         public static async Task CheckFile(string fileName)
         {
-            if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + fileName)))
+            if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName)))
             {
-                var file = File.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + fileName));
+                var file = File.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName));
                 file.Close();
 
                 for (int numTries = 0; numTries < 10; numTries++)
                 {
                     try
                     {
-                        await File.WriteAllTextAsync(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + fileName), "[]");
+                        await File.WriteAllTextAsync(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName), "[]");
                         return;
                     }
                     catch (IOException)
@@ -62,7 +65,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 return ex;
             }
         }
@@ -72,7 +75,7 @@ namespace AzureNamingTool.Helpers
             bool result = false;
             try
             {
-                // Get all the files in teh repository folder
+                // Get all the files in the repository folder
                 DirectoryInfo dirRepository = new("repository");
                 foreach (FileInfo file in dirRepository.GetFiles())
                 {
@@ -81,15 +84,33 @@ namespace AzureNamingTool.Helpers
                         // Copy the repository file to the settings folder
                         file.CopyTo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + file.Name), true);
                         result = true;
+                        // Clear any cached data
+                        
                         break;
                     }
                 }
             }
             catch(Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
             return result;
+        }
+
+        public static async Task MigrateDataToFile(string sourcefileName, string sourcefolderName, string destinationfilename, string destinationfolderName, bool delete)
+        {
+            // Get the source data
+            string data = await ReadFile(sourcefileName, sourcefolderName);
+
+            // Write the destination data
+            await WriteFile(destinationfilename, data, destinationfolderName);
+
+            // Check if the source file should be removed (In repository and settings folders)
+            if(delete)
+            {
+                File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repository/" + sourcefileName));
+                File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + sourcefileName));
+            }
         }
     }
 }

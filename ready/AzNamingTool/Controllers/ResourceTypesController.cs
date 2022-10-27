@@ -26,12 +26,12 @@ namespace AzureNamingTool.Controllers
         /// </summary>
         /// <returns>json - Current resource types data</returns>
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(bool admin = false)
         {
             try
             {
                 // Get list of items
-                serviceResponse = await ResourceTypeService.GetItems();
+                serviceResponse = await ResourceTypeService.GetItems(admin);
                 if (serviceResponse.Success)
                 {
                     return Ok(serviceResponse.ResponseObject);
@@ -43,7 +43,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 return BadRequest(ex);
             }
         }
@@ -72,7 +72,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 return BadRequest(ex);
             }
         }
@@ -123,7 +123,7 @@ namespace AzureNamingTool.Controllers
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 return BadRequest(ex);
             }
         }

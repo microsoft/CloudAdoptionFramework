@@ -1,4 +1,6 @@
 ﻿@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@using AzureNamingTool.Services
 @using Microsoft.JSInterop
 
 <a class="twitter-timeline" data-height="400" data-theme="dark" href="https://twitter.com/AzureNamingTool?ref_src=twsrc%5Etfw">Tweets by AzureNamingTool</a>
@@ -19,7 +21,7 @@
             }
             catch (Exception ex)
             {
-                LogHelper.LogAdminMessage("ERROR", ex.Message);
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
     }

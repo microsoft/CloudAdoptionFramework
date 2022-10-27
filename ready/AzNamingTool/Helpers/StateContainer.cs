@@ -8,6 +8,7 @@ namespace AzureNamingTool.Helpers
         private bool? _admin;
         private bool? _password;
         private string? _apptheme;
+        private bool? _newsenabled;
         public bool _reloadnav;
 
         public bool Verified
@@ -73,6 +74,23 @@ namespace AzureNamingTool.Helpers
         public void SetAppTheme(string value)
         {
             _apptheme = value;
+            NotifyStateChanged();
+        }
+
+        public bool NewsEnabled
+        {
+            get => _newsenabled ?? true;
+            set
+            {
+                _newsenabled = value;
+                NotifyStateChanged();
+            }
+        }
+
+
+        public void SetNewsEnabled(bool newsenabled)
+        {
+            _newsenabled = newsenabled;
             NotifyStateChanged();
         }
 

@@ -2,9 +2,11 @@
 @using System.Reflection
 @using AzureNamingTool.Helpers
 @using AzureNamingTool.Models
+@using AzureNamingTool.Services
 @inject ILogger<Index> Logger
 @inject NavigationManager NavigationManager
 @inject StateContainer state
+@inject ProtectedSessionStorage session
 
 <PageTitle>Azure Naming Tool - Home</PageTitle>
 
@@ -12,9 +14,9 @@
     <div class="card-body">
         <p>
             <img src="images/AzureNamingToolLogo.png" height="160px;" alt="Azure Naming Tool" />
-        </p>        
+        </p>
         <p style="font-style:italic">
-            Current App Version: @appversion
+            Installed App Version: @appversion
         </p>
         <h4>Disclaimer</h4>
         <p>
@@ -25,7 +27,7 @@
         </p>
         <h4>Configuration</h4>
         <p>
-            The Configuration page provides all the data points that make up your naming convention.  There are 8 possible components that may be used to name each Azure resource.  The data within each of those components can be completely customized, except for the resource types.  For the resource types, only the short name, optional, and excluded values may be updated.  A delimiter may be selected to separate each component in your resource names.  However, the delimiter will be included in a resource name if that character is allowed.  Your configuration may be exported under the Global Configuration header.  We recommend doing that after defining your naming convention as a backup.  @*Lastly, use the Policy export feature to create an Azure Policy Definition.  That can be applied to your Azure environment to enforce your naming convention.*@
+            The Configuration page provides all the data points that make up your naming convention.  There are 8 standard components that may be used to name each Azure resource.  The data within each of those components can be completely customized, except for the resource types.  For the resource types, only the short name, optional, and excluded values may be updated.  A delimiter may be selected to separate each component in your resource names.  However, the delimiter will be included in a resource name if that character is allowed. The tool also supports the ability to define custom components. This allows administratos to create new components for the naming convention.  Your configuration may be exported under the Global Configuration header.  We recommend doing that after defining your naming convention as a backup.  @*Lastly, use the Policy export feature to create an Azure Policy Definition.  That can be applied to your Azure environment to enforce your naming convention.*@
         </p>
 
         <h4>References</h4>
@@ -47,15 +49,70 @@
 @code {
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
+    private bool admin;
 
     private string? appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+    private string? updateurl = "https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/UPDATING.md";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    {  
+    {
+        var resultAdmin = await session.GetAsync<bool>("admin");
+        admin = (bool)resultAdmin.Value;
+        // Determine if the version notification has been dismissed
+        var resultNotification = await session.GetAsync<bool>("versionnotification");
+        bool notificationshown = resultNotification.Success ? resultNotification.Value : false;
+
+        if (firstRender)
+        {
+            try
+            {
+                if (admin)
+                {
+                    var latestversion = await GeneralHelper.GetToolVersion();
+                    if (!notificationshown)
+                    {
+                        // Check if the client's version matches the current offical version
+                        if (appversion != latestversion)
+                        {
+                            ShowVersionModal("bg-navcolor", "ATTENTION", "<p style='font-weight:bold;'>Your current version is out of date!</p><p>Please click <a href='" + updateurl + "' target='_blank'>here</a> to update to the current version for the latest features!</p><p><span style='font-weight:bold;'>Installed Version:</span> <span style='font-style:italic; '>" + appversion + "</p><p><span style='font-weight:bold;'>Latest version:</span> <span style='font-style:italic; '>" + latestversion + "</span></p>");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+        }
     }
 
     private async Task OnInstructionsClick()
     {
         NavigationManager.NavigateTo("/instructions");
+    }
+
+    async void ShowVersionModal(string headerstyle, string title, string message)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(InformationModal.message), message);
+        parameters.Add(nameof(InformationModal.title), title);
+        parameters.Add(nameof(InformationModal.headerstyle), headerstyle);
+        parameters.Add("theme", theme);
+
+        var options = new ModalOptions()
+            {
+                HideCloseButton = true,
+                UseCustomLayout = true
+            };
+
+        var modal = Modal.Show<InformationModal>(title, parameters, options);
+        var result = await modal.Result;
+        await session.SetAsync("versionnotification", true);
+        if (!result.Cancelled)
+        {
+            StateHasChanged();
+        }
     }
 }

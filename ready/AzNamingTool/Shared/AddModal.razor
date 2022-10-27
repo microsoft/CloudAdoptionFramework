@@ -182,7 +182,7 @@
             {
                 ModalInstance.CloseAsync();
                 toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!", "SUCCESS");
-                LogHelper.LogAdminMessage("SUCCESS", "(" + type + ") " + itemName + " added!");
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "SUCCESS", Message = "(" + type + ") " + itemName + " added!" });
             }
             else
             {

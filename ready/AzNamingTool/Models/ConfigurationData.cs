@@ -1,4 +1,5 @@
 ﻿using AzureNamingTool.Models;
+using AzureNamingTool.Pages;
 using System.Collections.Generic;
 
 namespace AzureNamingTool.Models
@@ -16,8 +17,11 @@ namespace AzureNamingTool.Models
         public List<ResourceUnitDept> ResourceUnitDepts { get; set; }
         public List<ResourceFunction> ResourceFunctions { get; set; }
         public List<CustomComponent> CustomComponents { get; set; }
-        public string SALTKey { get; set; }
-        public string AdminPassword { get; set; }
-        public string APIKey { get; set; }
+        public List<GeneratedName> GeneratedNames { get; set; }
+        public List<AdminLogMessage> AdminLogs { get; set; }
+
+        public string? SALTKey { get; set; }
+        public string? AdminPassword { get; set; }
+        public string? APIKey { get; set; }
     }
 }

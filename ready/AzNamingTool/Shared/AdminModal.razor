@@ -3,12 +3,13 @@
 @using AzureNamingTool.Services
 @using Microsoft.AspNetCore.Html
 @using Microsoft.Extensions.Logging
+@using System.Runtime.Caching
 @inject IJSRuntime JsRuntime
-@inject IConfiguration _config
 @inject StateContainer state
 @inject ProtectedSessionStorage session
 @inject IToastService toastService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
 
 <div class="modal fade show d-block" tabindex="-1" role="dialog">
     <div class="modal-backdrop fade show" @onclick="Close"></div>
@@ -34,31 +35,13 @@
                     <p>
                         This form allows you to set the Admin password, API key, and configuration for the Azure Naming Tool.
                     </p>
-@*                    <div class="card mb-3">
-                        <h5 class="card-header @theme.ThemeStyle">
-                            Theme
-                        </h5>
-                        <div class="card card-body @theme.ThemeStyle">
-                            <p>
-                                Select a theme for the site.
-                            </p>
-                            <div class="form-group">
-                                <label>
-                                    <input type="radio" name="apptheme" checked="@(apptheme == "bg-default text-black")" @onchange="() => OnThemeChanged(false)" /> Light
-                                </label>
-                                <label>
-                                    <input type="radio" name="apptheme" checked="@(apptheme == "bg-dark text-white")" @onchange="() => OnThemeChanged(true)" /> Dark
-                                </label>
-                            </div>
-
-                        </div>
-                    </div>*@
-
                     <div class="card mb-3">
                         <h5 class="card-header @theme.ThemeStyle">
-                            New Password
+                            <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href="#updatepassword" role="button" aria-expanded="false" aria-controls="updatepassword">
+                                <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> Update Password</h5>
+                            </a>
                         </h5>
-                        <div class="card card-body @theme.ThemeStyle">
+                        <div class="collapse card card-body @theme.ThemeStyle" id="updatepassword">
                             <p>
                                 Enter a new password for the site.
                             </p>
@@ -72,14 +55,16 @@
                                 <input title="New Password" id="newpassword" class="form-control  mb-3" type="password" @onchange="@((ui) => { SetFormValue("password",(string)ui.Value);})" />
                                 <button title="Save Password" type="button" disabled="@disabled" class="btn btn-success" @onclick="@(e => AdminFormAction("password"))">Save</button>
                             </div>
-
                         </div>
                     </div>
-                    <div class="card">
+
+                    <div class="card mb-3">
                         <h5 class="card-header @theme.ThemeStyle">
-                            API Key
+                            <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href="#updateapikey" role="button" aria-expanded="false" aria-controls="updateapikey">
+                                <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> API Key</h5>
+                            </a>
                         </h5>
-                        <div class="card card-body @theme.ThemeStyle">
+                        <div class="collapse card card-body @theme.ThemeStyle" id="updateapikey">
                             <p>
                                 The current API key is displayed. Click <strong>Generate</strong> to generate a new random API Key, or update the text to the desired value.
                             </p>
@@ -87,6 +72,22 @@
                                 <input title="API Key" id="currentapikey" class="form-control mb-3" type="text" @onchange="@((ui) => { SetFormValue("apikey",(string)ui.Value);})" value="@currentapikey" />
                                 <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("apikeysave"))" title="Save API Key">Save</button>
                                 <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("apikeygenerate"))" title="Generate API Key">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <h5 class="card-header @theme.ThemeStyle">
+                            <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href="#clearcache" role="button" aria-expanded="false" aria-controls="clearcache">
+                                <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> Clear Cache</h5>
+                            </a>
+                        </h5>
+                        <div class="collapse card card-body @theme.ThemeStyle" id="clearcache">
+                            <p>
+                                The tool uses caching for data to improve performance. Click <strong>Clear</strong> to clear all cached data.
+                            </p>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("clearcache"))" title="Clear Cache">Clear</button>
                             </div>
                         </div>
                     </div>
@@ -107,8 +108,6 @@
     </div>
 </div>
 
-
-
 @code {
 
     [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
@@ -128,13 +127,6 @@
 
     protected override async void OnInitialized()
     {
-        //admin = state.Admin;
-        //var result = await session.GetAsync<bool>("admin");
-        //admin = (bool)result.Value;
-        //if (admin)
-        //{
-        //    currentapikey = GeneralHelper.DecryptString(config.APIKey, config.SALTKey);
-        //}
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -151,8 +143,8 @@
     private async void AdminFormAction(string action)
     {
         message = new ResponseMessage();
+        ServiceResponse serviceResponse = new();
 
-        bool updateConfig = false;
         bool redirect = false;
 
         message.Header = "INFORMATION";
@@ -194,46 +186,75 @@
                 if (confirmPassword)
                 {
                     // Set the new admin password
-                    config.AdminPassword = GeneralHelper.EncryptString(newpassword, config.SALTKey);
-                    updateConfig = true;
-                    message.Type = MessageTypesEnum.SUCCESS;
-                    message.Header = "SUCCESS";
-                    message.Message = "Password updated!";
+                    serviceResponse = await AdminService.UpdatePassword(newpassword);
+                    if (serviceResponse.Success)
+                    {
+                        message.Type = MessageTypesEnum.SUCCESS;
+                        message.Header = "SUCCESS";
+                        message.Message = "Password updated!";
+                    }
+                    else
+                    {
+                        message.Type = MessageTypesEnum.ERROR;
+                        message.Header = "ERROR";
+                        message.Message = "There was a problem updating the password!";
+                    }
                 }
                 break;
             case "apikeysave":
-
                 bool confrimAPIKeySave = await JsRuntime.InvokeAsync<bool>("confirm", "This will update the current API Key. Are you sure?");
                 if (confrimAPIKeySave)
                 {
-                    config.APIKey = GeneralHelper.EncryptString(currentapikey, config.SALTKey);
-                    updateConfig = true;
-                    message.Type = MessageTypesEnum.SUCCESS;
-                    message.Header = "SUCCESS";
-                    message.Message = "API Key updated!";
+                    serviceResponse = await AdminService.UpdateAPIKey(currentapikey);
+                    if (serviceResponse.Success)
+                    {
+                        message.Type = MessageTypesEnum.SUCCESS;
+                        message.Header = "SUCCESS";
+                        message.Message = "API Key updated!";
+                    }
+                    else
+                    {
+                        message.Type = MessageTypesEnum.ERROR;
+                        message.Header = "ERROR";
+                        message.Message = "There was a problem updating the API Key!";
+                    }
                 }
                 break;
             case "apikeygenerate":
-
                 bool confrimAPIKeyGenerate = await JsRuntime.InvokeAsync<bool>("confirm", "This will generate a new API Key. Are you sure?");
                 if (confrimAPIKeyGenerate)
                 {
-                    // Set the new api key
-                    Guid guid = Guid.NewGuid();
-                    config.APIKey = GeneralHelper.EncryptString(guid.ToString(), config.SALTKey);
-                    currentapikey = guid.ToString();
-                    updateConfig = true;
-                    message.Type = MessageTypesEnum.SUCCESS;
-                    message.Header = "SUCCESS";
-                    message.Message = "API Key generated!";
+                    serviceResponse = await AdminService.GenerateAPIKey();
+                    if (serviceResponse.Success)
+                    {
+                        currentapikey = serviceResponse.ResponseObject;
+                        await jsRuntime.InvokeAsync<string>("console.log", currentapikey);
+                        message.Type = MessageTypesEnum.SUCCESS;
+                        message.Header = "SUCCESS";
+                        message.Message = "API Key updated!";
+                    }
+                    else
+                    {
+                        message.Type = MessageTypesEnum.ERROR;
+                        message.Header = "ERROR";
+                        message.Message = "There was a problem generating the API Key!";
+                    }
                 }
+                break;
+            case "clearcache":
+                ObjectCache memoryCache = MemoryCache.Default;
+                List<string> cacheKeys = memoryCache.Select(kvp => kvp.Key).ToList();
+                foreach (string cacheKey in cacheKeys)
+                {
+                    memoryCache.Remove(cacheKey);
+                }
+                message.Type = MessageTypesEnum.SUCCESS;
+                message.Header = "SUCCESS";
+                message.Message = "Cache cleared!";
                 break;
         }
 
-        if (updateConfig)
-        {
-            GeneralHelper.UpdateSettings(config);
-        }
+        config = GeneralHelper.GetConfigurationData();
 
         await InvokeAsync(() =>
         {
@@ -248,11 +269,9 @@
             {
                 case MessageTypesEnum.INFORMATION:
                     toastService.ShowInfo(message.Message, "INFORMATION");
-                    LogHelper.LogAdminMessage(message.Type.ToString(), message.Message);
                     break;
                 case MessageTypesEnum.SUCCESS:
                     toastService.ShowSuccess(message.Message, "SUCCESS");
-                    LogHelper.LogAdminMessage(message.Type.ToString(), message.Message);
                     break;
                 case MessageTypesEnum.WARNING:
                     toastService.ShowWarning(message.Message, "WARNING");
@@ -261,6 +280,7 @@
                     toastService.ShowError(message.Message, "ERROR");
                     break;
             }
+            AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message });
         }
 
         if (redirect)
