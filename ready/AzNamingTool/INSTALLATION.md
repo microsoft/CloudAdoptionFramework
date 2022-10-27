@@ -196,7 +196,7 @@ az ad sp create-for-rbac --name "[YOUR CREDENTIAL NAME]" --role contributor --sc
 10. Click **Add secret**.
 11. Click **New repository secret**.
 12. Enter **AZURE_CREDENTIALS** as the **Name**.
-13. Enter the ***Azure Wwb App Credentials** JSON as the **Value**:
+13. Enter the **Azure Wwb App Credentials** JSON as the **Value**:
 
   ![GitHub Secrets](./wwwroot/Screenshots/GitHubActionInstallation1.png)
 

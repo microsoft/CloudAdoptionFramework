@@ -11,7 +11,7 @@ namespace AzureNamingTool.Services
     public class ResourceTypeService
     {
         private static ServiceResponse serviceResponse = new();
-
+        
         public static async Task<ServiceResponse> GetItems(bool admin = true)
         {
             try
