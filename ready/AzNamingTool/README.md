@@ -49,6 +49,16 @@ The following are important notes/aspects of the Azure Naming Tool:
 
   ![Admin Password Prompt](./wwwroot/Screenshots/AdminPasswordPrompt.png)
 
+## Installation
+
+[How To Install](#how-to-install)
+
+* [Run as a Docker image](INSTALLATION.md#how-to-install)
+
+* [Run as an Azure App Service Container](INSTALLATION.md#run-as-an-azure-app-service-container)
+
+* [Run as a Stand-Alone Site](INSTALLATION.md#run-as-a-stand-alone-site)
+
 ## Pages
 
 ### Home Page
