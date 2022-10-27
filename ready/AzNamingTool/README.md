@@ -16,6 +16,8 @@ Stay up to date on new features and announcements here:
 
 [Project Structure](#project-structure)
 
+[Installation](#installation)
+
 [Important Notes](#important-notes)
 
 [Pages](#pages)
@@ -41,7 +43,19 @@ The Azure Naming Tool is a .NET 6 Blazor application with a RESTful API. The UI 
 * JSON configuration files
 * Dockerfile
 
-### Important Notes
+## Installation
+
+* [Run as a Docker image](INSTALLATION.md#run-as-a-docker-image) (Local development)
+
+* [Run as an Azure Web App Using GitHub Action](INSTALLATION.md#run-as-an-azure-web-app-using-github-action) (.NET Application running in an Azure App Service, non-container)
+
+* [Run as a Web App for Containers](INSTALLATION.md#run-as-a-web-app-for-containers) (Single container running in an Azure App Service)
+
+* [Run as an Azure Container App](INSTALLATION.md#run-as-an-azure-container-app) (Single container running in an Azure Container App)
+
+* [Run as a Stand-Alone Site](INSTALLATION.md#run-as-a-stand-alone-site) 
+
+## Important Notes
 
 The following are important notes/aspects of the Azure Naming Tool:
 
