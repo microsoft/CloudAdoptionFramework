@@ -2,13 +2,11 @@
 
 # Azure Naming Tool v2 - Overview
 
-<img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Image representing the Azure Naming Tool" title="Azure Naming Tool" height="150"/>
-
-
 Stay up to date on new features and announcements here:
 
-[Twitter/AzureNamingTool](https://twitter.com/azurenamingtool)
+![2021 Twitter logo - blue](https://user-images.githubusercontent.com/13591910/199250655-6f60c584-3a47-46af-a161-64908b7894fc.png) [AzureNamingTool](https://twitter.com/azurenamingtool)
 
+<img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Image representing the Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
 [Overview](#overview)
 
