@@ -4,7 +4,15 @@
 
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
-## Version 2.3.0 (current)
+## Version 2.3.1 (current)
+
+### Bug fixes
+- Updated Configuration page to export Admin configuration, if selecteddocumentation
+- Updated ResourceTypes.cs model to not require Short Name.
+
+***
+
+## Version 2.3.0
 ### Features
 - Added Search functionality to Admin Log
 - Added Search functionality to Generated Names Log

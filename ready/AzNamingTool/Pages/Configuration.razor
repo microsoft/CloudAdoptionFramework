@@ -1616,7 +1616,7 @@
                                         <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("Global",0,"download")) title="Export">
                                             <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export
                                         </button>
-                                        <input title="Include Admin Configuration" class="form-check-input" type="checkbox" value="" style="margin-top: 9px; margin-left:10px;" id="includeadminconfiguration"> Include Admin Configuration?
+                                        <input title="Include Admin Configuration" class="form-check-input" type="checkbox" @bind="@includeAdmin" style="margin-top: 9px; margin-left:10px;"> Include Admin Configuration?
                                     </p>
                                 </div>
                             </div>
@@ -1731,6 +1731,7 @@
     private string? newGlobalConfig;
     private bool refreshtypeshortnames = false;
     private bool refreshlocationshortnames = false;
+    private bool includeAdmin = false;
 
     private ResponseMessage message = new();
 
@@ -2950,7 +2951,7 @@
                     switch (action)
                     {
                         case "download":
-                            serviceResponse = await ImportExportService.ExportConfig();
+                            serviceResponse = await ImportExportService.ExportConfig(includeAdmin);
                             var globaljson = serviceResponse.ResponseObject;
                             await BlazorDownloadFileService.DownloadFileFromText("globalconfig.json", JsonSerializer.Serialize(globaljson).ToString(), System.Text.Encoding.UTF8, "application/octet-stream");
                             break;

@@ -12,7 +12,6 @@ namespace AzureNamingTool.Models
         public string Exclude { get; set; }
         public string Property { get; set; }
         private string _ShortName;
-        [Required()]
         [JsonPropertyName("ShortName")]
         public string ShortName
         {
