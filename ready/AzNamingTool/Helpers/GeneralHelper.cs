@@ -657,7 +657,7 @@ namespace AzureNamingTool.Helpers
                 ObjectCache memoryCache = MemoryCache.Default;
                 var cacheItemPolicy = new CacheItemPolicy
                 {
-                    AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(300.0),
+                    AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(600.0),
 
                 };
                 memoryCache.Set(cachekey, cachedata, cacheItemPolicy);

@@ -7,6 +7,7 @@
 @inject ILogger<Reference> Logger
 @inject NavigationManager NavigationManager
 @inject StateContainer state
+@inject IToastService toastService
 
 <PageTitle>Azure Naming Tool - Reference</PageTitle>
 
@@ -219,14 +220,17 @@
                                                                                 default:
                                                                                     if (resourceComponent.IsCustom)
                                                                                     {
-                                                                                        <tr>
-                                                                                            <td class="align-top w-25">
-                                                                                                @resourceComponent.Name:
-                                                                                            </td>
-                                                                                            <td style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;" class="align-top">
-                                                                                                @servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().Name (@servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName)
-                                                                                            </td>
-                                                                                        </tr>
+                                                                                        if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 0)
+                                                                                        {
+                                                                                            <tr>
+                                                                                                <td class="align-top w-25">
+                                                                                                    @resourceComponent.Name:
+                                                                                                </td>
+                                                                                                <td style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;" class="align-top">
+                                                                                                    @servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().Name (@servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName)
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        }
                                                                                     }
                                                                                     break;
                                                                             }
@@ -360,15 +364,32 @@
 
     protected override async Task OnInitializedAsync()
     {
-        servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
-        resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
-
-        // Get the list of categories
-        categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+        await SetServicesData();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (servicesData == null)
+        {
+            await SetServicesData();
+        }
+    }
+
+    private async Task SetServicesData()
+    {
+        try
+        {
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
+            resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
+
+            // Get the list of categories
+            categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            toastService.ShowError("There was a problem loading the page. Please try again", "ERROR");
+        }
     }
 
     protected string GenerateName(ResourceType type, string shortName, string staticvalues)
@@ -413,7 +434,10 @@
                                 default:
                                     if (resourceComponent.IsCustom)
                                     {
-                                        name += servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName;
+                                        if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 0)
+                                        {
+                                            name += servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName;
+                                        }
                                     }
                                     break;
                             }

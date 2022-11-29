@@ -293,24 +293,29 @@
                                         default:
                                             @if (resourceComponent.IsCustom)
                                             {
-                                                <div class="card @theme.ThemeStyle mb-3">
-                                                    <h5 class="card-header text-white bg-secondary">
-                                                        @resourceComponent.Name
-                                                        @if (selectedResourceTypeOptional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
-                                                        {
-                                                            @((MarkupString)optional)
-                                                        }
-                                                    </h5>
-                                                    <div class="card card-body @theme.ThemeStyle">
-                                                        <select title="@resourceComponent.DisplayName" class="@GetControlStyle()" value="@selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)]" @onchange='(e  => OnCustomComponentChanged(e, GeneralHelper.NormalizeName(resourceComponent.Name, true)))'>
-                                                            <option value="">Select a component</option>
-                                                            @foreach (var item in @servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                @if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 0)
+                                                {
+                                                    <div class="card @theme.ThemeStyle mb-3">
+                                                        <h5 class="card-header text-white bg-secondary">
+                                                            @resourceComponent.Name
+                                                            @if (selectedResourceTypeOptional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                                             {
-                                                                <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                                @(
+                                                                    (MarkupString)optional
+                                                                    )
                                                             }
-                                                        </select>
+                                                        </h5>
+                                                        <div class="card card-body @theme.ThemeStyle">
+                                                            <select title="@resourceComponent.DisplayName" class="@GetControlStyle()" value="@selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)]" @onchange='(e  => OnCustomComponentChanged(e, GeneralHelper.NormalizeName(resourceComponent.Name, true)))'>
+                                                                <option value="">Select a component</option>
+                                                                @foreach (var item in @servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                                {
+                                                                    <option value="@item.ShortName">@item.Name (@item.ShortName)</option>
+                                                                }
+                                                            </select>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                }
                                             }
                                             break;
                                     }
@@ -395,23 +400,44 @@
 
     protected override async Task OnInitializedAsync()
     {
-        servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
-        List<ResourceType> filteredtypes = new List<ResourceType>();
-        // Filter out the types w/o the scope
-        foreach (ResourceType type in servicesData.ResourceTypes)
+        await SetServicesData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (resourceDelimiter == null)
         {
-            //if (filteredscopes.Contains(type.Scope))
-            //{
-            filteredtypes.Add(type);
-            //}
+            await SetServicesData();
         }
-        servicesData.ResourceTypes = filteredtypes;
+    }
 
-        // Get the list of categories
-        categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+    private async Task SetServicesData()
+    {
+        try
+        {
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
+            List<ResourceType> filteredtypes = new List<ResourceType>();
+            // Filter out the types w/o the scope
+            foreach (ResourceType type in servicesData.ResourceTypes)
+            {
+                //if (filteredscopes.Contains(type.Scope))
+                //{
+                filteredtypes.Add(type);
+                //}
+            }
+            servicesData.ResourceTypes = filteredtypes;
 
-        resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
-        componentsVisible = "collapse show";
+            // Get the list of categories
+            categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+
+            resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
+            componentsVisible = "collapse show";
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            toastService.ShowError("There was a problem loading the page. Please try again", "ERROR");
+        }
     }
 
     private async Task HandleValidSubmit()
@@ -425,7 +451,7 @@
         resourceNameRequest.ResourceLocation = selectedResourceLocation;
         resourceNameRequest.ResourceOrg = selectedResourceOrg;
         resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
-        ResourceType resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(selectedResourceType)); 
+        ResourceType resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(selectedResourceType));
         resourceNameRequest.ResourceType = resourceType.ShortName;
         resourceNameRequest.ResourceId = resourceType.Id;
         resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
@@ -681,16 +707,19 @@
                             default:
                                 if (resourceComponent.IsCustom)
                                 {
-                                    // Make sure each component has a value
-                                    if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == null)
+                                    if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 0)
                                     {
-                                        boolFormDisabled = true;
-                                    }
-                                    else
-                                    {
-                                        if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == "")
+                                        // Make sure each component has a value
+                                        if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == null)
                                         {
                                             boolFormDisabled = true;
+                                        }
+                                        else
+                                        {
+                                            if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == "")
+                                            {
+                                                boolFormDisabled = true;
+                                            }
                                         }
                                     }
                                 }

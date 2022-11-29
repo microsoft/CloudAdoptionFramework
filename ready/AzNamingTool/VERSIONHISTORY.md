@@ -4,10 +4,18 @@
 
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
-## Version 2.3.1 (current)
+## Version 2.3.2 (current)
 
 ### Bug fixes
-- Updated Configuration page to export Admin configuration, if selecteddocumentation
+- Updated Reference/Generate pages to reload configuration data, if empty
+- Updated site to exclude Custom Component if no options are entered
+
+***
+
+## Version 2.3.1
+
+### Bug fixes
+- Updated Configuration page to export Admin configuration, if selected
 - Updated ResourceTypes.cs model to not require Short Name.
 
 ***
