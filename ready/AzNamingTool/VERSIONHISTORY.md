@@ -9,6 +9,7 @@
 ### Bug fixes
 - Updated Reference/Generate pages to reload configuration data, if empty
 - Updated site to exclude Custom Component if no options are entered
+- Updated Admin Page styling
 
 ***
 
