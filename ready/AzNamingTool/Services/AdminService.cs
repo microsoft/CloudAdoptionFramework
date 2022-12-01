@@ -14,7 +14,7 @@ namespace AzureNamingTool.Services
         {
             try
             {
-                if (GeneralHelper.ValidatePassword(password))
+                if (ValidationHelper.ValidatePassword(password))
                 {
                     config.AdminPassword = GeneralHelper.EncryptString(password, config.SALTKey);
                     GeneralHelper.UpdateSettings(config);

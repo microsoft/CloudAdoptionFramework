@@ -164,7 +164,7 @@ namespace AzureNamingTool.Services
 
                 // Validate the generated name for the resource type
                 // CALL VALIDATION FUNCTION
-                Tuple<bool, string, StringBuilder> namevalidation = GeneralHelper.ValidateGeneratedName(resourceType, name, request.ResourceDelimiter.Delimiter);
+                Tuple<bool, string, StringBuilder> namevalidation = ValidationHelper.ValidateGeneratedName(resourceType, name, request.ResourceDelimiter.Delimiter);
 
                 valid = (bool)namevalidation.Item1;
                 name = (string)namevalidation.Item2;
@@ -546,7 +546,7 @@ namespace AzureNamingTool.Services
 
                 // Validate the generated name for the resource type
                 // CALL VALIDATION FUNCTION
-                Tuple<bool, string, StringBuilder> namevalidation = GeneralHelper.ValidateGeneratedName(resourceType, name, resourceDelimiter.Delimiter);
+                Tuple<bool, string, StringBuilder> namevalidation = ValidationHelper.ValidateGeneratedName(resourceType, name, resourceDelimiter.Delimiter);
 
                 valid = (bool)namevalidation.Item1;
                 name = (string)namevalidation.Item2;

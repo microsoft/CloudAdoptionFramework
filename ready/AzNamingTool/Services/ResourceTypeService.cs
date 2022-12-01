@@ -257,7 +257,7 @@ namespace AzureNamingTool.Services
                     await FileSystemHelper.WriteFile("resourcetypes.json", refreshdata, "repository/");
 
                     // Clear cached data
-                    GeneralHelper.InvalidateCacheObject("ResourceType");
+                    CacheHelper.InvalidateCacheObject("ResourceType");
 
                     // Update the current configuration file version data information
                     await GeneralHelper.UpdateConfigurationFileVersion("resourcetypes");

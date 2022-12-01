@@ -55,7 +55,7 @@ namespace AzureNamingTool.Services
                 // Write items to file
                 await GeneralHelper.WriteList<GeneratedName>(items);
 
-                GeneralHelper.InvalidateCacheObject("generatednames.json");
+                CacheHelper.InvalidateCacheObject("generatednames.json");
 
                 serviceReponse.Success = true;
             }

@@ -30,7 +30,7 @@
             </div>
             <div class="modal-footer">
                 <button title="Add" @onclick="Save" class="btn btn-success">Add</button>
-                <button title="Cancel" @onclick="ModalInstance.CancelAsync" class="btn btn-secondary">Cancel</button>
+                <button title="Cancel" @onclick="Cancel" class="btn btn-secondary">Cancel</button>
             </div>
         </div>
     </div>
@@ -93,7 +93,7 @@
             {
                 if ((itemName != "") && (itemShortName != ""))
                 {
-                    if (GeneralHelper.ValidateShortName(itemShortName, type))
+                    if (ValidationHelper.ValidateShortName(itemShortName, type))
                     {
                         valid = true;
                         itemShortName = itemShortName.ToLower();
