@@ -204,7 +204,7 @@ namespace AzureNamingTool.Services
         }
 
         /// <summary>
-        /// This function is used to generate a name by providing each componetn and teh short name value. The function will validate the values to ensure they match the current configuration. 
+        /// This function is used to generate a name by providing each componetn and the short name value. The function will validate the values to ensure they match the current configuration. 
         /// </summary>
         /// <param name="request"></param>
         /// <returns>ResourceNameResponse - Response of name generation</returns>
@@ -226,6 +226,10 @@ namespace AzureNamingTool.Services
 
                 // Get the specified resource type
                 var resourceTypes = await GeneralHelper.GetList<ResourceType>();
+                if(resourceTypes == null)
+                {
+                    
+                }
                 var resourceTypesByShortName = resourceTypes.FindAll(x => x.ShortName == request.ResourceType);
                 if (resourceTypesByShortName == null)
                 {
@@ -266,7 +270,6 @@ namespace AzureNamingTool.Services
                         resourceType = resourceTypesByShortName[0];
                     }
                 }
-
 
                 // Get the current delimiter
                 serviceresponse = await ResourceDelimiterService.GetItem();
@@ -554,7 +557,6 @@ namespace AzureNamingTool.Services
                 {
                     sbMessage.Append((StringBuilder)namevalidation.Item3);
                 }
-
 
                 if (valid)
                 {

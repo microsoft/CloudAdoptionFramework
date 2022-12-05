@@ -77,20 +77,18 @@
         {
             OpenPasswordModal();
         }
-        var result = await session.GetAsync<bool>("admin");
-        admin = (bool)result.Value;
     }
-
-
-
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
+    {        
+        var adminresult = await session.GetAsync<bool>("admin");
+        admin = (bool)adminresult.Value;
         if (firstRender)
         {
             try
             {
-                var result = await storage.GetAsync<string>("apptheme");
-                theme.ThemeStyle = result.Success ? result.Value : "bg-default text-black";
+                var themeresult = await storage.GetAsync<string>("apptheme");
+                theme.ThemeStyle = themeresult.Success ? themeresult.Value : "bg-default text-black";
             }
             catch
             {

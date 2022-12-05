@@ -82,11 +82,13 @@ namespace AzureNamingTool.Helpers
 
         public async static Task<List<T>> GetList<T>()
         {
+            var items = new List<T>();
             try
             {
-                String data = String.Empty;
-                // Check if the data is already in cache
-                if (CacheHelper.GetCacheObject(typeof(T).Name) == null)
+                // Check if the data is cached
+                String data = (string)CacheHelper.GetCacheObject(typeof(T).Name);
+                // Load the data from the file system.
+                if ((data == null) || (data == ""))
                 {
                     data = typeof(T).Name switch
                     {
@@ -106,11 +108,7 @@ namespace AzureNamingTool.Helpers
                     };
                     CacheHelper.SetCacheObject(typeof(T).Name, data);
                 }
-                else
-                {
-                    data = (string)CacheHelper.GetCacheObject(typeof(T).Name);
-                }
-                var items = new List<T>();
+
                 if (data != "[]")
                 {
                     var options = new JsonSerializerOptions
@@ -127,7 +125,7 @@ namespace AzureNamingTool.Helpers
             catch (Exception ex)
             {
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-                throw;
+                return items;
             }
         }
 
@@ -201,7 +199,6 @@ namespace AzureNamingTool.Helpers
             catch (Exception ex)
             {
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-                throw;
             }
         }
 
