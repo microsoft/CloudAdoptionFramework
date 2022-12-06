@@ -20,6 +20,7 @@ namespace AzureNamingTool.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [ApiKey]
+    [RateFilter]
     public class ResourceNamingRequestsController : ControllerBase
     {
         // POST api/<ResourceNamingRequestsController>

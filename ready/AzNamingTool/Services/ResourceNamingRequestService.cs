@@ -226,10 +226,6 @@ namespace AzureNamingTool.Services
 
                 // Get the specified resource type
                 var resourceTypes = await GeneralHelper.GetList<ResourceType>();
-                if(resourceTypes == null)
-                {
-                    
-                }
                 var resourceTypesByShortName = resourceTypes.FindAll(x => x.ShortName == request.ResourceType);
                 if (resourceTypesByShortName == null)
                 {
@@ -240,6 +236,13 @@ namespace AzureNamingTool.Services
                 }
                 else
                 {
+                    if (resourceTypesByShortName.Count == 0)
+                    {
+                        valid = false;
+                        response.Message = "ResourceType value is invalid.";
+                        response.Success = false;
+                        return response;
+                    }
                     // Check if there are duplicates
                     if (resourceTypesByShortName.Count > 1)
                     {
