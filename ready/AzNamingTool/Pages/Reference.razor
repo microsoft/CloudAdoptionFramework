@@ -96,7 +96,7 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td>
-                                                                    <strong>Example:  @GenerateName(resourcetype, resourcetype.ShortName, resourcetype.StaticValues)001</strong><a id="@resourcetype.Id"></a>
+                                                                    <strong>Example:  @GenerateName(resourcetype, resourcetype.ShortName, resourcetype.StaticValues)</strong><a id="@resourcetype.Id"></a>
                                                                 </td>
                                                             </tr>
                                                         </tbody>
@@ -453,6 +453,10 @@
                 }
             }
 
+            if (name != "")
+            {
+                name += "1";
+            }
 
             // Apply the regex to the generate name
             Regex regx = new(type.Regx);
