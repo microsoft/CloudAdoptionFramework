@@ -88,6 +88,14 @@
 
                             @if (currentResourceType != null)
                             {
+                                @if (!filteredscopes.Contains(currentResourceType.Scope))
+                                {
+                                    <div class="card mt-3">
+                                        <div class="card card-body warning">
+                                            This resource has a lower-level scope and does not require a unique name.
+                                        </div>
+                                    </div>
+                                }
                                 <div id="guidelines" class="card mt-3">
                                     <div class="card-header bg-default text-black">
                                         <a id="NamingGuidlines" class="link-dark text-decoration-none" data-toggle="collapse" href="#namingguidelines" role="button" aria-expanded="false" aria-controls="namingguidelines">
