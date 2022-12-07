@@ -90,11 +90,15 @@
                             {
                                 @if (!filteredscopes.Contains(currentResourceType.Scope))
                                 {
-                                    <div class="card mt-3">
-                                        <div class="card card-body warning">
-                                            This resource has a lower-level scope and does not require a unique name.
-                                        </div>
-                                    </div>
+                                    <table class="table table-warning w-100 mt-3" style="margin-bottom:0;">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <strong>This resource has a lower-level scope and does not require a unique name.</strong><a id="@currentResourceType.Id"></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 }
                                 <div id="guidelines" class="card mt-3">
                                     <div class="card-header bg-default text-black">
