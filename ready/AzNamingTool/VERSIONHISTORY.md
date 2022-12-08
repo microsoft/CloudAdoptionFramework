@@ -9,7 +9,12 @@
 ### Bug fixes
 - Updated Reference/Generate pages to reload configuration data, if empty
 - Updated site to exclude Custom Component if no options are entered
+- Updated resourcetypes.json regex patterns
+- Updated cache reload process to ensure all data is loaded
 - Updated Admin Page styling
+- Updated comments in API
+- Updated Reference page to include delimiter for samples.
+- Added warning to Generate page for resource types with a lower-level scope.
 
 ***
 
