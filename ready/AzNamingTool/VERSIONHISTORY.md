@@ -15,6 +15,7 @@
 - Updated comments in API
 - Updated Reference page to include delimiter for samples.
 - Added warning to Generate page for resource types with a lower-level scope.
+- Updated Nuget packages
 
 ***
 
