@@ -113,16 +113,7 @@
                                                                 <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
                                                                     <span class="oi oi-ban" aria-hidden="true"></span>
                                                                 </button>
-                                                            }
-                                                            else
-                                                            {
-                                                                <span> </span>
-                                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",item.Id,"enable"))" title="Enable">
-                                                                    <span class="oi oi-plus" aria-hidden="true"></span>
-                                                                </button>
-                                                            }
-
-                                                            @if (!protectedComponents.Contains(item.Name.ToLower()))
+                                                                @if (!protectedComponents.Contains(item.Name.ToLower()))
                                                             {
                                                                 @if (item.IsGloballyOptional)
                                                                 {
@@ -139,6 +130,15 @@
                                                                     </button>
                                                                 }
                                                             }
+                                                            }
+                                                            else
+                                                            {
+                                                                <span> </span>
+                                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",item.Id,"enable"))" title="Enable">
+                                                                    <span class="oi oi-plus" aria-hidden="true"></span>
+                                                                </button>
+                                                            }
+                                                         
                                                             @if (item.IsCustom)
                                                             {
                                                                 <span> </span>
