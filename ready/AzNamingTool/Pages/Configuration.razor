@@ -76,13 +76,17 @@
                                             @foreach (var item in @servicesData.ResourceComponents)
                                             {
                                                 <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
-                                                    <td>
+                                                    <td class="w-50">
                                                         @item.DisplayName
                                                         @if (item.IsCustom)
                                                         {
                                                             <span>
                                                                 (CUSTOM)
                                                             </span>
+                                                        }
+                                                        @if (item.IsGloballyOptional)
+                                                        {
+                                                            <span style="font-style:italic"> - OPTIONAL</span>
                                                         }
                                                     </td>
                                                     @if (admin)
@@ -116,6 +120,24 @@
                                                                 <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",item.Id,"enable"))" title="Enable">
                                                                     <span class="oi oi-plus" aria-hidden="true"></span>
                                                                 </button>
+                                                            }
+
+                                                            @if (!protectedComponents.Contains(item.Name.ToLower()))
+                                                            {
+                                                                @if (item.IsGloballyOptional)
+                                                                {
+                                                                    <span> </span>
+                                                                    <button type="button" class="btn btn-info" @onclick="@(e => FormAction("ResourceComponent",item.Id,"globallyoptional"))" title="Toggle Not Globally Optional">
+                                                                        <span class="oi oi-random" aria-hidden="true"></span>
+                                                                    </button>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span> </span>
+                                                                    <button type="button" class="btn btn-outline-info" @onclick="@(e => FormAction("ResourceComponent",item.Id,"globallyoptional"))" title="Toggle Globally Optional">
+                                                                        <span class="oi oi-random" aria-hidden="true"></span>
+                                                                    </button>
+                                                                }
                                                             }
                                                             @if (item.IsCustom)
                                                             {
@@ -1265,8 +1287,10 @@
                                                                     @if (refreshtypeshortnames)
                                                                     {
                                                                         <li>
-                                                                            All resource type configurations will be updated, but all of your existing resource type configuration (except the short name value) customizations will be retained.</li>
-                                                                            <li><span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span>
+                                                                            All resource type configurations will be updated, but all of your existing resource type configuration (except the short name value) customizations will be retained.
+                                                                        </li>
+                                                                        <li>
+                                                                            <span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span>
                                                                         </li>
                                                                     }
                                                                     else
@@ -1704,6 +1728,7 @@
 
     public string filterData { get; set; }
 
+    private string[] protectedComponents = new string[] { "resourcetype", "resourcedelimiter", "resourceinstance" };
     private List<string> categories = new List<string>();
     private string? selectedResourceTypeCategory = "";
     private string? newComponentConfig;
@@ -1862,11 +1887,36 @@
                         case "disable":
                             resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
                             resourceComponent.Enabled = false;
+                            resourceComponent.IsGloballyOptional = false;
                             serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
                             if (serviceResponse.Success)
                             {
                                 message.Type = MessageTypesEnum.SUCCESS;
                                 message.Message = resourceComponent.Name + " disabled!";
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = resourceComponent.Name + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "globallyoptional":
+                            resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
+                            resourceComponent.IsGloballyOptional = !resourceComponent.IsGloballyOptional;
+                            serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                            if (serviceResponse.Success)
+                            {
+                                message.Message = resourceComponent.Name;
+                                if (resourceComponent.IsGloballyOptional)
+                                {
+                                    message.Message += " set as Globall Optional!";
+                                }
+                                else
+                                {
+                                    message.Message += " set as Not Globall Optional!";
+                                }
+                                message.Type = MessageTypesEnum.SUCCESS;
                             }
                             else
                             {
