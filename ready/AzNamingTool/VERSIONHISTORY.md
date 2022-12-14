@@ -11,7 +11,7 @@
 - Add Actions Legend to Configuration page
 
 ### Bug fixes
-- Updated Configuration page styling
+- Formatting/styling updates to Configuration & Generate pages
 
 ***
 

@@ -27,93 +27,94 @@
                 View Instructions
             </button>
         </div>
-        @if(admin)
-        { <div id="compontentslegendcontainer" class="card mb-3" style="width:auto;">
-                                            <div class="card-header bg-default text-black">
-                                                <a id="NamingGuidlines" class="link-dark text-decoration-none" data-toggle="collapse" href="#compontentslegend" role="button" aria-expanded="false" aria-controls="compontentslegend">
-                                                    Actions Legend
-                                                </a>
-                                            </div>
-                                            <div class="collapse card card-body @theme.ThemeStyle" id="compontentslegend">
-                                                <table class="table">
-                                                    <tbody>                                                        
-                                                        <tr>
-                                                            <td>
-                                                                <button type="button" class="btn btn-primary" title="Move up" style="min-width:42px;" disabled>
-                                                                <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
-                                                            </button>
-                                                            </td>
-                                                            <td>
-                                                                Move the item up in the order.
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <button type="button" class="btn btn-primary" title="Move down" style="min-width:42px;" disabled>
-                                                                <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
-                                                            	</button>
-                                                            </td>
-                                                            <td>
-                                                                Move the item down in the order.
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <button type="button" class="btn btn-info" title="Toggle Not Globally Optional" style="min-width:42px;" disabled>
-                                                                    <span class="oi oi-question-mark" aria-hidden="true"></span>
-                                                                 </button> | <button type="button" class="btn btn-outline-info" title="Toggle Not Globally Optional" style="min-width:42px;" disabled>
-                                                                    <span class="oi oi-question-mark" aria-hidden="true"></span>
-                                                                 </button>
-                                                            </td>
-                                                            <td>
-                                                                Toggle setting the component as Globally Optional. Setting this will override individual resource type optional components.
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <button type="button" class="btn btn-success" title="Enable" disabled>
-                                                                    <span class="oi oi-plus" aria-hidden="true"></span>
-                                                                </button>
+        @if (admin)
+        {
+            <div id="compontentslegendcontainer" class="card mb-3" style="width:auto;">
+                <div class="card-header bg-default text-black">
+                    <a id="ComponentsLegendLink" class="link-dark text-decoration-none" data-toggle="collapse" href="#componentslegend" role="button" aria-expanded="false" aria-controls="componentslegend">
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Actions Legend
+                    </a>
+                </div>
+                <div class="collapse card card-body @theme.ThemeStyle" id="componentslegend">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-primary btn-dummy" title="Move up" style="min-width:42px;">
+                                        <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Move the item up in the order.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-primary btn-dummy" title="Move down" style="min-width:42px;">
+                                        <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Move the item down in the order.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-info btn-dummy" title="Toggle Not Globally Optional" style="min-width:42px;" >
+                                        <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                    </button> | <button type="button" class="btn btn-outline-info btn-dummy" title="Toggle Not Globally Optional" style="min-width:42px;" >
+                                        <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Toggle setting the component as Globally Optional. Setting this will override individual resource type optional components.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-success btn-dummy" title="Enable" >
+                                        <span class="oi oi-plus" aria-hidden="true"></span>
+                                    </button>
 
-                                                            </td>
-                                                            <td>
-                                                                Enable the item. 
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <button type="button" class="btn btn-dark"  title="Disable" disabled>
-                                                                    <span class="oi oi-ban" aria-hidden="true"></span>
-                                                                </button>
-                                                            </td>
-                                                            <td>
-                                                                Disable the item. 
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <button type="button" class="btn btn-secondary"  title="Edit" disabled>
-                                                                    <span class="oi oi-pencil" aria-hidden="true"></span>
-                                                                </button>
-                                                            </td>
-                                                            <td>
-                                                                Edit the custom component.
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <button type="button" class="btn btn-danger" title="Delete" disabled>
-                                                                    <span class="oi oi-x" aria-hidden="true"></span>
-                                                                </button>
-                                                            </td>
-                                                            <td>
-                                                                Delete the custom component. 
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
+                                </td>
+                                <td>
+                                    Enable the item.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-dark btn-dummy" title="Disable" >
+                                        <span class="oi oi-ban" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Disable the item.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-secondary btn-dummy" title="Edit" >
+                                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Edit the custom component.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-danger btn-dummy" title="Delete" >
+                                        <span class="oi oi-x" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Delete the custom component.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         }
 
         @if (!dataLoaded)
@@ -2012,6 +2013,8 @@
                                 message.Message = resourceComponent.Name + " disabling failed!";
                                 message.MessageDetails = serviceResponse.ResponseMessage;
                             }
+                            break;
+                        case "blank":
                             break;
                         case "add":
                             ShowAddModal((int)id, "ResourceComponent", "Add Component", "<p>Add a Component.</p>");

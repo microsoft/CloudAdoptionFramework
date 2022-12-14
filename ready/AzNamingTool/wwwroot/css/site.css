@@ -167,3 +167,8 @@ input:checked + .slider:before {
 .disabled-text {
     color: #A9A9A9;
 }
+
+.btn-dummy {
+    pointer-events: none;
+    cursor: not-allowed;
+}
