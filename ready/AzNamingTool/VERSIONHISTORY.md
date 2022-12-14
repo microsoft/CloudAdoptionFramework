@@ -8,6 +8,7 @@
 ### Features
 - Added ability to set component as globally optional
 - Updated 2.4.0 version notes
+- Add Actions Legend to Configuration page
 
 ### Bug fixes
 - Updated Configuration page styling
