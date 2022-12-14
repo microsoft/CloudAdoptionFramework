@@ -4,10 +4,10 @@
 
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
-## Version 2.4.1 (current)
+## Version 2.4.0 (current)
 ### Features
 - Added ability to set component as globally optional
-- Updated 2.4.1 version notes
+- Updated 2.4.0 version notes
 
 ### Bug fixes
 - Updated Configuration page styling
