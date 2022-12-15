@@ -137,5 +137,112 @@ namespace AzureNamingTool.Controllers
             }
         }
 
+        /// <summary>
+        /// This function will return the admin log data.
+        /// </summary>
+        /// <returns>json - Current admin log data</returns>
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> GetAdminLog()
+        {
+            try
+            {
+                serviceResponse = await AdminLogService.GetItems();
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+        /// <summary>
+        /// This function will purge the admin log data.
+        /// </summary>
+        /// <returns>dttring - Successful operation</returns>
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> PurgeAdminLog()
+        {
+            try
+            {
+                serviceResponse = await AdminLogService.DeleteAllItems();
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+        /// <summary>
+        /// This function will return the generated names data.
+        /// </summary>
+        /// <returns>json - Current generated names data</returns>
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> GetGeneratedNamesLog()
+        {
+            try
+            {
+                serviceResponse = await GeneratedNamesService.GetItems();
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+        /// <summary>
+        /// This function will purge the generated names data.
+        /// </summary>
+        /// <returns>dttring - Successful operation</returns>
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> PurgeGeneratedNamesLog()
+        {
+            try
+            {
+                serviceResponse = await GeneratedNamesService.DeleteAllItems();
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
     }
 }

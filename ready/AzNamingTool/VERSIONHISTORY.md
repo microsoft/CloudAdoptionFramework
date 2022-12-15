@@ -9,6 +9,7 @@
 - Added ability to set component as globally optional
 - Updated 2.4.0 version notes
 - Add Actions Legend to Configuration page
+- Added Admin Log / Generated Names Log functions to Admin controller
 
 ### Bug fixes
 - Formatting/styling updates to Configuration & Generate pages
