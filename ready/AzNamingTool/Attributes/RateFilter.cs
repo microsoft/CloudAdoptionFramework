@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using AzureNamingTool.Models;
+using AzureNamingTool.Services;
 
 namespace AzureNamingTool.Attributes
 {
@@ -33,7 +35,7 @@ namespace AzureNamingTool.Attributes
             }
             catch (Exception ex)
             {
-                //Log or Throw
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
 
