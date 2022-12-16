@@ -33,7 +33,7 @@ namespace AzureNamingTool.Attributes
             }
             catch (Exception ex)
             {
-                //Log or Throw
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
 
