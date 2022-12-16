@@ -27,6 +27,95 @@
                 View Instructions
             </button>
         </div>
+        @if (admin)
+        {
+            <div id="compontentslegendcontainer" class="card mb-3" style="width:auto;">
+                <div class="card-header bg-default text-black">
+                    <a id="ComponentsLegendLink" class="link-dark text-decoration-none" data-toggle="collapse" href="#componentslegend" role="button" aria-expanded="false" aria-controls="componentslegend">
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Actions Legend
+                    </a>
+                </div>
+                <div class="collapse card card-body @theme.ThemeStyle" id="componentslegend">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-primary btn-dummy" title="Move up" style="min-width:42px;">
+                                        <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Move the item up in the order.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-primary btn-dummy" title="Move down" style="min-width:42px;">
+                                        <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Move the item down in the order.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-info btn-dummy" title="Toggle Not Globally Optional" style="min-width:42px;" >
+                                        <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                    </button> | <button type="button" class="btn btn-outline-info btn-dummy" title="Toggle Not Globally Optional" style="min-width:42px;" >
+                                        <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Toggle setting the component as Globally Optional. Setting this will override individual resource type optional components.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-success btn-dummy" title="Enable" >
+                                        <span class="oi oi-plus" aria-hidden="true"></span>
+                                    </button>
+
+                                </td>
+                                <td>
+                                    Enable the item.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-dark btn-dummy" title="Disable" >
+                                        <span class="oi oi-ban" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Disable the item.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-secondary btn-dummy" title="Edit" >
+                                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Edit the custom component.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-danger btn-dummy" title="Delete" >
+                                        <span class="oi oi-x" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Delete the custom component.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
 
         @if (!dataLoaded)
         {
@@ -56,11 +145,11 @@
                                     <p>The current Components.</p>
                                     @if (admin)
                                     {
-                                        <p>
+                                        <div>
                                             <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",0,"add"))" title="Add Component">
                                                 <span class="oi oi-plus" aria-hidden="true"></span> Add Component
                                             </button>
-                                        </p>
+                                        </div>
                                     }
                                     <table class="table @theme.ThemeStyle">
                                         <thead>
@@ -76,7 +165,7 @@
                                             @foreach (var item in @servicesData.ResourceComponents)
                                             {
                                                 <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
-                                                    <td>
+                                                    <td class="w-50">
                                                         @item.DisplayName
                                                         @if (item.IsCustom)
                                                         {
@@ -84,15 +173,19 @@
                                                                 (CUSTOM)
                                                             </span>
                                                         }
+                                                        @if (item.IsGloballyOptional)
+                                                        {
+                                                            <span style="font-style:italic"> - OPTIONAL</span>
+                                                        }
                                                     </td>
                                                     @if (admin)
                                                     {
                                                         <td>
-                                                            <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"up"))" title="Move up">
+                                                            <button type="button" class="btn btn-primary" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"up"))" title="Move up">
                                                                 <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
                                                             </button>
                                                             <span> </span>
-                                                            <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
+                                                            <button type="button" class="btn btn-primary" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
                                                                 <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                             </button>
 
@@ -109,6 +202,23 @@
                                                                 <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
                                                                     <span class="oi oi-ban" aria-hidden="true"></span>
                                                                 </button>
+                                                                @if (!protectedComponents.Contains(item.Name.ToLower()))
+                                                                {
+                                                                    @if (item.IsGloballyOptional)
+                                                                    {
+                                                                        <span> </span>
+                                                                        <button type="button" class="btn btn-info" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"globallyoptional"))" title="Toggle Not Globally Optional">
+                                                                            <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                                                        </button>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span> </span>
+                                                                        <button type="button" class="btn btn-outline-info" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"globallyoptional"))" title="Toggle Globally Optional">
+                                                                            <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                                                        </button>
+                                                                    }
+                                                                }
                                                             }
                                                             else
                                                             {
@@ -117,6 +227,7 @@
                                                                     <span class="oi oi-plus" aria-hidden="true"></span>
                                                                 </button>
                                                             }
+
                                                             @if (item.IsCustom)
                                                             {
                                                                 <span> </span>
@@ -1265,8 +1376,10 @@
                                                                     @if (refreshtypeshortnames)
                                                                     {
                                                                         <li>
-                                                                            All resource type configurations will be updated, but all of your existing resource type configuration (except the short name value) customizations will be retained.</li>
-                                                                            <li><span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span>
+                                                                            All resource type configurations will be updated, but all of your existing resource type configuration (except the short name value) customizations will be retained.
+                                                                        </li>
+                                                                        <li>
+                                                                            <span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span>
                                                                         </li>
                                                                     }
                                                                     else
@@ -1704,6 +1817,7 @@
 
     public string filterData { get; set; }
 
+    private string[] protectedComponents = new string[] { "resourcetype", "resourcedelimiter" };
     private List<string> categories = new List<string>();
     private string? selectedResourceTypeCategory = "";
     private string? newComponentConfig;
@@ -1862,6 +1976,7 @@
                         case "disable":
                             resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
                             resourceComponent.Enabled = false;
+                            resourceComponent.IsGloballyOptional = false;
                             serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
                             if (serviceResponse.Success)
                             {
@@ -1874,6 +1989,32 @@
                                 message.Message = resourceComponent.Name + " disabling failed!";
                                 message.MessageDetails = serviceResponse.ResponseMessage;
                             }
+                            break;
+                        case "globallyoptional":
+                            resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
+                            resourceComponent.IsGloballyOptional = !resourceComponent.IsGloballyOptional;
+                            serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                            if (serviceResponse.Success)
+                            {
+                                message.Message = resourceComponent.Name;
+                                if (resourceComponent.IsGloballyOptional)
+                                {
+                                    message.Message += " set as Globally Optional!";
+                                }
+                                else
+                                {
+                                    message.Message += " set as Not Globally Optional!";
+                                }
+                                message.Type = MessageTypesEnum.SUCCESS;
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = resourceComponent.Name + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "blank":
                             break;
                         case "add":
                             ShowAddModal((int)id, "ResourceComponent", "Add Component", "<p>Add a Component.</p>");
