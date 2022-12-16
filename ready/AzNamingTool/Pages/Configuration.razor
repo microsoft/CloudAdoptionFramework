@@ -3057,7 +3057,7 @@
             }
 
             // Reset cache items
-            GeneralHelper.InvalidateCacheObject(type);
+            CacheHelper.InvalidateCacheObject(type);
             servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
         }
         catch (Exception ex)

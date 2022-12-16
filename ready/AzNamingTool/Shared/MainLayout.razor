@@ -9,6 +9,7 @@
 @inject NavigationManager NavigationManager
 @using Blazored.Toast.Configuration
 @inject ProtectedLocalStorage storage
+@inject ProtectedSessionStorage session
 
 <PageTitle>Azure Naming Tool</PageTitle>
 <BlazoredToasts Position="ToastPosition.BottomRight" ShowProgressBar="true" />
@@ -19,6 +20,11 @@
 
     <main>
         <div class="top-row px-4 auth @theme.ThemeStyle">
+
+            @if ((admin) && (bool.Parse(GeneralHelper.GetAppSetting("DevMode"))))
+            {
+                <div class="warning-message">DEV MODE Enabled! This can cause unexpected behavior! Use at your own risk!</div>
+            }
             <div class="px-3">
                 <label class="switch" title="App Theme">
                     <input type="checkbox" checked="@isdarktheme" @oninput="ThemeChanged">
@@ -49,6 +55,7 @@
     [CascadingParameter] public IModalService Modal { get; set; }
     private ThemeInfo theme = new() { ThemeName = "Light", ThemeStyle = "bg-default text-black" };
     private bool isdarktheme = false;
+    private bool admin;
 
     public bool PasswordModalOpen { get; set; }
     public Type PageType { get; set; }
@@ -71,17 +78,17 @@
             OpenPasswordModal();
         }
     }
-
-
-
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
+    {        
+        var adminresult = await session.GetAsync<bool>("admin");
+        admin = (bool)adminresult.Value;
         if (firstRender)
         {
             try
             {
-                var result = await storage.GetAsync<string>("apptheme");
-                theme.ThemeStyle = result.Success ? result.Value : "bg-default text-black";
+                var themeresult = await storage.GetAsync<string>("apptheme");
+                theme.ThemeStyle = themeresult.Success ? themeresult.Value : "bg-default text-black";
             }
             catch
             {

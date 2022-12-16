@@ -34,6 +34,11 @@ a, .btn-link {
     color: red;
 }
 
+.warning-message {
+    color: red;
+    font-weight: bold;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

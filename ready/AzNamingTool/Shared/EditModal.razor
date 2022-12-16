@@ -19,11 +19,12 @@
                 <p>
                     @((MarkupString)message)
                 </p>
-                <div class="form-group">
-                    <p>
-                        <label for="name"><strong>Name</strong></label>
-                    </p>
-                    <p>
+
+                <div class="card @theme.ThemeStyle mb-3">
+                    <div class="card-header bg-default text-black fw-bold">
+                        Name
+                    </div>
+                    <div class="card card-body @theme.ThemeStyle">
                         @if (protectedName)
                         {
                             <input title="Name" value="@itemName" disabled type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
@@ -32,26 +33,39 @@
                         {
                             <input title="Name" value="@itemName" type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
                         }
-                    </p>
+                    </div>
                 </div>
                 @if (type != "ResourceComponent")
                 {
-                    <div class="form-group">
-                        <p>
-                            <label for="shortName"><strong>Short Name</strong></label>
-                        </p>
-                        <p>
+                    <div class="card @theme.ThemeStyle mb-3">
+                        <div class="card-header bg-default text-black fw-bold">
+                            Short Name
+                        </div>
+                        <div class="card card-body @theme.ThemeStyle">
                             <input title="Short Name" value="@itemShortName" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemShortName = (string)ui.Value;})" />
-                        </p>
+                        </div>
                     </div>
                 }
                 @if ((type == "ResourceType") && (resourceComponents != null))
                 {
-                    <div class="form-group">
-                        <p>
-                            <strong>Optional Components</strong>
-                        </p>
-                        <p>
+                    @if (bool.Parse(GeneralHelper.GetAppSetting("DevMode")))
+                    {
+                        <div class="card @theme.ThemeStyle mb-3">
+                            <div class="card-header bg-default text-black fw-bold">
+                                RegEx
+                            </div>
+                            <div class="card card-body @theme.ThemeStyle">
+                                <input title="RegEx" value="@itemRegEx" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemRegEx = (string)ui.Value;})" />
+                            </div>
+                        </div>
+                    }
+                    <div id="optional" class="card mt-3">
+                        <div class="card-header bg-default text-black fw-bold">
+                            <a id="OptionalComponents" class="link-dark text-decoration-none" data-toggle="collapse" href="#optionalcomponents" role="button" aria-expanded="false" aria-controls="optionalcomponents">
+                                Optional Components
+                            </a>
+                        </div>
+                        <div class="collapse card card-body @theme.ThemeStyle" id="optionalcomponents">
                             @foreach (ResourceComponent resourceComponent in resourceComponents)
                             {
                                 if (resourceComponent.Name != "ResourceType")
@@ -74,14 +88,16 @@
                                     </div>
                                 }
                             }
-                        </p>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <p>
-                            <strong>Excluded Components</strong>
-                        </p>
-                        <p>
+                    <div id="excluded" class="card mt-3">
+                        <div class="card-header bg-default text-black fw-bold">
+                            <a id="ExcludedComponents" class="link-dark text-decoration-none" data-toggle="collapse" href="#excludedcomponents" role="button" aria-expanded="false" aria-controls="excludedcomponents">
+                                Excluded Components
+                            </a>
+                        </div>
+                        <div class="collapse card card-body @theme.ThemeStyle" id="excludedcomponents">
                             @foreach (ResourceComponent resourceComponent in resourceComponents)
                             {
                                 //@if (resourceComponent.Name != "ResourceType")
@@ -104,13 +120,13 @@
                                 </div>
                                 //}
                             }
-                        </p>
+                        </div>
                     </div>
                 }
             </div>
             <div class="modal-footer">
                 <button title="Save" @onclick="Save" class="btn btn-success">Update</button>
-                <button title="Cancel" @onclick="ModalInstance.CancelAsync" class="btn btn-secondary">Cancel</button>
+                <button title="Cancel" @onclick="Cancel" class="btn btn-secondary">Cancel</button>
             </div>
         </div>
     </div>
@@ -133,6 +149,7 @@
     private ServiceResponse serviceResponse = new();
     private string? itemName;
     private string? itemShortName;
+    private string? itemRegEx;
     private List<ResourceComponent> resourceComponents;
     private string? optional;
     private string? exclude;
@@ -178,6 +195,7 @@
                 itemShortName = resourceType.ShortName;
                 optional = resourceType.Optional;
                 exclude = resourceType.Exclude;
+                itemRegEx = resourceType.Regx;
                 serviceResponse = await ResourceComponentService.GetItems(true);
                 resourceComponents = (List<ResourceComponent>)serviceResponse.ResponseObject;
                 resourceComponents = resourceComponents.OrderBy(x => x.Name).ToList();
@@ -245,7 +263,7 @@
             {
                 if ((itemName != "") && (itemShortName != ""))
                 {
-                    if (GeneralHelper.ValidateShortName(itemShortName, type))
+                    if (ValidationHelper.ValidateShortName(itemShortName, type))
                     {
                         valid = true;
                         switch (type)
@@ -283,6 +301,10 @@
                                 resourceType.ShortName = itemShortName;
                                 resourceType.Optional = "";
                                 resourceType.Exclude = "";
+                                if (bool.Parse(GeneralHelper.GetAppSetting("DevMode")))
+                                {
+                                    resourceType.Regx = itemRegEx;
+                                }
 
                                 // Update the Optional and Exclude components
                                 foreach (ResourceComponent resourceComponent in resourceComponents)
@@ -364,7 +386,7 @@
                 }
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + ex.Message, "ERROR");

@@ -12,7 +12,7 @@
 @inject IJSRuntime jsRuntime
 
 <div class="modal fade show d-block" tabindex="-1" role="dialog">
-    <div class="modal-backdrop fade show" @onclick="Close"></div>
+    <div class="modal-backdrop fade show" @onclick="Cancel"></div>
     <div class="modal-dialog" style="z-index: 1050">
         <!-- Pop it above the backdrop -->
         <div class="modal-content  @theme.ThemeStyle">
@@ -102,7 +102,7 @@
                 {
                     <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("login"))" title="Login">Login</button>
                 }
-                <button @onclick="Close" class="btn btn-secondary">Close</button>
+                <button @onclick="Cancel" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </div>
@@ -300,7 +300,7 @@
             case "password":
                 newpassword = value;
                 // Validate the password complexity
-                if (GeneralHelper.ValidatePassword(newpassword))
+                if (ValidationHelper.ValidatePassword(newpassword))
                 {
                     disabled = false;
                 }
@@ -316,5 +316,5 @@
         }
     }
 
-    async Task Close() => await ModalInstance.CancelAsync();
+    async Task Cancel() => await ModalInstance.CancelAsync();
 }

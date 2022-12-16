@@ -236,9 +236,9 @@ namespace AzureNamingTool.Services
 
                     // Update the repository file
                     await FileSystemHelper.WriteFile("resourcelocations.json", refreshdata, "repository/");
-                    
+
                     // Clear cached data
-                    GeneralHelper.InvalidateCacheObject("ResourceLocation");
+                    CacheHelper.InvalidateCacheObject("ResourceLocation");
 
                     // Update the current configuration file version data information
                     await GeneralHelper.UpdateConfigurationFileVersion("resourcelocations");
