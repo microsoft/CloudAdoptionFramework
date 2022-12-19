@@ -7,18 +7,18 @@
 ## Version 2.4.0 (current)
 ### Features
 - Added ability to set component as globally optional
-- Updated 2.4.0 version notes
 - Add Actions Legend to Configuration page
 - Added Admin Log / Generated Names Log functions to Admin controller
 - Updated Edit modal styling
-- Disabled Latest News feeed by default
 - Added functionality to generate multiple resource types names on Generate page
-- Updated layout/styling on Generate page
-- Updated validation on Generate on Generate page
-- Updated layout/styling on Configuration page
+- Updated formatting/styling on Generate page
+- Updated validation on Generate page
+- Updated formatting/styling on Configuration page
+- Updated 2.4.0 version notes
 
 ### Bug fixes
 - Formatting/styling updates to Configuration & Generate pages
+- Disabled Latest News feeed by default
 
 ***
 
