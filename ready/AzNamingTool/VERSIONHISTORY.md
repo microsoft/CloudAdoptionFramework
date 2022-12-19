@@ -12,6 +12,10 @@
 - Added Admin Log / Generated Names Log functions to Admin controller
 - Updated Edit modal styling
 - Disabled Latest News feeed by default
+- Added functionality to generate multiple resource types names on Generate page
+- Updated layout/styling on Generate page
+- Updated validation on Generate on Generate page
+- Updated layout/styling on Configuration page
 
 ### Bug fixes
 - Formatting/styling updates to Configuration & Generate pages

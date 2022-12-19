@@ -112,4 +112,18 @@
         }
     }
 
+    function generateSelectToggle(sender) {
+        if (sender == "single") {
+            jQuery('#single').show();
+            jQuery('#multi').hide();
+        }
+        else {
+            $('[id*=multitype_]').each(function () {
+                $(this).prop("checked", false);
+            });
+            jQuery('#single').hide();
+            jQuery('#multi').show();
+        }
+    }
+
 </script>
