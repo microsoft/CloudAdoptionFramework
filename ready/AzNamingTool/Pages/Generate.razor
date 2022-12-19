@@ -21,13 +21,16 @@
                     Select the desired Resource Type / Resource Types
                 </li>
                 <li>
-                    Review the Naming Guidelines
+                    Review the Naming Guidelines (for single resource type)
                 </li>
                 <li>
                     Select the component options
                 </li>
                 <li>
-                    Click <strong>Generate</strong> to generate the Azure resource name
+                    Click <strong>Generate</strong> to generate the Azure resource name(s)
+                </li>
+                <li>
+                    View generated names in the <a href="/generatednameslog">Generated Names Log</a>
                 </li>
             </ol>
         </p>
@@ -118,7 +121,7 @@
                         </h5>
                         <div class="card card-body @theme.ThemeStyle">
                             <p>
-                                Use the filters below to jump to a specifc resource type.
+                                Select the desired resource type.
                             </p>
                             <InputSelect title="Resource Category" class="@GetControlStyle()" ValueExpression="@(()=>selectedResourceTypeCategory)"
                                      Value="@selectedResourceTypeCategory"
@@ -392,14 +395,14 @@
                                 }
                             }
 
-                            <div class="card @theme.ThemeStyle mb-3">
-                                <h5 class="card-header text-white bg-secondary">
-                                    Delimiter
-                                </h5>
-                                <div class="card card-body @theme.ThemeStyle">
-                                    @resourceDelimiter.Name: @resourceDelimiter.Delimiter
-                                </div>
-                            </div>
+                            @*<div class="card mb-3">
+                    <h5 class="card-header bg-default text-black">
+                    Delimiter (Configured by site administrator)
+                    </h5>
+                    <div class="card card-body @theme.ThemeStyle">
+                    @resourceDelimiter.Name: @resourceDelimiter.Delimiter
+                    </div>
+                    </div>*@
                             <div class="mb-3">
                                 <br />
                                 <button class="btn btn-success" type="submit" title="Generate" disabled=@boolFormDisabled>
@@ -420,7 +423,7 @@
                                                 @if (multiselectedResourceTypes.Count == 0)
                                                 {
                                                     <strong>Generated Name: </strong>
-                                                    <label>@((MarkupString)generatedName)</label>
+                                                    @((MarkupString)generatedName)
                                                 }
                                                 else
                                                 {
@@ -436,11 +439,12 @@
                                         {
                                             <div>
                                                 <strong>Message: </strong>
-                                                <br />
+
                                                 @foreach (var sub in message.Split('\n'))
                                                 {
-                                                    @sub
-                                                    <br />
+                                                    <div>
+                                                        @sub
+                                                    </div>
                                                 }
                                             </div>
                                         }
@@ -540,6 +544,7 @@
         if (multiselectedResourceTypes.Count == 0)
         {
             // Single type generation
+            StringBuilder sbName = new();
             resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(selectedResourceType));
             resourceNameRequest.ResourceType = resourceType.ShortName;
             resourceNameRequest.ResourceId = resourceType.Id;
@@ -548,8 +553,27 @@
 
             resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
 
-            // Process the valid form
-            generatedName = resourceNameRequestResponse.ResourceName;
+            // Prepare the response
+            sbName.Append("<div>");
+            sbName.Append("<strong>");
+            if (resourceType.Property != "")
+            {
+                sbName.Append(@resourceType.Resource + " - " + @resourceType.Property + " (" + @resourceType.ShortName + "): ");
+            }
+            else
+            {
+                sbName.Append(@resourceType.Resource + " (" + @resourceType.ShortName + "): ");
+            }
+            sbName.Append("</strong>");
+            sbName.Append(resourceNameRequestResponse.ResourceName);
+            if (resourceNameRequestResponse.Message != "")
+            {
+                sbName.Append(" - " + resourceNameRequestResponse.Message);
+            }
+
+            sbName.Append("</div>");
+
+            generatedName = sbName.ToString();
             message = resourceNameRequestResponse.Message;
 
             // Set the result container
