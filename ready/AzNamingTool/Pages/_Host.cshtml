@@ -99,6 +99,10 @@
         document.body.appendChild(tag);
     }
 
+     function ShowAlert(message) {
+         alert(message);
+    }
+
     function checkboxConfirmChange(checkbox, message) {
         if (checkbox.checked) {
             var confirmBox = confirm(message);
@@ -110,6 +114,10 @@
                 checkbox.checked = false;
             };
         }
+    }
+
+    function expandMultiSelectParent(sender) {
+        console.log("test!");
     }
 
 </script>
