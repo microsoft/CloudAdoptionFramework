@@ -18,15 +18,31 @@
                 <p>
                     Select the desired resource types.
                 </p>
+
+                <div class="form-group row mt-3">
+                    <div class="input-group flex-nowrap">
+                        <div class="input-group flex-nowrap mb-3">
+                            <span class="input-group-text" id="addon-wrapping">
+                                <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
+                            </span>
+                            <input class="form-control" type="search" placeholder="Filter by Name, Short Name"
+                                   @bind="filterData"
+                                   @bind:event="oninput">
+                        </div>
+                    </div>
+                </div>
+
                 <div class=" card @theme.ThemeStyle mb-3">
                     <h5 class="card-header text-white bg-secondary text-white">
                         <a id="ResourceDelimiter" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#resourcetypes" role="button" aria-expanded="false" aria-controls="resourcetypes">
                             <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Resource Types
                         </a>
                     </h5>
-                    <div class="collapse card card-body @theme.ThemeStyle" id="resourcetypes">
+                    <div class="collapse show card card-body @theme.ThemeStyle" id="resourcetypes">
                         @foreach (var category in categories)
                         {
+                            if (!IsCategoryVisible(category))
+                                continue;
                             <div id="@("multitypecontainer_"+@category)" class="card mb-3">
                                 <div class="card-header bg-default text-black">
                                     <a id="NamingGuidlines" class="link-dark text-decoration-none" data-toggle="collapse" href="@("#multitypesection_"+@category)" role="button" aria-expanded="false" aria-controls="@("multitypesection_"+@category)">
@@ -37,6 +53,8 @@
                                     <ul style="list-style-type: none;word-break: break-word;">
                                         @foreach (var resourceType in ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, category))
                                         {
+                                            if (!IsTypeVisible(resourceType))
+                                                continue;
                                             <li>
                                                 <div class="form-check">
                                                     @if (multiselectedResourceTypes.Contains(resourceType.Id.ToString()))
@@ -86,6 +104,7 @@
 
     private ServicesData servicesData = new();
     private List<string> categories = new();
+    public string filterData { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -145,5 +164,36 @@
     async void Save()
     {
         await ModalInstance.CloseAsync(ModalResult.Ok(multiselectedResourceTypes));
+    }
+
+    public bool IsTypeVisible(ResourceType type)
+    {
+        bool visible = true;
+
+        if (!string.IsNullOrEmpty(filterData))
+        {
+            if ((!type.Resource.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!type.ShortName.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+                visible = false;
+        }
+        return visible;
+    }
+
+    public bool IsCategoryVisible(string category)
+    {
+        bool visible = true;
+
+        if (!string.IsNullOrEmpty(filterData))
+        {
+            // Gett all the types for the category
+            @foreach (var type in ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, category))
+            {
+                if ((!type.Resource.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!type.ShortName.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+                {
+                    visible = false;
+                    break;
+                }
+            }        
+        }
+        return visible;
     }
 }
