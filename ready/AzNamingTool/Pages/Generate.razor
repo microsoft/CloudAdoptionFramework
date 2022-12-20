@@ -46,7 +46,6 @@
             <EditForm Model="@resourceNameRequest" OnValidSubmit="@HandleValidSubmit">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
-
                 <div id="generator">
                     <div class="card @theme.ThemeStyle mb-3">
                         <h5 class="card-header text-white bg-secondary">
@@ -67,54 +66,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="collapse card @theme.ThemeStyle mb-3" id="multi">
-                        <h5 class="card-header text-white bg-secondary text-white">
-                            <a id="ResourceDelimiter" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#resourcetypes" role="button" aria-expanded="false" aria-controls="resourcetypes">
-                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Generate Multiple Resource Type Names
-                            </a>
-                        </h5>
-                        <div class="card card-body @theme.ThemeStyle @resourcetypesVisible" id="resourcetypes">
-                            <p>
-                                Select the desired resource types.
-                            </p>
-                            @foreach (var category in categories)
-                            {
-                                <div id="@("multitypecontainer_"+@category)" class="card mb-3">
-                                    <div class="card-header bg-default text-black">
-                                        <a id="NamingGuidlines" class="link-dark text-decoration-none" data-toggle="collapse" href="@("#multitypesection_"+@category)" role="button" aria-expanded="false" aria-controls="@("multitypesection_"+@category)">
-                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @category
-                                        </a>
-                                    </div>
-                                    <div class="collapse card card-body @theme.ThemeStyle" id="@("multitypesection_"+@category)">
-
-                                        <ul style="list-style-type: none">
-                                            @foreach (var resourceType in ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, category))
-                                            {
-                                                <li>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" value="@resourceType.Id" id="@("multitype_"+@resourceType.Id)" @onchange="eventArgs => { OnMultiTypesChange(resourceType.Id.ToString(), eventArgs.Value); }">
-                                                        @if (resourceType.Property != "")
-                                                        {
-                                                            <label class="form-check-label" for="flexCheckDefault">
-                                                                @resourceType.Resource - @resourceType.Property (@resourceType.ShortName)
-                                                            </label>
-                                                        }
-                                                        else
-                                                        {
-                                                            <label class="form-check-label" for="flexCheckDefault">
-                                                                @resourceType.Resource (@resourceType.ShortName)
-                                                            </label>
-                                                        }
-                                                    </div>
-                                                </li>
-                                            }
-                                        </ul>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
                     <div class="card @theme.ThemeStyle mb-3" id="single">
                         <h5 class="card-header text-white bg-secondary">
                             Generate Single Resouce Type Name
@@ -200,7 +151,54 @@
                             }
                         </div>
                     </div>
+                    <div class="collapse card @theme.ThemeStyle mb-3" id="multi">
+                        <h5 class="card-header text-white bg-secondary text-white">
+                            <a id="ResourceDelimiter" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#resourcetypes" role="button" aria-expanded="false" aria-controls="resourcetypes">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Generate Multiple Resource Type Names
+                            </a>
+                        </h5>
+                        <div class="card card-body @theme.ThemeStyle @resourcetypesVisible" id="resourcetypes">
+                            <p>
+                                Select the desired resource types.
+                            </p>
+                            @foreach (var category in categories)
+                            {
+                                <div id="@("multitypecontainer_"+@category)" class="card mb-3">
+                                    <div class="card-header bg-default text-black">
+                                        <a id="NamingGuidlines" class="link-dark text-decoration-none" data-toggle="collapse" href="@("#multitypesection_"+@category)" role="button" aria-expanded="false" aria-controls="@("multitypesection_"+@category)">
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @category
+                                        </a>
+                                    </div>
+                                    <div class="collapse card card-body @theme.ThemeStyle" id="@("multitypesection_"+@category)">
 
+                                        <ul style="list-style-type: none">
+                                            @foreach (var resourceType in ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, category))
+                                            {
+                                                <li>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="@resourceType.Id" id="@("multitype_"+@resourceType.Id)" @onchange="eventArgs => { OnMultiTypesChange(resourceType.Id.ToString(), eventArgs.Value); }">
+                                                        @if (resourceType.Property != "")
+                                                        {
+                                                            <label class="form-check-label" for="flexCheckDefault">
+                                                                @resourceType.Resource - @resourceType.Property (@resourceType.ShortName)
+                                                            </label>
+                                                        }
+                                                        else
+                                                        {
+                                                            <label class="form-check-label" for="flexCheckDefault">
+                                                                @resourceType.Resource (@resourceType.ShortName)
+                                                            </label>
+                                                        }
+                                                    </div>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    
                     @if (selectedResourceType != "")
                     {
                         @if (componentsVisible == "collapse")
