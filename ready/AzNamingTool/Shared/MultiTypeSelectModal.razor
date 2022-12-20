@@ -181,18 +181,19 @@
     public bool IsCategoryVisible(string category)
     {
         bool visible = true;
+        bool typevisible = false;
 
         if (!string.IsNullOrEmpty(filterData))
         {
             // Gett all the types for the category
             @foreach (var type in ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, category))
             {
-                if ((!type.Resource.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!type.ShortName.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+                if ((type.Resource.Contains(filterData, StringComparison.OrdinalIgnoreCase)) || (type.ShortName.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
                 {
-                    visible = false;
-                    break;
+                    typevisible = true;
                 }
-            }        
+            }
+            visible = typevisible;
         }
         return visible;
     }
