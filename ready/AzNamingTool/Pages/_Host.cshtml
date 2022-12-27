@@ -51,9 +51,17 @@
         return document.getElementById(id).checked;
     };
 
-    function htmlToCSV(filename) {
+    function htmlToCSV(filename, tableclass = "") {
         var data = [];
-        var rows = document.querySelectorAll("table tr");
+        var rows;
+        if(tableclass != "")
+        {
+            rows = document.querySelectorAll("table[class*=" + tableclass + "] tr ");
+        }
+        else
+        {
+            rows = document.querySelectorAll("table tr");
+        }
 
         for (var i = 0; i < rows.length; i++) {
             var row = [], cols = rows[i].querySelectorAll("td, th");

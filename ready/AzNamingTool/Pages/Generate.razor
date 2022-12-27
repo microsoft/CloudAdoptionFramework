@@ -55,7 +55,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="generateselect" id="singleselect" value="single" checked @onclick="@(e => OnGenerateModeChange("single"))">
                                 <label class="form-check-label" for="singleselect">
-                                    <strong>Generate Single Resouce Type Name</strong><br />This option will allow the geenration of single resource type name using the selected components.
+                                    <strong>Generate Single Resouce Type Name</strong><br />This option will allow the generation of a single resource type name using the selected components.
                                 </label>
                             </div>
                             <div class="form-check">
@@ -157,10 +157,12 @@
                             Resource Types
                         </h5>
                         <div class="card card-body @theme.ThemeStyle">
+                            <p>The currently selected resource types.</p>
+                            <ul>
                             @foreach (string id in multiselectedResourceTypes)
                             {
                                 ResourceType thistype = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(id));
-                                <div>
+                                <li>
                                     @if (thistype.Property != "")
                                     {
                                         <span>@thistype.Resource - @thistype.Property (@thistype.ShortName)</span>
@@ -169,9 +171,10 @@
                                     {
                                         <span>@thistype.Resource (@thistype.ShortName)</span>
                                     }
-                                </div>
+                                </li>
                             }
-                            <div class="mt-3 mb-3">
+                            </ul>
+                            <div class="m-3">
                                 <button type="button" title="Select" class="btn btn-primary" @onclick="@(e => OpenMultiSelectModal(false))">Select</button>
                             </div>
 
@@ -515,6 +518,9 @@
 
     private async Task HandleValidSubmit()
     {
+        generatedName = "";        
+        message = "";
+
         ResourceType resourceType = new();
         // Create the name request
         resourceNameRequest.ResourceEnvironment = selectedResourceEnvironment;
@@ -581,7 +587,7 @@
             StringBuilder sbMessage = new();
             resultClass = "bg-success";
 
-            sbNames.Append("<table class=\"table text-light\">");
+            sbNames.Append("<table class=\"table text-light generatednames\">");
             sbNames.Append("<thead>");
             sbNames.Append("<tr>");
             sbNames.Append("<th class\"w25\">Reource Type</th>");
@@ -1081,7 +1087,7 @@
 
     private async Task OnExportGeneratedNames()
     {
-        await JsRuntime.InvokeVoidAsync("htmlToCSV", "generatednames.csv");
+        await JsRuntime.InvokeVoidAsync("htmlToCSV", "generatednames.csv", "generatednames");
     }
 
     private void ResetForm(bool clearselection)
