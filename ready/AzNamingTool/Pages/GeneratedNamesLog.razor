@@ -89,6 +89,10 @@
                         <table class="table @theme.ThemeStyle">
                             <thead>
                                 <tr>
+                                    @if (admin)
+                                    {
+                                        <th scope="col"></th>
+                                    }
                                     <th scope="col">Created On</th>
                                     <th scope="col">Generated Name</th>
                                     <th scope="col">Resource Type</th>
@@ -101,6 +105,14 @@
                                     if (!IsVisible(name))
                                         continue;
                                     <tr>
+                                        @if (admin)
+                                        {
+                                            <td class="align-top">
+                                                <button type="button" class="btn btn-danger" @onclick="@(e => DeleteGeneratedName(name.Id))" title="Delete">
+                                                    <span class="oi oi-x" aria-hidden="true"></span>
+                                                </button>
+                                            </td>
+                                        }
                                         <td class="align-top">
                                             @name.CreatedOn.ToString()
                                         </td>
@@ -160,11 +172,18 @@
         {
             var result = await session.GetAsync<bool>("admin");
             admin = (bool)result.Value;
-            serviceResponse = await GeneratedNamesService.GetItems();
-            lstNameRequests = (List<GeneratedName>)serviceResponse.ResponseObject;
-            dataLoaded = true;
+            LoadData();
             StateHasChanged();
         }
+    }
+
+    private async Task LoadData()
+    {
+        ServiceResponse serviceResponse = new();
+        serviceResponse = await GeneratedNamesService.GetItems();
+        lstNameRequests = (List<GeneratedName>)serviceResponse.ResponseObject;
+        dataLoaded = true;
+        StateHasChanged();
     }
 
 
@@ -177,6 +196,33 @@
     public void Dispose()
     {
         StateHasChanged();
+    }
+
+    private async Task DeleteGeneratedName(long id)
+    {
+        ServiceResponse serviceResponse = new();
+        ResponseMessage message = new();
+        bool confirm = false;
+        confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirm)
+        {
+            serviceResponse = await GeneratedNamesService.DeleteItem(Convert.ToInt32(id));
+            if (serviceResponse.Success)
+            {
+                message.Type = MessageTypesEnum.SUCCESS;
+                message.Message = "Generated name deleted!";
+                toastService.ShowSuccess(message.Message, "SUCCESS");
+                LoadData();
+                state.SetNavReload(true);
+            }
+            else
+            {
+                message.Type = MessageTypesEnum.ERROR;
+                message.Message = "Generated name deletion failed!";
+                message.MessageDetails = serviceResponse.ResponseMessage;
+                toastService.ShowError(message.Message, "ERROR");
+            }
+        }
     }
 
     private async Task OnPurgeLogClick()

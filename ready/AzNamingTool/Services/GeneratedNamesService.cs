@@ -67,6 +67,30 @@ namespace AzureNamingTool.Services
             return serviceReponse;
         }
 
+        public static async Task<ServiceResponse> DeleteItem(int id)
+        {
+            try
+            {
+                // Get list of items
+                var items = await GeneralHelper.GetList<GeneratedName>();
+                // Get the specified item
+                var item = items.Find(x => x.Id == id);
+                // Remove the item from the collection
+                items.Remove(item);
+
+                // Write items to file
+                await GeneralHelper.WriteList<GeneratedName>(items);
+                serviceResponse.Success = true;
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.ResponseObject = ex;
+                serviceResponse.Success = false;
+            }
+            return serviceResponse;
+        }
+
         /// <summary>
         /// This function clears the generated names log. 
         /// </summary>
