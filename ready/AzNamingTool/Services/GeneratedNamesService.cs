@@ -30,6 +30,25 @@ namespace AzureNamingTool.Services
             return serviceResponse;
         }
 
+        public static async Task<ServiceResponse> GetItem(int id)
+        {
+            try
+            {
+                // Get list of items
+                var data = await GeneralHelper.GetList<GeneratedName>();
+                var item = data.Find(x => x.Id == id);
+                serviceResponse.ResponseObject = item;
+                serviceResponse.Success = true;
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
+            }
+            return serviceResponse;
+        }
+        
         /// <summary>
         ///  This function logs the generated name. 
         /// </summary>

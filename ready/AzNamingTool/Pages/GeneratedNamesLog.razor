@@ -206,14 +206,28 @@
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
         if (confirm)
         {
-            serviceResponse = await GeneratedNamesService.DeleteItem(Convert.ToInt32(id));
+            serviceResponse = await GeneratedNamesService.GetItem(Convert.ToInt32(id));
             if (serviceResponse.Success)
             {
-                message.Type = MessageTypesEnum.SUCCESS;
-                message.Message = "Generated name deleted!";
-                toastService.ShowSuccess(message.Message, "SUCCESS");
-                LoadData();
-                state.SetNavReload(true);
+                GeneratedName generatedname = (GeneratedName)serviceResponse.ResponseObject;
+                serviceResponse = await GeneratedNamesService.DeleteItem(Convert.ToInt32(generatedname.Id));
+                if (serviceResponse.Success)
+                {
+                    message.Type = MessageTypesEnum.SUCCESS;
+                    message.Message = "Generated name deleted!";
+                    toastService.ShowSuccess(message.Message, "SUCCESS");
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedname.ResourceName+") deleted." });
+                    CacheHelper.InvalidateCacheObject("GeneratedName");
+                    LoadData();
+                    state.SetNavReload(true);
+                }
+                else
+                {
+                    message.Type = MessageTypesEnum.ERROR;
+                    message.Message = "Generated name deletion failed!";
+                    message.MessageDetails = serviceResponse.ResponseMessage;
+                    toastService.ShowError(message.Message, "ERROR");
+                }
             }
             else
             {
@@ -222,6 +236,7 @@
                 message.MessageDetails = serviceResponse.ResponseMessage;
                 toastService.ShowError(message.Message, "ERROR");
             }
+
         }
     }
 
@@ -237,8 +252,7 @@
             toastService.ShowSuccess("Generated Log purged!", "SUCCESS");
             AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Names log purged." });
             CacheHelper.InvalidateCacheObject("GeneratedName");
-            serviceResponse = await GeneratedNamesService.GetItems();
-            lstNameRequests = (List<GeneratedName>)serviceResponse.ResponseObject;
+            await LoadData();
             StateHasChanged();
         }
     }
