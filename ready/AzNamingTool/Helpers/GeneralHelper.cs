@@ -335,6 +335,26 @@ namespace AzureNamingTool.Helpers
             }
         }
 
+        public static bool VerifyConnectivity()
+        {
+            bool result = false;
+            string host = "http://microsoft.com";
+            Ping ping = new();
+            try
+            {
+                PingReply reply = ping.Send(host, 3000);
+                if (reply.Status == IPStatus.Success)
+                {
+                    result = true;
+                }
+            }
+            catch (Exception)
+            {
+                // Do not log the exception becasue there is no connection.
+            }
+            return result;
+        }
+
         public static async void UpdateSettings(Config config)
         {
             var jsonWriteOptions = new JsonSerializerOptions()
@@ -356,7 +376,7 @@ namespace AzureNamingTool.Helpers
             state.SetPassword(false);
             state.SetAppTheme("bg-default text-black");
         }
-        
+
         public static async Task<string> DownloadString(string url)
         {
             string data;
@@ -491,44 +511,43 @@ namespace AzureNamingTool.Helpers
             return versiondata;
         }
 
-
         public static async Task UpdateConfigurationFileVersion(string fileName)
         {
-            try
+            if (VerifyConnectivity())
             {
-                // Get the official version from GitHub
-                ConfigurationFileVersionData? officialversiondata = new();
-                var officialdatajson = await GetOfficalConfigurationFileVersionData();
-
-                // Get the current version
-                ConfigurationFileVersionData? currentversiondata = new();
-                var currentdatajson = await GetCurrentConfigFileVersionData();
-
-                // Determine if the version data is different
-                if ((officialdatajson != null) && (currentdatajson != null))
+                try
                 {
-                    officialversiondata = JsonSerializer.Deserialize<ConfigurationFileVersionData>(officialdatajson);
-                    currentversiondata = JsonSerializer.Deserialize<ConfigurationFileVersionData>(currentdatajson);
+                    // Get the official version from GitHub
+                    ConfigurationFileVersionData? officialversiondata = new();
+                    var officialdatajson = await GetOfficalConfigurationFileVersionData();
 
-                    switch (fileName)
+                    // Get the current version
+                    ConfigurationFileVersionData? currentversiondata = new();
+                    var currentdatajson = await GetCurrentConfigFileVersionData();
+
+                    // Determine if the version data is different
+                    if ((officialdatajson != null) && (currentdatajson != null))
                     {
-                        case "resourcetypes":
-                            currentversiondata.resourcetypes = officialversiondata.resourcetypes;
-                            break;
-                        case "resourcelocations":
-                            currentversiondata.resourcelocations = officialversiondata.resourcelocations;
-                            break;
+                        officialversiondata = JsonSerializer.Deserialize<ConfigurationFileVersionData>(officialdatajson);
+                        currentversiondata = JsonSerializer.Deserialize<ConfigurationFileVersionData>(currentdatajson);
+
+                        switch (fileName)
+                        {
+                            case "resourcetypes":
+                                currentversiondata.resourcetypes = officialversiondata.resourcetypes;
+                                break;
+                            case "resourcelocations":
+                                currentversiondata.resourcelocations = officialversiondata.resourcelocations;
+                                break;
+                        }
+                        //  Update the current configuration file version data
+                        await FileSystemHelper.WriteFile("configurationfileversions.json", JsonSerializer.Serialize(currentversiondata), "settings/");
                     }
-
-                    //  Update the current configuration file version data
-                    await FileSystemHelper.WriteFile("configurationfileversions.json", JsonSerializer.Serialize(currentversiondata), "settings/");
                 }
-
-
-            }
-            catch (Exception ex)
-            {
-                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                catch (Exception ex)
+                {
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                }
             }
         }
     }
