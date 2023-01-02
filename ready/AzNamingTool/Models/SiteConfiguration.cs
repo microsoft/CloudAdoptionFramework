@@ -1,6 +1,6 @@
 ﻿namespace AzureNamingTool.Models
 {
-    public class Config
+    public class SiteConfiguration
     {
         public string? SALTKey { get; set; }
         public string? AdminPassword { get; set; }

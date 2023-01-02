@@ -8,7 +8,7 @@ namespace AzureNamingTool.Services
     public class AdminService
     {
         private static ServiceResponse serviceResponse = new();
-        private static Config config = ConfigurationHelper.GetConfigurationData();
+        private static SiteConfiguration config = ConfigurationHelper.GetConfigurationData();
         
         public static async Task<ServiceResponse> UpdatePassword(string password)
         {

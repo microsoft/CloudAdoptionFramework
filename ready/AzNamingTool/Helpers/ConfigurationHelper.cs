@@ -9,13 +9,13 @@ namespace AzureNamingTool.Helpers
 {
     public class ConfigurationHelper
     {
-        public static Config GetConfigurationData()
+        public static SiteConfiguration GetConfigurationData()
         {
             var config = new ConfigurationBuilder()
                     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                     .AddJsonFile("settings/appsettings.json")
                     .Build()
-                    .Get<Config>();
+                    .Get<SiteConfiguration>();
             return config;
         }
 
@@ -132,22 +132,20 @@ namespace AzureNamingTool.Helpers
 
         public static bool VerifyConnectivity()
         {
-            bool result = false;
-            string host = "http://microsoft.com";
-            Ping ping = new();
             try
             {
-                PingReply reply = ping.Send(host, 3000);
-                if (reply.Status == IPStatus.Success)
-                {
-                    result = true;
-                }
+                Ping ping = new Ping();
+                String host = "github.com";
+                byte[] buffer = new byte[32];
+                int timeout = 1000;
+                PingOptions pingOptions = new PingOptions();
+                PingReply reply = ping.Send(host, timeout, buffer, pingOptions);
+                return (reply.Status == IPStatus.Success);
             }
             catch (Exception)
             {
-                // Do not log the exception becasue there is no connection.
+                return false;
             }
-            return result;
         }
         public async static Task<List<T>> GetList<T>()
         {
@@ -271,7 +269,7 @@ namespace AzureNamingTool.Helpers
             }
         }
 
-        public static async void UpdateSettings(Config config)
+        public static async void UpdateSettings(SiteConfiguration config)
         {
             var jsonWriteOptions = new JsonSerializerOptions()
             {
