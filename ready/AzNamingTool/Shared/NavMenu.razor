@@ -113,13 +113,13 @@
                 </div>
             }
         }
-        @if (PageType.ToString() == "AzureNamingTool.Pages.Index")
+        @if ((PageType.ToString() == "AzureNamingTool.Pages.Index") && (connected))
         {
             <hr />
             <div class="nav-item px-3">
                 <div class="nav-link">
                     <label title="Latest News" style="font-weight:bold;">
-                    Latest News
+                        Latest News
                     </label>
                     <label class="switch" title="Latest News Switch" style="top:-5px; float:right;">
                         <input type="checkbox" checked="@newsenabled" @oninput="NewsChanged">
@@ -146,6 +146,7 @@
     private bool admin;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     private bool newsenabled = false;
+    private bool connected = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -157,19 +158,26 @@
         admin = (bool)result.Value;
         if (firstRender)
         {
-            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
-            try
+            if (ConfigurationHelper.VerifyConnectivity())
             {
-                result = await storage.GetAsync<bool>("newsenabled");
-                newsenabled = result.Success ? result.Value : true;
+                servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+                try
+                {
+                    result = await storage.GetAsync<bool>("newsenabled");
+                    newsenabled = result.Success ? result.Value : true;
+                }
+                catch
+                {
+                    newsenabled = true;
+                }
+                state.NewsEnabled = newsenabled;
             }
-            catch
+            else
             {
-                newsenabled = true;
+                connected = false;
             }
-            state.NewsEnabled = newsenabled;
             StateHasChanged();
-            
+
         }
         else
         {

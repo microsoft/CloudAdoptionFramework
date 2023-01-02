@@ -4,6 +4,7 @@ using System.Text.Json;
 using AzureNamingTool.Services;
 using System.Xml.Linq;
 using System.Net.NetworkInformation;
+using System.Net;
 
 namespace AzureNamingTool.Helpers
 {
@@ -49,6 +50,7 @@ namespace AzureNamingTool.Helpers
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
         }
+
         public static void VerifyConfiguration()
         {
             try
@@ -134,19 +136,20 @@ namespace AzureNamingTool.Helpers
         {
             try
             {
-                Ping ping = new Ping();
-                String host = "github.com";
-                byte[] buffer = new byte[32];
-                int timeout = 1000;
-                PingOptions pingOptions = new PingOptions();
-                PingReply reply = ping.Send(host, timeout, buffer, pingOptions);
-                return (reply.Status == IPStatus.Success);
+                var request = (HttpWebRequest)WebRequest.Create("https://github.com/aznamingtool/AzureNamingTool/blob/main/connectiontest.png");
+                request.KeepAlive = false;
+                request.Timeout = 1500;
+                using (var response = (HttpWebResponse)request.GetResponse())
+                {
+                    return (response.StatusCode == HttpStatusCode.OK);
+                }
             }
             catch (Exception)
             {
                 return false;
             }
         }
+
         public async static Task<List<T>> GetList<T>()
         {
             var items = new List<T>();
@@ -282,6 +285,7 @@ namespace AzureNamingTool.Helpers
             var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/appsettings.json");
             await FileSystemHelper.WriteFile("appsettings.json", newJson);
         }
+
         public static async Task<string> GetOfficalConfigurationFileVersionData()
         {
             string versiondata = null;
@@ -405,6 +409,7 @@ namespace AzureNamingTool.Helpers
             state.SetPassword(false);
             state.SetAppTheme("bg-default text-black");
         }
+
         public static async Task<string> GetToolVersion()
         {
             try
