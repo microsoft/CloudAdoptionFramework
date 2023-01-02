@@ -13,14 +13,14 @@ namespace AzureNamingTool.Services
             try
             {
                 var delimiter = '-';
-                var nameComponents = await Helpers.GeneralHelper.GetList<ResourceComponent>();
-                var resourceTypes = await Helpers.GeneralHelper.GetList<ResourceType>();
-                var unitDepts = await Helpers.GeneralHelper.GetList<ResourceUnitDept>();
-                var environments = await Helpers.GeneralHelper.GetList<ResourceEnvironment>();
-                var locations = await Helpers.GeneralHelper.GetList<ResourceLocation>();
-                var orgs = await Helpers.GeneralHelper.GetList<ResourceOrg>();
-                var Functions = await Helpers.GeneralHelper.GetList<ResourceFunction>();
-                var projectAppSvcs = await Helpers.GeneralHelper.GetList<ResourceProjAppSvc>();
+                var nameComponents = await Helpers.ConfigurationHelper.GetList<ResourceComponent>();
+                var resourceTypes = await Helpers.ConfigurationHelper.GetList<ResourceType>();
+                var unitDepts = await Helpers.ConfigurationHelper.GetList<ResourceUnitDept>();
+                var environments = await Helpers.ConfigurationHelper.GetList<ResourceEnvironment>();
+                var locations = await Helpers.ConfigurationHelper.GetList<ResourceLocation>();
+                var orgs = await Helpers.ConfigurationHelper.GetList<ResourceOrg>();
+                var Functions = await Helpers.ConfigurationHelper.GetList<ResourceFunction>();
+                var projectAppSvcs = await Helpers.ConfigurationHelper.GetList<ResourceProjAppSvc>();
 
                 List<String> validations = new();
                 var maxSortOrder = 0;

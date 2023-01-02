@@ -1,9 +1,9 @@
-﻿@using AzureNamingTool.Helpers
-@using AzureNamingTool.Models
-@using AzureNamingTool.Services
+﻿@using AzureNamingTool.Helpers;
+@using AzureNamingTool.Models;
+@using System.Runtime.Caching;
+@using AzureNamingTool.Services;
 @using Microsoft.AspNetCore.Html
 @using Microsoft.Extensions.Logging
-@using System.Runtime.Caching
 @inject IJSRuntime JsRuntime
 @inject StateContainer state
 @inject ProtectedSessionStorage session
@@ -123,7 +123,7 @@
     private bool admin;
     private bool disabled = true;
 
-    private Config config = GeneralHelper.GetConfigurationData();
+    private Config config = ConfigurationHelper.GetConfigurationData();
 
     protected override async void OnInitialized()
     {
@@ -254,7 +254,7 @@
                 break;
         }
 
-        config = GeneralHelper.GetConfigurationData();
+        config = ConfigurationHelper.GetConfigurationData();
 
         await InvokeAsync(() =>
         {

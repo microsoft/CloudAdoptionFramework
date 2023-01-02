@@ -70,9 +70,9 @@
             {
                 if (admin)
                 {
-                    if (GeneralHelper.VerifyConnectivity())
+                    if (ConfigurationHelper.VerifyConnectivity())
                     {
-                        var latestversion = await GeneralHelper.GetToolVersion();
+                        var latestversion = await ConfigurationHelper.GetToolVersion();
                         if (!notificationshown)
                         {
                             // Check if the client's version matches the current offical version

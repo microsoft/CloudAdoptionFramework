@@ -11,7 +11,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceDelimiter>();
+                var items = await ConfigurationHelper.GetList<ResourceDelimiter>();
                 serviceResponse.ResponseObject = items.OrderBy(y => y.SortOrder).OrderByDescending(y => y.Enabled).ToList()[0];
                 serviceResponse.Success = true;
             }
@@ -29,7 +29,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceDelimiter>();
+                var items = await ConfigurationHelper.GetList<ResourceDelimiter>();
                 if (!admin)
                 {
                     serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(y => y.SortOrder).ToList();
@@ -54,7 +54,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceDelimiter>();
+                var items = await ConfigurationHelper.GetList<ResourceDelimiter>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -121,7 +121,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceDelimiter>(items);
+                await ConfigurationHelper.WriteList<ResourceDelimiter>(items);
                 serviceResponse.ResponseObject = "Item added!";
                 serviceResponse.Success = true;
             }
@@ -183,7 +183,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceDelimiter>(newitems);
+                await ConfigurationHelper.WriteList<ResourceDelimiter>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

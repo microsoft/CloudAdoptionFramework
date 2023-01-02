@@ -1,6 +1,4 @@
-﻿using AzureNamingTool.Models;
-
-namespace AzureNamingTool.Helpers
+﻿namespace AzureNamingTool.Models
 {
     public class StateContainer
     {
@@ -52,7 +50,7 @@ namespace AzureNamingTool.Helpers
                 NotifyStateChanged();
             }
         }
-        
+
         public void SetPassword(bool password)
         {
             _password = password;

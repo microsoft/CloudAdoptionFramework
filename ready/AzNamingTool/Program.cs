@@ -1,11 +1,11 @@
 using AzureNamingTool.Attributes;
-using AzureNamingTool.Helpers;
 using BlazorDownloadFile;
 using Blazored.Toast;
 using Microsoft.OpenApi.Models;
 using Blazored.Modal;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
+using AzureNamingTool.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -21,7 +21,7 @@ namespace AzureNamingTool.Controllers
     public class AdminController : ControllerBase
     {
         private ServiceResponse serviceResponse = new();
-        private Config config = GeneralHelper.GetConfigurationData();
+        private Config config = ConfigurationHelper.GetConfigurationData();
 
         // POST api/<AdminController>
         /// <summary>

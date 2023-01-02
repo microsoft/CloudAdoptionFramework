@@ -48,7 +48,7 @@
                 }
                 @if ((type == "ResourceType") && (resourceComponents != null))
                 {
-                    @if (bool.Parse(GeneralHelper.GetAppSetting("DevMode")))
+                    @if (bool.Parse(ConfigurationHelper.GetAppSetting("DevMode")))
                     {
                         <div class="card @theme.ThemeStyle mb-3">
                             <div class="card-header bg-default text-black fw-bold">
@@ -301,7 +301,7 @@
                                 resourceType.ShortName = itemShortName;
                                 resourceType.Optional = "";
                                 resourceType.Exclude = "";
-                                if (bool.Parse(GeneralHelper.GetAppSetting("DevMode")))
+                                if (bool.Parse(ConfigurationHelper.GetAppSetting("DevMode")))
                                 {
                                     resourceType.Regx = itemRegEx;
                                 }

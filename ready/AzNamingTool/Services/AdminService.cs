@@ -8,7 +8,7 @@ namespace AzureNamingTool.Services
     public class AdminService
     {
         private static ServiceResponse serviceResponse = new();
-        private static Config config = GeneralHelper.GetConfigurationData();
+        private static Config config = ConfigurationHelper.GetConfigurationData();
         
         public static async Task<ServiceResponse> UpdatePassword(string password)
         {
@@ -17,7 +17,7 @@ namespace AzureNamingTool.Services
                 if (ValidationHelper.ValidatePassword(password))
                 {
                     config.AdminPassword = GeneralHelper.EncryptString(password, config.SALTKey);
-                    GeneralHelper.UpdateSettings(config);
+                    ConfigurationHelper.UpdateSettings(config);
                     serviceResponse.Success = true;
                 }
                 else
@@ -42,7 +42,7 @@ namespace AzureNamingTool.Services
                 // Set the new api key
                 Guid guid = Guid.NewGuid();
                 config.APIKey = GeneralHelper.EncryptString(guid.ToString(), config.SALTKey);
-                GeneralHelper.UpdateSettings(config);
+                ConfigurationHelper.UpdateSettings(config);
                 serviceResponse.ResponseObject = guid.ToString();
                 serviceResponse.Success = true;
             }
@@ -60,7 +60,7 @@ namespace AzureNamingTool.Services
             try
             {
                 config.APIKey = GeneralHelper.EncryptString(apikey, config.SALTKey);
-                GeneralHelper.UpdateSettings(config);
+                ConfigurationHelper.UpdateSettings(config);
                 serviceResponse.ResponseObject = apikey;
                 serviceResponse.Success = true;
             }

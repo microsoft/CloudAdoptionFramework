@@ -67,7 +67,7 @@ namespace AzureNamingTool.Services
                 // Get the security settings
                 if (includeadmin)
                 {
-                    var config = GeneralHelper.GetConfigurationData();
+                    var config = ConfigurationHelper.GetConfigurationData();
                     configdata.SALTKey = config.SALTKey;
                     configdata.AdminPassword = config.AdminPassword;
                     configdata.APIKey = config.APIKey;
@@ -104,7 +104,7 @@ namespace AzureNamingTool.Services
                 await AdminLogService.PostConfig(configdata.AdminLogs);
                 
                 // Set the security settings
-                var config = GeneralHelper.GetConfigurationData();
+                var config = ConfigurationHelper.GetConfigurationData();
 
                 if (configdata.SALTKey != null)
                 {
