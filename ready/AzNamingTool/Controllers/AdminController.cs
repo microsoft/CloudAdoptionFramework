@@ -143,7 +143,7 @@ namespace AzureNamingTool.Controllers
         /// <returns>json - Current admin log data</returns>
         [HttpGet]
         [Route("[action]")]
-        public async Task<IActionResult> GetAdminLog()
+        public async Task<IActionResult> GetAdminLog([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
         {
             try
             {
@@ -170,7 +170,7 @@ namespace AzureNamingTool.Controllers
         /// <returns>dttring - Successful operation</returns>
         [HttpPost]
         [Route("[action]")]
-        public async Task<IActionResult> PurgeAdminLog()
+        public async Task<IActionResult> PurgeAdminLog([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
         {
             try
             {
@@ -224,7 +224,7 @@ namespace AzureNamingTool.Controllers
         /// <returns>dttring - Successful operation</returns>
         [HttpPost]
         [Route("[action]")]
-        public async Task<IActionResult> PurgeGeneratedNamesLog()
+        public async Task<IActionResult> PurgeGeneratedNamesLog([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
         {
             try
             {

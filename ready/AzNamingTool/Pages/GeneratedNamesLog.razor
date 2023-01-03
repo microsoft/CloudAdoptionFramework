@@ -34,18 +34,17 @@
             <div class="mb-3">
                 @if (lstNameRequests.Count > 0)
                 {
-                    @if (admin)
-                    {
-                        <div class="mb-3">
-                            <button class="btn btn-primary" title="Export Generated Names Log" @onclick="@(e => OnExportLogClick())">
-                                Export Generated Names Log
-                            </button>
+                    <div class="mb-3">
+                        <button class="btn btn-primary" title="Export Generated Names Log" @onclick="@(e => OnExportLogClick())">
+                            Export Generated Names Log
+                        </button>
+                        @if (admin)
+                        {
                             <button class="btn btn-danger" title="Purge Generated Names Log" @onclick="@(e => OnPurgeLogClick())">
                                 Purge Generated Names Log
                             </button>
-                        </div>
-                    }
-
+                        }
+                    </div>
                     <div class="card">
                         <div class="card-header bg-default text-black">
                             <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
@@ -216,7 +215,7 @@
                     message.Type = MessageTypesEnum.SUCCESS;
                     message.Message = "Generated name deleted!";
                     toastService.ShowSuccess(message.Message, "SUCCESS");
-                    AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedname.ResourceName+") deleted." });
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedname.ResourceName + ") deleted." });
                     CacheHelper.InvalidateCacheObject("GeneratedName");
                     LoadData();
                     state.SetNavReload(true);

@@ -11,7 +11,7 @@ namespace AzureNamingTool.Services
     public class ResourceTypeService
     {
         private static ServiceResponse serviceResponse = new();
-        
+
         public static async Task<ServiceResponse> GetItems(bool admin = true)
         {
             try
@@ -194,9 +194,17 @@ namespace AzureNamingTool.Services
 
         public static List<ResourceType> GetFilteredResourceTypes(List<ResourceType> types, string filter)
         {
+            List<ResourceType> currenttypes = new();
             // Filter out resource types that should have name generation
-            List<ResourceType> filteredtypes = types.Where(x => x.Resource.ToLower().StartsWith(filter.ToLower() + "/") && x.Property.ToLower() != "display name" && x.ShortName != "").ToList();
-            return filteredtypes;
+            if (filter != "")
+            {
+                currenttypes = types.Where(x => x.Resource.ToLower().StartsWith(filter.ToLower() + "/") && x.Property.ToLower() != "display name" && x.ShortName != "").ToList();
+            }
+            else
+            {
+                currenttypes = types;
+            }
+            return currenttypes;
         }
 
         public static async Task<ServiceResponse> RefreshResourceTypes(bool shortNameReset = false)
@@ -208,7 +216,7 @@ namespace AzureNamingTool.Services
                 serviceResponse = await ResourceTypeService.GetItems();
                 List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
                 string url = "https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/repository/resourcetypes.json";
-                
+
                 string refreshdata = await GeneralHelper.DownloadString(url);
                 if (refreshdata != "")
                 {
@@ -233,7 +241,7 @@ namespace AzureNamingTool.Services
                             ResourceType oldtype = types[i];
                             newtype.Exclude = oldtype.Exclude;
                             newtype.Optional = oldtype.Optional;
-                            newtype.Enabled= oldtype.Enabled;
+                            newtype.Enabled = oldtype.Enabled;
                             if ((!shortNameReset) || (oldtype.ShortName == ""))
                             {
                                 newtype.ShortName = oldtype.ShortName;
@@ -252,7 +260,7 @@ namespace AzureNamingTool.Services
 
                     // Update the settings file
                     serviceResponse = await PostConfig(types);
-                    
+
                     // Update the repository file
                     await FileSystemHelper.WriteFile("resourcetypes.json", refreshdata, "repository/");
 
