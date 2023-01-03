@@ -134,20 +134,54 @@ namespace AzureNamingTool.Helpers
 
         public static bool VerifyConnectivity()
         {
+            bool pingsuccessful = false;
+            bool result = false;
             try
             {
-                var request = (HttpWebRequest)WebRequest.Create("https://github.com/aznamingtool/AzureNamingTool/blob/main/connectiontest.png");
-                request.KeepAlive = false;
-                request.Timeout = 1500;
-                using (var response = (HttpWebResponse)request.GetResponse())
+                // Check if the data is cached
+                var data = CacheHelper.GetCacheObject("isconnected");
+                if (data == null)
                 {
-                    return (response.StatusCode == HttpStatusCode.OK);
+                    // Atempt to ping a url first
+                    Ping ping = new Ping();
+                    String host = "github.com";
+                    byte[] buffer = new byte[32];
+                    int timeout = 1000;
+                    PingOptions pingOptions = new PingOptions();
+                    PingReply reply = ping.Send(host, timeout, buffer, pingOptions);
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        pingsuccessful = true;
+                        result = true;
+                    }
+
+                    // If ping is not successful, attempt to download a file
+                    if (!pingsuccessful)
+                    {
+                        // Atempt to download a file
+                        var request = (HttpWebRequest)WebRequest.Create("https://github.com/aznamingtool/AzureNamingTool/blob/main/connectiontest.png");
+                        request.KeepAlive = false;
+                        request.Timeout = 1500;
+                        using (var response = (HttpWebResponse)request.GetResponse())
+                        {
+                            if (response.StatusCode == HttpStatusCode.OK)
+                            {
+                                result = true;
+                            }
+                        }
+                    }
+                    // Set the result to cache
+                    CacheHelper.SetCacheObject("isconnected", result);
+                }
+                else
+                {
+                    result = (bool)data;
                 }
             }
             catch (Exception)
             {
-                return false;
             }
+            return result;
         }
 
         public async static Task<List<T>> GetList<T>()
