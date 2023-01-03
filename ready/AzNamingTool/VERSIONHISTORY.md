@@ -15,6 +15,8 @@
 - Updated validation on Generate page
 - Updated formatting/styling on Configuration page
 - Added ability for admin to delete generated names from log
+- Added Instructions link to site pages
+- Updated Instructions with latest screenshots/details
 - Updated 2.4.0 version notes
 
 ### Bug fixes

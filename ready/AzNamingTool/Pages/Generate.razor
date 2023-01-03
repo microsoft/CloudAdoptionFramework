@@ -3,6 +3,7 @@
 @using AzureNamingTool.Models
 @using AzureNamingTool.Services
 @using System.Text;
+@using AzureNamingTool.Shared.Components;
 @inject ILogger<Generate> Logger
 @inject NavigationManager NavigationManager
 @inject StateContainer state
@@ -12,29 +13,42 @@
 <PageTitle>Azure Naming Tool - Generate</PageTitle>
 <div class="card @theme.ThemeStyle">
     <div class="card-body">
-        <h1>Generate</h1>
+        <div style="float:left;">
+            <h1>
+                Generate
+            </h1>
+        </div>
+        <div style="float:right;">
+            <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                <span class="oi oi-document" aria-hidden="true"></span> Documentation
+            </button>
+        </div>
+        <div style="clear:both;"></div>
         <div class="mb-3">This page generates a name for the selected resource type.</div>
-        <p>
-            <strong>Instructions</strong>
-            <ol>
-                <li>
-                    Select the desired Resource Type / Resource Types
-                </li>
-                <li>
-                    Review the Naming Guidelines (for single resource type)
-                </li>
-                <li>
-                    Select the component options
-                </li>
-                <li>
-                    Click <strong>Generate</strong> to generate the Azure resource name(s)
-                </li>
-                <li>
-                    View generated names in the <a href="/generatednameslog">Generated Names Log</a>
-                </li>
-            </ol>
-        </p>
-
+        <div class="card ">
+            <h5 class="card-header bg-default text-black">
+                Instructions
+            </h5>
+            <div class="card card-body @theme.ThemeStyle">
+                <ol>
+                    <li>
+                        Select the desired Resource Type / Resource Types
+                    </li>
+                    <li>
+                        Review the Naming Guidelines (for single resource type)
+                    </li>
+                    <li>
+                        Select the component options
+                    </li>
+                    <li>
+                        Click <strong>Generate</strong> to generate the Azure resource name(s)
+                    </li>
+                    <li>
+                        View generated names in the <a href="/generatednameslog">Generated Names Log</a>
+                    </li>
+                </ol>
+            </div>
+        </div>
         @if (servicesData.ResourceTypes == null)
         {
             <div class="spinner-border" role="status">
@@ -159,20 +173,20 @@
                         <div class="card card-body @theme.ThemeStyle">
                             <p>The currently selected resource types.</p>
                             <ul>
-                            @foreach (string id in multiselectedResourceTypes)
-                            {
-                                ResourceType thistype = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(id));
-                                <li>
-                                    @if (thistype.Property != "")
-                                    {
-                                        <span>@thistype.Resource - @thistype.Property (@thistype.ShortName)</span>
-                                    }
-                                    else
-                                    {
-                                        <span>@thistype.Resource (@thistype.ShortName)</span>
-                                    }
-                                </li>
-                            }
+                                @foreach (string id in multiselectedResourceTypes)
+                                {
+                                    ResourceType thistype = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(id));
+                                    <li>
+                                        @if (thistype.Property != "")
+                                        {
+                                            <span>@thistype.Resource - @thistype.Property (@thistype.ShortName)</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@thistype.Resource (@thistype.ShortName)</span>
+                                        }
+                                    </li>
+                                }
                             </ul>
                             <div class="m-3">
                                 <button type="button" title="Select" class="btn btn-primary" @onclick="@(e => OpenMultiSelectModal(false))">Select</button>
@@ -518,7 +532,7 @@
 
     private async Task HandleValidSubmit()
     {
-        generatedName = "";        
+        generatedName = "";
         message = "";
 
         ResourceType resourceType = new();
@@ -1070,11 +1084,6 @@
         }
     }
 
-    private async Task OnInstructionsClick()
-    {
-        NavigationManager.NavigateTo("/instructions");
-    }
-
     private string GetControlStyle()
     {
         return "form-control " + theme.ThemeStyle;
@@ -1098,6 +1107,31 @@
         if (clearselection)
         {
             multiselectedResourceTypes.Clear();
+        }
+    }
+    
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Generate");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "generateinstructions");
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
         }
     }
 }

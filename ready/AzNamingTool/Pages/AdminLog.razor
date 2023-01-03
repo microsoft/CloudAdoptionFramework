@@ -20,7 +20,17 @@
 <PageTitle>Azure Naming Tool - Admin Log</PageTitle>
 <div class="card  @theme.ThemeStyle">
     <div class="card-body">
-        <h1>Admin Log</h1>
+        <div style="float:left;">
+            <h1>
+                Admin Log
+            </h1>
+        </div>
+        <div style="float:right;">
+            <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                <span class="oi oi-document" aria-hidden="true"></span> Documentation
+            </button>
+        </div>
+        <div style="clear:both;"></div>
         <div class="mb-3">This page displays a log of admin/configuration changes.</div>
 
 
@@ -127,6 +137,8 @@
 
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
     private bool admin;
     private bool dataLoaded = false;
     List<AdminLogMessage> lstAdminLogMessages = new();
@@ -220,5 +232,29 @@
         startdate = DateTime.Today.AddDays(-30);
         enddate = DateTime.Today;
         filterData = "";
+    }
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Admin Log");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "adminloginstructions");
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+        }
     }
 }

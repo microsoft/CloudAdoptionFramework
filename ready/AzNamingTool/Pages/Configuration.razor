@@ -20,19 +20,26 @@
 <PageTitle>Azure Naming Tool - Configuration</PageTitle>
 <div class="card @theme.ThemeStyle">
     <div class="card-body">
-        <h1>Configuration</h1>
+        <div style="float:left;">
+            <h1>
+                Configuration
+            </h1>
+        </div>
+        <div style="float:right;">
+            <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                <span class="oi oi-document" aria-hidden="true"></span> Documentation
+            </button>
+        </div>
+        <div style="clear:both;"></div>
         <div class="mb-3">This page contains the inputs to customize the Azure Naming Tool configuration.</div>
         <div class="mb-3">
-            <button class="btn btn-primary" title="Instructions" @onclick="@(e => OnInstructionsClick())">
-                View Instructions
-            </button>
         </div>
         @if (admin)
         {
             @if (!ConfigurationHelper.VerifyConnectivity())
             {
                 <div class="mb-3 warning-message">
-                    NOTE: You are not currently connected to the internet, so some features will be disabled.
+                    NOTE: You are not currently connected to the internet, so some features will be disabled. This includes the ability to <strong>Refresh</strong> resource types and locations.
                 </div>
             }
             <div id="compontentslegendcontainer" class="card mb-3" style="width:auto;">
@@ -1723,7 +1730,7 @@
                     <div class="card">
                         <h5 class="card-header text-white bg-secondary text-white">
                             <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#global" role="button" aria-expanded="false" aria-controls="global">
-                               <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Global Configuration
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Global Configuration
                             </a>
                         </h5>
                         <div class="collapse card card-body @theme.ThemeStyle" id="global">
@@ -3392,6 +3399,31 @@
         if (!result.Cancelled)
         {
             StateHasChanged();
+        }
+    }
+
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Configuration");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "toolconfigurationinstructions");
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
         }
     }
 

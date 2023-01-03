@@ -64,6 +64,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="wwwroot\images\runnoft.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="settings\blank.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

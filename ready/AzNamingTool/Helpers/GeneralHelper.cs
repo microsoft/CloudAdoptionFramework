@@ -1,25 +1,7 @@
 using AzureNamingTool.Models;
-using System;
-using System.Collections.Generic;
+using AzureNamingTool.Services;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Microsoft.Extensions.Caching.Memory;
-using System.Linq.Expressions;
-using System.Security.AccessControl;
-using System.Runtime.Caching;
-using MemoryCache = System.Runtime.Caching.MemoryCache;
-using System.Net.Http.Json;
-using AzureNamingTool.Services;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
-using System.Reflection;
-using System.Net.NetworkInformation;
-using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace AzureNamingTool.Helpers
 {

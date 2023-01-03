@@ -5,6 +5,7 @@
 @inject IJSRuntime JsRuntime
 @inject ILogger<NavMenu> Logger
 @inject ProtectedLocalStorage storage
+@inject NavigationManager NavigationManager
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -61,7 +62,6 @@
                     </NavLink>
                 </div>
             }
-
             @if (PageType.ToString() == "AzureNamingTool.Pages.Configuration")
             {
                 <div class="card bg-transparent">
@@ -98,42 +98,49 @@
                     </div>
                     <div class="card bg-transparent">
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step1"))' @onclick:preventDefault href="">Step 1 - Admin Password</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminpasswordcontainer"))' @onclick:preventDefault href="">Admin Password</a>
                         </div>
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step2"))' @onclick:preventDefault href="">Step 2 - Admin Config</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminconfigurationcontainer"))' @onclick:preventDefault href="">Admin Configuration</a>
                         </div>
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step3"))' @onclick:preventDefault href="">Step 3 - Tool Config</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("toolconfigurationcontainer"))' @onclick:preventDefault href="">Tool Configuration</a>
                         </div>
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step4"))' @onclick:preventDefault href="">Step 4 - Generate</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("generatecontainer"))' @onclick:preventDefault href="">Generate</a>
+                        </div>
+                        <div class="nav-item px-3">
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("generatednameslogcontainer"))' @onclick:preventDefault href="">Generated Names Log</a>
+                        </div>
+                        <div class="nav-item px-3">
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("referencecontainer"))' @onclick:preventDefault href="">Reference</a>
                         </div>
                     </div>
                 </div>
             }
-        }
-        @if ((PageType.ToString() == "AzureNamingTool.Pages.Index") && (connected))
-        {
-            <hr />
-            <div class="nav-item px-3">
-                <div class="nav-link">
-                    <label title="Latest News" style="font-weight:bold;">
-                        Latest News
-                    </label>
-                    <label class="switch" title="Latest News Switch" style="top:-5px; float:right;">
-                        <input type="checkbox" checked="@newsenabled" @oninput="NewsChanged">
-                        <span class="slider round"></span>
-                    </label>
-                    <div style="clear:both"></div>
-                    @if (newsenabled)
-                    {
-                        <div classclass="nav-link" style="padding-top:10px">
-                            <LatestNews></LatestNews>
-                        </div>
-                    }
+
+            @if ((PageType.ToString() == "AzureNamingTool.Pages.Index") && (connected))
+            {
+                <hr />
+                <div class="nav-item px-3">
+                    <div class="nav-link">
+                        <label title="Latest News" style="font-weight:bold;">
+                            Latest News
+                        </label>
+                        <label class="switch" title="Latest News Switch" style="top:-5px; float:right;">
+                            <input type="checkbox" checked="@newsenabled" @oninput="NewsChanged">
+                            <span class="slider round"></span>
+                        </label>
+                        <div style="clear:both"></div>
+                        @if (newsenabled)
+                        {
+                            <div classclass="nav-link" style="padding-top:10px">
+                                <LatestNews></LatestNews>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         }
     </nav>
 </div>

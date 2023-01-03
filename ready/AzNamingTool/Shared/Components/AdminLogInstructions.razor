@@ -1,0 +1,25 @@
+﻿@using AzureNamingTool.Models;
+<p>
+    The <strong>Admin Log</strong> utility allows the viewing of all the logged events within the Azure Naming Tool.
+</p>
+<div class="card">
+    <h5 class="card-header bg-default text-black">
+        Page Sections/Actions
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <p>
+            <strong>Export Admin Log</strong>
+        </p>
+        <p>This option allows you to export the <strong>Admin Log</strong> to a CSV file.</p>
+        <p>
+            <strong>Purge Admin Log</strong>
+        </p>
+        <p>
+            This option will delete all <strong>Admin Log</strong> data. This action cannot be undone!
+        </p>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+}
