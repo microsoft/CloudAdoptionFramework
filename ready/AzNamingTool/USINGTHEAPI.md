@@ -45,7 +45,7 @@ The following process details a sample API integration to return components and 
 
 
 ### Generating Names
-To generate a resource type name programmatically, the API requires a JSON payload of all the components being requested. This includes all current configured components and the desired resource type. 
+To generate a resource type name programmatically, the API requires a JSON payload of all the components being requested. This includes all configured components and the desired resource type. 
 
 The process is as follows:
 
