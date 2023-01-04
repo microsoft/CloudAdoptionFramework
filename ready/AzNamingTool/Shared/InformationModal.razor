@@ -27,28 +27,28 @@
                 {
                     case "generateinstructions":
                         <div class="mb-3">
-                            <GenerateInstructions theme="@theme" />
+                            <GenerateInstructions theme="@theme" admin="@admin" />
                         </div>
                         break;
                     case "generatednamesloginstructions":
                         <div class="mb-3">
-                            <GeneratedNamesLogInstructions theme="@theme" />
+                            <GeneratedNamesLogInstructions theme="@theme" admin="@admin" />
                         </div>
                         break;
                     case "toolconfigurationinstructions":
                         <div class="mb-3">
-                            <ToolConfigurationInstructions theme="@theme" />
+                            <ToolConfigurationInstructions theme="@theme" admin="@admin" />
                         </div>
                         break;
                     case "referenceinstructions":
                         <div class="mb-3">
-                            <ReferenceInstructions theme="@theme" />
+                            <ReferenceInstructions theme="@theme" admin="@admin" />
                         </div>
                         break;
                     case "adminloginstructions":
-                                <div class="mb-3">
-                                    <AdminLogInstructions theme="@theme" />
-                                </div>
+                        <div class="mb-3">
+                            <AdminLogInstructions theme="@theme" admin="@admin" />
+                        </div>
                         break;
                 }
             </div>
@@ -70,6 +70,7 @@
     [Parameter] public string message { get; set; } = null;
     [Parameter] public string headerstyle { get; set; }
     [Parameter] public object component { get; set; } = null;
+    [Parameter] public bool admin { get; set; } = false;
 
 
     async Task Confirm() => await ModalInstance.CloseAsync();

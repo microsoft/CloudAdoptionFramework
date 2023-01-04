@@ -97,12 +97,18 @@
                         Jump To
                     </div>
                     <div class="card bg-transparent">
-                        <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminpasswordcontainer"))' @onclick:preventDefault href="">Admin Password</a>
-                        </div>
-                        <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminconfigurationcontainer"))' @onclick:preventDefault href="">Admin Configuration</a>
-                        </div>
+                        @if (admin)
+                        {
+                            <div class="nav-item px-3">
+                                <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminpasswordcontainer"))' @onclick:preventDefault href="">Admin Password</a>
+                            </div>
+                        }
+                        @if (admin)
+                        {
+                            <div class="nav-item px-3">
+                                <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminconfigurationcontainer"))' @onclick:preventDefault href="">Admin Configuration</a>
+                            </div>
+                        }
                         <div class="nav-item px-3">
                             <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("toolconfigurationcontainer"))' @onclick:preventDefault href="">Tool Configuration</a>
                         </div>

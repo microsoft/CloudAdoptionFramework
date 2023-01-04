@@ -3,31 +3,38 @@
 @using AzureNamingTool.Models
 @using AzureNamingTool.Shared.Components
 @inject StateContainer state
+@inject ProtectedSessionStorage session
 
 <div class="card @theme.ThemeStyle">
     <div class="card-body">
         <h1>Instructions</h1>
         <div class="mb-3">This page provides instructions on how to configure and use the Azure Naming Tool.</div>
-        <div class="card mb-3">
-            <h5 class="card-header bg-secondary text-white" id="adminpasswordcontainer">
-                <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#adminpassword" role="button" aria-expanded="true" aria-controls="adminpassword">
-                    <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin password
-                </a>
-            </h5>
-            <div class="card card-body collapse show @theme.ThemeStyle" id="adminpassword">
-                <AdminPasswordInstructions theme="@theme" />
+        @if (admin)
+        {
+            <div class="card mb-3">
+                <h5 class="card-header bg-secondary text-white" id="adminpasswordcontainer">
+                    <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#adminpassword" role="button" aria-expanded="true" aria-controls="adminpassword">
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin password
+                    </a>
+                </h5>
+                <div class="card card-body collapse show @theme.ThemeStyle" id="adminpassword">
+                    <AdminPasswordInstructions theme="@theme" />
+                </div>
             </div>
-        </div>
-        <div class="card mb-3">
-            <h5 class="card-header bg-secondary text-white" id="adminconfigurationcontainer">
-                <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#adminconfiguration" role="button" aria-expanded="true" aria-controls="adminconfiguration">
-                    <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin configuration
-                </a>
-            </h5>
-            <div class="card card-body collapse show @theme.ThemeStyle" id="adminconfiguration">
-                <AdminConfigurationInstructions theme="@theme" />
+        }
+        @if (admin)
+        {
+            <div class="card mb-3">
+                <h5 class="card-header bg-secondary text-white" id="adminconfigurationcontainer">
+                    <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#adminconfiguration" role="button" aria-expanded="true" aria-controls="adminconfiguration">
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin configuration
+                    </a>
+                </h5>
+                <div class="card card-body collapse show @theme.ThemeStyle" id="adminconfiguration">
+                    <AdminConfigurationInstructions theme="@theme" />
+                </div>
             </div>
-        </div>
+        }
         <div class="card mb-3">
             <h5 class="card-header bg-secondary text-white" id="toolconfigurationcontainer">
                 <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#toolconfiguration" role="button" aria-expanded="true" aria-controls="toolconfiguration">
@@ -35,11 +42,10 @@
                 </a>
             </h5>
             <div class="card card-body collapse show @theme.ThemeStyle" id="toolconfiguration">
-                <ToolConfigurationInstructions theme="@theme" />
+                <ToolConfigurationInstructions theme="@theme" admin="@admin" />
             </div>
         </div>
-        <p></p>
-        <div class="card">
+        <div class="card mb-3">
             <h5 class="card-header bg-secondary text-white" id="generatecontainer">
                 <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#generate" role="button" aria-expanded="true" aria-controls="generate">
                     <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Generate
@@ -49,8 +55,7 @@
                 <GenerateInstructions theme="@theme" />
             </div>
         </div>
-        <p></p>
-        <div class="card">
+        <div class="card mb-3">
             <h5 class="card-header bg-secondary text-white" id="generatednameslogcontainer">
                 <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#generatednameslog" role="button" aria-expanded="true" aria-controls="generatednameslog">
                     <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Generated Names Log
@@ -60,8 +65,7 @@
                 <GeneratedNamesLogInstructions theme="@theme" />
             </div>
         </div>
-        <p></p>
-        <div class="card">
+        <div class="card mb-3">
             <h5 class="card-header bg-secondary text-white" id="referencecontainer">
                 <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#reference" role="button" aria-expanded="true" aria-controls="reference">
                     <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Reference
@@ -77,4 +81,20 @@
 @code {
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
+
+    private bool admin = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var result = await session.GetAsync<bool>("admin");
+            admin = (bool)result.Value;
+            StateHasChanged();
+        }
+    }
 }
