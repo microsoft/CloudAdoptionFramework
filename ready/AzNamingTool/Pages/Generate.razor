@@ -171,7 +171,7 @@
                             Resource Types
                         </h5>
                         <div class="card card-body @theme.ThemeStyle">
-                            <p>The currently selected resource types.</p>
+                            <p>The current selected resource types.</p>
                             <ul>
                                 @foreach (string id in multiselectedResourceTypes)
                                 {
@@ -659,7 +659,7 @@
 
         if (mode == "multi")
         {
-            toastService.ShowInfo("This option will require all currently configured components to be selected.", "INFORMATION");
+            toastService.ShowInfo("This option will require all current configured components to be selected.", "INFORMATION");
             // Show the multi select modal
             await OpenMultiSelectModal(true);
             resourcetypeVisible = "collapse";
