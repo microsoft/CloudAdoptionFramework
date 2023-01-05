@@ -410,11 +410,11 @@ namespace AzureNamingTool.Services
                                     //var items = await ConfigurationHelper.GetList<ResourceComponent>();
 
                                     // Check if the delimeter is already ignored
-                                    if (!ignoredelimeter)
+                                    if ((!ignoredelimeter) && (resourceDelimiter.Delimiter != ""))
                                     {
                                         // Check if delimeter is an invalid character
                                         if (resourceType.InvalidCharacters != "")
-                                        {
+                                        { 
                                             if (!resourceType.InvalidCharacters.Contains(resourceDelimiter.Delimiter))
                                             {
                                                 if (name != "")
