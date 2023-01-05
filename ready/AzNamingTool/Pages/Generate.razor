@@ -414,20 +414,12 @@
                                         @if (@generatedName != "")
                                         {
                                             <div>
-                                                @if (multiselectedResourceTypes.Count == 0)
-                                                {
-                                                    <strong>Generated Name: </strong>
-                                                    @((MarkupString)generatedName)
-                                                }
-                                                else
-                                                {
-                                                    <strong>Generated Name(s): </strong>
-                                                    @((MarkupString)generatedName)
+                                                <strong>Generated Name(s): </strong>
+                                                @((MarkupString)generatedName)
 
-                                                    <button class="btn btn-primary" title="Export Generated Names" @onclick="@(e => OnExportGeneratedNames())">
-                                                        Export Generated Names
-                                                    </button>
-                                                }
+                                                <button class="btn btn-primary" title="Export Generated Names" @onclick="@(e => OnExportGeneratedNames())">
+                                                    Export Generated Names
+                                                </button>
                                             </div>
                                         }
                                     }
@@ -532,6 +524,8 @@
 
     private async Task HandleValidSubmit()
     {
+        StringBuilder sbNames = new();
+        StringBuilder sbMessage = new();
         generatedName = "";
         message = "";
 
@@ -543,6 +537,16 @@
         resourceNameRequest.ResourceLocation = selectedResourceLocation;
         resourceNameRequest.ResourceOrg = selectedResourceOrg;
         resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
+
+        sbNames.Append("<table class=\"table text-light generatednames\">");
+        sbNames.Append("<thead>");
+        sbNames.Append("<tr>");
+        sbNames.Append("<th class\"w25\">Reource Type</th>");
+        sbNames.Append("<th class\"w25\">Generated Name</th>");
+        sbNames.Append("<th class\"w50\">Notes</th>");
+        sbNames.Append("</tr>");
+        sbNames.Append("</thead>");
+        sbNames.Append("<tbody>");
 
         // Check the genrate mode
         if (multiselectedResourceTypes.Count == 0)
@@ -558,27 +562,23 @@
             resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
 
             // Prepare the response
-            sbName.Append("<div>");
-            sbName.Append("<strong>");
+            sbNames.Append("<tr>");
             if (resourceType.Property != "")
             {
-                sbName.Append(@resourceType.Resource + " - " + @resourceType.Property + " (" + @resourceType.ShortName + "): ");
+                sbNames.Append("<td class=\"col-3\">" + @resourceType.Resource + " - " + @resourceType.Property + "</td>");
             }
             else
             {
-                sbName.Append(@resourceType.Resource + " (" + @resourceType.ShortName + "): ");
+                sbNames.Append("<td class=\"col-3\">" + @resourceType.Resource + "</td>");
             }
-            sbName.Append("</strong>");
-            sbName.Append(resourceNameRequestResponse.ResourceName);
+            sbNames.Append("<td class=\"col-3\">" + resourceNameRequestResponse.ResourceName + "</td>");
+            sbNames.Append("<td class=\"col-3\">");
             if (resourceNameRequestResponse.Message != "")
             {
-                sbName.Append(" - " + resourceNameRequestResponse.Message);
+                sbNames.Append(resourceNameRequestResponse.Message);
             }
-
-            sbName.Append("</div>");
-
-            generatedName = sbName.ToString();
-            message = resourceNameRequestResponse.Message;
+            sbNames.Append("</td>");
+            sbNames.Append("</tr>");
 
             // Set the result container
             if (resourceNameRequestResponse.Success)
@@ -597,19 +597,7 @@
         else
         {
             // Attempt to genrate name for each seelct types
-            StringBuilder sbNames = new();
-            StringBuilder sbMessage = new();
             resultClass = "bg-success";
-
-            sbNames.Append("<table class=\"table text-light generatednames\">");
-            sbNames.Append("<thead>");
-            sbNames.Append("<tr>");
-            sbNames.Append("<th class\"w25\">Reource Type</th>");
-            sbNames.Append("<th class\"w25\">Generated Name</th>");
-            sbNames.Append("<th class\"w50\">Notes</th>");
-            sbNames.Append("</tr>");
-            sbNames.Append("</thead>");
-            sbNames.Append("<tbody>");
             foreach (string id in multiselectedResourceTypes)
             {
                 resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(id));
@@ -644,13 +632,15 @@
                     resultHeader = "FAILURE";
                 }
             }
-            sbNames.Append("</tbody>");
-            sbNames.Append("</table>");
 
-            // Always show the response
-            generatedName = sbNames.ToString();
-            componentsVisible = "collapse";
         }
+
+        sbNames.Append("</tbody>");
+        sbNames.Append("</table>");
+
+        // Always show the response
+        generatedName = sbNames.ToString();
+        componentsVisible = "collapse";
     }
 
     private async void OnGenerateModeChange(string mode)
@@ -1109,7 +1099,7 @@
             multiselectedResourceTypes.Clear();
         }
     }
-    
+
     private async void ShowInstructionsModal()
     {
         try
