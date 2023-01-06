@@ -14,40 +14,47 @@
             <div class="card mb-3">
                 <h5 class="card-header bg-secondary text-white" id="adminpasswordcontainer">
                     <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#adminpassword" role="button" aria-expanded="true" aria-controls="adminpassword">
-                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin password
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin Password
                     </a>
                 </h5>
                 <div class="card card-body collapse show @theme.ThemeStyle" id="adminpassword">
-                    <AdminPasswordInstructions theme="@theme" />
+                    <AdminPasswordInstructions theme="@theme" admin="@admin" />
                 </div>
             </div>
-        }
-        @if (admin)
-        {
             <div class="card mb-3">
                 <h5 class="card-header bg-secondary text-white" id="adminconfigurationcontainer">
-                    <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#adminconfiguration" role="button" aria-expanded="true" aria-controls="adminconfiguration">
-                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin configuration
+                    <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#adminconfiguration" role="button" aria-expanded="true" aria-controls="adminconfiguration">
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin Configuration
                     </a>
                 </h5>
                 <div class="card card-body collapse show @theme.ThemeStyle" id="adminconfiguration">
-                    <AdminConfigurationInstructions theme="@theme" />
+                    <AdminConfigurationInstructions theme="@theme" admin="@admin" />
                 </div>
             </div>
+                <div class="card mb-3">
+                    <h5 class="card-header bg-secondary text-white" id="adminlogcontainer">
+                    <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#adminlog" role="button" aria-expanded="true" aria-controls="adminlog">
+                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin Log
+                        </a>
+                    </h5>
+                <div class="card card-body collapse show @theme.ThemeStyle" id="adminlog">
+                        <AdminLogInstructions theme="@theme" admin="@admin" />
+                    </div>
+                </div>
         }
         <div class="card mb-3">
-            <h5 class="card-header bg-secondary text-white" id="toolconfigurationcontainer">
-                <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#toolconfiguration" role="button" aria-expanded="true" aria-controls="toolconfiguration">
-                    <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Tool Configuration
+            <h5 class="card-header bg-secondary text-white" id="configurationcontainer">
+                <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#configuration" role="button" aria-expanded="true" aria-controls="configuration">
+                    <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Configuration
                 </a>
             </h5>
-            <div class="card card-body collapse show @theme.ThemeStyle" id="toolconfiguration">
-                <ToolConfigurationInstructions theme="@theme" admin="@admin" />
+            <div class="card card-body collapse show @theme.ThemeStyle" id="configuration">
+                <ConfigurationInstructions theme="@theme" admin="@admin" />
             </div>
         </div>
         <div class="card mb-3">
             <h5 class="card-header bg-secondary text-white" id="generatecontainer">
-                <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#generate" role="button" aria-expanded="true" aria-controls="generate">
+                <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#generate" role="button" aria-expanded="true" aria-controls="generate">
                     <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Generate
                 </a>
             </h5>
@@ -57,7 +64,7 @@
         </div>
         <div class="card mb-3">
             <h5 class="card-header bg-secondary text-white" id="generatednameslogcontainer">
-                <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#generatednameslog" role="button" aria-expanded="true" aria-controls="generatednameslog">
+                <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#generatednameslog" role="button" aria-expanded="true" aria-controls="generatednameslog">
                     <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Generated Names Log
                 </a>
             </h5>
@@ -67,7 +74,7 @@
         </div>
         <div class="card mb-3">
             <h5 class="card-header bg-secondary text-white" id="referencecontainer">
-                <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#reference" role="button" aria-expanded="true" aria-controls="reference">
+                <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#reference" role="button" aria-expanded="true" aria-controls="reference">
                     <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Reference
                 </a>
             </h5>

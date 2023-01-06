@@ -102,15 +102,15 @@
                             <div class="nav-item px-3">
                                 <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminpasswordcontainer"))' @onclick:preventDefault href="">Admin Password</a>
                             </div>
-                        }
-                        @if (admin)
-                        {
                             <div class="nav-item px-3">
                                 <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminconfigurationcontainer"))' @onclick:preventDefault href="">Admin Configuration</a>
                             </div>
+                            <div class="nav-item px-3">
+                                <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminlogcontainer"))' @onclick:preventDefault href="">Admin Log</a>
+                            </div>
                         }
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("toolconfigurationcontainer"))' @onclick:preventDefault href="">Tool Configuration</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("configurationcontainer"))' @onclick:preventDefault href="">Configuration</a>
                         </div>
                         <div class="nav-item px-3">
                             <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("generatecontainer"))' @onclick:preventDefault href="">Generate</a>

@@ -2,9 +2,18 @@
 <p>
     The <strong>Configuration</strong> page is used to view/set the configuration for the tool and the resource naming components. This page is separated into multiple sections. Each section displays the configuration for the individual components.
 </p>
-<p>
-    <img style="width:600px;" class="img-fluid" src="Screenshots/ConfigurationPage.png" alt="Configuration" />
-</p>
+@if (admin)
+{
+    <p>
+        <img style="width:600px;" class="img-fluid" src="Screenshots/ConfigurationPageAdmin.png" alt="Configuration" />
+    </p>
+}
+else
+{
+    <p>
+        <img style="width:600px;" class="img-fluid" src="Screenshots/ConfigurationPage.png" alt="Configuration" />
+    </p>
+}
 @if (admin)
 {
         <div class="card mb-3">
@@ -21,13 +30,13 @@
                 </strong>
             </p>
             <p>
-                This section allows the configuration of which components will be used for resource name generation. Components can be enabled/disabled, as well as sorted to the desired configuration.
+                This section allows the configuration of which components will be used for resource name generation. Components can be enabled, disabled, ordered, and marked as Globally Optional.
             </p>
             <p>
                 <strong>Delimiters</strong>
             </p>
             <p>
-                The Azure Naming Tool allows for a specified delimiter to be used between components when a name is generated. This section allows the selection of the delimiter. In the event a resource type does not allow the selected delimiter, it will be removed.
+                The Azure Naming Tool allows for a delimiter to be used between components when a name is generated. This section allows the selection of the delimiter. In the event a resource type does not allow the selected delimiter, it will be removed.
             </p>
         </div>
     </div>
@@ -38,24 +47,24 @@
         <div class="card card-body @theme.ThemeStyle">
             <p>
                 This section provides the ability to configure the individual components used in name generation. Each component provides the ability to add/edit/delete items, as well as set the desired sort order.
-                Note: The Resource Type and Location components allow limited configuration for consistency.
+                Note: The Resource Type and Location components allow limited configuration to ensure compatibility with Azure.
             </p>
             <p>
                 <strong>Export</strong>
             </p>
             <p>
-                Component configuration is stored as a JSON file within the application. Each component configuration file can be exported and stored for backup purposes. It is recommended to export all configuration files when updating the Azure Naming Tool codebase.
+                Component configuration is stored as a JSON file within the application. Each component configuration file can be exported and stored for backup purposes. It is recommended to export all configuration files when updating the Azure Naming Tool version.
             </p>
             <p>
                 <strong>Refresh</strong>
             </p>
             <p>
-                For Resource Types and Locations, the list of components can be refreshed to the latest published version in the Azure Naming Tool Github repo. These files are frequently updated with new rsource types, locations, and naming guidelines.
+                For Resource Types and Locations, the list of components can be refreshed to the latest published version in the Azure Naming Tool Github repo. These files are frequently updated with new resource types, locations, and naming guidelines.
             </p>
             <p>
                 <strong>Reset</strong>
             </p>
-            <p>When the tool is installed, a default configuration is used for each component. The Reset feature allows the default configuration to be restored for the component.</p>
+            <p>When the tool is installed, a default configuration is used for each component. The <strong>Reset</strong> feature allows the default configuration to be restored for the component.</p>
             <p>
                 <strong>Import</strong>
             </p>
@@ -74,7 +83,7 @@
                 <strong>Global Configuration</strong>
             </p>
             <p>
-                This section allows the user to import/export a complete configuration for the Azure Naming Tool Application. All component configuration files are combined into a single JSON file. This is especially helpful when backing up/restoring the application.
+                This section allows the user to import/export a complete configuration for the Azure Naming Tool Application. All component configuration files are combined into a single JSON file. This file is used when backing up/restoring the tool configuration.
             </p>
             @*<p>
         <strong>Policy</strong>

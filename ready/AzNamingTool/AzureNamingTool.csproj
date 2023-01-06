@@ -44,7 +44,7 @@
   <ItemGroup>
     <None Include="wwwroot\Screenshots\AdminPasswordPrompt.png" />
     <None Include="wwwroot\Screenshots\Containers1.png" />
-    <None Include="wwwroot\Screenshots\ConfigurationPage.png" />
+    <None Include="wwwroot\Screenshots\ConfigurationPageAdmin.png" />
     <None Include="wwwroot\Screenshots\Containers2.png" />
     <None Include="wwwroot\Screenshots\FileShare.png" />
     <None Include="wwwroot\Screenshots\GeneratePage.png" />
