@@ -97,4 +97,4 @@ The Reference Page provides examples for each type of Azure resource. The exampl
 
 The Generate Page provides a dropdown menu to select an Azure resource. Once a resource is selected, naming component options are provided. Read-only components, like the value for a resource type or organization, cannot be changed. Optional components, if left blank, will be null and not shown in the output. Required components do not allow a null value, and the first value in the array is set as the default.
 
-![Generate Page](./wwwroot/Screenshots/GeneratePage.png)
+![Generate Page](./wwwroot/Screenshots/GeneratePage1.png)

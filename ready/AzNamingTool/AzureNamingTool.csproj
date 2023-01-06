@@ -47,7 +47,6 @@
     <None Include="wwwroot\Screenshots\ConfigurationPageAdmin.png" />
     <None Include="wwwroot\Screenshots\Containers2.png" />
     <None Include="wwwroot\Screenshots\FileShare.png" />
-    <None Include="wwwroot\Screenshots\GeneratePage.png" />
     <None Include="wwwroot\Screenshots\HomePage.png" />
     <None Include="wwwroot\Screenshots\MountStorage.png" />
     <None Include="wwwroot\Screenshots\ReferencePage.png" />
