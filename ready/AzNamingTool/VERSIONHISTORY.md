@@ -21,7 +21,7 @@
 
 ### Bug fixes
 - Formatting/styling updates to Configuration & Generate pages
-- Disabled Latest News feeed by default
+- Disabled Latest News feed by default
 - Updated Admin Modal section header style for dark mode
 - Refactored helper classes 
 
