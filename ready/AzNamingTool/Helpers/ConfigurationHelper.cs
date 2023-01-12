@@ -180,6 +180,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception)
             {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
             return result;
         }
