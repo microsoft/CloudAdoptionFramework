@@ -48,7 +48,7 @@
                 }
                 @if ((type == "ResourceType") && (resourceComponents != null))
                 {
-                    @if (bool.Parse(GeneralHelper.GetAppSetting("DevMode")))
+                    @if (bool.Parse(ConfigurationHelper.GetAppSetting("DevMode")))
                     {
                         <div class="card @theme.ThemeStyle mb-3">
                             <div class="card-header bg-default text-black fw-bold">
@@ -62,7 +62,7 @@
                     <div id="optional" class="card mt-3">
                         <div class="card-header bg-default text-black fw-bold">
                             <a id="OptionalComponents" class="link-dark text-decoration-none" data-toggle="collapse" href="#optionalcomponents" role="button" aria-expanded="false" aria-controls="optionalcomponents">
-                                Optional Components
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Optional Components
                             </a>
                         </div>
                         <div class="collapse card card-body @theme.ThemeStyle" id="optionalcomponents">
@@ -94,7 +94,7 @@
                     <div id="excluded" class="card mt-3">
                         <div class="card-header bg-default text-black fw-bold">
                             <a id="ExcludedComponents" class="link-dark text-decoration-none" data-toggle="collapse" href="#excludedcomponents" role="button" aria-expanded="false" aria-controls="excludedcomponents">
-                                Excluded Components
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Excluded Components
                             </a>
                         </div>
                         <div class="collapse card card-body @theme.ThemeStyle" id="excludedcomponents">
@@ -301,7 +301,7 @@
                                 resourceType.ShortName = itemShortName;
                                 resourceType.Optional = "";
                                 resourceType.Exclude = "";
-                                if (bool.Parse(GeneralHelper.GetAppSetting("DevMode")))
+                                if (bool.Parse(ConfigurationHelper.GetAppSetting("DevMode")))
                                 {
                                     resourceType.Regx = itemRegEx;
                                 }

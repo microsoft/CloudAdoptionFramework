@@ -17,7 +17,7 @@ namespace AzureNamingTool.Helpers
 
             return isValidated;
         }
-        
+
         public static bool ValidateShortName(string value, string type)
         {
             bool valid = false;
@@ -228,5 +228,18 @@ namespace AzureNamingTool.Helpers
             }
         }
 
+        public static bool CheckNumeric(string value)
+        {
+            Regex regx = new("^[0-9]+$");
+            Match match = regx.Match(value);
+            return match.Success;
+        }
+
+        public static bool CheckAlphanumeric(string value)
+        {
+            Regex regx = new("^[a-zA-Z0-9]+$");
+            Match match = regx.Match(value);
+            return match.Success;
+        }
     }
 }

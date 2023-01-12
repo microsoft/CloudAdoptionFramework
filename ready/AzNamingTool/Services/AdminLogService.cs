@@ -18,7 +18,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<AdminLogMessage>();
+                var items = await ConfigurationHelper.GetList<AdminLogMessage>();
                 serviceResponse.ResponseObject = items.OrderByDescending(x => x.CreatedOn).ToList();
                 serviceResponse.Success = true;
             }
@@ -41,7 +41,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Log the created name
-                var items = await GeneralHelper.GetList<AdminLogMessage>();       
+                var items = await ConfigurationHelper.GetList<AdminLogMessage>();       
                 if (items != null)
                 {
                     if (items.Count > 0)
@@ -52,7 +52,7 @@ namespace AzureNamingTool.Services
 
                 items.Add(adminlogMessage);
                 // Write items to file
-                await GeneralHelper.WriteList<AdminLogMessage>(items);
+                await ConfigurationHelper.WriteList<AdminLogMessage>(items);
                 serviceReponse.Success = true;
             }
             catch (Exception)
@@ -73,7 +73,7 @@ namespace AzureNamingTool.Services
             try
             {
                 List<AdminLogMessage> lstAdminLogMessages = new List<AdminLogMessage>();
-                await GeneralHelper.WriteList<AdminLogMessage>(lstAdminLogMessages);
+                await ConfigurationHelper.WriteList<AdminLogMessage>(lstAdminLogMessages);
                 serviceReponse.Success = true;
             }
             catch (Exception ex)
@@ -101,7 +101,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<AdminLogMessage>(newitems);
+                await ConfigurationHelper.WriteList<AdminLogMessage>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

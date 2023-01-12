@@ -51,9 +51,17 @@
         return document.getElementById(id).checked;
     };
 
-    function htmlToCSV(filename) {
+    function htmlToCSV(filename, tableclass = "") {
         var data = [];
-        var rows = document.querySelectorAll("table tr");
+        var rows;
+        if(tableclass != "")
+        {
+            rows = document.querySelectorAll("table[class*=" + tableclass + "] tr ");
+        }
+        else
+        {
+            rows = document.querySelectorAll("table tr");
+        }
 
         for (var i = 0; i < rows.length; i++) {
             var row = [], cols = rows[i].querySelectorAll("td, th");
@@ -99,6 +107,10 @@
         document.body.appendChild(tag);
     }
 
+     function ShowAlert(message) {
+         alert(message);
+    }
+
     function checkboxConfirmChange(checkbox, message) {
         if (checkbox.checked) {
             var confirmBox = confirm(message);
@@ -110,6 +122,10 @@
                 checkbox.checked = false;
             };
         }
+    }
+
+    function expandMultiSelectParent(sender) {
+        console.log("test!");
     }
 
 </script>

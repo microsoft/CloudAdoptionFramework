@@ -5,6 +5,7 @@
 @inject IJSRuntime JsRuntime
 @inject ILogger<NavMenu> Logger
 @inject ProtectedLocalStorage storage
+@inject NavigationManager NavigationManager
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -50,18 +51,14 @@
                 <span class="oi oi-check" aria-hidden="true"></span> Generate
             </NavLink>
         </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="generatednameslog">
+                <span class="oi oi-list" aria-hidden="true"></span> Generated Names Log
+            </NavLink>
+        </div>
 
         @if (PageType != null)
         {
-            @if ((PageType.ToString() == "AzureNamingTool.Pages.Generate") || (PageType.ToString() == "AzureNamingTool.Pages.GeneratedNamesLog"))
-            {
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="generatednameslog">
-                        <span class="oi oi-list" aria-hidden="true"></span> Generated Names Log
-                    </NavLink>
-                </div>
-            }
-
             @if (PageType.ToString() == "AzureNamingTool.Pages.Configuration")
             {
                 <div class="card bg-transparent">
@@ -97,44 +94,56 @@
                         Jump To
                     </div>
                     <div class="card bg-transparent">
+                        @if (admin)
+                        {
+                            <div class="nav-item px-3">
+                                <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminpasswordcontainer"))' @onclick:preventDefault href="">Admin Password</a>
+                            </div>
+                            <div class="nav-item px-3">
+                                <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminconfigurationcontainer"))' @onclick:preventDefault href="">Admin Configuration</a>
+                            </div>
+                            <div class="nav-item px-3">
+                                <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("adminlogcontainer"))' @onclick:preventDefault href="">Admin Log</a>
+                            </div>
+                        }
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step1"))' @onclick:preventDefault href="">Step 1 - Admin Password</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("configurationcontainer"))' @onclick:preventDefault href="">Configuration</a>
                         </div>
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step2"))' @onclick:preventDefault href="">Step 2 - Admin Config</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("generatecontainer"))' @onclick:preventDefault href="">Generate</a>
                         </div>
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step3"))' @onclick:preventDefault href="">Step 3 - Tool Config</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("generatednameslogcontainer"))' @onclick:preventDefault href="">Generated Names Log</a>
                         </div>
                         <div class="nav-item px-3">
-                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("step4"))' @onclick:preventDefault href="">Step 4 - Generate</a>
+                            <a class="text-decoration-none nav-link" @onclick='(() => OnConfigNavClick("referencecontainer"))' @onclick:preventDefault href="">Reference</a>
                         </div>
                     </div>
                 </div>
             }
-        }
-        @if (PageType.ToString() == "AzureNamingTool.Pages.Index")
-        {
-            <hr />
 
-            <div class="nav-item px-3">
-                <div class="nav-link">
-                    <label title="Latest News" style="font-weight:bold;">
-                    Latest News
-                    </label>
-                    <label class="switch" title="Latest News Switch" style="top:-5px; float:right;">
-                        <input type="checkbox" checked="@newsenabled" @oninput="NewsChanged">
-                        <span class="slider round"></span>
-                    </label>
-                    <div style="clear:both"></div>
-                    @if (newsenabled)
-                    {
-                        <div classclass="nav-link" style="padding-top:10px">
-                            <LatestNews></LatestNews>
-                        </div>
-                    }
+            @if ((PageType.ToString() == "AzureNamingTool.Pages.Index") && (connected))
+            {
+                <hr />
+                <div class="nav-item px-3">
+                    <div class="nav-link">
+                        <label title="Latest News" style="font-weight:bold;">
+                            Latest News
+                        </label>
+                        <label class="switch" title="Latest News Switch" style="top:-5px; float:right;">
+                            <input type="checkbox" checked="@newsenabled" @oninput="NewsChanged">
+                            <span class="slider round"></span>
+                        </label>
+                        <div style="clear:both"></div>
+                        @if (newsenabled)
+                        {
+                            <div classclass="nav-link" style="padding-top:10px">
+                                <LatestNews></LatestNews>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         }
     </nav>
 </div>
@@ -146,7 +155,8 @@
     private ServicesData servicesData = new();
     private bool admin;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-    private bool newsenabled = true;
+    private bool newsenabled = false;
+    private bool connected = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -158,19 +168,26 @@
         admin = (bool)result.Value;
         if (firstRender)
         {
-            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
-            try
+            if (ConfigurationHelper.VerifyConnectivity())
             {
-                result = await storage.GetAsync<bool>("newsenabled");
-                newsenabled = result.Success ? result.Value : true;
+                servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+                try
+                {
+                    result = await storage.GetAsync<bool>("newsenabled");
+                    newsenabled = result.Success ? result.Value : true;
+                }
+                catch
+                {
+                    newsenabled = true;
+                }
+                state.NewsEnabled = newsenabled;
             }
-            catch
+            else
             {
-                newsenabled = true;
+                connected = false;
             }
-            state.NewsEnabled = newsenabled;
             StateHasChanged();
-            
+
         }
         else
         {

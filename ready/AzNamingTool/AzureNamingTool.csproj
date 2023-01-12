@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-	<Version>2.3.2</Version>
+	<Version>2.4.0</Version>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -44,10 +44,9 @@
   <ItemGroup>
     <None Include="wwwroot\Screenshots\AdminPasswordPrompt.png" />
     <None Include="wwwroot\Screenshots\Containers1.png" />
-    <None Include="wwwroot\Screenshots\ConfigurationPage.png" />
+    <None Include="wwwroot\Screenshots\ConfigurationPageAdmin.png" />
     <None Include="wwwroot\Screenshots\Containers2.png" />
     <None Include="wwwroot\Screenshots\FileShare.png" />
-    <None Include="wwwroot\Screenshots\GeneratePage.png" />
     <None Include="wwwroot\Screenshots\HomePage.png" />
     <None Include="wwwroot\Screenshots\MountStorage.png" />
     <None Include="wwwroot\Screenshots\ReferencePage.png" />
@@ -61,6 +60,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.4.0" />
     <PackageReference Include="System.Runtime.Caching" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\images\runnoft.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -21,7 +21,7 @@
     <main>
         <div class="top-row px-4 auth @theme.ThemeStyle">
 
-            @if ((admin) && (bool.Parse(GeneralHelper.GetAppSetting("DevMode"))))
+            @if ((admin) && (bool.Parse(ConfigurationHelper.GetAppSetting("DevMode"))))
             {
                 <div class="warning-message">DEV MODE Enabled! This can cause unexpected behavior! Use at your own risk!</div>
             }
@@ -44,7 +44,7 @@
     </main>
 </div>
 
-<button onclick="topFunction()" id="btnScrollToTop" class="btn btn-success btn-sm" title="Go to top">Top</button>
+<button onclick="topFunction()" id="btnScrollToTop" class="btn btn-success btn-sm" title="Go to top"><span class="oi oi-arrow-circle-top" style="vertical-align:text-top;"></span> Top</button>
 @if (PasswordModalOpen)
 {
     <PasswordModal OnClose="@OnPasswordModalClose">
@@ -69,8 +69,8 @@
 
     protected override async void OnInitialized()
     {
-        GeneralHelper.VerifyConfiguration();
-        GeneralHelper.VerifySecurity(state);
+        ConfigurationHelper.VerifyConfiguration();
+        ConfigurationHelper.VerifySecurity(state);
 
         // Check that the admin password is set
         if (!state.Password)
@@ -154,14 +154,14 @@
         if (confrimAPIKeyGenerate)
         {
 
-            var config = GeneralHelper.GetConfigurationData();
+            var config = ConfigurationHelper.GetConfigurationData();
             config.SALTKey = "";
             config.AdminPassword = "";
             config.APIKey = "";
 
-            GeneralHelper.UpdateSettings(config);
-            GeneralHelper.ResetState(state);
-            GeneralHelper.VerifySecurity(state);
+            ConfigurationHelper.UpdateSettings(config);
+            ConfigurationHelper.ResetState(state);
+            ConfigurationHelper.VerifySecurity(state);
 
             toastService.ShowSuccess("The site has been reset.", "MAGIC RESET ENABLED!");
 

@@ -13,13 +13,18 @@
 
 <div class="card @theme.ThemeStyle">
     <div class="card-body">
-        <h1>Reference</h1>
-        <div class="mb-3">This page provides an example name for each resource type using the defined configuration.</div>
-        <div class="mb-3">
-            <button class="btn btn-primary" title="Instructions" @onclick="@(e => OnInstructionsClick())">
-                View Instructions
+        <div style="float:left;">
+            <h1>
+                Reference
+            </h1>
+        </div>
+        <div style="float:right;">
+            <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                <span class="oi oi-document" aria-hidden="true"></span> Documentation
             </button>
         </div>
+        <div style="clear:both;"></div>
+        <div class="mb-3">This page provides an example name for each resource type using the defined configuration.</div>
 
         @if (servicesData.ResourceTypes == null)
         {
@@ -355,6 +360,8 @@
 @code {
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
     private ServicesData servicesData = new();
     private ResourceDelimiter? resourceDelimiter;
     public string filterData { get; set; }
@@ -482,8 +489,7 @@
         selectedResourceTypeCategory = e.Value.ToString();
 
     }
-
-
+    
     private async void OnTypeChanged(ChangeEventArgs e)
     {
         await JsRuntime.InvokeVoidAsync("scrollIntoView", e.Value.ToString());
@@ -504,5 +510,30 @@
                 visible = false;
         }
         return visible;
+    }
+    
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Reference");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "referenceinstructions");
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+        }
     }
 }

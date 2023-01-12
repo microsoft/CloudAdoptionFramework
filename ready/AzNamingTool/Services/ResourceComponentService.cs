@@ -12,7 +12,7 @@ namespace AzureNamingTool.Services
         {
             try
             {
-                var items = await GeneralHelper.GetList<ResourceComponent>();
+                var items = await ConfigurationHelper.GetList<ResourceComponent>();
                 if (!admin)
                 {
                     serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(y => y.SortOrder).ToList();
@@ -37,7 +37,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var data = await GeneralHelper.GetList<ResourceComponent>();
+                var data = await ConfigurationHelper.GetList<ResourceComponent>();
                 var item = data.Find(x => x.Id == id);
                 serviceResponse.ResponseObject = item;
                 serviceResponse.Success = true;
@@ -56,7 +56,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceComponent>();
+                var items = await ConfigurationHelper.GetList<ResourceComponent>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -118,7 +118,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(items);
+                await ConfigurationHelper.WriteList<ResourceComponent>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -135,14 +135,14 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceComponent>();
+                var items = await ConfigurationHelper.GetList<ResourceComponent>();
                 // Get the specified item
                 var item = items.Find(x => x.Id == id);
 
                 // Delete any custom components for this resource component
-                var components = await GeneralHelper.GetList<CustomComponent>();
+                var components = await ConfigurationHelper.GetList<CustomComponent>();
                 components.RemoveAll(x => x.ParentComponent == GeneralHelper.NormalizeName(item.Name, true));
-                await GeneralHelper.WriteList<CustomComponent>(components);
+                await ConfigurationHelper.WriteList<CustomComponent>(components);
 
                 // Remove the item from the collection
                 items.Remove(item);
@@ -156,7 +156,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(items);
+                await ConfigurationHelper.WriteList<ResourceComponent>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -213,7 +213,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(newitems);
+                await ConfigurationHelper.WriteList<ResourceComponent>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

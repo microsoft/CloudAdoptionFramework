@@ -1,0 +1,36 @@
+﻿@using AzureNamingTool.Models;
+<p>
+    The <strong>Admin</strong> utility allows the user to login/logout of the site, update passwords/keys, and clear the site cache. Click the <strong>Admin</strong> button in the top navigation to login/logout.
+</p>
+<p>
+    <img style="width:600px;" class="img-fluid" src="Screenshots/AdminConfiguration.png" alt="Admin configuration" />
+</p>
+<div class="card">
+    <h5 class="card-header bg-default text-black">
+        Page Sections/Actions
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <p>
+            <strong>New Password</strong>
+        </p>
+        <p>This section allows you to update the <strong>Admin password</strong> for the tool.</p>
+        <p>
+            <strong>API Key</strong>
+        </p>
+        <p>
+            The Azure Naming Tool provides a RESTful API. Each API function requires an <strong>API Key</strong> to be provided. This section provides the ability to view/update the API Key for the tool.
+        </p>
+        <p>
+            <strong>Clear Cache</strong>
+        </p>
+        <p>
+            The Azure Naming Tool leverages caching to improve perofrmance. This section provides the ability to clear all cached data for the tool.
+        </p>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+}

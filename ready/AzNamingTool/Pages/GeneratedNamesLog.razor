@@ -20,7 +20,17 @@
 <PageTitle>Azure Naming Tool - Generated Names Log</PageTitle>
 <div class="card  @theme.ThemeStyle">
     <div class="card-body">
-        <h1>Generated Names Log</h1>
+        <div style="float:left;">
+            <h1>
+                Generated Names Log
+            </h1>
+        </div>
+        <div style="float:right;">
+            <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                <span class="oi oi-document" aria-hidden="true"></span> Documentation
+            </button>
+        </div>
+        <div style="clear:both;"></div>
         <div class="mb-3">This page displays a log of generated resouce type names.</div>
 
         @if (!dataLoaded)
@@ -34,18 +44,17 @@
             <div class="mb-3">
                 @if (lstNameRequests.Count > 0)
                 {
-                    @if (admin)
-                    {
-                        <div class="mb-3">
-                            <button class="btn btn-primary" title="Export Generated Names Log" @onclick="@(e => OnExportLogClick())">
-                                Export Generated Names Log
-                            </button>
-                            <button class="btn btn-danger" title="Purge Generated Names Log" @onclick="@(e => OnPurgeLogClick())">
+                    <div class="mb-3">
+                        <button class="btn btn-primary" title="Export Generated Names Log" @onclick="@(e => OnExportLogClick())">
+                            Export Generated Names Log
+                        </button>
+                        @if (admin)
+                        {
+                            <button class="btn btn-danger" style="margin-left:5px;" title="Purge Generated Names Log" @onclick="@(e => OnPurgeLogClick())">
                                 Purge Generated Names Log
                             </button>
-                        </div>
-                    }
-
+                        }
+                    </div>
                     <div class="card">
                         <div class="card-header bg-default text-black">
                             <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
@@ -89,6 +98,10 @@
                         <table class="table @theme.ThemeStyle">
                             <thead>
                                 <tr>
+                                    @if (admin)
+                                    {
+                                        <th scope="col"></th>
+                                    }
                                     <th scope="col">Created On</th>
                                     <th scope="col">Generated Name</th>
                                     <th scope="col">Resource Type</th>
@@ -101,6 +114,14 @@
                                     if (!IsVisible(name))
                                         continue;
                                     <tr>
+                                        @if (admin)
+                                        {
+                                            <td class="align-top">
+                                                <button type="button" class="btn btn-danger" @onclick="@(e => DeleteGeneratedName(name.Id))" title="Delete">
+                                                    <span class="oi oi-x" aria-hidden="true"></span>
+                                                </button>
+                                            </td>
+                                        }
                                         <td class="align-top">
                                             @name.CreatedOn.ToString()
                                         </td>
@@ -142,6 +163,8 @@
 
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
     private bool admin;
     private bool dataLoaded = false;
     List<GeneratedName> lstNameRequests = new();
@@ -160,11 +183,18 @@
         {
             var result = await session.GetAsync<bool>("admin");
             admin = (bool)result.Value;
-            serviceResponse = await GeneratedNamesService.GetItems();
-            lstNameRequests = (List<GeneratedName>)serviceResponse.ResponseObject;
-            dataLoaded = true;
+            LoadData();
             StateHasChanged();
         }
+    }
+
+    private async Task LoadData()
+    {
+        ServiceResponse serviceResponse = new();
+        serviceResponse = await GeneratedNamesService.GetItems();
+        lstNameRequests = (List<GeneratedName>)serviceResponse.ResponseObject;
+        dataLoaded = true;
+        StateHasChanged();
     }
 
 
@@ -179,6 +209,48 @@
         StateHasChanged();
     }
 
+    private async Task DeleteGeneratedName(long id)
+    {
+        ServiceResponse serviceResponse = new();
+        ResponseMessage message = new();
+        bool confirm = false;
+        confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirm)
+        {
+            serviceResponse = await GeneratedNamesService.GetItem(Convert.ToInt32(id));
+            if (serviceResponse.Success)
+            {
+                GeneratedName generatedname = (GeneratedName)serviceResponse.ResponseObject;
+                serviceResponse = await GeneratedNamesService.DeleteItem(Convert.ToInt32(generatedname.Id));
+                if (serviceResponse.Success)
+                {
+                    message.Type = MessageTypesEnum.SUCCESS;
+                    message.Message = "Generated name deleted!";
+                    toastService.ShowSuccess(message.Message, "SUCCESS");
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedname.ResourceName + ") deleted." });
+                    CacheHelper.InvalidateCacheObject("GeneratedName");
+                    LoadData();
+                    state.SetNavReload(true);
+                }
+                else
+                {
+                    message.Type = MessageTypesEnum.ERROR;
+                    message.Message = "Generated name deletion failed!";
+                    message.MessageDetails = serviceResponse.ResponseMessage;
+                    toastService.ShowError(message.Message, "ERROR");
+                }
+            }
+            else
+            {
+                message.Type = MessageTypesEnum.ERROR;
+                message.Message = "Generated name deletion failed!";
+                message.MessageDetails = serviceResponse.ResponseMessage;
+                toastService.ShowError(message.Message, "ERROR");
+            }
+
+        }
+    }
+
     private async Task OnPurgeLogClick()
     {
         ServiceResponse serviceResponse = new();
@@ -191,8 +263,7 @@
             toastService.ShowSuccess("Generated Log purged!", "SUCCESS");
             AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Names log purged." });
             CacheHelper.InvalidateCacheObject("GeneratedName");
-            serviceResponse = await GeneratedNamesService.GetItems();
-            lstNameRequests = (List<GeneratedName>)serviceResponse.ResponseObject;
+            await LoadData();
             StateHasChanged();
         }
     }
@@ -230,5 +301,32 @@
         startdate = DateTime.Today.AddDays(-30);
         enddate = DateTime.Today;
         filterData = "";
+    }
+
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Generated Names Log");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "generatednamesloginstructions");
+            parameters.Add(nameof(InformationModal.admin), admin);
+
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+        }
     }
 }

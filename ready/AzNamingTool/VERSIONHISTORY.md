@@ -4,7 +4,30 @@
 
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
-## Version 2.3.2 (current)
+## Version 2.4.0 (current)
+### Features
+- Added ability to set component as globally optional
+- Add Actions Legend to Configuration page
+- Added Admin Log / Generated Names Log functions to Admin controller
+- Updated Edit modal styling
+- Added functionality to generate multiple resource types names on Generate page
+- Updated formatting/styling on Generate page
+- Updated validation on Generate page
+- Updated formatting/styling on Configuration page
+- Added ability for admin to delete generated names from log
+- Added Instructions link to site pages
+- Updated Instructions with latest screenshots/details
+- Updated 2.4.0 version notes
+
+### Bug fixes
+- Formatting/styling updates to Configuration & Generate pages
+- Disabled Latest News feed by default
+- Updated Admin Modal section header style for dark mode
+- Refactored helper classes 
+
+***
+
+## Version 2.3.2
 
 ### Bug fixes
 - Updated Reference/Generate pages to reload configuration data, if empty

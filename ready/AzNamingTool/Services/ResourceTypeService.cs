@@ -11,13 +11,13 @@ namespace AzureNamingTool.Services
     public class ResourceTypeService
     {
         private static ServiceResponse serviceResponse = new();
-        
+
         public static async Task<ServiceResponse> GetItems(bool admin = true)
         {
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceType>();
+                var items = await ConfigurationHelper.GetList<ResourceType>();
                 if (!admin)
                 {
                     serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(x => x.Resource).ToList();
@@ -42,7 +42,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var data = await GeneralHelper.GetList<ResourceType>();
+                var data = await ConfigurationHelper.GetList<ResourceType>();
                 var item = data.Find(x => x.Id == id);
                 serviceResponse.ResponseObject = item;
                 serviceResponse.Success = true;
@@ -61,7 +61,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Make sure the new item short name only contains letters/numbers
-                if (!GeneralHelper.CheckAlphanumeric(item.ShortName))
+                if (!ValidationHelper.CheckAlphanumeric(item.ShortName))
                 {
                     serviceResponse.Success = false;
                     serviceResponse.ResponseObject = "Short name must be alphanumeric.";
@@ -72,7 +72,7 @@ namespace AzureNamingTool.Services
                 item.ShortName = item.ShortName.ToLower();
 
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceType>();
+                var items = await ConfigurationHelper.GetList<ResourceType>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -102,7 +102,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceType>(items);
+                await ConfigurationHelper.WriteList<ResourceType>(items);
                 serviceResponse.ResponseObject = "Item added!";
                 serviceResponse.Success = true;
             }
@@ -120,14 +120,14 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceType>();
+                var items = await ConfigurationHelper.GetList<ResourceType>();
                 // Get the specified item
                 var item = items.Find(x => x.Id == id);
                 // Remove the item from the collection
                 items.Remove(item);
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceType>(items);
+                await ConfigurationHelper.WriteList<ResourceType>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -158,7 +158,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceType>(newitems);
+                await ConfigurationHelper.WriteList<ResourceType>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -194,9 +194,17 @@ namespace AzureNamingTool.Services
 
         public static List<ResourceType> GetFilteredResourceTypes(List<ResourceType> types, string filter)
         {
+            List<ResourceType> currenttypes = new();
             // Filter out resource types that should have name generation
-            List<ResourceType> filteredtypes = types.Where(x => x.Resource.StartsWith(filter) && x.Property.ToLower() != "display name" && x.ShortName != "").ToList();
-            return filteredtypes;
+            if (filter != "")
+            {
+                currenttypes = types.Where(x => x.Resource.ToLower().StartsWith(filter.ToLower() + "/") && x.Property.ToLower() != "display name" && x.ShortName != "").ToList();
+            }
+            else
+            {
+                currenttypes = types;
+            }
+            return currenttypes;
         }
 
         public static async Task<ServiceResponse> RefreshResourceTypes(bool shortNameReset = false)
@@ -208,7 +216,7 @@ namespace AzureNamingTool.Services
                 serviceResponse = await ResourceTypeService.GetItems();
                 List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
                 string url = "https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/repository/resourcetypes.json";
-                
+
                 string refreshdata = await GeneralHelper.DownloadString(url);
                 if (refreshdata != "")
                 {
@@ -233,7 +241,7 @@ namespace AzureNamingTool.Services
                             ResourceType oldtype = types[i];
                             newtype.Exclude = oldtype.Exclude;
                             newtype.Optional = oldtype.Optional;
-                            newtype.Enabled= oldtype.Enabled;
+                            newtype.Enabled = oldtype.Enabled;
                             if ((!shortNameReset) || (oldtype.ShortName == ""))
                             {
                                 newtype.ShortName = oldtype.ShortName;
@@ -252,7 +260,7 @@ namespace AzureNamingTool.Services
 
                     // Update the settings file
                     serviceResponse = await PostConfig(types);
-                    
+
                     // Update the repository file
                     await FileSystemHelper.WriteFile("resourcetypes.json", refreshdata, "repository/");
 
@@ -260,7 +268,7 @@ namespace AzureNamingTool.Services
                     CacheHelper.InvalidateCacheObject("ResourceType");
 
                     // Update the current configuration file version data information
-                    await GeneralHelper.UpdateConfigurationFileVersion("resourcetypes");
+                    await ConfigurationHelper.UpdateConfigurationFileVersion("resourcetypes");
                 }
                 else
                 {

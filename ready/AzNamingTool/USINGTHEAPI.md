@@ -30,11 +30,11 @@ The following process details a sample API integration to return components and 
 
 	- Retrieve the API Key from the Admin section (this value will be passed with all API calls)
 	- Retrieve the current components
-		○ The site configuration contains a list of the currently selected components and their respective order. To retrieve these values:
+		○ The site configuration contains a list of the current selected components and their respective order. To retrieve these values:
 			§ Call the **ResourceComponents (GET /api/ResourceComonents)** function
 				□ API Key: [Your API Key]
 				□ Admin : false
-			§ This API call will return the list of currently selected components in JSON format. 
+			§ This API call will return the list of current selected components in JSON format. 
 	- Retrieve the available options for each component
 		○ For each component in the **ResourceComponents** results, call the respective API call for the component type to return the available component options. 
 			§ Example:
@@ -45,7 +45,7 @@ The following process details a sample API integration to return components and 
 
 
 ### Generating Names
-To generate a resource type name programmatically, the API requires a JSON payload of all the components being requested. This includes all currently configured components and the desired resource type. 
+To generate a resource type name programmatically, the API requires a JSON payload of all the components being requested. This includes all configured components and the desired resource type. 
 
 The process is as follows:
 

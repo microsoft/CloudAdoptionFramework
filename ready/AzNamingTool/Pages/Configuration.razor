@@ -20,13 +20,115 @@
 <PageTitle>Azure Naming Tool - Configuration</PageTitle>
 <div class="card @theme.ThemeStyle">
     <div class="card-body">
-        <h1>Configuration</h1>
-        <div class="mb-3">This page contains the inputs to customize the Azure Naming Tool configuration.</div>
-        <div class="mb-3">
-            <button class="btn btn-primary" title="Instructions" @onclick="@(e => OnInstructionsClick())">
-                View Instructions
+        <div style="float:left;">
+            <h1>
+                Configuration
+            </h1>
+        </div>
+        <div style="float:right;">
+            <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                <span class="oi oi-document" aria-hidden="true"></span> Documentation
             </button>
         </div>
+        <div style="clear:both;"></div>
+        <div class="mb-3">This page contains the inputs to customize the Azure Naming Tool configuration.</div>
+        <div class="mb-3">
+        </div>
+        @if (admin)
+        {
+            @if (!ConfigurationHelper.VerifyConnectivity())
+            {
+                <div class="mb-3 warning-message">
+                    NOTE: You are not currently connected to the internet, so some features will be disabled. This includes the ability to <strong>Refresh</strong> resource types and locations.
+                </div>
+            }
+            <div id="compontentslegendcontainer" class="card mb-3" style="width:auto;">
+                <div class="card-header bg-default text-black">
+                    <a id="ComponentsLegendLink" class="link-dark text-decoration-none" data-toggle="collapse" href="#componentslegend" role="button" aria-expanded="false" aria-controls="componentslegend">
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Actions Legend
+                    </a>
+                </div>
+                <div class="collapse card card-body @theme.ThemeStyle" id="componentslegend">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-primary btn-dummy" title="Move up" style="min-width:42px;">
+                                        <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Move the item up in the order.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-primary btn-dummy" title="Move down" style="min-width:42px;">
+                                        <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Move the item down in the order.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-info btn-dummy" title="Toggle Not Globally Optional" style="min-width:42px;">
+                                        <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                    </button> | <button type="button" class="btn btn-outline-info btn-dummy" title="Toggle Not Globally Optional" style="min-width:42px;">
+                                        <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Toggle setting the component as Globally Optional. Setting this will override individual resource type optional components.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-success btn-dummy" title="Enable">
+                                        <span class="oi oi-plus" aria-hidden="true"></span>
+                                    </button>
+
+                                </td>
+                                <td>
+                                    Enable the item.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-dark btn-dummy" title="Disable">
+                                        <span class="oi oi-ban" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Disable the item.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-secondary btn-dummy" title="Edit">
+                                        <span class="oi oi-pencil" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Edit the custom component.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-25">
+                                    <button type="button" class="btn btn-danger btn-dummy" title="Delete">
+                                        <span class="oi oi-x" aria-hidden="true"></span>
+                                    </button>
+                                </td>
+                                <td>
+                                    Delete the custom component.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
 
         @if (!dataLoaded)
         {
@@ -44,7 +146,7 @@
                     <div class="card">
                         <h5 class="card-header text-white bg-secondary text-white">
                             <a id="ResourceComponent" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#components" role="button" aria-expanded="false" aria-controls="components">
-                                Components
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Components
                             </a>
                         </h5>
                         <div class="collapse card card-body @theme.ThemeStyle" id="components">
@@ -56,11 +158,11 @@
                                     <p>The current Components.</p>
                                     @if (admin)
                                     {
-                                        <p>
+                                        <div>
                                             <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",0,"add"))" title="Add Component">
                                                 <span class="oi oi-plus" aria-hidden="true"></span> Add Component
                                             </button>
-                                        </p>
+                                        </div>
                                     }
                                     <table class="table @theme.ThemeStyle">
                                         <thead>
@@ -76,7 +178,7 @@
                                             @foreach (var item in @servicesData.ResourceComponents)
                                             {
                                                 <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
-                                                    <td>
+                                                    <td class="w-50">
                                                         @item.DisplayName
                                                         @if (item.IsCustom)
                                                         {
@@ -84,15 +186,19 @@
                                                                 (CUSTOM)
                                                             </span>
                                                         }
+                                                        @if (item.IsGloballyOptional)
+                                                        {
+                                                            <span style="font-style:italic"> - OPTIONAL</span>
+                                                        }
                                                     </td>
                                                     @if (admin)
                                                     {
                                                         <td>
-                                                            <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"up"))" title="Move up">
+                                                            <button type="button" class="btn btn-primary" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"up"))" title="Move up">
                                                                 <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
                                                             </button>
                                                             <span> </span>
-                                                            <button type="button" class="btn btn-primary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
+                                                            <button type="button" class="btn btn-primary" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
                                                                 <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
                                                             </button>
 
@@ -109,6 +215,23 @@
                                                                 <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
                                                                     <span class="oi oi-ban" aria-hidden="true"></span>
                                                                 </button>
+                                                                @if (!protectedComponents.Contains(item.Name.ToLower()))
+                                                                {
+                                                                    @if (item.IsGloballyOptional)
+                                                                    {
+                                                                        <span> </span>
+                                                                        <button type="button" class="btn btn-info" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"globallyoptional"))" title="Toggle Not Globally Optional">
+                                                                            <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                                                        </button>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span> </span>
+                                                                        <button type="button" class="btn btn-outline-info" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"globallyoptional"))" title="Toggle Globally Optional">
+                                                                            <span class="oi oi-question-mark" aria-hidden="true"></span>
+                                                                        </button>
+                                                                    }
+                                                                }
                                                             }
                                                             else
                                                             {
@@ -117,6 +240,7 @@
                                                                     <span class="oi oi-plus" aria-hidden="true"></span>
                                                                 </button>
                                                             }
+
                                                             @if (item.IsCustom)
                                                             {
                                                                 <span> </span>
@@ -206,7 +330,7 @@
                     <div class="card">
                         <h5 class="card-header text-white bg-secondary text-white">
                             <a id="ResourceDelimiter" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#delimiters" role="button" aria-expanded="false" aria-controls="delimiters">
-                                Delimiters
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Delimiters
                             </a>
                         </h5>
                         <div class="collapse card card-body @theme.ThemeStyle" id="delimiters">
@@ -336,7 +460,7 @@
                                 <div class="card">
                                     <h5 class="card-header bg-secondary text-white">
                                         <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#environments" role="button" aria-expanded="false" aria-controls="environments">
-                                            @resourceComponent.DisplayName
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @resourceComponent.DisplayName
                                         </a>
                                     </h5>
                                     <div class="collapse card card-body @theme.ThemeStyle" id="environments">
@@ -473,7 +597,7 @@
                                 <div class="card">
                                     <h5 class="card-header text-white bg-secondary text-white">
                                         <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#functions" role="button" aria-expanded="false" aria-controls="functions">
-                                            @resourceComponent.DisplayName
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @resourceComponent.DisplayName
                                         </a>
                                     </h5>
                                     <div class="collapse card card-body @theme.ThemeStyle" id="functions">
@@ -611,7 +735,7 @@
                                 <div class="card">
                                     <h5 class="card-header text-white bg-secondary text-white">
                                         <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#locations" role="button" aria-expanded="false" aria-controls="locations">
-                                            @resourceComponent.DisplayName
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @resourceComponent.DisplayName
                                         </a>
                                     </h5>
                                     <div class="collapse card card-body @theme.ThemeStyle" id="locations">
@@ -729,40 +853,43 @@
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div class="card  w-auto mb-3">
-                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
-                                                            Refresh the Resource Locations Configuration
+                                                    @if (ConfigurationHelper.VerifyConnectivity())
+                                                    {
+                                                        <div class="card  w-auto mb-3">
+                                                            <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                                Refresh the Resource Locations Configuration
+                                                            </div>
+                                                            <div class="card card-body @theme.ThemeStyle">
+                                                                <p>
+                                                                    Click <strong>Refresh</strong> to download the latest Resource Locations Configuration file from the Azure Naming Tool GitHub repository.
+                                                                </p>
+                                                                <p>
+                                                                    <strong>NOTES:</strong>
+                                                                    <ul>
+                                                                        <li><strong>This will refresh your current configuration and cannot be undone!</strong></li>
+                                                                        <li>New location configurations will be added.</li>
+                                                                        @if (refreshlocationshortnames)
+                                                                        {
+                                                                            <li>All location configurations will be updated.</li>
+                                                                            <li><span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span></li>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <li>
+                                                                                All of your existing location configurations will be retained.
+                                                                            </li>
+                                                                        }
+                                                                    </ul>
+                                                                </p>
+                                                                <p>
+                                                                    <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceLocation",0,"refresh")) title="Refresh">
+                                                                        <span class="oi oi-reload" aria-hidden="true"></span> Refresh
+                                                                    </button>
+                                                                    <input title="Refresh Short Names" class="form-check-input" type="checkbox" @bind="@refreshlocationshortnames" onclick="checkboxConfirmChange(this, '** ATTENTION ***\n\nThis will reset your location short names to match the latest Azure Naming Tool values.\n\nThis cannot be undone!\n\nAre you sure?');" style="margin-top: 9px; margin-left:10px;"> Refresh short names?
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                        <div class="card card-body @theme.ThemeStyle">
-                                                            <p>
-                                                                Click <strong>Refresh</strong> to download the latest Resource Locations Configuration file from the Azure Naming Tool GitHub repository.
-                                                            </p>
-                                                            <p>
-                                                                <strong>NOTES:</strong>
-                                                                <ul>
-                                                                    <li><strong>This will refresh your current configuration and cannot be undone!</strong></li>
-                                                                    <li>New location configurations will be added.</li>
-                                                                    @if (refreshlocationshortnames)
-                                                                    {
-                                                                        <li>All location configurations will be updated.</li>
-                                                                        <li><span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span></li>
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <li>
-                                                                            All of your existing location configurations will be retained.
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </p>
-                                                            <p>
-                                                                <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceLocation",0,"refresh")) title="Refresh">
-                                                                    <span class="oi oi-reload" aria-hidden="true"></span> Refresh
-                                                                </button>
-                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" @bind="@refreshlocationshortnames" onclick="checkboxConfirmChange(this, '** ATTENTION ***\n\nThis will reset your location short names to match the latest Azure Naming Tool values.\n\nThis cannot be undone!\n\nAre you sure?');" style="margin-top: 9px; margin-left:10px;"> Refresh short names?
-                                                            </p>
-                                                        </div>
-                                                    </div>
+                                                    }
                                                     <div class="card  w-auto mb-3">
                                                         <div class="card card-header bg-default text-black" style="font-weight:bold;">
                                                             Reset the Locations Configuration
@@ -812,7 +939,7 @@
                                 <div class="card">
                                     <h5 class="card-header text-white bg-secondary text-white">
                                         <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#orgs" role="button" aria-expanded="false" aria-controls="orgs">
-                                            @resourceComponent.DisplayName
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @resourceComponent.DisplayName
                                         </a>
                                     </h5>
                                     <div class="collapse card card-body @theme.ThemeStyle" id="orgs">
@@ -952,7 +1079,7 @@
                                 <div class="card">
                                     <h5 class="card-header text-white bg-secondary text-white">
                                         <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#projsappssvcs" role="button" aria-expanded="false" aria-controls="projsappssvcs">
-                                            @resourceComponent.DisplayName
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @resourceComponent.DisplayName
                                         </a>
                                     </h5>
                                     <div class="collapse card card-body @theme.ThemeStyle" id="projsappssvcs">
@@ -1089,7 +1216,7 @@
                                 <div class="card">
                                     <h5 class="card-header text-white bg-secondary text-white">
                                         <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#types" role="button" aria-expanded="false" aria-controls="types">
-                                            @resourceComponent.DisplayName
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @resourceComponent.DisplayName
                                         </a>
                                     </h5>
                                     <div class="collapse card card-body @theme.ThemeStyle" id="types">
@@ -1249,44 +1376,47 @@
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div class="card  w-auto mb-3">
-                                                        <div class="card card-header bg-default text-black" style="font-weight:bold;">
-                                                            Refresh the Resource Types Configuration
+                                                    @if (ConfigurationHelper.VerifyConnectivity())
+                                                    {
+                                                        <div class="card  w-auto mb-3">
+                                                            <div class="card card-header bg-default text-black" style="font-weight:bold;">
+                                                                Refresh the Resource Types Configuration
+                                                            </div>
+                                                            <div class="card card-body @theme.ThemeStyle">
+                                                                <p>
+                                                                    Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository.
+                                                                </p>
+                                                                <p>
+                                                                    <strong>NOTES:</strong>
+                                                                    <ul>
+                                                                        <li><strong>This will refresh your current configuration and cannot be undone!</strong></li>
+                                                                        <li>New resource type configurations will be added.</li>
+                                                                        @if (refreshtypeshortnames)
+                                                                        {
+                                                                            <li>
+                                                                                All resource type configurations will be updated, but all of your existing resource type configuration (except the short name value) customizations will be retained.
+                                                                            </li>
+                                                                            <li>
+                                                                                <span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span>
+                                                                            </li>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <li>
+                                                                                Resource type configurations will be updated, but all of your existing resource type configuration customizations will be retained.
+                                                                            </li>
+                                                                        }
+                                                                    </ul>
+                                                                </p>
+                                                                <p>
+                                                                    <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceType",0,"refresh")) title="Refresh">
+                                                                        <span class="oi oi-reload" aria-hidden="true"></span> Refresh
+                                                                    </button>
+                                                                    <input title="Refresh Short Names" class="form-check-input" type="checkbox" @bind="@refreshtypeshortnames" onclick="checkboxConfirmChange(this, '** ATTENTION ***\n\nThis will reset your type short names to match the latest Azure Naming Tool values.\n\nThis cannot be undone!\n\nAre you sure?');" style="margin-top: 9px; margin-left:10px;"> Refresh short names?
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                        <div class="card card-body @theme.ThemeStyle">
-                                                            <p>
-                                                                Click <strong>Refresh</strong> to download the latest Resource Types Configuration file from the Azure Naming Tool GitHub repository.
-                                                            </p>
-                                                            <p>
-                                                                <strong>NOTES:</strong>
-                                                                <ul>
-                                                                    <li><strong>This will refresh your current configuration and cannot be undone!</strong></li>
-                                                                    <li>New resource type configurations will be added.</li>
-                                                                    @if (refreshtypeshortnames)
-                                                                    {
-                                                                        <li>
-                                                                            All resource type configurations will be updated, but all of your existing resource type configuration (except the short name value) customizations will be retained.</li>
-                                                                            <li><span style="color:red; font-weight:bold;">Any customized short names will be overwritten.</span>
-                                                                        </li>
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <li>
-                                                                            Resource type configurations will be updated, but all of your existing resource type configuration customizations will be retained.
-                                                                        </li>
-                                                                    }
-                                                                </ul>
-                                                            </p>
-                                                            <p>
-                                                                <button type="button" class="btn btn-success" @onclick=@(e => FormAction("ResourceType",0,"refresh")) title="Refresh">
-                                                                    <span class="oi oi-reload" aria-hidden="true"></span> Refresh
-                                                                </button>
-                                                                <input title="Refresh Short Names" class="form-check-input" type="checkbox" @bind="@refreshtypeshortnames" onclick="checkboxConfirmChange(this, '** ATTENTION ***\n\nThis will reset your type short names to match the latest Azure Naming Tool values.\n\nThis cannot be undone!\n\nAre you sure?');" style="margin-top: 9px; margin-left:10px;"> Refresh short names?
-                                                            </p>
-
-
-                                                        </div>
-                                                    </div>
+                                                    }
                                                     <div class="card  w-auto mb-3">
                                                         <div class="card card-header bg-default text-black" style="font-weight:bold;">
                                                             Reset the Resource Types Configuration
@@ -1336,7 +1466,7 @@
                                 <div class="card">
                                     <h5 class="card-header text-white bg-secondary text-white">
                                         <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#unitsdepts" role="button" aria-expanded="false" aria-controls="unitsdepts">
-                                            @resourceComponent.DisplayName
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @resourceComponent.DisplayName
                                         </a>
                                     </h5>
                                     <div class="collapse card card-body @theme.ThemeStyle" id="unitsdepts">
@@ -1474,7 +1604,7 @@
                                 <div class="card">
                                     <h5 class="card-header bg-secondary text-white">
                                         <a id="@resourceComponent.Name" class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href=@("#custom" + resourceComponent.Id.ToString()) role="button" aria-expanded="false" aria-controls="@("custom" + resourceComponent.Id.ToString())">
-                                            @resourceComponent.DisplayName
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @resourceComponent.DisplayName
                                         </a>
                                     </h5>
                                     <div class="collapse card card-body @theme.ThemeStyle" id=@("custom" + resourceComponent.Id.ToString())>
@@ -1600,7 +1730,7 @@
                     <div class="card">
                         <h5 class="card-header text-white bg-secondary text-white">
                             <a class="link-light text-decoration-none" data-toggle="collapse" style="display:block;" href="#global" role="button" aria-expanded="false" aria-controls="global">
-                                Global Configuration
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Global Configuration
                             </a>
                         </h5>
                         <div class="collapse card card-body @theme.ThemeStyle" id="global">
@@ -1704,6 +1834,7 @@
 
     public string filterData { get; set; }
 
+    private string[] protectedComponents = new string[] { "resourcetype", "resourcedelimiter" };
     private List<string> categories = new List<string>();
     private string? selectedResourceTypeCategory = "";
     private string? newComponentConfig;
@@ -1756,17 +1887,21 @@
             // Determine if the installed version of the configuration files are up to date
             if (admin)
             {
-                // Get a list of any configurations that are out of date
-                List<string> versiondata = await GeneralHelper.VerifyConfigurationFileVersionData();
-                if (versiondata.Count > 0)
+                // Check connectivity
+                if (ConfigurationHelper.VerifyConnectivity())
                 {
-                    string versionmessage = "";
-                    foreach (string message in versiondata)
+                    // Get a list of any configurations that are out of date
+                    List<string> versiondata = await ConfigurationHelper.VerifyConfigurationFileVersionData();
+                    if (versiondata.Count > 0)
                     {
-                        versionmessage += message;
+                        string versionmessage = "";
+                        foreach (string message in versiondata)
+                        {
+                            versionmessage += message;
+                        }
+                        // Display a notification of the files requiring updating
+                        await ShowInformationModal("bg-navcolor", "ATTENTION", versionmessage);
                     }
-                    // Display a notification of the files requiring updating
-                    await ShowInformationModal("bg-navcolor", "ATTENTION", versionmessage);
                 }
             }
             StateHasChanged();
@@ -1862,6 +1997,7 @@
                         case "disable":
                             resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
                             resourceComponent.Enabled = false;
+                            resourceComponent.IsGloballyOptional = false;
                             serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
                             if (serviceResponse.Success)
                             {
@@ -1874,6 +2010,32 @@
                                 message.Message = resourceComponent.Name + " disabling failed!";
                                 message.MessageDetails = serviceResponse.ResponseMessage;
                             }
+                            break;
+                        case "globallyoptional":
+                            resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
+                            resourceComponent.IsGloballyOptional = !resourceComponent.IsGloballyOptional;
+                            serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                            if (serviceResponse.Success)
+                            {
+                                message.Message = resourceComponent.Name;
+                                if (resourceComponent.IsGloballyOptional)
+                                {
+                                    message.Message += " set as Globally Optional!";
+                                }
+                                else
+                                {
+                                    message.Message += " set as Not Globally Optional!";
+                                }
+                                message.Type = MessageTypesEnum.SUCCESS;
+                            }
+                            else
+                            {
+                                message.Type = MessageTypesEnum.ERROR;
+                                message.Message = resourceComponent.Name + " disabling failed!";
+                                message.MessageDetails = serviceResponse.ResponseMessage;
+                            }
+                            break;
+                        case "blank":
                             break;
                         case "add":
                             ShowAddModal((int)id, "ResourceComponent", "Add Component", "<p>Add a Component.</p>");
@@ -2167,7 +2329,6 @@
                                 message.Message = resourceFunction.Name + " move failed!";
                                 message.MessageDetails = serviceResponse.ResponseMessage;
                             }
-
                             break;
                         case "down":
                             resourceFunction = servicesData.ResourceFunctions.Find(x => x.Id == id);
@@ -3237,6 +3398,32 @@
         if (!result.Cancelled)
         {
             StateHasChanged();
+        }
+    }
+
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Configuration");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "toolconfigurationinstructions");
+            parameters.Add(nameof(InformationModal.admin), admin);
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
         }
     }
 

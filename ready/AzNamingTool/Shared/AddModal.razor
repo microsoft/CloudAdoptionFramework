@@ -2,7 +2,6 @@
 @using AzureNamingTool.Models
 @using AzureNamingTool.Services
 @using Microsoft.AspNetCore.Html
-@using AzureNamingTool.Helpers
 @inject IToastService toastService
 @inject StateContainer state
 
@@ -73,7 +72,8 @@
                         {
                             Name = itemName,
                             DisplayName = itemName,
-                            IsCustom = true
+                            IsCustom = true,
+                            IsGloballyOptional = false
                         };
                     serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
                 }
