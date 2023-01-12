@@ -178,7 +178,7 @@ namespace AzureNamingTool.Helpers
                     result = (bool)data;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
@@ -224,14 +224,12 @@ namespace AzureNamingTool.Helpers
 
                     items = JsonSerializer.Deserialize<List<T>>(data, options);
                 }
-
-                return items;
             }
             catch (Exception ex)
             {
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-                return items;
             }
+            return items;
         }
 
         public async static Task WriteList<T>(List<T> items)
