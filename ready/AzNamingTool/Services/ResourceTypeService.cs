@@ -3,8 +3,10 @@ using AzureNamingTool.Models;
 using Microsoft.AspNetCore.Components;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Text.Json;
+using ResourceType = AzureNamingTool.Models.ResourceType;
 
 namespace AzureNamingTool.Services
 {
@@ -102,7 +104,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await ConfigurationHelper.WriteList<ResourceType>(items);
+                await ConfigurationHelper.WriteList<ResourceType>(items.OrderBy(x => x.Id).ToList());
                 serviceResponse.ResponseObject = "Item added!";
                 serviceResponse.Success = true;
             }
@@ -274,6 +276,70 @@ namespace AzureNamingTool.Services
                 {
                     AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = "There was a problem refreshing the resource types configuration." });
                 }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
+            }
+            return serviceResponse;
+        }
+
+        public static async Task<ServiceResponse> UpdateTypeComponents(string operation, int componentid)
+        {
+            try
+            {
+                serviceResponse = await ResourceComponentService.GetItem(componentid);
+                ResourceComponent resourceComponent = (ResourceComponent)serviceResponse.ResponseObject;
+                string component = GeneralHelper.NormalizeName(resourceComponent.Name, false);
+                serviceResponse = await ResourceTypeService.GetItems();
+                List<ResourceType> resourceTypes = (List<ResourceType>)serviceResponse.ResponseObject;
+                List<string> currentvalues = new();
+                // Update all the resource type component settings
+                foreach (ResourceType currenttype in resourceTypes)
+                {
+                    switch (operation)
+                    {
+                        case "optional-add":
+                            currentvalues = new List<string>(currenttype.Optional.Split(','));
+                            if (!currentvalues.Contains(component))
+                            {
+                                currentvalues.Add(component);
+                                currenttype.Optional = String.Join(",", currentvalues.ToArray());
+                                await ResourceTypeService.PostItem(currenttype);
+                            }
+                            break;
+                        case "optional-remove":
+                            currentvalues = new List<string>(currenttype.Optional.Split(','));
+                            if (currentvalues.Contains(component))
+                            {
+                                currentvalues.Remove(component);
+                                currenttype.Optional = String.Join(",", currentvalues.ToArray());
+                                await ResourceTypeService.PostItem(currenttype);
+                            }
+                            break;
+                        case "exclude-add":
+                            currentvalues = new List<string>(currenttype.Exclude.Split(','));
+                            if (!currentvalues.Contains(component))
+                            {
+                                currentvalues.Add(component);
+                                currenttype.Exclude = String.Join(",", currentvalues.ToArray());
+                                await ResourceTypeService.PostItem(currenttype);
+                            }
+                            break;
+                        case "exclude-remove":
+                            currentvalues = new List<string>(currenttype.Exclude.Split(','));
+                            if (currentvalues.Contains(component))
+                            {
+                                currentvalues.Remove(component);
+                                currenttype.Exclude = String.Join(",", currentvalues.ToArray());
+                                await ResourceTypeService.PostItem(currenttype);
+                            }
+                            break;
+                    }
+                }
+                serviceResponse.Success = true;
             }
             catch (Exception ex)
             {

@@ -7,6 +7,7 @@
 @inject IJSRuntime JsRuntime
 @inject ILogger<MainLayout> Logger
 @inject NavigationManager NavigationManager
+@using AzureNamingTool.Services;
 @using Blazored.Toast.Configuration
 @inject ProtectedLocalStorage storage
 @inject ProtectedSessionStorage session
@@ -25,14 +26,15 @@
             {
                 <div class="warning-message">DEV MODE Enabled! This can cause unexpected behavior! Use at your own risk!</div>
             }
-            <div class="px-3">
+            @if (admin)
+            {
+                <button type="button" class="btn btn-danger" @onclick="@(e => Logout())" title="Logout" data-toggle="collapse" href="#admin">Logout</button>
+            }
+            <div class=" px-3">
                 <label class="switch" title="App Theme">
                     <input type="checkbox" checked="@isdarktheme" @oninput="ThemeChanged">
                     <span class="slider round"></span>
                 </label>
-            </div>
-            <div>
-                <button type="button" class="btn btn-success" @onclick="@(e => ShowAdminModal())" title="Admin">Admin</button>
             </div>
         </div>
 
@@ -78,9 +80,9 @@
             OpenPasswordModal();
         }
     }
-    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    {        
+    {
         var adminresult = await session.GetAsync<bool>("admin");
         admin = (bool)adminresult.Value;
         if (firstRender)
@@ -126,28 +128,6 @@
         StateHasChanged();
     }
 
-    async void ShowAdminModal()
-    {
-        var parameters = new ModalParameters();
-        parameters.Add("theme", theme);
-
-        var options = new ModalOptions()
-            {
-                HideCloseButton = false,
-                UseCustomLayout = true
-            };
-
-        var modal = Modal.Show<AdminModal>("Admin", parameters, options);
-
-        var result = await modal.Result;
-
-        //if (!result.Cancelled)
-        //{
-        // Reload the current page
-        NavigationManager.NavigateTo(NavigationManager.Uri, true);
-        //}
-    }
-
     private async void MagicReset()
     {
         bool confrimAPIKeyGenerate = await JsRuntime.InvokeAsync<bool>("confirm", "This will reset the site settings. Are you sure?");
@@ -186,6 +166,20 @@
         }
         await storage.SetAsync("apptheme", theme.ThemeStyle);
         state.AppTheme = theme.ThemeStyle;
+        StateHasChanged();
+    }
+
+    private async void Logout()
+    {
+        admin = false;
+        state.SetAdmin(false);
+        await session.SetAsync("admin", false);
+        ResponseMessage message = new();
+        message.Type = MessageTypesEnum.INFORMATION;
+        message.Header = "INFORMATION";
+        message.Message = "Admin logged out.";
+        toastService.ShowInfo(message.Message, "INFORMATION");
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
         StateHasChanged();
     }
 }

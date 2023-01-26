@@ -64,10 +64,14 @@ namespace AzureNamingTool.Services
                 serviceResponse = await AdminLogService.GetItems();
                 configdata.AdminLogs = serviceResponse.ResponseObject;
 
+                // Get the current settings
+                var config = ConfigurationHelper.GetConfigurationData();
+                configdata.DismissedAlerts = config.DismissedAlerts;
+                configdata.DuplicateNamesAllowed = config.DuplicateNamesAllowed;
+
                 // Get the security settings
                 if (includeadmin)
                 {
-                    var config = ConfigurationHelper.GetConfigurationData();
                     configdata.SALTKey = config.SALTKey;
                     configdata.AdminPassword = config.AdminPassword;
                     configdata.APIKey = config.APIKey;
@@ -102,10 +106,12 @@ namespace AzureNamingTool.Services
                 await CustomComponentService.PostConfig(configdata.CustomComponents);
                 await GeneratedNamesService.PostConfig(configdata.GeneratedNames);
                 await AdminLogService.PostConfig(configdata.AdminLogs);
-                
-                // Set the security settings
-                var config = ConfigurationHelper.GetConfigurationData();
 
+                var config = ConfigurationHelper.GetConfigurationData();
+                config.DismissedAlerts = configdata.DismissedAlerts;
+                config.DuplicateNamesAllowed = configdata.DuplicateNamesAllowed;
+
+                // Set the security settings
                 if (configdata.SALTKey != null)
                 {
                     config.SALTKey = configdata.SALTKey;

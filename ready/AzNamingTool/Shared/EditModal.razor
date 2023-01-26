@@ -19,15 +19,21 @@
                 <p>
                     @((MarkupString)message)
                 </p>
-
-                <div class="card @theme.ThemeStyle mb-3">
+                <div id="globallyoptionalcontainer" class="card mb-3">
                     <div class="card-header bg-default text-black fw-bold">
                         Name
                     </div>
                     <div class="card card-body @theme.ThemeStyle">
                         @if (protectedName)
                         {
-                            <input title="Name" value="@itemName" disabled type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
+                            @if (type == "ResourceComponent")
+                            {
+                                <input title="Name" value="@itemDisplayName" disabled type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
+                            }
+                            else
+                            {
+                                <input title="Name" value="@itemName" disabled type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
+                            }
                         }
                         else
                         {
@@ -35,9 +41,84 @@
                         }
                     </div>
                 </div>
-                @if (type != "ResourceComponent")
+                @if (type == "ResourceComponent")
                 {
-                    <div class="card @theme.ThemeStyle mb-3">
+                    <div id="globallyoptionalcontainer" class="card mb-3">
+                        <div class="card-header bg-default text-black fw-bold">
+                            <a id="OptionalComponents" class="link-dark text-decoration-none" data-toggle="collapse" href="#globallyoptional" role="button" aria-expanded="false" aria-controls="globallyoptional">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Globally Optional Configuration
+                            </a>
+                        </div>
+                        <div class="collapse card card-body @theme.ThemeStyle" id="globallyoptional">
+                            <div class="mb-3">
+                                This section allows you to add/remove the component as OPTIONAL for all resource types.
+                            </div>
+                            <table class="table @theme.ThemeStyle">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            This option will ADD the component as OPTIONAL for all resource types.
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-success w-100" @onclick="@(e => FormAction("ResourceComponent","optional-add"))" style="min-width:42px;" title="Add as OPTIONAL for all resoure types">
+                                                ADD
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            This option will REMOVE the component from OPTIONAL for all resource types.
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger w-100" @onclick="@(e => FormAction("ResourceComponent","optional-remove"))" style="min-width:42px;" title="Remove as OPTIONAL for all resoure types">
+                                                REMOVE
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="globallyexcludecontainer" class="card mb-3">
+                        <div class="card-header bg-default text-black fw-bold">
+                            <a id="OptionalComponents" class="link-dark text-decoration-none" data-toggle="collapse" href="#globallyexclude" role="button" aria-expanded="false" aria-controls="globallyexclude">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Globally Exclude Configuration
+                            </a>
+                        </div>
+                        <div class="collapse card card-body @theme.ThemeStyle" id="globallyexclude">
+                            <div class="mb-3">
+                                This section allows you to add/remove the component as EXCLUDE for all resource types.
+                            </div>
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            This option will ADD the component as EXCLUDE for all resource types.
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-success w-100" @onclick="@(e => FormAction("ResourceComponent","exclude-add"))" style="min-width:42px;" title="Add as EXCLUDE for all resoure types">
+                                                ADD
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            This option will REMOVE the component from EXCLUDE for all resource types.
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger w-100" @onclick="@(e => FormAction("ResourceComponent","exclude-remove"))" style="min-width:42px;" title="Remove as EXCLUDE for all resoure types">
+                                                REMOVE
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div id="globallyoptionalcontainer" class="card mb-3">
                         <div class="card-header bg-default text-black fw-bold">
                             Short Name
                         </div>
@@ -50,16 +131,16 @@
                 {
                     @if (bool.Parse(ConfigurationHelper.GetAppSetting("DevMode")))
                     {
-                        <div class="card @theme.ThemeStyle mb-3">
+                        <div id="globallyoptionalcontainer" class="card mb-3">
                             <div class="card-header bg-default text-black fw-bold">
-                                RegEx
+                                Regex
                             </div>
                             <div class="card card-body @theme.ThemeStyle">
                                 <input title="RegEx" value="@itemRegEx" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemRegEx = (string)ui.Value;})" />
                             </div>
                         </div>
                     }
-                    <div id="optional" class="card mt-3">
+                    <div id="optional" class="card mb-3">
                         <div class="card-header bg-default text-black fw-bold">
                             <a id="OptionalComponents" class="link-dark text-decoration-none" data-toggle="collapse" href="#optionalcomponents" role="button" aria-expanded="false" aria-controls="optionalcomponents">
                                 <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Optional Components
@@ -91,7 +172,7 @@
                         </div>
                     </div>
 
-                    <div id="excluded" class="card mt-3">
+                    <div id="excluded" class="card mb-3">
                         <div class="card-header bg-default text-black fw-bold">
                             <a id="ExcludedComponents" class="link-dark text-decoration-none" data-toggle="collapse" href="#excludedcomponents" role="button" aria-expanded="false" aria-controls="excludedcomponents">
                                 <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Excluded Components
@@ -125,8 +206,11 @@
                 }
             </div>
             <div class="modal-footer">
-                <button title="Save" @onclick="Save" class="btn btn-success">Update</button>
-                <button title="Cancel" @onclick="Cancel" class="btn btn-secondary">Cancel</button>
+                @if (type != "ResourceComponent")
+                {
+                    <button title="Save" @onclick="Save" class="btn btn-success">Update</button>
+                }
+                <button title="Cancel" @onclick="Cancel" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </div>
@@ -138,6 +222,8 @@
 
     [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
     [Parameter] public ThemeInfo theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
 
     [Parameter] public int id { get; set; }
     [Parameter] public string title { get; set; }
@@ -148,12 +234,14 @@
 
     private ServiceResponse serviceResponse = new();
     private string? itemName;
+    private string? itemDisplayName;
     private string? itemShortName;
     private string? itemRegEx;
     private List<ResourceComponent> resourceComponents;
     private string? optional;
     private string? exclude;
     private bool ischecked = false;
+    private ResponseMessage responseMessage = new();
 
     protected override async void OnInitialized()
     {
@@ -163,6 +251,7 @@
                 serviceResponse = await ResourceComponentService.GetItem(id);
                 ResourceComponent resourceComponent = (ResourceComponent)serviceResponse.ResponseObject;
                 itemName = resourceComponent.Name;
+                itemDisplayName = resourceComponent.DisplayName;
                 break;
             case "ResourceEnvironment":
                 serviceResponse = await ResourceEnvironmentService.GetItem(id);
@@ -316,11 +405,12 @@
                                         ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "optional-" + GeneralHelper.NormalizeName(resourceComponent.Name, true));
                                         if (ischecked)
                                         {
-                                            if (resourceType.Optional != "")
+                                            List<string> currentoptional = new List<string>(resourceType.Optional.Split(','));
+                                            if (!currentoptional.Contains(resourceComponent.Name))
                                             {
-                                                resourceType.Optional += ",";
+                                                currentoptional.Add(GeneralHelper.NormalizeName(resourceComponent.Name, true));
+                                                resourceType.Optional = String.Join(",", currentoptional.ToArray());
                                             }
-                                            resourceType.Optional += GeneralHelper.NormalizeName(resourceComponent.Name, false);
                                         }
                                     }
 
@@ -329,11 +419,12 @@
                                     ischecked = await JsRuntime.InvokeAsync<bool>("IsElementChecked", "exclude-" + GeneralHelper.NormalizeName(resourceComponent.Name, true));
                                     if (ischecked)
                                     {
-                                        if (resourceType.Exclude != "")
+                                        List<string> currentexclude = new List<string>(resourceType.Exclude.Split(','));
+                                        if (!currentexclude.Contains(resourceComponent.Name))
                                         {
-                                            resourceType.Exclude += ",";
+                                            currentexclude.Add(GeneralHelper.NormalizeName(resourceComponent.Name, true));
+                                            resourceType.Exclude = String.Join(",", currentexclude.ToArray());
                                         }
-                                        resourceType.Exclude += GeneralHelper.NormalizeName(resourceComponent.Name, false);
                                     }
                                 }
                                 serviceResponse = await ResourceTypeService.PostItem(resourceType);
@@ -390,6 +481,103 @@
         {
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + ex.Message, "ERROR");
+        }
+    }
+
+    private async Task FormAction(string type, string action)
+    {
+        bool confirm = false;
+        confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will update all resource types! Are you sure?");
+        if (confirm)
+        {
+
+            responseMessage = new ResponseMessage();
+            var workingmodaloptions = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var workingmodal = Modal.Show<WorkingModal>("Working", workingmodaloptions);
+
+            try
+            {
+                ServiceResponse serviceResponse;
+                switch (type)
+                {
+                    case "ResourceComponent":
+                        serviceResponse = await ResourceComponentService.GetItem(id);
+                        ResourceComponent resourceComponent = (ResourceComponent)serviceResponse.ResponseObject;
+                        int componentid = (int)resourceComponent.Id;
+                        serviceResponse = await ResourceTypeService.GetItems();
+                        List<ResourceType> resourceTypes = (List<ResourceType>)serviceResponse.ResponseObject;
+                        responseMessage.Message = resourceComponent.Name;
+                        List<string> currentvalues = new();
+                        switch (action)
+                        {
+                            case "optional-add":
+                                serviceResponse = await ResourceTypeService.UpdateTypeComponents("optional-add", componentid);
+                                if (serviceResponse.Success)
+                                {
+                                    responseMessage.Message += " ADDED as OPTIONAL!";
+                                }                                
+                                break;
+                            case "optional-remove":
+                                serviceResponse = await ResourceTypeService.UpdateTypeComponents("optional-remove", componentid);
+                                if (serviceResponse.Success)
+                                {
+                                    responseMessage.Message += " REMOVED from OPTIONAL!";
+                                }
+                                break;
+                            case "exclude-add":
+                                serviceResponse = await ResourceTypeService.UpdateTypeComponents("exclude-add", componentid);
+                                if (serviceResponse.Success)
+                                {
+                                    responseMessage.Message += " ADDED as EXCLUDE!";
+                                }
+                                break;
+                            case "exclude-remove":
+                                serviceResponse = await ResourceTypeService.UpdateTypeComponents("exclude-remove", componentid);
+                                if (serviceResponse.Success)
+                                {
+                                    responseMessage.Message += " REMOVED from EXCLUDE!";
+                                }
+                                break;
+                        }
+                        break;
+                }
+
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                responseMessage.Type = MessageTypesEnum.ERROR;
+                responseMessage.Message = "There was a problem with the request.";
+            }
+
+            workingmodal.Close();
+
+            if (responseMessage.Message != null)
+            {
+                responseMessage.Message = "(" + type + ") " + responseMessage.Message;
+                switch (responseMessage.Type)
+                {
+                    case MessageTypesEnum.INFORMATION:
+                        toastService.ShowInfo(responseMessage.Message, "INFORMATION");
+                        break;
+                    case MessageTypesEnum.SUCCESS:
+                        toastService.ShowSuccess(responseMessage.Message, "SUCCESS");
+                        break;
+                    case MessageTypesEnum.WARNING:
+                        toastService.ShowWarning(responseMessage.Message, "WARNING");
+                        break;
+                    case MessageTypesEnum.ERROR:
+                        toastService.ShowError(responseMessage.Message, "ERROR");
+                        break;
+                }
+                AdminLogService.PostItem(new AdminLogMessage() { Title = responseMessage.Type.ToString(), Message = responseMessage.Message });
+            }
         }
     }
 

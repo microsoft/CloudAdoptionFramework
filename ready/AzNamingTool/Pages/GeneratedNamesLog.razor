@@ -50,18 +50,33 @@
                         </button>
                         @if (admin)
                         {
-                            <button class="btn btn-danger" style="margin-left:5px;" title="Purge Generated Names Log" @onclick="@(e => OnPurgeLogClick())">
-                                Purge Generated Names Log
-                            </button>
+                            if (duplicatenamesallowed)
+                            {
+                                <button class="btn btn-danger" style="margin-left:5px;" title="Purge Generated Names Log" @onclick="@(e => OnPurgeLogClick())">
+                                    Purge Generated Names Log
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-danger" style="margin-left:5px;" title="Purge Generated Names Log" disabled>
+                                    Purge Generated Names Log
+                                </button>
+                                <div class="mt-3">
+                                    <div class="alert alert-warning">
+                                    <strong>NOTE</strong>:
+                                    Duplicate names are not currently allowed in the site settings. Purging of the log is restricted.
+                                    </div>
+                                </div>
+                            }
                         }
                     </div>
-                    <div class="card">
+                    <div class="card mb-3">
                         <div class="card-header bg-default text-black">
                             <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
-                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter Data
                             </a>
                         </div>
-                        <div class="collapse card card-body @theme.ThemeStyle" id="filter">
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="filter">
                             <div class="form-group row mb-3">
                                 <div style="width:auto;">
                                     <input class="form-control" type="date" style="width: 150px;" @bind="startdate" @bind:event="oninput" />
@@ -73,9 +88,9 @@
                                     <input class="form-control" type="date" style="width: 150px;" @bind="enddate" @bind:event="oninput" />
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <div class="input-group flex-nowrap mb-3">
-                                    <div class="input-group flex-nowrap mb-3">
+                            <div class="form-group row mb-3">
+                                <div class="input-group flex-nowrap">
+                                    <div class="input-group flex-nowrap">
                                         <span class="input-group-text" id="addon-wrapping">
                                             <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
                                         </span>
@@ -98,7 +113,7 @@
                         <table class="table @theme.ThemeStyle">
                             <thead>
                                 <tr>
-                                    @if (admin)
+                                    @if ((admin) && (duplicatenamesallowed))
                                     {
                                         <th scope="col"></th>
                                     }
@@ -114,7 +129,7 @@
                                     if (!IsVisible(name))
                                         continue;
                                     <tr>
-                                        @if (admin)
+                                        @if ((admin) && (duplicatenamesallowed))
                                         {
                                             <td class="align-top">
                                                 <button type="button" class="btn btn-danger" @onclick="@(e => DeleteGeneratedName(name.Id))" title="Delete">
@@ -167,6 +182,7 @@
     public IModalService Modal { get; set; }
     private bool admin;
     private bool dataLoaded = false;
+    private bool duplicatenamesallowed = false;
     List<GeneratedName> lstNameRequests = new();
     public string filterData { get; set; }
     public DateTime startdate { get; set; } = DateTime.Today.AddDays(-30);
@@ -177,13 +193,12 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ServiceResponse serviceResponse = new();
-
         if (firstRender)
         {
             var result = await session.GetAsync<bool>("admin");
             admin = (bool)result.Value;
             LoadData();
+            duplicatenamesallowed = Convert.ToBoolean(ConfigurationHelper.GetAppSetting("DuplicateNamesAllowed"));
             StateHasChanged();
         }
     }

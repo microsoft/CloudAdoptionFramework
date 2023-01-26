@@ -1,6 +1,7 @@
 ﻿using AzureNamingTool.Helpers;
 using AzureNamingTool.Models;
 using System.Net.WebSockets;
+using System.Security.AccessControl;
 
 namespace AzureNamingTool.Services
 {
@@ -138,6 +139,30 @@ namespace AzureNamingTool.Services
                 var items = await ConfigurationHelper.GetList<ResourceComponent>();
                 // Get the specified item
                 var item = items.Find(x => x.Id == id);
+
+                // Delete any resource type settings for the component
+                List<string> currentvalues = new();
+                serviceResponse = await ResourceTypeService.GetItems();
+                List<Models.ResourceType> resourceTypes = (List<Models.ResourceType>)serviceResponse.ResponseObject;
+                foreach (Models.ResourceType currenttype in resourceTypes)
+                {
+                    currentvalues = new List<string>(currenttype.Optional.Split(','));
+                    if (currentvalues.Contains(GeneralHelper.NormalizeName(item.Name, false)))
+                    {
+                        currentvalues.Remove(GeneralHelper.NormalizeName(item.Name, false));
+                        currenttype.Optional = String.Join(",", currentvalues.ToArray());
+                    }
+
+                    currentvalues = new List<string>(currenttype.Exclude.Split(','));
+                    if (currentvalues.Contains(GeneralHelper.NormalizeName(item.Name, false)))
+                    {
+                        currentvalues.Remove(GeneralHelper.NormalizeName(item.Name, false));
+                        currenttype.Exclude = String.Join(",", currentvalues.ToArray());
+                    }
+
+                    await ResourceTypeService.PostItem(currenttype);
+                }
+
 
                 // Delete any custom components for this resource component
                 var components = await ConfigurationHelper.GetList<CustomComponent>();

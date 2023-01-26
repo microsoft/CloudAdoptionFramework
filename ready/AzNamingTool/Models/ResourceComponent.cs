@@ -13,6 +13,5 @@ namespace AzureNamingTool.Models
         public bool Enabled { get; set; }
         public int SortOrder { get; set; } = 0;
         public bool IsCustom { get; set; } = false;
-        public bool IsGloballyOptional { get; set; } = false;
     }
 }

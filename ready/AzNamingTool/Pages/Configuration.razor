@@ -8,6 +8,7 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @using System.Text
+@using System.Reflection;
 @inject ILogger<Configuration> Logger
 @inject IJSRuntime JsRuntime
 @inject IConfiguration _config
@@ -32,14 +33,26 @@
         </div>
         <div style="clear:both;"></div>
         <div class="mb-3">This page contains the inputs to customize the Azure Naming Tool configuration.</div>
-        <div class="mb-3">
-        </div>
         @if (admin)
         {
             @if (!ConfigurationHelper.VerifyConnectivity())
             {
                 <div class="mb-3 warning-message">
                     NOTE: You are not currently connected to the internet, so some features will be disabled. This includes the ability to <strong>Refresh</strong> resource types and locations.
+                </div>
+            }
+            @if ((!versionalertshown) && (versionalert != ""))
+            {
+                <div>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <div>
+                            @((MarkupString)versionalert)
+                        </div>
+                        <button type="button" class="close btn btn-light" data-dismiss="alert" aria-label="Close" @onclick="@(e => OnConfigurationAlertDismissed())">
+                            <span aria-hidden="true">Dismiss</span>
+                        </button>
+                        <input title="Do Not Show Again" class="form-check-input" type="checkbox" @bind="@dismissalert" style="margin-top: 9px; margin-left:10px;"> Do not show again
+                    </div>
                 </div>
             }
             <div id="compontentslegendcontainer" class="card mb-3" style="width:auto;">
@@ -73,18 +86,6 @@
                             </tr>
                             <tr>
                                 <td class="w-25">
-                                    <button type="button" class="btn btn-info btn-dummy" title="Toggle Not Globally Optional" style="min-width:42px;">
-                                        <span class="oi oi-question-mark" aria-hidden="true"></span>
-                                    </button> | <button type="button" class="btn btn-outline-info btn-dummy" title="Toggle Not Globally Optional" style="min-width:42px;">
-                                        <span class="oi oi-question-mark" aria-hidden="true"></span>
-                                    </button>
-                                </td>
-                                <td>
-                                    Toggle setting the component as Globally Optional. Setting this will override individual resource type optional components.
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="w-25">
                                     <button type="button" class="btn btn-success btn-dummy" title="Enable">
                                         <span class="oi oi-plus" aria-hidden="true"></span>
                                     </button>
@@ -111,7 +112,7 @@
                                     </button>
                                 </td>
                                 <td>
-                                    Edit the custom component.
+                                    Edit the item.
                                 </td>
                             </tr>
                             <tr>
@@ -121,7 +122,7 @@
                                     </button>
                                 </td>
                                 <td>
-                                    Delete the custom component.
+                                    Delete the item.
                                 </td>
                             </tr>
                         </tbody>
@@ -164,96 +165,75 @@
                                             </button>
                                         </div>
                                     }
-                                    <table class="table @theme.ThemeStyle">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                @if (admin)
-                                                {
-                                                    <th>Actions</th>
-                                                }
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var item in @servicesData.ResourceComponents)
-                                            {
-                                                <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
-                                                    <td class="w-50">
-                                                        @item.DisplayName
-                                                        @if (item.IsCustom)
-                                                        {
-                                                            <span>
-                                                                (CUSTOM)
-                                                            </span>
-                                                        }
-                                                        @if (item.IsGloballyOptional)
-                                                        {
-                                                            <span style="font-style:italic"> - OPTIONAL</span>
-                                                        }
-                                                    </td>
+                                    <div class="table-responsive">
+                                        <table class="table @theme.ThemeStyle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
                                                     @if (admin)
                                                     {
-                                                        <td>
-                                                            <button type="button" class="btn btn-primary" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"up"))" title="Move up">
-                                                                <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
-                                                            </button>
-                                                            <span> </span>
-                                                            <button type="button" class="btn btn-primary" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
-                                                                <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
-                                                            </button>
-
+                                                        <th>Actions</th>
+                                                    }
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in @servicesData.ResourceComponents)
+                                                {
+                                                    <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
+                                                        <td class="w-50">
+                                                            @item.DisplayName
                                                             @if (item.IsCustom)
                                                             {
+                                                                <span>
+                                                                    (CUSTOM)
+                                                                </span>
+                                                            }
+                                                        </td>
+                                                        @if (admin)
+                                                        {
+                                                            <td>
+                                                                <button type="button" class="btn btn-primary" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"up"))" title="Move up">
+                                                                    <span class="oi oi-arrow-thick-top" aria-hidden="true"></span>
+                                                                </button>
+                                                                <span> </span>
+                                                                <button type="button" class="btn btn-primary" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"down"))" title="Move down">
+                                                                    <span class="oi oi-arrow-thick-bottom" aria-hidden="true"></span>
+                                                                </button>
+
                                                                 <span> </span>
                                                                 <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceComponent",item.Id,"edit"))" title="Edit">
                                                                     <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                 </button>
-                                                            }
-                                                            @if (item.Enabled)
-                                                            {
-                                                                <span> </span>
-                                                                <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
-                                                                    <span class="oi oi-ban" aria-hidden="true"></span>
-                                                                </button>
-                                                                @if (!protectedComponents.Contains(item.Name.ToLower()))
+                                                                @if (item.Enabled)
                                                                 {
-                                                                    @if (item.IsGloballyOptional)
-                                                                    {
-                                                                        <span> </span>
-                                                                        <button type="button" class="btn btn-info" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"globallyoptional"))" title="Toggle Not Globally Optional">
-                                                                            <span class="oi oi-question-mark" aria-hidden="true"></span>
-                                                                        </button>
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <span> </span>
-                                                                        <button type="button" class="btn btn-outline-info" style="min-width:42px;" @onclick="@(e => FormAction("ResourceComponent",item.Id,"globallyoptional"))" title="Toggle Globally Optional">
-                                                                            <span class="oi oi-question-mark" aria-hidden="true"></span>
-                                                                        </button>
-                                                                    }
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                <span> </span>
-                                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",item.Id,"enable"))" title="Enable">
-                                                                    <span class="oi oi-plus" aria-hidden="true"></span>
-                                                                </button>
-                                                            }
+                                                                    <span> </span>
+                                                                    <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceComponent",item.Id,"disable"))" title="Disable">
+                                                                        <span class="oi oi-ban" aria-hidden="true"></span>
+                                                                    </button>
 
-                                                            @if (item.IsCustom)
-                                                            {
-                                                                <span> </span>
-                                                                <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceComponent",item.Id,"delete"))" title="Delete">
-                                                                    <span class="oi oi-x" aria-hidden="true"></span>
-                                                                </button>
-                                                            }
-                                                        </td>
-                                                    }
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span> </span>
+                                                                    <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceComponent",item.Id,"enable"))" title="Enable">
+                                                                        <span class="oi oi-plus" aria-hidden="true"></span>
+                                                                    </button>
+                                                                }
+
+                                                                @if (item.IsCustom)
+                                                                {
+                                                                    <span> </span>
+                                                                    <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceComponent",item.Id,"delete"))" title="Delete">
+                                                                        <span class="oi oi-x" aria-hidden="true"></span>
+                                                                    </button>
+                                                                }
+                                                            </td>
+                                                        }
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                             @if (admin)
@@ -340,44 +320,46 @@
                                 </div>
                                 <div class="card card-body @theme.ThemeStyle">
                                     <p>The current delimiter.</p>
-                                    <table class="table @theme.ThemeStyle">
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Delimiter</th>
-                                                @if (admin)
-                                                {
-                                                    <th>Actions</th>
-                                                }
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var item in @servicesData.ResourceDelimiters)
-                                            {
-                                                <tr style="height:55px;" class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
-                                                    <td>@item.Name</td>
-                                                    <td>@item.Delimiter</td>
+                                    <div class="table-responsive">
+                                        <table class="table @theme.ThemeStyle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Delimiter</th>
                                                     @if (admin)
                                                     {
-                                                        <td>
-                                                            @if (item.Enabled)
-                                                            {
-                                                                @* <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceDelimiter",item.Id,"disable"))" title="Disable">
-                                            <span class="oi oi-x" aria-hidden="true"></span>
-                                            </button>*@
-                                                            }
-                                                            else
-                                                            {
-                                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceDelimiter",item.Id,"enable"))" title="Enable">
-                                                                    <span class="oi oi-plus" aria-hidden="true"></span>
-                                                                </button>
-                                                            }
-                                                        </td>
+                                                        <th>Actions</th>
                                                     }
                                                 </tr>
-                                            }
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var item in @servicesData.ResourceDelimiters)
+                                                {
+                                                    <tr style="height:55px;" class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
+                                                        <td>@item.Name</td>
+                                                        <td>@item.Delimiter</td>
+                                                        @if (admin)
+                                                        {
+                                                            <td>
+                                                                @if (item.Enabled)
+                                                                {
+                                                                    @* <button type="button" class="btn btn-danger" @onclick="@(e => FormAction("ResourceDelimiter",item.Id,"disable"))" title="Disable">
+                                                <span class="oi oi-x" aria-hidden="true"></span>
+                                                </button>*@
+                                                                }
+                                                                else
+                                                                {
+                                                                    <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceDelimiter",item.Id,"enable"))" title="Enable">
+                                                                        <span class="oi oi-plus" aria-hidden="true"></span>
+                                                                    </button>
+                                                                }
+                                                            </td>
+                                                        }
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                             @if (admin)
@@ -477,7 +459,8 @@
                                                             <span class="oi oi-plus" aria-hidden="true"></span> Add Environment
                                                         </button>
                                                     </p>
-                                                }
+                                                }                                                
+                                                <div class="table-responsive">
                                                 <table class="table @theme.ThemeStyle">
                                                     <thead>
                                                         <tr>
@@ -522,6 +505,7 @@
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
                                         @if (admin)
@@ -615,6 +599,7 @@
                                                         </button>
                                                     </p>
                                                 }
+                                                <div class="table-responsive">
                                                 <table class="table @theme.ThemeStyle">
                                                     <thead>
                                                         <tr>
@@ -660,6 +645,7 @@
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
                                         @if (admin)
@@ -745,6 +731,7 @@
                                             </div>
                                             <div class="card card-body @theme.ThemeStyle">
                                                 <p>The current Locations.</p>
+                                                <div class="table-responsive">
                                                 <table class="table @theme.ThemeStyle">
                                                     <thead>
                                                         <tr>
@@ -796,6 +783,7 @@
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
                                         @if (admin)
@@ -957,6 +945,7 @@
                                                         </button>
                                                     </p>
                                                 }
+                                                <div class="table-responsive">
                                                 <table class="table @theme.ThemeStyle">
                                                     <thead>
                                                         <tr>
@@ -1001,6 +990,7 @@
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
                                         @if (admin)
@@ -1097,6 +1087,7 @@
                                                         </button>
                                                     </p>
                                                 }
+                                                <div class="table-responsive">
                                                 <table class="table @theme.ThemeStyle">
                                                     <thead>
                                                         <tr>
@@ -1141,6 +1132,7 @@
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
                                         @if (admin)
@@ -1265,91 +1257,93 @@
                                                         </div>
                                                     </div>
                                                 </p>
-                                                <table class="table @theme.ThemeStyle">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Name</th>
-                                                            <th>Short Name</th>
-                                                            @if (admin)
-                                                            {
-                                                                <th>Optional</th>
-                                                                <th>Excluded</th>
-                                                                <th>Actions</th>
-                                                            }
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach (var item in @servicesData.ResourceTypes)
-                                                        {
-                                                            if (!IsTypeVisible(item))
-                                                                continue;
-                                                            <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
-                                                                @if (item.Property != "")
-                                                                {
-                                                                    <td>@item.Resource - @item.Property<a id="@item.Id"></a></td>
-                                                                }
-                                                                else
-                                                                {
-                                                                    <td>@item.Resource<a id="@item.Id"></a></td>
-                                                                }
-                                                                <td>@item.ShortName</td>
+                                                <div class="table-responsive">
+                                                    <table class="table @theme.ThemeStyle">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Short Name</th>
                                                                 @if (admin)
                                                                 {
-                                                                    <td>
-                                                                        @if (item.Optional != "")
-                                                                        {
-                                                                            @foreach (ResourceComponent component in @servicesData.ResourceComponents.Where(y => y.Enabled).ToList())
+                                                                    <th>Optional</th>
+                                                                    <th>Excluded</th>
+                                                                    <th>Actions</th>
+                                                                }
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var item in @servicesData.ResourceTypes)
+                                                            {
+                                                                if (!IsTypeVisible(item))
+                                                                    continue;
+                                                                <tr class="@GeneralHelper.SetTextEnabledClass(item.Enabled)">
+                                                                    @if (item.Property != "")
+                                                                    {
+                                                                        <td>@item.Resource - @item.Property<a id="@item.Id"></a></td>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <td>@item.Resource<a id="@item.Id"></a></td>
+                                                                    }
+                                                                    <td>@item.ShortName</td>
+                                                                    @if (admin)
+                                                                    {
+                                                                        <td>
+                                                                            @if (item.Optional != "")
                                                                             {
-                                                                                if (component.Name != "ResourceType")
+                                                                                @foreach (ResourceComponent component in @servicesData.ResourceComponents.Where(y => y.Enabled).ToList())
                                                                                 {
-                                                                                    @if (item.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
+                                                                                    if (component.Name != "ResourceType")
                                                                                     {
-                                                                                        <div>@component.DisplayName</div>
+                                                                                        @if (item.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
+                                                                                        {
+                                                                                            <div>@component.DisplayName</div>
+                                                                                        }
                                                                                     }
                                                                                 }
                                                                             }
-                                                                        }
-                                                                    </td>
-                                                                    <td>
-                                                                        @if (item.Exclude != "")
-                                                                        {
-                                                                            @foreach (ResourceComponent component in @servicesData.ResourceComponents)
+                                                                        </td>
+                                                                        <td>
+                                                                            @if (item.Exclude != "")
                                                                             {
-                                                                                //if (component.Name != "ResourceType")
-                                                                                //{
-                                                                                @if (item.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
+                                                                                @foreach (ResourceComponent component in @servicesData.ResourceComponents)
                                                                                 {
-                                                                                    <div>@component.DisplayName</div>
+                                                                                    //if (component.Name != "ResourceType")
+                                                                                    //{
+                                                                                    @if (item.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
+                                                                                    {
+                                                                                        <div>@component.DisplayName</div>
+                                                                                    }
+                                                                                    //}
                                                                                 }
-                                                                                //}
                                                                             }
-                                                                        }
-                                                                    </td>
-                                                                    <td>
-                                                                        <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceType",item.Id,"edit"))" title="Edit">
-                                                                            <span class="oi oi-pencil" aria-hidden="true"></span>
-                                                                        </button>
-                                                                        @if (item.Enabled)
-                                                                        {
-                                                                            <span> </span>
-                                                                            <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceType",item.Id,"disable"))" title="Disable">
-                                                                                <span class="oi oi-ban" aria-hidden="true"></span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <button type="button" class="btn btn-secondary" @onclick="@(e => FormAction("ResourceType",item.Id,"edit"))" title="Edit">
+                                                                                <span class="oi oi-pencil" aria-hidden="true"></span>
                                                                             </button>
-                                                                        }
-                                                                        else
-                                                                        {
+                                                                            @if (item.Enabled)
+                                                                            {
+                                                                                <span> </span>
+                                                                                <button type="button" class="btn btn-dark" @onclick="@(e => FormAction("ResourceType",item.Id,"disable"))" title="Disable">
+                                                                                    <span class="oi oi-ban" aria-hidden="true"></span>
+                                                                                </button>
+                                                                            }
+                                                                            else
+                                                                            {
 
-                                                                            <span> </span>
-                                                                            <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceType",item.Id,"enable"))" title="Enable">
-                                                                                <span class="oi oi-plus" aria-hidden="true"></span>
-                                                                            </button>
-                                                                        }
-                                                                    </td>
-                                                                }
-                                                            </tr>
-                                                        }
-                                                    </tbody>
-                                                </table>
+                                                                                <span> </span>
+                                                                                <button type="button" class="btn btn-success" @onclick="@(e => FormAction("ResourceType",item.Id,"enable"))" title="Enable">
+                                                                                    <span class="oi oi-plus" aria-hidden="true"></span>
+                                                                                </button>
+                                                                            }
+                                                                        </td>
+                                                                    }
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
                                         @if (admin)
@@ -1484,6 +1478,7 @@
                                                         </button>
                                                     </p>
                                                 }
+                                                <div class="table-responsive">
                                                 <table class="table @theme.ThemeStyle">
                                                     <thead>
                                                         <tr>
@@ -1529,6 +1524,7 @@
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
                                         @if (admin)
@@ -1622,6 +1618,7 @@
                                                         </button>
                                                     </p>
                                                 }
+                                                <div class="table-responsive">
                                                 <table class="table @theme.ThemeStyle">
                                                     <thead>
                                                         <tr>
@@ -1666,6 +1663,7 @@
                                                         }
                                                     </tbody>
                                                 </table>
+                                                </div>
                                             </div>
                                         </div>
                                         @if (admin)
@@ -1831,6 +1829,12 @@
     private ServicesData servicesData = new();
     private bool dataLoaded = false;
     private bool admin;
+    private string? versionalert = "";
+    private bool versionalertshown = false;
+    private bool dismissalert = false;
+    private bool configurationalertshown = false;
+    private bool configurationfilealertshown = false;
+    private string appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
     public string filterData { get; set; }
 
@@ -1887,20 +1891,40 @@
             // Determine if the installed version of the configuration files are up to date
             if (admin)
             {
+                // Determine if the version notification has been dismissed
+                var resultVersionAlert = await session.GetAsync<bool>("versionalert-" + appversion + "-shown");
+                versionalertshown = resultVersionAlert.Success ? resultVersionAlert.Value : false;
+                if (!versionalertshown)
+                {
+                    versionalert = ConfigurationHelper.GetVersionAlert().Result;
+                    if (versionalert == "")
+                    {
+                        versionalertshown = true;
+                        await session.SetAsync("versionalert-" + appversion + "-shown", true);
+                    }
+                }
+
+                var resultConfigurationFileAlert = await session.GetAsync<bool>("configurationfilealertshown");
+                configurationfilealertshown = resultConfigurationFileAlert.Success ? resultConfigurationFileAlert.Value : false;
+
                 // Check connectivity
                 if (ConfigurationHelper.VerifyConnectivity())
                 {
-                    // Get a list of any configurations that are out of date
-                    List<string> versiondata = await ConfigurationHelper.VerifyConfigurationFileVersionData();
-                    if (versiondata.Count > 0)
+                    if (!configurationfilealertshown)
                     {
-                        string versionmessage = "";
-                        foreach (string message in versiondata)
+                        // Get a list of any configurations that are out of date
+                        List<string> versiondata = await ConfigurationHelper.VerifyConfigurationFileVersionData();
+                        if (versiondata.Count > 0)
                         {
-                            versionmessage += message;
+                            string versionmessage = "";
+                            foreach (string message in versiondata)
+                            {
+                                versionmessage += message;
+                            }
+                            // Display a notification of the files requiring updating
+                            await ShowInformationModal("bg-navcolor", "ATTENTION", versionmessage);
+                            await session.SetAsync("configurationfilealertshown", true);
                         }
-                        // Display a notification of the files requiring updating
-                        await ShowInformationModal("bg-navcolor", "ATTENTION", versionmessage);
                     }
                 }
             }
@@ -1929,6 +1953,13 @@
     {
         message = new ResponseMessage();
         bool confirm = false;
+        var workingmodaloptions = new ModalOptions()
+            {
+                HideCloseButton = true,
+                UseCustomLayout = true
+            };
+
+        var workingmodal = Modal.Show<WorkingModal>("Working", workingmodaloptions);
         try
         {
             ServiceResponse serviceResponse;
@@ -1997,36 +2028,11 @@
                         case "disable":
                             resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
                             resourceComponent.Enabled = false;
-                            resourceComponent.IsGloballyOptional = false;
                             serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
                             if (serviceResponse.Success)
                             {
                                 message.Type = MessageTypesEnum.SUCCESS;
                                 message.Message = resourceComponent.Name + " disabled!";
-                            }
-                            else
-                            {
-                                message.Type = MessageTypesEnum.ERROR;
-                                message.Message = resourceComponent.Name + " disabling failed!";
-                                message.MessageDetails = serviceResponse.ResponseMessage;
-                            }
-                            break;
-                        case "globallyoptional":
-                            resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
-                            resourceComponent.IsGloballyOptional = !resourceComponent.IsGloballyOptional;
-                            serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
-                            if (serviceResponse.Success)
-                            {
-                                message.Message = resourceComponent.Name;
-                                if (resourceComponent.IsGloballyOptional)
-                                {
-                                    message.Message += " set as Globally Optional!";
-                                }
-                                else
-                                {
-                                    message.Message += " set as Not Globally Optional!";
-                                }
-                                message.Type = MessageTypesEnum.SUCCESS;
                             }
                             else
                             {
@@ -2041,7 +2047,8 @@
                             ShowAddModal((int)id, "ResourceComponent", "Add Component", "<p>Add a Component.</p>");
                             break;
                         case "edit":
-                            ShowEditModal((int)id, "ResourceComponent", "Edit Component", "Edit the Component.");
+                            resourceComponent = servicesData.ResourceComponents.Find(x => x.Id == id);
+                            ShowEditModal((int)id, "ResourceComponent", "Edit Component", "Edit the Component.", !resourceComponent.IsCustom);
                             break;
                         case "delete":
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
@@ -2422,7 +2429,7 @@
                     servicesData.ResourceFunctions = (List<ResourceFunction>)serviceResponse.ResponseObject;
                     break;
                 case "ResourceLocation":
-                    ResourceLocation resourceLocation;
+                    AzureNamingTool.Models.ResourceLocation resourceLocation;
                     switch (action)
                     {
                         case "enable":
@@ -2524,7 +2531,7 @@
                                 confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will update your current Locations configuration and cannot be undone!\n\nAre you sure?");
                                 if (confirm)
                                 {
-                                    serviceResponse = await ResourceLocationService.PostConfig(JsonSerializer.Deserialize<List<ResourceLocation>>(newLocationConfig));
+                                    serviceResponse = await ResourceLocationService.PostConfig(JsonSerializer.Deserialize<List<AzureNamingTool.Models.ResourceLocation>>(newLocationConfig));
                                     if (serviceResponse.Success)
                                     {
                                         message.Type = MessageTypesEnum.SUCCESS;
@@ -2542,7 +2549,7 @@
                             break;
                     }
                     serviceResponse = await ResourceLocationService.GetItems();
-                    servicesData.ResourceLocations = (List<ResourceLocation>)serviceResponse.ResponseObject;
+                    servicesData.ResourceLocations = (List<AzureNamingTool.Models.ResourceLocation>)serviceResponse.ResponseObject;
                     break;
                 case "ResourceOrg":
                     ResourceOrg resourceOrg;
@@ -3120,55 +3127,19 @@
                             confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nThis will reset your current configuration for all settings and cannot be undone!\n\nAre you sure?");
                             if (confirm)
                             {
-                                if (!FileSystemHelper.ResetConfiguration("resourcecomponents.json"))
+                                bool confirm2 = confirm = await JsRuntime.InvokeAsync<bool>("confirm", "WARNING!\n\nEvery setting of the site will be reset if you continue! It is recommended you take a backup of the configuration before proceeding!\n\nAre you sure?");
+                                if (confirm2)
                                 {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourcedelimiters.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourceenvironments.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourcefunctions.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourcelocations.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourceorgs.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourceprojappsvcs.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourcetypes.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourceunitdepts.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-                                if (!FileSystemHelper.ResetConfiguration("resourceunitdepts.json"))
-                                {
-                                    message.Type = MessageTypesEnum.ERROR;
-                                }
-
-                                if (message.Type == MessageTypesEnum.ERROR)
-                                {
-                                    message.Message = "Global configuration reset failed!";
-                                }
-                                else
-                                {
-                                    message.Type = MessageTypesEnum.SUCCESS;
-                                    message.Message = "Global configuration reset!";
+                                    if (ConfigurationHelper.ResetSiteConfiguration())
+                                    {
+                                        message.Type = MessageTypesEnum.SUCCESS;
+                                        message.Message = "Global configuration reset!";
+                                    }
+                                    else
+                                    {
+                                        message.Type = MessageTypesEnum.ERROR;
+                                        message.Message = "Global configuration reset failed!";
+                                    }
                                 }
                             }
                             break;
@@ -3227,6 +3198,11 @@
             message.Type = MessageTypesEnum.ERROR;
             message.Message = "There was a problem with the request.";
         }
+        finally
+        {
+            workingmodal.Close();
+        }
+
 
         if (message.Message != null)
         {
@@ -3371,12 +3347,9 @@
 
         var modal = Modal.Show<EditModal>(title, parameters, options);
         var result = await modal.Result;
-        if (!result.Cancelled)
-        {
-            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
-            state.SetNavReload(true);
-            StateHasChanged();
-        }
+        servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+        state.SetNavReload(true);
+        StateHasChanged();
     }
 
     async Task ShowInformationModal(string headerstyle, string title, string message)
@@ -3441,5 +3414,14 @@
     private async Task OnInstructionsClick()
     {
         NavigationManager.NavigateTo("/instructions");
+    }
+
+    private async Task OnConfigurationAlertDismissed()
+    {
+        await session.SetAsync("versionalert-" + appversion + "-shown", true);
+        if (dismissalert)
+        {
+            ConfigurationHelper.DismissVersionAlert();
+        }
     }
 }
