@@ -130,8 +130,8 @@ This process will allow you to deploy the Azure Naming Tool as a .NET applicatio
 **Create an Azure Web App** (if needed)  
 For an automated deployment of a Web App, utilize the button below and fill in the required information. Then proceed to step 4.    
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
-[![Deploy to Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmaster%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
+[![Deploy to Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmaster%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
 
 1. Create a new Azure Web App in the Azure portal.
 2. For the **Publish** option, select **Code**.
