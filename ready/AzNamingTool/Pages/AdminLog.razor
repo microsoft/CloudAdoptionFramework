@@ -42,7 +42,7 @@
         }
         else
         {
-            <div class="mb-3">
+            <div>
                 @if (lstAdminLogMessages.Count > 0)
                 {
                     <div class="mb-3">
@@ -53,13 +53,13 @@
                             Purge Admin Log
                         </button>
                     </div>
-                    <div class="card">
+                    <div class="card mb-3">
                         <div class="card-header bg-default text-black">
                             <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
-                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter Data
                             </a>
                         </div>
-                        <div class="collapse card card-body @theme.ThemeStyle" id="filter">
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="filter">
                             <div class="form-group row mb-3">
                                 <div style="width:auto;">
                                     <input class="form-control" type="date" style="width: 150px;" @bind="startdate" @bind:event="oninput" />
@@ -71,9 +71,9 @@
                                     <input class="form-control" type="date" style="width: 150px;" @bind="enddate" @bind:event="oninput" />
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <div class="input-group flex-nowrap mb-3">
-                                    <div class="input-group flex-nowrap mb-3">
+                            <div class="form-group row mb-3">
+                                <div class="input-group flex-nowrap">
+                                    <div class="input-group flex-nowrap">
                                         <span class="input-group-text" id="addon-wrapping">
                                             <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
                                         </span>
@@ -81,6 +81,13 @@
                                        @bind="filterData"
                                        @bind:event="oninput">
                                     </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div>
+                                    <button class="btn btn-success" title="Reset" @onclick="@(e => OnResetClick())">
+                                        Reset
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -145,16 +152,15 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ServiceResponse serviceResponse = new();
-        var result = await session.GetAsync<bool>("admin");
-        admin = (bool)result.Value;
-        if (!admin)
-        {
-            NavigationManager.NavigateTo("/");
-        }
-
         if (firstRender)
         {
+            var result = await session.GetAsync<bool>("admin");
+            admin = (bool)result.Value;
+            if (!admin)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+            ServiceResponse serviceResponse = new();
             serviceResponse = await AdminLogService.GetItems();
             lstAdminLogMessages = (List<AdminLogMessage>)serviceResponse.ResponseObject;
 
@@ -226,6 +232,7 @@
         enddate = DateTime.Today;
         filterData = "";
     }
+    
     private async void ShowInstructionsModal()
     {
         try

@@ -18,7 +18,7 @@ namespace AzureNamingTool.Helpers
         public static async Task<string> ReadFile(string fileName, string folderName = "settings/")
         {
             await CheckFile(folderName + fileName);
-            string data = await File.ReadAllTextAsync(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName));
+            string data = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName));
             return data;
         }
 

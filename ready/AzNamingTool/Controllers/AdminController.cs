@@ -244,5 +244,32 @@ namespace AzureNamingTool.Controllers
                 return BadRequest(ex);
             }
         }
+
+        /// <summary>
+        /// This function will reset the site configuration. THIS CANNOT BE UNDONE!
+        /// </summary>
+        /// <returns>dttring - Successful operation</returns>
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> ResetSiteConfiguration([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
+        {
+            try
+            {
+
+                if (ConfigurationHelper.ResetSiteConfiguration())
+                {
+                    return Ok("Site configuration reset suceeded!");
+                }
+                else
+                {
+                    return BadRequest("Site configuration reset failed!");
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
     }
 }

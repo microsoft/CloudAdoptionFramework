@@ -25,7 +25,7 @@
         </div>
         <div style="clear:both;"></div>
         <div class="mb-3">This page generates a name for the selected resource type.</div>
-        <div class="card ">
+        <div class="card mb-3">
             <h5 class="card-header bg-default text-black">
                 Instructions
             </h5>
@@ -75,7 +75,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="generateselect" id="multiselect" value="multi" @onclick="@(e => OnGenerateModeChange("multi"))">
                                 <label class="form-check-label" for="multiselect">
-                                    <strong>Generate Multiple Resource Type Names</strong><br />This option will allow the generatation of names for multiple resource types using the selected components. All components not marked as Globally Optional will be required.
+                                    <strong>Generate Multiple Resource Type Names</strong><br />This option will allow the generatation of names for multiple resource types using the selected components. All components will be required.
                                 </label>
                             </div>
                         </div>
@@ -215,7 +215,7 @@
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
                                                     @resourceComponent.DisplayName
-                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("environment")) && (multiselectedResourceTypes.Count == 0)) || (resourceComponent.IsGloballyOptional))
+                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("environment")) && (multiselectedResourceTypes.Count == 0)))
                                                     {
                                                         @((MarkupString)optional)
                                                     }
@@ -237,7 +237,7 @@
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
                                                     @resourceComponent.DisplayName
-                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("function")) && (multiselectedResourceTypes.Count == 0)) || (resourceComponent.IsGloballyOptional))
+                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("function")) && (multiselectedResourceTypes.Count == 0)))
                                                     {
                                                         @((MarkupString)optional)
                                                     }
@@ -259,7 +259,7 @@
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
                                                     @resourceComponent.DisplayName
-                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("instance")) && (multiselectedResourceTypes.Count == 0)) || (resourceComponent.IsGloballyOptional))
+                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("instance")) && (multiselectedResourceTypes.Count == 0)))
                                                     {
                                                         @((MarkupString)optional)
                                                     }
@@ -275,7 +275,7 @@
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
                                                     @resourceComponent.DisplayName
-                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("location")) && (multiselectedResourceTypes.Count == 0)) || (resourceComponent.IsGloballyOptional))
+                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("location")) && (multiselectedResourceTypes.Count == 0)))
                                                     {
                                                         @((MarkupString)optional)
                                                     }
@@ -297,7 +297,7 @@
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
                                                     @resourceComponent.DisplayName
-                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("org")) && (multiselectedResourceTypes.Count == 0)) || (resourceComponent.IsGloballyOptional))
+                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("org")) && (multiselectedResourceTypes.Count == 0)))
                                                     {
                                                         @((MarkupString)optional)
                                                     }
@@ -319,7 +319,7 @@
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
                                                     @resourceComponent.DisplayName
-                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("projappsvc")) && (multiselectedResourceTypes.Count == 0)) || (resourceComponent.IsGloballyOptional))
+                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("projappsvc")) && (multiselectedResourceTypes.Count == 0)))
                                                     {
                                                         @((MarkupString)optional)
                                                     }
@@ -341,7 +341,7 @@
                                             <div class="card @theme.ThemeStyle mb-3">
                                                 <h5 class="card-header text-white bg-secondary">
                                                     @resourceComponent.DisplayName
-                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("unitdept")) && (multiselectedResourceTypes.Count == 0)) || (resourceComponent.IsGloballyOptional))
+                                                    @if (((selectedResourceTypeOptional.ToLower().Contains("unitdept")) && (multiselectedResourceTypes.Count == 0)))
                                                     {
                                                         @((MarkupString)optional)
                                                     }
@@ -367,7 +367,7 @@
                                                     <div class="card @theme.ThemeStyle mb-3">
                                                         <h5 class="card-header text-white bg-secondary">
                                                             @resourceComponent.Name
-                                                            @if (((selectedResourceTypeOptional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true))) && (multiselectedResourceTypes.Count == 0)) || (resourceComponent.IsGloballyOptional))
+                                                            @if (((selectedResourceTypeOptional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true))) && (multiselectedResourceTypes.Count == 0)))
                                                             {
                                                                 @((MarkupString)optional)
                                                             }
@@ -828,7 +828,7 @@
                     if (!selectedResourceTypeExclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                     {
                         // Check if the component is optional for the resource type
-                        if ((!selectedResourceTypeOptional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true))) && (!resourceComponent.IsGloballyOptional))
+                        if ((!selectedResourceTypeOptional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true))))
                         {
                             switch (resourceComponent.Name)
                             {
@@ -951,123 +951,121 @@
                 else
                 {
                     // Ensure every component has a value, unless it's globally optional
-                    if (!resourceComponent.IsGloballyOptional)
-                    {
-                        switch (resourceComponent.Name)
-                        {
-                            case "ResourceEnvironment":
-                                if (selectedResourceEnvironment == null)
-                                {
-                                    boolFormDisabled = true;
-                                }
-                                else
-                                {
-                                    if (selectedResourceEnvironment == "")
-                                    {
-                                        boolFormDisabled = true;
-                                    }
-                                }
-                                break;
 
-                            case "ResourceInstance":
-                                if (selectedResourceInstance == null)
+                    switch (resourceComponent.Name)
+                    {
+                        case "ResourceEnvironment":
+                            if (selectedResourceEnvironment == null)
+                            {
+                                boolFormDisabled = true;
+                            }
+                            else
+                            {
+                                if (selectedResourceEnvironment == "")
                                 {
                                     boolFormDisabled = true;
                                 }
-                                else
-                                {
-                                    if (selectedResourceInstance == "")
-                                    {
-                                        boolFormDisabled = true;
-                                    }
-                                }
-                                break;
-                            case "ResourceLocation":
-                                if (selectedResourceLocation == null)
-                                {
-                                    boolFormDisabled = true;
-                                }
-                                else
-                                {
-                                    if (selectedResourceLocation == "")
-                                    {
-                                        boolFormDisabled = true;
-                                    }
-                                }
-                                break;
-                            case "ResourceOrg":
-                                if (selectedResourceOrg == null)
+                            }
+                            break;
+
+                        case "ResourceInstance":
+                            if (selectedResourceInstance == null)
+                            {
+                                boolFormDisabled = true;
+                            }
+                            else
+                            {
+                                if (selectedResourceInstance == "")
                                 {
                                     boolFormDisabled = true;
                                 }
-                                else
-                                {
-                                    if (selectedResourceOrg == "")
-                                    {
-                                        boolFormDisabled = true;
-                                    }
-                                }
-                                break;
-                            case "ResourceProjAppSvc":
-                                if (selectedResourceProjAppSvc == null)
-                                {
-                                    boolFormDisabled = true;
-                                }
-                                else
-                                {
-                                    if (selectedResourceProjAppSvc == "")
-                                    {
-                                        boolFormDisabled = true;
-                                    }
-                                }
-                                break;
-                            case "ResourceUnitDept":
-                                if (selectedResourceUnitDept == null)
+                            }
+                            break;
+                        case "ResourceLocation":
+                            if (selectedResourceLocation == null)
+                            {
+                                boolFormDisabled = true;
+                            }
+                            else
+                            {
+                                if (selectedResourceLocation == "")
                                 {
                                     boolFormDisabled = true;
                                 }
-                                else
-                                {
-                                    if (selectedResourceUnitDept == "")
-                                    {
-                                        boolFormDisabled = true;
-                                    }
-                                }
-                                break;
-                            case "ResourceFunction":
-                                if (selectedResourceFunction == null)
+                            }
+                            break;
+                        case "ResourceOrg":
+                            if (selectedResourceOrg == null)
+                            {
+                                boolFormDisabled = true;
+                            }
+                            else
+                            {
+                                if (selectedResourceOrg == "")
                                 {
                                     boolFormDisabled = true;
                                 }
-                                else
+                            }
+                            break;
+                        case "ResourceProjAppSvc":
+                            if (selectedResourceProjAppSvc == null)
+                            {
+                                boolFormDisabled = true;
+                            }
+                            else
+                            {
+                                if (selectedResourceProjAppSvc == "")
                                 {
-                                    if (selectedResourceFunction == "")
+                                    boolFormDisabled = true;
+                                }
+                            }
+                            break;
+                        case "ResourceUnitDept":
+                            if (selectedResourceUnitDept == null)
+                            {
+                                boolFormDisabled = true;
+                            }
+                            else
+                            {
+                                if (selectedResourceUnitDept == "")
+                                {
+                                    boolFormDisabled = true;
+                                }
+                            }
+                            break;
+                        case "ResourceFunction":
+                            if (selectedResourceFunction == null)
+                            {
+                                boolFormDisabled = true;
+                            }
+                            else
+                            {
+                                if (selectedResourceFunction == "")
+                                {
+                                    boolFormDisabled = true;
+                                }
+                            }
+                            break;
+                        default:
+                            if (resourceComponent.IsCustom)
+                            {
+                                if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 0)
+                                {
+                                    // Make sure each component has a value
+                                    if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == null)
                                     {
                                         boolFormDisabled = true;
                                     }
-                                }
-                                break;
-                            default:
-                                if (resourceComponent.IsCustom)
-                                {
-                                    if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 0)
+                                    else
                                     {
-                                        // Make sure each component has a value
-                                        if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == null)
+                                        if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == "")
                                         {
                                             boolFormDisabled = true;
                                         }
-                                        else
-                                        {
-                                            if (selectedCustomComponents[GeneralHelper.NormalizeName(resourceComponent.Name, true)] == "")
-                                            {
-                                                boolFormDisabled = true;
-                                            }
-                                        }
                                     }
                                 }
-                                break;
-                        }
+                            }
+                            break;
                     }
                 }
             }

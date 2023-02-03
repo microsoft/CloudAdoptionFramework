@@ -34,11 +34,13 @@
         }
         else
         {
-            <div class="card" style="margin-bottom:10px;">
-                <h5 class="card-header text-white bg-secondary">
-                    Jump To
-                </h5>
-                <div class="card card-body @theme.ThemeStyle">
+            <div class="card mb-3">
+                <div class="card-header bg-default text-black">
+                    <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#jumpto" role="button" aria-expanded="false" aria-controls="jumpto">
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Jump To
+                    </a>
+                </div>
+                <div class="collapse show card card-body @theme.ThemeStyle" id="jumpto">
                     <p>
                         Use the filters below to jump to a specifc resource type.
                     </p>
@@ -64,18 +66,6 @@
                             }
                         }
                     </select>
-                    <div class="form-group row mt-3">
-                        <div class="input-group flex-nowrap">
-                            <div class="input-group flex-nowrap mb-3">
-                                <span class="input-group-text" id="addon-wrapping">
-                                    <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
-                                </span>
-                                <input class="form-control" type="search" placeholder="Filter by Name, Short Name"
-                                   @bind="filterData"
-                                   @bind:event="oninput">
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             <table class="table table-responsive  @theme.ThemeStyle w-100">
@@ -90,7 +80,14 @@
                                     <tbody>
                                         <tr class="bg-secondary">
                                             <td style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;">
-                                                <h5 class="text-white bg-secondary" style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;">@resourcetype.Resource</h5>
+                                                @if (resourcetype.Property != "")
+                                                {
+                                                    <h5 class="text-white bg-secondary" style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;">@resourcetype.Resource - @resourcetype.Property                                                  </h5>
+                                                }
+                                                else
+                                                {
+                                                    <h5 class="text-white bg-secondary" style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;">@resourcetype.Resource                                                    </h5>
+                                                }
                                             </td>
                                         </tr>
                                         <tr>
@@ -489,7 +486,7 @@
         selectedResourceTypeCategory = e.Value.ToString();
 
     }
-    
+
     private async void OnTypeChanged(ChangeEventArgs e)
     {
         await JsRuntime.InvokeVoidAsync("scrollIntoView", e.Value.ToString());
@@ -511,7 +508,7 @@
         }
         return visible;
     }
-    
+
     private async void ShowInstructionsModal()
     {
         try

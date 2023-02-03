@@ -128,6 +128,36 @@ namespace AzureNamingTool.Controllers
             }
         }
 
+        // POST api/<ResourceTypesController>
+        /// <summary>
+        /// This function will update all resource types for the specifed component
+        /// </summary>
+        /// <param name="operation">string - Operation type  (optional-add, optional-remove, exlcude-add, exclude-remove)</param>
+        /// <param name="componentid">int - Component ID</param>
+        /// <returns>bool - PASS/FAIL</returns>
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> UpdateTypeComponents(string operation, int componentid)
+        {
+            try
+            {
+                serviceResponse = await ResourceTypeService.UpdateTypeComponents(operation, componentid);
+                if (serviceResponse.Success)
+                {
+                    return Ok("Resource Types updated!");
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
         //// DELETE api/<ResourceTypesController>/5
         //[HttpDelete("{id}")]
         //public async Task<IActionResult> Delete(int id)

@@ -5,6 +5,8 @@ using AzureNamingTool.Services;
 using System.Xml.Linq;
 using System.Net.NetworkInformation;
 using System.Net;
+using System.Runtime.Caching;
+using System.Reflection;
 
 namespace AzureNamingTool.Helpers
 {
@@ -26,7 +28,11 @@ namespace AzureNamingTool.Helpers
             try
             {
                 var config = GetConfigurationData();
-                value = config.GetType().GetProperty(key).GetValue(config, null).ToString();
+
+                if (config.GetType().GetProperty(key) != null)
+                {
+                    value = config.GetType().GetProperty(key).GetValue(config, null).ToString();
+                }
             }
             catch (Exception ex)
             {
@@ -435,6 +441,36 @@ namespace AzureNamingTool.Helpers
             }
         }
 
+        public static bool ResetSiteConfiguration()
+        {
+            bool result = false;
+            try
+            {
+                // Get all the files in teh repository folder
+                DirectoryInfo repositoryDir = new("repository");
+                // Filter out teh appsettings.json to retain admin credentials
+                foreach (FileInfo file in repositoryDir.GetFiles().Where(x => x.Name != "appsettings.json"))
+                {
+                    // Copy the repository file to the settings folder
+                    file.CopyTo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + file.Name), true);
+                }
+
+                // Clear the cache
+                ObjectCache memoryCache = MemoryCache.Default;
+                List<string> cacheKeys = memoryCache.Select(kvp => kvp.Key).ToList();
+                foreach (string cacheKey in cacheKeys)
+                {
+                    memoryCache.Remove(cacheKey);
+                }
+                result = true;
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+            return result;
+        }
+
         public static void ResetState(StateContainer state)
         {
             state.SetVerified(false);
@@ -461,6 +497,118 @@ namespace AzureNamingTool.Helpers
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
                 return null;
             }
+        }
+
+        public static async Task<string> GetVersionAlert(bool forceDisplay = false)
+        {
+            string alert = "";
+            try
+            {
+                VersionAlert versionalert = new();
+                bool dismissed = false;
+                string appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
+                // Check if version alert has been dismissed
+                var dismissedalerts = GetAppSetting("DismissedAlerts").Split(',');
+                if (dismissedalerts != null)
+                {
+                    if (dismissedalerts.Contains(appversion))
+                    {
+                        dismissed = true;
+                    }
+                }
+
+                if ((!dismissed) || (forceDisplay))
+                {
+                    // Check if the data is cached
+                    var cacheddata = CacheHelper.GetCacheObject("versionalert-" + appversion);
+                    if (cacheddata == null)
+                    {
+                        // Get the alert 
+                        List<VersionAlert> versionAlerts = new();
+                        string data = await FileSystemHelper.ReadFile("versionalerts.json", "");
+                        if (data != null)
+                        {
+                            var items = new List<VersionAlert>();
+                            var options = new JsonSerializerOptions
+                            {
+                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                PropertyNameCaseInsensitive = true
+                            };
+                            items = JsonSerializer.Deserialize<List<VersionAlert>>(data, options).ToList();
+                            versionalert = items.Where(x => x.Version == appversion).FirstOrDefault();
+
+                            if (versionalert != null)
+                            {
+                                // Set the result to cache
+                                CacheHelper.SetCacheObject("versionalert-" + appversion, versionalert);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        versionalert = (VersionAlert)cacheddata;
+                    }
+                    if (versionalert != null)
+                    {
+                        alert = versionalert.Alert;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+            return alert;
+        }
+
+        public static void DismissVersionAlert()
+        {
+            try
+            {
+                string appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+                List<string> dismissedalerts = new List<string>(GetAppSetting("DismissedAlerts").Split(','));
+                if (!dismissedalerts.Contains(appversion))
+                {
+                    if (string.Join(",", dismissedalerts) == "")
+                    {
+                        dismissedalerts.Clear();
+                    }
+                    dismissedalerts.Add(appversion);
+                }
+                SetAppSetting("DismissedAlerts", string.Join(",", dismissedalerts));
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+        }
+
+        public static bool VerifyDuplicateNamesAllowed()
+        {
+            bool result = false;
+            try
+            {
+                // Check if the data is cached
+                var cacheddata = CacheHelper.GetCacheObject("duplicatenamesallowed");
+                if (cacheddata == null)
+                {
+                    // Check if version alert has been dismissed
+                    var allowed = GetAppSetting("DuplicateNamesAllowed");
+                    result = Convert.ToBoolean(allowed);
+                    // Set the result to cache
+                    CacheHelper.SetCacheObject("duplicatenamesallowed", result);
+                }
+                else
+                {
+                    result = Convert.ToBoolean(cacheddata);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+            return result;
         }
     }
 }

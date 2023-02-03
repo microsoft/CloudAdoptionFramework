@@ -1,25 +1,39 @@
-﻿@using AzureNamingTool.Helpers;
+﻿@page "/admin"
+@using AzureNamingTool.Helpers;
 @using AzureNamingTool.Models;
 @using System.Runtime.Caching;
 @using AzureNamingTool.Services;
 @using Microsoft.AspNetCore.Html
 @using Microsoft.Extensions.Logging
+@using System.Reflection;
 @inject IJSRuntime JsRuntime
 @inject StateContainer state
 @inject ProtectedSessionStorage session
 @inject IToastService toastService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime jsRuntime
+@inject ProtectedLocalStorage storage
 
-<div class="modal fade show d-block" tabindex="-1" role="dialog">
-    <div class="modal-backdrop fade show" @onclick="Cancel"></div>
-    <div class="modal-dialog" style="z-index: 1050">
+<PageTitle>Azure Naming Tool - Admin</PageTitle>
+<div class="card  @theme.ThemeStyle">
+    <div class="card-body">
         <!-- Pop it above the backdrop -->
-        <div class="modal-content  @theme.ThemeStyle">
-            <div class="modal-header bg-navcolor text-white">
-                <h3 class="modal-title">Admin</h3>
+        <div class="@theme.ThemeStyle">
+            <div style="float:left;">
+                <h1>
+                    Admin
+                </h1>
             </div>
-            <div class="modal-body">
+            @if (admin)
+            {
+                <div style="float:right;">
+                    <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                        <span class="oi oi-document" aria-hidden="true"></span> Documentation
+                    </button>
+                </div>
+            }
+            <div style="clear:both;"></div>
+            <div>
                 @if (!admin)
                 {
                     <p>
@@ -35,15 +49,38 @@
                     <p>
                         This form allows you to set the Admin password, API key, and configuration for the Azure Naming Tool.
                     </p>
+                    <div class="card mb-3" style="width:auto;">
+                        <div class="card-header bg-default text-black">
+                            <a id="versiondetailslink" class="link-dark text-decoration-none" data-toggle="collapse" href="#versiondetails" role="button" aria-expanded="false" aria-controls="versiondetails">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Version Details
+                            </a>
+                        </div>
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="versiondetails">
+                            <div class="mb-3">
+                                <strong>Current version:</strong> @appversion
+                            </div>
+                            @if (versionalert != "")
+                            {
+                                <div class="alert alert-warning" role="alert">
+                                    <div>
+                                        @(
+                                            (MarkupString)versionalert
+                                            )
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
                     <div class="card mb-3">
                         <h5 class="card-header text-white bg-secondary text-white">
                             <a class="text-decoration-none text-white" data-toggle="collapse" style="display:block;font-weight:bold;" href="#updatepassword" role="button" aria-expanded="false" aria-controls="updatepassword">
-                                <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> Update Password</h5>
+                                <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin Password</h5>
                             </a>
                         </h5>
-                        <div class="collapse card card-body @theme.ThemeStyle" id="updatepassword">
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="updatepassword">
                             <p>
-                                Enter a new password for the site.
+                                Enter a new admin password for the site.
                             </p>
                             <p><strong>Requirements</strong></p>
                             <ul>
@@ -64,7 +101,7 @@
                                 <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> API Key</h5>
                             </a>
                         </h5>
-                        <div class="collapse card card-body @theme.ThemeStyle" id="updateapikey">
+                        <div class="collapse show  card card-body @theme.ThemeStyle" id="updateapikey">
                             <p>
                                 The current API key is displayed. Click <strong>Generate</strong> to generate a new random API Key, or update the text to the desired value.
                             </p>
@@ -82,7 +119,7 @@
                                 <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> Clear Cache</h5>
                             </a>
                         </h5>
-                        <div class="collapse card card-body @theme.ThemeStyle" id="clearcache">
+                        <div class="collapse show  card card-body @theme.ThemeStyle" id="clearcache">
                             <p>
                                 The tool uses caching for data to improve performance. Click <strong>Clear</strong> to clear all cached data.
                             </p>
@@ -91,38 +128,55 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card mb-3">
+                        <h5 class="card-header text-white bg-secondary text-white">
+                            <a class="text-decoration-none text-white" data-toggle="collapse" style="display:block;font-weight:bold;" href="#sitesettings" role="button" aria-expanded="false" aria-controls="sitesettings">
+                                <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> Site Settings</h5>
+                            </a>
+                        </h5>
+                        <div class="collapse show  card card-body @theme.ThemeStyle" id="sitesettings">
+                            <p>
+                                Configure settings for the site.
+                            </p>
+                            <div class="form-group">
+                                <label class="switch" title="Duplicate Names Allowed">
+                                    <input type="checkbox" checked="@duplicatenamesallowed" @oninput='args => SettingChanged(args, "duplicatenamesallowed")'>
+                                    <span class="slider round"></span>
+                                </label>
+                                <span class="align-text-top"> Allow duplicate name generation</span>
+                            </div>
+                        </div>
+                    </div>
                 }
             </div>
-            <div class="modal-footer">
-                @if (admin)
-                {
-                    <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("logout"))" title="Logout" data-toggle="collapse" href="#admin">Logout</button>
-                }
-                else
+            <div>
+                @if (!admin)
                 {
                     <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("login"))" title="Login">Login</button>
                 }
-                <button @onclick="Cancel" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 @code {
-
-    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
-    [Parameter] public ThemeInfo theme { get; set; }
-
-    [Parameter] public EventCallback OnAdminChange { get; set; }
-
+    [CascadingParameter]
+    protected ThemeInfo? theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
     private ServicesData servicesData = new();
     private string? currentpassword;
     private string? newpassword;
     private string? currentapikey;
     private ResponseMessage message = new();
     private bool admin;
+    private bool versionalertshown = false;
     private bool disabled = true;
-
+    private bool showversionalert = false;
+    private bool dismissalert = false;
+    private bool duplicatenamesallowed = false;
+    private string versionalert = string.Empty;
+    private string? appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
     private SiteConfiguration config = ConfigurationHelper.GetConfigurationData();
 
     protected override async void OnInitialized()
@@ -131,24 +185,39 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var result = await session.GetAsync<bool>("admin");
-        admin = (bool)result.Value;
-        if (admin)
+        if (firstRender)
         {
-            currentapikey = GeneralHelper.DecryptString(config.APIKey, config.SALTKey);
+            var result = await session.GetAsync<bool>("admin");
+            admin = (bool)result.Value;
+            if (admin)
+            {
+                currentapikey = GeneralHelper.DecryptString(config.APIKey, config.SALTKey);
+            }
+
+            await storage.SetAsync("apptheme", theme.ThemeStyle);
+            state.AppTheme = theme.ThemeStyle;
+
+            // Determine if the version notification has been dismissed
+            var resultVersionAlert = await session.GetAsync<bool>("versionalert-" + appversion + "-shown");
+            versionalertshown = resultVersionAlert.Success ? resultVersionAlert.Value : false;
+            versionalert = ConfigurationHelper.GetVersionAlert(true).Result;
+            if (versionalert != "")
+            {
+                showversionalert = true;
+            }
+            duplicatenamesallowed = Convert.ToBoolean(ConfigurationHelper.GetAppSetting("DuplicateNamesAllowed"));
         }
+
         StateHasChanged();
     }
 
     private async void AdminFormAction(string action)
     {
         message = new ResponseMessage();
-        ServiceResponse serviceResponse = new();
-
-        bool redirect = false;
-
         message.Header = "INFORMATION";
         message.Type = MessageTypesEnum.INFORMATION;
+        ServiceResponse serviceResponse = new();
+        bool redirect = false;
 
         switch (action)
         {
@@ -163,6 +232,8 @@
                     message.Type = MessageTypesEnum.INFORMATION;
                     message.Header = "INFORMATION";
                     message.Message = "Admin logged in.";
+                    admin = true;
+                    redirect = true;
                 }
                 else
                 {
@@ -256,13 +327,6 @@
 
         config = ConfigurationHelper.GetConfigurationData();
 
-        await InvokeAsync(() =>
-        {
-            base.StateHasChanged();
-        });
-
-        await OnAdminChange.InvokeAsync(admin);
-
         if (message.Message != null)
         {
             switch (message.Type)
@@ -283,9 +347,18 @@
             AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message });
         }
 
+        StateHasChanged();
+
         if (redirect)
         {
-            ModalInstance.CloseAsync();
+            if (admin)
+            {
+                NavigationManager.NavigateTo(NavigationManager.Uri, true);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/", true);
+            }
         }
 
     }
@@ -316,5 +389,109 @@
         }
     }
 
-    async Task Cancel() => await ModalInstance.CancelAsync();
+    private async void SettingChanged(ChangeEventArgs e, string setting)
+    {
+        message = new ResponseMessage();
+        message.Header = "INFORMATION";
+        message.Type = MessageTypesEnum.INFORMATION;
+
+        try
+        {
+            switch (setting)
+            {
+                case "duplicatenamesallowed":
+                    ConfigurationHelper.SetAppSetting("DuplicateNamesAllowed", e.Value.ToString());
+                    message.Message = "Duplicate Names Allowed setting updated to " + e.Value.ToString().ToUpper() + "!";
+                    // Set the result to cache
+                    CacheHelper.SetCacheObject("duplicatenamesallowed", e.Value);
+                    break;
+            }
+            message.Type = MessageTypesEnum.SUCCESS;
+            message.Header = "SUCCESS";
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            message.Message = "There was a problem updating the setting!";
+            message.Header = "ERROR";
+        }
+
+        if (message.Message != null)
+        {
+            switch (message.Type)
+            {
+                case MessageTypesEnum.INFORMATION:
+                    toastService.ShowInfo(message.Message, "INFORMATION");
+                    break;
+                case MessageTypesEnum.SUCCESS:
+                    toastService.ShowSuccess(message.Message, "SUCCESS");
+                    break;
+                case MessageTypesEnum.WARNING:
+                    toastService.ShowWarning(message.Message, "WARNING");
+                    break;
+                case MessageTypesEnum.ERROR:
+                    toastService.ShowError(message.Message, "ERROR");
+                    break;
+            }
+            AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message });
+        }
+        StateHasChanged();
+    }
+
+    private async Task OnConfigurationAlertDismissed()
+    {
+        await session.SetAsync("versionalert-" + appversion + "-shown", true);
+        if (dismissalert)
+        {
+            ConfigurationHelper.DismissVersionAlert();
+        }
+    }
+
+    async Task ShowInformationModal(string headerstyle, string title, string message)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(InformationModal.message), message);
+        parameters.Add(nameof(InformationModal.title), title);
+        parameters.Add(nameof(InformationModal.headerstyle), headerstyle);
+        parameters.Add("theme", theme);
+
+        var options = new ModalOptions()
+            {
+                HideCloseButton = true,
+                UseCustomLayout = true
+            };
+
+        var modal = Modal.Show<InformationModal>(title, parameters, options);
+        var result = await modal.Result;
+        if (!result.Cancelled)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Adnin");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "adminconfigurationinstructions");
+            parameters.Add(nameof(InformationModal.admin), admin);
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+        }
+    }
 }

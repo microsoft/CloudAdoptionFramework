@@ -7,7 +7,6 @@ namespace AzureNamingTool.Models
     public class ConfigurationData
     {
         public List<ResourceComponent> ResourceComponents { get; set; }
-
         public List<ResourceDelimiter> ResourceDelimiters { get; set; }
         public List<ResourceEnvironment> ResourceEnvironments { get; set; }
         public List<ResourceLocation> ResourceLocations { get; set; }
@@ -23,5 +22,7 @@ namespace AzureNamingTool.Models
         public string? SALTKey { get; set; }
         public string? AdminPassword { get; set; }
         public string? APIKey { get; set; }
+        public string? DismissedAlerts { get; set; }
+        public string? DuplicateNamesAllowed { get; set; } = "false";
     }
 }

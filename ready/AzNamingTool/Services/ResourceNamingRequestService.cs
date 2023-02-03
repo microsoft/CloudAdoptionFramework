@@ -575,17 +575,38 @@ namespace AzureNamingTool.Services
 
                 if (valid)
                 {
-                    GeneratedName generatedName = new GeneratedName()
+                    bool nameallowed = true;
+                    // Check if duplicate names are allowed
+                    if(!ConfigurationHelper.VerifyDuplicateNamesAllowed())
                     {
-                        CreatedOn = DateTime.Now,
-                        ResourceName = name.ToLower(),
-                        Components = lstComponents,
-                        ResourceTypeName = resourceType.Resource
-                    };
-                    await GeneratedNamesService.PostItem(generatedName);
-                    response.Success = true;
-                    response.ResourceName = name.ToLower();
-                    response.Message = sbMessage.ToString();
+                        // Check if the name already exists
+                        serviceresponse = await GeneratedNamesService.GetItems();
+                        var names = (List<GeneratedName>)serviceresponse.ResponseObject;
+                        if (names.Where(x => x.ResourceName == name).Count() > 0)
+                        {
+                            nameallowed = false;
+                        }
+                    }
+                    if (nameallowed)
+                    {
+                        GeneratedName generatedName = new GeneratedName()
+                        {
+                            CreatedOn = DateTime.Now,
+                            ResourceName = name.ToLower(),
+                            Components = lstComponents,
+                            ResourceTypeName = resourceType.Resource
+                        };
+                        await GeneratedNamesService.PostItem(generatedName);
+                        response.Success = true;
+                        response.ResourceName = name.ToLower();
+                        response.Message = sbMessage.ToString();
+                    }
+                    else
+                    {
+                        response.Success = false;
+                        response.ResourceName = "***RESOURCE NAME NOT GENERATED***";
+                        response.Message = "The name (" + name + ") you are trying to generate already exists. Please select different component options and try again.";
+                    }
                     return response;
                 }
                 else

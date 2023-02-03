@@ -1,0 +1,7 @@
+[
+  {
+    "id": 1,
+    "version": "2.5.0",
+    "alert": "<p><strong>IMPORTANT NOTE</strong></p><p>The V2.5.0 update removes GLOBALLY OPTIONAL functionality for components. The update contains new functionality that allows a component to be ADDED/REMOVED as OPTIONAL/EXLCUDE for all resource types.</p><p>To migrate existing GLOBALLY OPTIONAL components:</p><ul><li>On the Configuration page, click the Edit button for the component you wish to migrate.</li><li>Expand the Globally Optional Configuration section.</li><li>Click ADD to add the component as OPTIONAL for all resource types.</li></ul>"
+  }
+]
