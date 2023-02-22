@@ -85,7 +85,6 @@
             }
         }
 
-
         public void SetNewsEnabled(bool newsenabled)
         {
             _newsenabled = newsenabled;

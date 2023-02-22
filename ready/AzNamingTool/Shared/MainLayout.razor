@@ -71,6 +71,8 @@
 
     protected override async void OnInitialized()
     {
+        state.OnChange += StateHasChanged;
+
         ConfigurationHelper.VerifyConfiguration();
         ConfigurationHelper.VerifySecurity(state);
 
@@ -107,7 +109,6 @@
                 isdarktheme = true;
             }
             state.AppTheme = theme.ThemeStyle;
-            StateHasChanged();
         }
     }
 
@@ -125,7 +126,6 @@
     private async Task OnPasswordModalClose(bool accepted)
     {
         PasswordModalOpen = false;
-        StateHasChanged();
     }
 
     private async void MagicReset()
@@ -146,8 +146,6 @@
             toastService.ShowSuccess("The site has been reset.", "MAGIC RESET ENABLED!");
 
             OpenPasswordModal();
-
-            StateHasChanged();
         }
     }
 
@@ -166,7 +164,6 @@
         }
         await storage.SetAsync("apptheme", theme.ThemeStyle);
         state.AppTheme = theme.ThemeStyle;
-        StateHasChanged();
     }
 
     private async void Logout()
