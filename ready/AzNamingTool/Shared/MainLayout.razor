@@ -71,8 +71,6 @@
 
     protected override async void OnInitialized()
     {
-        state.OnChange += StateHasChanged;
-
         ConfigurationHelper.VerifyConfiguration();
         ConfigurationHelper.VerifySecurity(state);
 
@@ -109,6 +107,7 @@
                 isdarktheme = true;
             }
             state.AppTheme = theme.ThemeStyle;
+            StateHasChanged();
         }
     }
 

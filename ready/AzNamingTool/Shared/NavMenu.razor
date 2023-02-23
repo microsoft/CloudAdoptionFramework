@@ -199,6 +199,7 @@
             {
                 servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
                 state.SetNavReload(false);
+                StateHasChanged();
             }
         }
     }
