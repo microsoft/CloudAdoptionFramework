@@ -22,7 +22,7 @@
 - Optimized page loading/refreshing - Special thanks to [stroborobo](https://github.com/stroborobo) for their contribution!
 - Updated Custom Components import/export functionality to ensure data is properly handled
 - Refactored Custom Components configuration layout
-- Added PostConfigWithParentData API operation
+- Added Custom Components PostConfigWithParentData API operation
 - Updated API operation descriptions
 
 ***
