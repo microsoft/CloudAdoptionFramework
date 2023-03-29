@@ -4,7 +4,30 @@
 
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Azure Naming Tool" title="Azure Naming Tool" height="150" />
 
-## Version 2.5.0 (current)
+## Version 2.6.0 (current)
+
+### Features
+- Added functionality to post to webhook when name is generated
+- Added Admin functionality to configure webhook URL
+- Added Admin functionality to view cache data
+- Updated Admin page layout
+- Added in-tool feedback (when enabled by the Azure Naming Tool team)
+- Updated INSTALLATION.md with podman instructions * Special thanks to (rfernandezdo)[https://github.com/rfernandezdo] for their contribution!
+- Updated 2.6.0 version notes
+
+### Bug fixes
+- Updated models to allow NULL values
+- Updated Connectivty Check logging/messaging
+- Refactored logging to improve performance
+- Optimized page loading/refreshing * Special thanks to (stroborobo)[https://github.com/stroborobo] for their contribution!
+- Updated Custom Components import/export functionality to ensure data is properly handled
+- Refactored Custom Components configuration layout
+- Added PostConfigWithParentData API operation
+- Updated API operation descriptions
+
+***
+
+## Version 2.5.0
 
 ### IMPORTANT NOTES
 This update removes GLOBALLY OPTIONAL functionality for components. The new functionality allows a component to be ADDED/REMOVED as OPTIONAL/EXLCUDE for all resource types, using the Configuration page.

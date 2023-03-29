@@ -187,7 +187,7 @@
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Admin Log. Are you sure?");
         if (confirm)
         {
-            await AdminLogService.DeleteAllItems();
+            await LogHelper.PurgeAdminLog();
             toastService.ShowSuccess("Admin Log purged!", "SUCCESS");
             AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Admin Log purged." });
             CacheHelper.InvalidateCacheObject("AdminLogMessage");

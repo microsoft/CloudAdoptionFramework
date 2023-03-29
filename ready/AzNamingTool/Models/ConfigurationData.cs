@@ -24,5 +24,7 @@ namespace AzureNamingTool.Models
         public string? APIKey { get; set; }
         public string? DismissedAlerts { get; set; }
         public string? DuplicateNamesAllowed { get; set; } = "false";
+        public string? GenerationWebhook { get; set; } = string.Empty;
+        public string? ConnectivityCheckEnabled { get; set; } = "true";
     }
 }

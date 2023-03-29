@@ -206,10 +206,9 @@
                 }
             </div>
             <div class="modal-footer">
-                @if (type != "ResourceComponent")
-                {
-                    <button title="Save" @onclick="Save" class="btn btn-success">Update</button>
-                }
+
+                <button title="Save" @onclick="Save" class="btn btn-success">Update</button>
+
                 <button title="Cancel" @onclick="Cancel" class="btn btn-secondary">Close</button>
             </div>
         </div>
@@ -520,7 +519,7 @@
                                 if (serviceResponse.Success)
                                 {
                                     responseMessage.Message += " ADDED as OPTIONAL!";
-                                }                                
+                                }
                                 break;
                             case "optional-remove":
                                 serviceResponse = await ResourceTypeService.UpdateTypeComponents("optional-remove", componentid);

@@ -51,7 +51,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will create/update the specified delimiter data.
         /// </summary>
-        /// <param name="item">json - Delimiter data</param>
+        /// <param name="item">ResourceDelimiter (json) - Delimiter data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceDelimiter item)
@@ -80,7 +80,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all delimiters data.
         /// </summary>
-        /// <param name="items">json - All delimiters data</param>
+        /// <param name="items">List - ResourceDelimiter (json) - All delimiters data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

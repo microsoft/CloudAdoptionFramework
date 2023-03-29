@@ -63,27 +63,33 @@
         bool valid = false;
         if (type == "ResourceComponent")
         {
-            if (itemName != null)
+            if (!String.IsNullOrEmpty(itemName))
             {
-                if (itemName != "")
+                // Make sure the name is unique
+                serviceResponse = await ResourceComponentService.GetItems(true);
+                if (serviceResponse.Success)
                 {
-                    valid = true;
-                    ResourceComponent resourceComponent = new()
-                        {
-                            Name = itemName,
-                            DisplayName = itemName,
-                            IsCustom = true
-                        };
-                    serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                    List<ResourceComponent> resourceComponents = serviceResponse.ResponseObject;
+                    if (resourceComponents.Where(x => GeneralHelper.NormalizeName(x.Name, true) == GeneralHelper.NormalizeName(itemName, true)).Count() > 0)
+                    {
+                        toastService.ShowError("You must enter a unique component name!", "ERROR");
+                    }
+                    else
+                    {
+                        valid = true;
+                        ResourceComponent resourceComponent = new()
+                            {
+                                Name = itemName,
+                                DisplayName = itemName,
+                                IsCustom = true
+                            };
+                        serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                    }
                 }
                 else
                 {
                     toastService.ShowError("You must enter a name!", "ERROR");
                 }
-            }
-            else
-            {
-                toastService.ShowError("You must enter a name!", "ERROR");
             }
         }
         else

@@ -274,10 +274,9 @@
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Generated Names log. Are you sure?");
         if (confirm)
         {
-            await GeneratedNamesService.DeleteAllItems();
+            await LogHelper.PurgeGeneratedNames();
             toastService.ShowSuccess("Generated Log purged!", "SUCCESS");
             AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Names log purged." });
-            CacheHelper.InvalidateCacheObject("GeneratedName");
             await LoadData();
             StateHasChanged();
         }

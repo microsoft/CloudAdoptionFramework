@@ -1,0 +1,11 @@
+﻿@using AzureNamingTool.Models;
+<iframe src="@externalurl" style="height:600px;width:800px;"></iframe>
+
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+    [Parameter]
+    public string externalurl { get; set; }
+}

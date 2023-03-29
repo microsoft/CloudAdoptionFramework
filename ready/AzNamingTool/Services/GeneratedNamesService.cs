@@ -48,7 +48,7 @@ namespace AzureNamingTool.Services
             }
             return serviceResponse;
         }
-        
+
         /// <summary>
         ///  This function logs the generated name. 
         /// </summary>
@@ -72,7 +72,7 @@ namespace AzureNamingTool.Services
                 items.Add(generatedName);
 
                 // Write items to file
-                await ConfigurationHelper.WriteList<GeneratedName>(items);
+                ConfigurationHelper.WriteList<GeneratedName>(items);
 
                 CacheHelper.InvalidateCacheObject("generatednames.json");
 

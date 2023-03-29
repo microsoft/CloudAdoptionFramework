@@ -77,10 +77,10 @@ namespace AzureNamingTool.Services
                 if (items.Count > 0)
                 {
                     // Check if the item already exists
-                    if (items.Exists(x => x.Id == item.Id))
+                    if (items.Exists(x => (x.Name == item.Name) && (x.IsCustom == true)))
                     {
                         // Remove the updated item from the list
-                        var existingitem = items.Find(x => x.Id == item.Id);
+                        var existingitem = items.Find(x => (x.Name == item.Name) && (x.IsCustom == true));
                         int index = items.IndexOf(existingitem);
                         items.RemoveAt(index);
                     }
@@ -95,7 +95,7 @@ namespace AzureNamingTool.Services
                     // Check for the new sort order
                     if (items.Exists(x => x.SortOrder == item.SortOrder))
                     {
-                        // Remove the updated item from the list
+                        // Insert the new item
                         items.Insert(items.IndexOf(items.FirstOrDefault(x => x.SortOrder == item.SortOrder)), item);
                     }
                     else
@@ -115,6 +115,7 @@ namespace AzureNamingTool.Services
                 foreach (ResourceComponent thisitem in items.OrderBy(x => x.SortOrder).OrderByDescending(x => x.Enabled).ToList())
                 {
                     thisitem.SortOrder = position;
+                    thisitem.Id = position;
                     position += 1;
                 }
 
@@ -177,6 +178,7 @@ namespace AzureNamingTool.Services
                 foreach (ResourceComponent thisitem in items.OrderBy(x => x.SortOrder).ToList())
                 {
                     thisitem.SortOrder = position;
+                    thisitem.Id = position;
                     position += 1;
                 }
 

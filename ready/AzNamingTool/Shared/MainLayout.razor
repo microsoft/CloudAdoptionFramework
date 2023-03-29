@@ -21,7 +21,12 @@
 
     <main>
         <div class="top-row px-4 auth @theme.ThemeStyle">
-
+            @if ((admin) && (!String.IsNullOrEmpty(feedbackurl)))
+            {
+                <div class="text-left w-100">
+                <button type="button" class="btn btn-success" @onclick="@(e => ShowFeedback())" title="Want to give feedback?">Want to give feedback?</button>
+                </div>
+            }
             @if ((admin) && (bool.Parse(ConfigurationHelper.GetAppSetting("DevMode"))))
             {
                 <div class="warning-message">DEV MODE Enabled! This can cause unexpected behavior! Use at your own risk!</div>
@@ -58,6 +63,7 @@
     private ThemeInfo theme = new() { ThemeName = "Light", ThemeStyle = "bg-default text-black" };
     private bool isdarktheme = false;
     private bool admin;
+    private string feedbackurl = String.Empty;
 
     public bool PasswordModalOpen { get; set; }
     public Type PageType { get; set; }
@@ -107,6 +113,12 @@
                 isdarktheme = true;
             }
             state.AppTheme = theme.ThemeStyle;
+
+            // Check if Feedback is enabled
+            if (admin)
+            {
+                feedbackurl = await ConfigurationHelper.GetProgramSetting("FeedbackURL");
+            }
             StateHasChanged();
         }
     }
@@ -125,7 +137,6 @@
     private async Task OnPasswordModalClose(bool accepted)
     {
         PasswordModalOpen = false;
-        StateHasChanged();
     }
 
     private async void MagicReset()
@@ -146,8 +157,6 @@
             toastService.ShowSuccess("The site has been reset.", "MAGIC RESET ENABLED!");
 
             OpenPasswordModal();
-
-            StateHasChanged();
         }
     }
 
@@ -166,7 +175,6 @@
         }
         await storage.SetAsync("apptheme", theme.ThemeStyle);
         state.AppTheme = theme.ThemeStyle;
-        StateHasChanged();
     }
 
     private async void Logout()
@@ -181,5 +189,10 @@
         toastService.ShowInfo(message.Message, "INFORMATION");
         NavigationManager.NavigateTo(NavigationManager.Uri, true);
         StateHasChanged();
+    }
+
+    private async void ShowFeedback()
+    {
+        await JsRuntime.InvokeVoidAsync("open", feedbackurl, "_blank");
     }
 }

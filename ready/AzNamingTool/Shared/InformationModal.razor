@@ -55,6 +55,11 @@
                             <AdminLogInstructions theme="@theme" admin="@admin" />
                         </div>
                         break;
+                    case "externalcontent":
+                        <div class="mb-3">
+                            <ExternalContent theme="@theme" admin="@admin" externalurl="@externalurl"/>
+                        </div>
+                        break;
                 }
             </div>
             <div class="modal-footer">
@@ -76,6 +81,7 @@
     [Parameter] public string headerstyle { get; set; }
     [Parameter] public object component { get; set; } = null;
     [Parameter] public bool admin { get; set; } = false;
+    [Parameter] public string externalurl { get; set; }
 
 
     async Task Confirm() => await ModalInstance.CloseAsync();

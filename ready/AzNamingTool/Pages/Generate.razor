@@ -537,6 +537,8 @@
         resourceNameRequest.ResourceLocation = selectedResourceLocation;
         resourceNameRequest.ResourceOrg = selectedResourceOrg;
         resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
+        resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
+        resourceNameRequest.CustomComponents = selectedCustomComponents;
 
         sbNames.Append("<table class=\"table text-light generatednames\">");
         sbNames.Append("<thead>");
@@ -556,8 +558,6 @@
             resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(selectedResourceType));
             resourceNameRequest.ResourceType = resourceType.ShortName;
             resourceNameRequest.ResourceId = resourceType.Id;
-            resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
-            resourceNameRequest.CustomComponents = selectedCustomComponents;
 
             resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
 
@@ -603,8 +603,6 @@
                 resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(id));
                 resourceNameRequest.ResourceType = resourceType.ShortName;
                 resourceNameRequest.ResourceId = resourceType.Id;
-                resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
-                resourceNameRequest.CustomComponents = selectedCustomComponents;
                 resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
 
                 sbNames.Append("<tr>");

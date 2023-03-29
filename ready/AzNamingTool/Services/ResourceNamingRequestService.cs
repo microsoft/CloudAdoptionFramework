@@ -596,10 +596,27 @@ namespace AzureNamingTool.Services
                             Components = lstComponents,
                             ResourceTypeName = resourceType.Resource
                         };
-                        await GeneratedNamesService.PostItem(generatedName);
-                        response.Success = true;
-                        response.ResourceName = name.ToLower();
-                        response.Message = sbMessage.ToString();
+                        ServiceResponse responseGenerateName = await GeneratedNamesService.PostItem(generatedName);
+                        if(responseGenerateName.Success)
+                        {
+                            response.Success = true;
+                            response.ResourceName = name.ToLower();
+                            response.Message = sbMessage.ToString();
+
+                            // Check if the GenerationWebhook is configured
+                            String webhook = ConfigurationHelper.GetAppSetting("GenerationWebhook", true);
+                            if (!String.IsNullOrEmpty(webhook))
+                            {
+                                // Asynchronously post to the webhook
+                                ConfigurationHelper.PostToGenerationWebhook(webhook, generatedName);
+                            }
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.ResourceName = "***RESOURCE NAME NOT GENERATED***";
+                            response.Message = "There was an error generating the name. Please try again.";
+                        }
                     }
                     else
                     {
