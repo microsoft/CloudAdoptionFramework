@@ -12,14 +12,14 @@
 - Added Admin functionality to view cache data
 - Updated Admin page layout
 - Added in-tool feedback (when enabled by the Azure Naming Tool team)
-- Updated INSTALLATION.md with podman instructions * Special thanks to (rfernandezdo)[https://github.com/rfernandezdo] for their contribution!
+- Updated INSTALLATION.md with podman instructions * Special thanks to [rfernandezdo](https://github.com/rfernandezdo) for their contribution!
 - Updated 2.6.0 version notes
 
 ### Bug fixes
 - Updated models to allow NULL values
 - Updated Connectivty Check logging/messaging
 - Refactored logging to improve performance
-- Optimized page loading/refreshing * Special thanks to (stroborobo)[https://github.com/stroborobo] for their contribution!
+- Optimized page loading/refreshing * Special thanks to [stroborobo](https://github.com/stroborobo) for their contribution!
 - Updated Custom Components import/export functionality to ensure data is properly handled
 - Refactored Custom Components configuration layout
 - Added PostConfigWithParentData API operation
