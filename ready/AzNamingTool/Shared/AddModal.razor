@@ -16,13 +16,13 @@
             <div class="modal-body">
                 @((MarkupString)message)
                 <div class="form-group">
-                    <label for="name">Name</label>
+                    <label for="name" style="font-weight:bold;">Name</label>
                     <input title="Name" value="@itemName" type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
                 </div>
                 @if (type != "ResourceComponent")
                 {
                     <div class="form-group">
-                        <label for="shortName">Short Name</label>
+                        <label for="shortName" style="font-weight:bold;">Short Name</label>
                         <input title="Short Name" value="@itemShortName" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemShortName = (string)ui.Value;})" />
                     </div>
                 }
