@@ -339,12 +339,12 @@
                     }
                     else
                     {
-                        toastService.ShowError("You must enter a name!", "ERROR");
+                        toastService.ShowError("You must enter a name!");
                     }
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a name!", "ERROR");
+                    toastService.ShowError("You must enter a name!");
                 }
             }
             else
@@ -453,12 +453,12 @@
                     }
                     else
                     {
-                        toastService.ShowError("You must enter a valid short name!", "ERROR");
+                        toastService.ShowError("You must enter a valid short name!");
                     }
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a name and short name!", "ERROR");
+                    toastService.ShowError("You must enter a name and short name!");
                 }
             }
 
@@ -467,19 +467,19 @@
                 if (serviceResponse.Success)
                 {
                     ModalInstance.CloseAsync();
-                    toastService.ShowSuccess(GeneralHelper.NormalizeName(type, false) + " updated!", "SUCCESS");
+                    toastService.ShowSuccess(GeneralHelper.NormalizeName(type, false) + " updated!");
                     AdminLogService.PostItem(new AdminLogMessage() { Title = "SUCCESS", Message = GeneralHelper.NormalizeName(type, false) + " updated!" });
                 }
                 else
                 {
-                    toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + serviceResponse.ResponseObject, "ERROR");
+                    toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + serviceResponse.ResponseObject);
                 }
             }
         }
         catch (Exception ex)
         {
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-            toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + ex.Message, "ERROR");
+            toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + ex.Message);
         }
     }
 
@@ -563,16 +563,16 @@
                 switch (responseMessage.Type)
                 {
                     case MessageTypesEnum.INFORMATION:
-                        toastService.ShowInfo(responseMessage.Message, "INFORMATION");
+                        toastService.ShowInfo(responseMessage.Message);
                         break;
                     case MessageTypesEnum.SUCCESS:
-                        toastService.ShowSuccess(responseMessage.Message, "SUCCESS");
+                        toastService.ShowSuccess(responseMessage.Message);
                         break;
                     case MessageTypesEnum.WARNING:
-                        toastService.ShowWarning(responseMessage.Message, "WARNING");
+                        toastService.ShowWarning(responseMessage.Message);
                         break;
                     case MessageTypesEnum.ERROR:
-                        toastService.ShowError(responseMessage.Message, "ERROR");
+                        toastService.ShowError(responseMessage.Message);
                         break;
                 }
                 AdminLogService.PostItem(new AdminLogMessage() { Title = responseMessage.Type.ToString(), Message = responseMessage.Message });

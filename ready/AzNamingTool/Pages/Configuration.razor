@@ -3337,16 +3337,16 @@
             switch (message.Type)
             {
                 case MessageTypesEnum.INFORMATION:
-                    toastService.ShowInfo(message.Message, "INFORMATION");
+                    toastService.ShowInfo(message.Message);
                     break;
                 case MessageTypesEnum.SUCCESS:
-                    toastService.ShowSuccess(message.Message, "SUCCESS");
+                    toastService.ShowSuccess(message.Message);
                     break;
                 case MessageTypesEnum.WARNING:
-                    toastService.ShowWarning(message.Message, "WARNING");
+                    toastService.ShowWarning(message.Message);
                     break;
                 case MessageTypesEnum.ERROR:
-                    toastService.ShowError(message.Message, "ERROR");
+                    toastService.ShowError(message.Message);
                     break;
             }
             AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message });

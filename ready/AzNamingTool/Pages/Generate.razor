@@ -518,7 +518,7 @@
         catch (Exception ex)
         {
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-            toastService.ShowError("There was a problem loading the page. Please try again", "ERROR");
+            toastService.ShowError("There was a problem loading the page. Please try again");
         }
     }
 
@@ -647,7 +647,7 @@
 
         if (mode == "multi")
         {
-            toastService.ShowInfo("This option will require all current components to be selected.", "INFORMATION");
+            toastService.ShowInfo("This option will require all current components to be selected.");
             // Show the multi select modal
             await OpenMultiSelectModal(true);
             resourcetypeVisible = "collapse";
@@ -746,7 +746,7 @@
         }
         catch (Exception ex)
         {
-            toastService.ShowError("There was an error setting the resource type! Please try again.", "ERROR");
+            toastService.ShowError("There was an error setting the resource type! Please try again.");
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
         }
 

@@ -181,11 +181,11 @@ namespace AzureNamingTool.Helpers
                     if (Convert.ToBoolean(ConfigurationHelper.GetAppSetting("ConnectivityCheckEnabled")))
                     {
                         // Atempt to ping a url first
-                        Ping ping = new Ping();
+                        Ping ping = new();
                         String host = "github.com";
                         byte[] buffer = new byte[32];
                         int timeout = 1000;
-                        PingOptions pingOptions = new PingOptions();
+                        PingOptions pingOptions = new();
                         PingReply reply = ping.Send(host, timeout, buffer, pingOptions);
                         if (reply.Status == IPStatus.Success)
                         {
@@ -606,7 +606,7 @@ namespace AzureNamingTool.Helpers
             try
             {
                 string appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-                List<string> dismissedalerts = new List<string>(GetAppSetting("DismissedAlerts").Split(','));
+                List<string> dismissedalerts = new(GetAppSetting("DismissedAlerts").Split(','));
                 if (!dismissedalerts.Contains(appversion))
                 {
                     if (string.Join(",", dismissedalerts) == "")
@@ -655,7 +655,7 @@ namespace AzureNamingTool.Helpers
             bool result = false;
             try
             {
-                HttpClient httpClient = new HttpClient()
+                HttpClient httpClient = new()
                 {
                     BaseAddress = new Uri(URL)
                 };

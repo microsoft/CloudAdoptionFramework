@@ -72,7 +72,7 @@
                     List<ResourceComponent> resourceComponents = serviceResponse.ResponseObject;
                     if (resourceComponents.Where(x => GeneralHelper.NormalizeName(x.Name, true) == GeneralHelper.NormalizeName(itemName, true)).Count() > 0)
                     {
-                        toastService.ShowError("You must enter a unique component name!", "ERROR");
+                        toastService.ShowError("You must enter a unique component name!");
                     }
                     else
                     {
@@ -88,7 +88,7 @@
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a name!", "ERROR");
+                    toastService.ShowError("You must enter a name!");
                 }
             }
         }
@@ -171,12 +171,12 @@
                     }
                     else
                     {
-                        toastService.ShowError("You must enter a name and short name!", "ERROR");
+                        toastService.ShowError("You must enter a name and short name!");
                     }
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a name and short name!", "ERROR");
+                    toastService.ShowError("You must enter a name and short name!");
                 }
             }
         }
@@ -186,12 +186,12 @@
             if (serviceResponse.Success)
             {
                 ModalInstance.CloseAsync();
-                toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!", "SUCCESS");
+                toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!");
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "SUCCESS", Message = "(" + type + ") " + itemName + " added!" });
             }
             else
             {
-                toastService.ShowError("There was an error adding the " + GeneralHelper.NormalizeName(type, false) + "!", "ERROR");
+                toastService.ShowError("There was an error adding the " + GeneralHelper.NormalizeName(type, false) + "!");
             }
         }
     }

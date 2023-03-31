@@ -188,7 +188,7 @@
         if (confirm)
         {
             await LogHelper.PurgeAdminLog();
-            toastService.ShowSuccess("Admin Log purged!", "SUCCESS");
+            toastService.ShowSuccess("Admin Log purged!");
             AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Admin Log purged." });
             CacheHelper.InvalidateCacheObject("AdminLogMessage");
             serviceResponse = await AdminLogService.GetItems();

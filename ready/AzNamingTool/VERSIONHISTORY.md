@@ -13,6 +13,7 @@
 - Updated Admin page layout
 - Added in-tool feedback (when enabled by the Azure Naming Tool team)
 - Updated INSTALLATION.md with podman instructions - Special thanks to [rfernandezdo](https://github.com/rfernandezdo) for their contribution!
+- Updated NuGet packages
 - Updated 2.6.0 version notes
 
 ### Bug fixes
@@ -22,7 +23,7 @@
 - Optimized page loading/refreshing - Special thanks to [stroborobo](https://github.com/stroborobo) for their contribution!
 - Updated Custom Components import/export functionality to ensure data is properly handled
 - Refactored Custom Components configuration layout
-- Added PostConfigWithParentData API operation
+-  Added Custom Components PostConfigWithParentData API operation
 - Updated API operation descriptions
 
 ***

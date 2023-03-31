@@ -154,7 +154,7 @@
             ConfigurationHelper.ResetState(state);
             ConfigurationHelper.VerifySecurity(state);
 
-            toastService.ShowSuccess("The site has been reset.", "MAGIC RESET ENABLED!");
+            toastService.ShowSuccess("The site has been reset.");
 
             OpenPasswordModal();
         }
@@ -186,7 +186,7 @@
         message.Type = MessageTypesEnum.INFORMATION;
         message.Header = "INFORMATION";
         message.Message = "Admin logged out.";
-        toastService.ShowInfo(message.Message, "INFORMATION");
+        toastService.ShowInfo(message.Message);
         NavigationManager.NavigateTo(NavigationManager.Uri, true);
         StateHasChanged();
     }
