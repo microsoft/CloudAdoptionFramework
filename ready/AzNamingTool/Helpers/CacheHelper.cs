@@ -76,6 +76,7 @@ namespace AzureNamingTool.Helpers
             catch (Exception ex)
             {
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                data.Append("<p><strong>No data currently cached.</strong></p>");
             }
             return data.ToString();
         }
