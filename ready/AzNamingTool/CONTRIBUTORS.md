@@ -4,6 +4,7 @@ Since the tool's inception, several people have contributed to the tool through 
 
 - [Adi Biton](https://github.com/adibiton)
 - Binit Kumar
+- [Bo](https://github.com/stroborobo)
 - [Brian McKeiver](https://github.com/mcbeev)
 - [Bryan Soltis](https://github.com/bryansoltis)
 - Dan Jones
@@ -23,6 +24,7 @@ Since the tool's inception, several people have contributed to the tool through 
 - Mariojose Palma
 - Nikki Haase
 - [Purna Chandra Panda](https://github.com/PurnaChandraPanda)
+- [Rafael Fernández](https://github.com/rfernandezdo)
 - [Rajmani Patel](https://github.com/rajmanipatel)
 - [Satheeshkumar Manoharan](https://github.com/infosatheesh2020)
 - [Sherri Babylon](https://github.com/shbabylo)

@@ -81,7 +81,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will create/update the specified function data.
         /// </summary>
-        /// <param name="item">json - Function data</param>
+        /// <param name="item">ResourceFunction (json) - Function data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceFunction item)
@@ -109,7 +109,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all functions data.
         /// </summary>
-        /// <param name="items">json - All functions data</param>
+        /// <param name="items">List - ResourceFunction (json) - All functions data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

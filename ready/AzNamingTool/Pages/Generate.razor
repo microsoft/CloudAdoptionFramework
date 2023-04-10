@@ -75,7 +75,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="generateselect" id="multiselect" value="multi" @onclick="@(e => OnGenerateModeChange("multi"))">
                                 <label class="form-check-label" for="multiselect">
-                                    <strong>Generate Multiple Resource Type Names</strong><br />This option will allow the generatation of names for multiple resource types using the selected components. All components will be required.
+                                    <strong>Generate Multiple Resource Type Names</strong><br />This option will allow the generatation of names for multiple resource types using the selected components. <span class="warning-message">All components will be required.</span>
                                 </label>
                             </div>
                         </div>
@@ -518,7 +518,7 @@
         catch (Exception ex)
         {
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-            toastService.ShowError("There was a problem loading the page. Please try again", "ERROR");
+            toastService.ShowError("There was a problem loading the page. Please try again");
         }
     }
 
@@ -537,6 +537,8 @@
         resourceNameRequest.ResourceLocation = selectedResourceLocation;
         resourceNameRequest.ResourceOrg = selectedResourceOrg;
         resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
+        resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
+        resourceNameRequest.CustomComponents = selectedCustomComponents;
 
         sbNames.Append("<table class=\"table text-light generatednames\">");
         sbNames.Append("<thead>");
@@ -556,8 +558,6 @@
             resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(selectedResourceType));
             resourceNameRequest.ResourceType = resourceType.ShortName;
             resourceNameRequest.ResourceId = resourceType.Id;
-            resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
-            resourceNameRequest.CustomComponents = selectedCustomComponents;
 
             resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
 
@@ -603,8 +603,6 @@
                 resourceType = servicesData.ResourceTypes.Find(x => x.Id == Convert.ToInt32(id));
                 resourceNameRequest.ResourceType = resourceType.ShortName;
                 resourceNameRequest.ResourceId = resourceType.Id;
-                resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
-                resourceNameRequest.CustomComponents = selectedCustomComponents;
                 resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(resourceNameRequest);
 
                 sbNames.Append("<tr>");
@@ -649,7 +647,7 @@
 
         if (mode == "multi")
         {
-            toastService.ShowInfo("This option will require all current components to be selected.", "INFORMATION");
+            toastService.ShowInfo("This option will require all current components to be selected.");
             // Show the multi select modal
             await OpenMultiSelectModal(true);
             resourcetypeVisible = "collapse";
@@ -748,7 +746,7 @@
         }
         catch (Exception ex)
         {
-            toastService.ShowError("There was an error setting the resource type! Please try again.", "ERROR");
+            toastService.ShowError("There was an error setting the resource type! Please try again.");
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
         }
 

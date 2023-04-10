@@ -80,7 +80,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will create/update the specified unit/dept data.
         /// </summary>
-        /// <param name="item">json - Unit/Dept data</param>
+        /// <param name="item">ResourceUnitDept (json) - Unit/Dept data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceUnitDept item)
@@ -108,7 +108,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all units/depts data.
         /// </summary>
-        /// <param name="items">json - All units/depts data</param>
+        /// <param name="items">List - ResourceUnitDept (json) - All units/depts data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

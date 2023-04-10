@@ -16,13 +16,13 @@
             <div class="modal-body">
                 @((MarkupString)message)
                 <div class="form-group">
-                    <label for="name">Name</label>
+                    <label for="name" style="font-weight:bold;">Name</label>
                     <input title="Name" value="@itemName" type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
                 </div>
                 @if (type != "ResourceComponent")
                 {
                     <div class="form-group">
-                        <label for="shortName">Short Name</label>
+                        <label for="shortName" style="font-weight:bold;">Short Name</label>
                         <input title="Short Name" value="@itemShortName" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemShortName = (string)ui.Value;})" />
                     </div>
                 }
@@ -63,27 +63,33 @@
         bool valid = false;
         if (type == "ResourceComponent")
         {
-            if (itemName != null)
+            if (!String.IsNullOrEmpty(itemName))
             {
-                if (itemName != "")
+                // Make sure the name is unique
+                serviceResponse = await ResourceComponentService.GetItems(true);
+                if (serviceResponse.Success)
                 {
-                    valid = true;
-                    ResourceComponent resourceComponent = new()
-                        {
-                            Name = itemName,
-                            DisplayName = itemName,
-                            IsCustom = true
-                        };
-                    serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                    List<ResourceComponent> resourceComponents = serviceResponse.ResponseObject;
+                    if (resourceComponents.Where(x => GeneralHelper.NormalizeName(x.Name, true) == GeneralHelper.NormalizeName(itemName, true)).Count() > 0)
+                    {
+                        toastService.ShowError("You must enter a unique component name!");
+                    }
+                    else
+                    {
+                        valid = true;
+                        ResourceComponent resourceComponent = new()
+                            {
+                                Name = itemName,
+                                DisplayName = itemName,
+                                IsCustom = true
+                            };
+                        serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                    }
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a name!", "ERROR");
+                    toastService.ShowError("You must enter a name!");
                 }
-            }
-            else
-            {
-                toastService.ShowError("You must enter a name!", "ERROR");
             }
         }
         else
@@ -165,12 +171,12 @@
                     }
                     else
                     {
-                        toastService.ShowError("You must enter a name and short name!", "ERROR");
+                        toastService.ShowError("You must enter a name and short name!");
                     }
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a name and short name!", "ERROR");
+                    toastService.ShowError("You must enter a name and short name!");
                 }
             }
         }
@@ -180,12 +186,12 @@
             if (serviceResponse.Success)
             {
                 ModalInstance.CloseAsync();
-                toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!", "SUCCESS");
+                toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!");
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "SUCCESS", Message = "(" + type + ") " + itemName + " added!" });
             }
             else
             {
-                toastService.ShowError("There was an error adding the " + GeneralHelper.NormalizeName(type, false) + "!", "ERROR");
+                toastService.ShowError("There was an error adding the " + GeneralHelper.NormalizeName(type, false) + "!");
             }
         }
     }

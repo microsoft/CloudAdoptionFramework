@@ -3,6 +3,7 @@
 @using AzureNamingTool.Models;
 @using System.Runtime.Caching;
 @using AzureNamingTool.Services;
+@using Blazored.Toast.Configuration;
 @using Microsoft.AspNetCore.Html
 @using Microsoft.Extensions.Logging
 @using System.Reflection;
@@ -11,7 +12,6 @@
 @inject ProtectedSessionStorage session
 @inject IToastService toastService
 @inject NavigationManager NavigationManager
-@inject IJSRuntime jsRuntime
 @inject ProtectedLocalStorage storage
 
 <PageTitle>Azure Naming Tool - Admin</PageTitle>
@@ -40,7 +40,7 @@
                         Enter the Admin Password to configure the Azure Naming Tool site.
                     </p>
                     <div class="form-group">
-                        <label for="password">Password</label>
+                        <label for="password" style="font-weight:bold">Password</label>
                         <input title="Password" class="form-control mb-3" type="password" @onchange="@((ui) => { SetFormValue("login",(string)ui.Value);})" />
                     </div>
                 }
@@ -52,7 +52,7 @@
                     <div class="card mb-3" style="width:auto;">
                         <div class="card-header bg-default text-black">
                             <a id="versiondetailslink" class="link-dark text-decoration-none" data-toggle="collapse" href="#versiondetails" role="button" aria-expanded="false" aria-controls="versiondetails">
-                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Version Details
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> <strong>Version Details</strong>
                             </a>
                         </div>
                         <div class="collapse show card card-body @theme.ThemeStyle" id="versiondetails">
@@ -124,7 +124,10 @@
                                 The tool uses caching for data to improve performance. Click <strong>Clear</strong> to clear all cached data.
                             </p>
                             <div class="form-group">
-                                <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("clearcache"))" title="Clear Cache">Clear</button>
+                                <p>
+                                    <button type="button" class="btn btn-primary" @onclick="@(e => AdminFormAction("viewcachedata"))" title="View Cache Data">View Cache Data</button>
+                                    <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("clearcache"))" title="Clear Cache">Clear Cache Data</button>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -134,16 +137,78 @@
                                 <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> Site Settings</h5>
                             </a>
                         </h5>
-                        <div class="collapse show  card card-body @theme.ThemeStyle" id="sitesettings">
-                            <p>
-                                Configure settings for the site.
-                            </p>
-                            <div class="form-group">
-                                <label class="switch" title="Duplicate Names Allowed">
-                                    <input type="checkbox" checked="@duplicatenamesallowed" @oninput='args => SettingChanged(args, "duplicatenamesallowed")'>
-                                    <span class="slider round"></span>
-                                </label>
-                                <span class="align-text-top"> Allow duplicate name generation</span>
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="sitesettings">
+                            <div class="card mb-3" style="width:auto;">
+                                <div class="card-header bg-default text-black">
+                                    <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href="#duplicatenames" role="button" aria-expanded="false" aria-controls="duplicatenames">
+                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Allow Duplicate Names
+                                    </a>
+                                </div>
+                                <div class="collapse show card card-body @theme.ThemeStyle" id="duplicatenames">
+                                    <div class="mb-3">
+                                        <p>
+                                            By default, the Azure Naming Tool prevents duplicate resource names from being generated. This setting can be used to allow duplicate names.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="switch" title="Duplicate Names Allowed">
+                                            <input type="checkbox" checked="@duplicatenamesallowed" @oninput='args => SettingChanged(args, "duplicatenamesallowed")'>
+                                            <span class="slider round"></span>
+                                        </label>
+                                        <span class="align-text-top"> Enable</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mb-3" style="width:auto;">
+                                <div class="card-header bg-default text-black">
+                                    <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href="#connectivitycheck" role="button" aria-expanded="false" aria-controls="connectivitycheck">
+                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Connectivity Check
+                                    </a>
+                                </div>
+                                <div class="collapse show card card-body @theme.ThemeStyle" id="connectivitycheck">
+                                    <div class="mb-3">
+                                        <p>
+                                            The Azure Naming Tool will verify the tool has internet connectivity to enable update features. Use this setting to disable the connectivity check functionality.
+                                        </p>
+                                        <p class="alert alert-danger">
+                                            <strong>NOTE</strong><br />
+                                            Disabling this setting may result in connectivity errors being logged to the Admin Log.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="switch" title="Connectivity Check Enabled">
+                                            <input type="checkbox" checked="@connectivitycheckenabled" @oninput='args => SettingChanged(args, "connectivitycheckenabled")'>
+                                            <span class="slider round"></span>
+                                        </label>
+                                        <span class="align-text-top"> Enable</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mb-3" style="width:auto;">
+                                <div class="card-header bg-default text-black">
+                                    <a class="text-decoration-none text-black" data-toggle="collapse" style="display:block;font-weight:bold;" href="#generationwebhook" role="button" aria-expanded="false" aria-controls="generationwebhook">
+                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Generation Webhook
+                                    </a>
+                                </div>
+                                <div class="collapse show card card-body @theme.ThemeStyle" id="generationwebhook">
+                                    <div class="mb-3">
+                                        <p>
+                                            The Azure Naming Tool can post generated names to a webhook. This can be used to integrate with other systems. Enter a valid URL below to save the webhook setting.
+                                        </p>
+                                        <p>
+                                            Generated names will be posted using the <strong><a href="https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/Models/GeneratedName.cs" target="_blank">GeneratedName</a></strong> JSON format.
+                                        </p>
+                                        <p>
+                                            <button type="button" class="btn btn-primary" @onclick="@(e => AdminFormAction("samplepost"))" title="Sample Post">Sample Post</button>
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input title="Generation Webhook" id="currentgenerationwebhook" class="form-control" type="text" @onchange="@((ui) => { SetFormValue("generationwebhook",(string)ui.Value);})" value="@currentgenerationwebhook" />
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-success w-auto" @onclick="@(e => AdminFormAction("generationwebhooksave"))" title="Save Generate Webhook">Save</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -175,6 +240,8 @@
     private bool showversionalert = false;
     private bool dismissalert = false;
     private bool duplicatenamesallowed = false;
+    private bool connectivitycheckenabled = true;
+    private string currentgenerationwebhook = string.Empty;
     private string versionalert = string.Empty;
     private string? appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
     private SiteConfiguration config = ConfigurationHelper.GetConfigurationData();
@@ -192,23 +259,24 @@
             if (admin)
             {
                 currentapikey = GeneralHelper.DecryptString(config.APIKey, config.SALTKey);
+                // Determine if the version notification has been dismissed
+                var resultVersionAlert = await session.GetAsync<bool>("versionalert-" + appversion + "-shown");
+                versionalertshown = resultVersionAlert.Success ? resultVersionAlert.Value : false;
+                versionalert = ConfigurationHelper.GetVersionAlert(true).Result;
+                if (versionalert != "")
+                {
+                    showversionalert = true;
+                }
+                duplicatenamesallowed = Convert.ToBoolean(ConfigurationHelper.GetAppSetting("DuplicateNamesAllowed"));
+                connectivitycheckenabled = Convert.ToBoolean(ConfigurationHelper.GetAppSetting("ConnectivityCheckEnabled"));
+                currentgenerationwebhook = ConfigurationHelper.GetAppSetting("GenerationWebhook", true);
             }
 
             await storage.SetAsync("apptheme", theme.ThemeStyle);
             state.AppTheme = theme.ThemeStyle;
 
-            // Determine if the version notification has been dismissed
-            var resultVersionAlert = await session.GetAsync<bool>("versionalert-" + appversion + "-shown");
-            versionalertshown = resultVersionAlert.Success ? resultVersionAlert.Value : false;
-            versionalert = ConfigurationHelper.GetVersionAlert(true).Result;
-            if (versionalert != "")
-            {
-                showversionalert = true;
-            }
-            duplicatenamesallowed = Convert.ToBoolean(ConfigurationHelper.GetAppSetting("DuplicateNamesAllowed"));
+            StateHasChanged();
         }
-
-        StateHasChanged();
     }
 
     private async void AdminFormAction(string action)
@@ -299,7 +367,7 @@
                     if (serviceResponse.Success)
                     {
                         currentapikey = serviceResponse.ResponseObject;
-                        await jsRuntime.InvokeAsync<string>("console.log", currentapikey);
+                        await JsRuntime.InvokeAsync<string>("console.log", currentapikey);
                         message.Type = MessageTypesEnum.SUCCESS;
                         message.Header = "SUCCESS";
                         message.Message = "API Key updated!";
@@ -310,6 +378,26 @@
                         message.Header = "ERROR";
                         message.Message = "There was a problem generating the API Key!";
                     }
+                }
+                break;
+            case "generationwebhooksave":
+                bool confirmGenerationWebhook = await JsRuntime.InvokeAsync<bool>("confirm", "This will update the current Generation Webhook. Are you sure?");
+                if (confirmGenerationWebhook)
+                {
+                    if (currentgenerationwebhook != "")
+                    {
+                        if (!Uri.IsWellFormedUriString(currentgenerationwebhook, UriKind.Absolute))
+                        {
+                            message.Header = "ERROR";
+                            message.Type = MessageTypesEnum.ERROR;
+                            message.Message = "You must enter a valid URL!";
+                            break;
+                        }
+                    }
+                    ConfigurationHelper.SetAppSetting("GenerationWebhook", currentgenerationwebhook, true);
+                    message.Type = MessageTypesEnum.SUCCESS;
+                    message.Header = "SUCCESS";
+                    message.Message = "Generation Webhook configuration saved!";
                 }
                 break;
             case "clearcache":
@@ -323,25 +411,34 @@
                 message.Header = "SUCCESS";
                 message.Message = "Cache cleared!";
                 break;
+            case "viewcachedata":
+                string cachedata = CacheHelper.GetAllCacheData();
+                await ShowInformationModal("bg-navcolor", "Cache Data", "<p>This is the current cache data.</p>" + cachedata);
+                break;
+            case "samplepost":
+                string webhookdata = await FileSystemHelper.ReadFile("samplewebhookdata.json", "");
+                await ShowInformationModal("bg-navcolor", "Sample Post", "<p>This is a sample Generation Webhook post.</p><code style=\"display: block; white-space: pre-wrap;\">" + webhookdata + "</code>");
+                break;
+
         }
 
         config = ConfigurationHelper.GetConfigurationData();
 
         if (message.Message != null)
         {
-            switch (message.Type)
+        switch (message.Type)
             {
                 case MessageTypesEnum.INFORMATION:
-                    toastService.ShowInfo(message.Message, "INFORMATION");
+                    toastService.ShowInfo(message.Message);
                     break;
                 case MessageTypesEnum.SUCCESS:
-                    toastService.ShowSuccess(message.Message, "SUCCESS");
+                    toastService.ShowSuccess(message.Message);
                     break;
                 case MessageTypesEnum.WARNING:
-                    toastService.ShowWarning(message.Message, "WARNING");
+                    toastService.ShowWarning(message.Message);
                     break;
                 case MessageTypesEnum.ERROR:
-                    toastService.ShowError(message.Message, "ERROR");
+                    toastService.ShowError(message.Message);
                     break;
             }
             AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message });
@@ -385,7 +482,9 @@
             case "apikey":
                 currentapikey = value;
                 break;
-
+            case "generationwebhook":
+                currentgenerationwebhook = value;
+                break;
         }
     }
 
@@ -402,8 +501,19 @@
                 case "duplicatenamesallowed":
                     ConfigurationHelper.SetAppSetting("DuplicateNamesAllowed", e.Value.ToString());
                     message.Message = "Duplicate Names Allowed setting updated to " + e.Value.ToString().ToUpper() + "!";
-                    // Set the result to cache
-                    CacheHelper.SetCacheObject("duplicatenamesallowed", e.Value);
+                    break;
+                case "connectivitycheckenabled":
+                    ConfigurationHelper.SetAppSetting("ConnectivityCheckEnabled", e.Value.ToString());
+                    message.Message = "Connectivity Check Enabled setting updated to " + e.Value.ToString().ToUpper() + "!";
+                    // Update the tool connection setting to true, if the connecvity check is disabled. This will cause the stie to always assume there is connectivity and attempt external connections.
+                    if (!(bool)e.Value)
+                    {
+                        CacheHelper.SetCacheObject("isconnected", true);
+                    }
+                    else
+                    {
+                        CacheHelper.InvalidateCacheObject("isconnected");
+                    }
                     break;
             }
             message.Type = MessageTypesEnum.SUCCESS;
@@ -421,16 +531,16 @@
             switch (message.Type)
             {
                 case MessageTypesEnum.INFORMATION:
-                    toastService.ShowInfo(message.Message, "INFORMATION");
+                    toastService.ShowInfo(message.Message);
                     break;
                 case MessageTypesEnum.SUCCESS:
-                    toastService.ShowSuccess(message.Message, "SUCCESS");
+                    toastService.ShowSuccess(message.Message);
                     break;
                 case MessageTypesEnum.WARNING:
-                    toastService.ShowWarning(message.Message, "WARNING");
+                    toastService.ShowWarning(message.Message);
                     break;
                 case MessageTypesEnum.ERROR:
-                    toastService.ShowError(message.Message, "ERROR");
+                    toastService.ShowError(message.Message);
                     break;
             }
             AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message });
@@ -475,7 +585,7 @@
         {
             var parameters = new ModalParameters();
             parameters.Add(nameof(InformationModal.message), null);
-            parameters.Add(nameof(InformationModal.title), "Adnin");
+            parameters.Add(nameof(InformationModal.title), "Admin");
             parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
             parameters.Add(nameof(InformationModal.component), "adminconfigurationinstructions");
             parameters.Add(nameof(InformationModal.admin), admin);

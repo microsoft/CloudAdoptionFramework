@@ -78,7 +78,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will create/update the specified environment data.
         /// </summary>
-        /// <param name="item">json - Environment data</param>
+        /// <param name="item">ResourceEnvironment (json) - Environment data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceEnvironment item)
@@ -106,7 +106,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all environments data.
         /// </summary>
-        /// <param name="items">json - All environments data</param>
+        /// <param name="items">List - ResourceEnvironment (json) - All environments data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

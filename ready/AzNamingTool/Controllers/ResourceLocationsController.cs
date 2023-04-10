@@ -100,7 +100,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all locations data.
         /// </summary>
-        /// <param name="items">json - All locations data</param>
+        /// <param name="items">List - ResourceLocation (json) - All locations data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

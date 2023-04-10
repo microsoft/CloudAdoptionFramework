@@ -57,7 +57,6 @@
             NotifyStateChanged();
         }
 
-
         public string AppTheme
         {
             get => _apptheme ?? "bg-default text-black";
@@ -67,7 +66,6 @@
                 NotifyStateChanged();
             }
         }
-
 
         public void SetAppTheme(string value)
         {
@@ -84,7 +82,6 @@
                 NotifyStateChanged();
             }
         }
-
 
         public void SetNewsEnabled(bool newsenabled)
         {

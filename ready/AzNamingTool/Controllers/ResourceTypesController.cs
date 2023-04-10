@@ -103,7 +103,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all resource types data.
         /// </summary>
-        /// <param name="items">json - All resource types data</param>
+        /// <param name="items">List - ResourceType (json) - All resource types data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

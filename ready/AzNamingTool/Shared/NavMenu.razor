@@ -27,7 +27,7 @@
             <NavLink class="nav-link" href="admin">
                 <span class="oi oi-lock-locked" aria-hidden="true"></span> Admin
             </NavLink>
-        </div>        
+        </div>
         @if (admin)
         {
             <div class="nav-item px-3">
@@ -192,17 +192,16 @@
                 connected = false;
             }
             StateHasChanged();
-
         }
         else
         {
-            if ((admin != (bool)result.Value) || (servicesData == null) || (state._reloadnav))
+            //if ((admin != (bool)result.Value) || (servicesData == null) || (state._reloadnav))
+            if (servicesData == null || state._reloadnav)
             {
                 servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
                 state.SetNavReload(false);
             }
         }
-        StateHasChanged();
     }
 
     private void ToggleNavMenu()

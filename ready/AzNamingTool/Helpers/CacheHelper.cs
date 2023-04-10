@@ -1,6 +1,7 @@
 ﻿using AzureNamingTool.Models;
 using AzureNamingTool.Services;
 using System.Runtime.Caching;
+using System.Text;
 
 namespace AzureNamingTool.Helpers
 {
@@ -57,6 +58,27 @@ namespace AzureNamingTool.Helpers
             {
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
+        }
+
+
+        public static string GetAllCacheData()
+        {
+            StringBuilder data = new();
+            try
+            {
+                ObjectCache memoryCache = MemoryCache.Default;
+                var cacheKeys = memoryCache.Select(kvp => kvp.Key).ToList();
+                foreach (var key in cacheKeys.OrderBy(x => x))
+                {                    
+                    data.Append("<p><strong>" + key + "</strong></p><div class=\"alert alert-secondary\" style=\"word-wrap:break-word;\">" + MemoryCache.Default[key].ToString() + "</div>");
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                data.Append("<p><strong>No data currently cached.</strong></p>");
+            }
+            return data.ToString();
         }
     }
 }

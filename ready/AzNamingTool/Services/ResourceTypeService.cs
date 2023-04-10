@@ -180,14 +180,17 @@ namespace AzureNamingTool.Services
             {
 
                 string category = type.Resource;
-                if (category.Contains('/'))
+                if (!String.IsNullOrEmpty(category))
                 {
-                    category = category[..category.IndexOf("/")];
-                }
+                    if (category.Contains('/'))
+                    {
+                        category = category[..category.IndexOf("/")];
+                    }
 
-                if (!categories.Contains(category))
-                {
-                    categories.Add(category);
+                    if (!categories.Contains(category))
+                    {
+                        categories.Add(category);
+                    }
                 }
             }
 

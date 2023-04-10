@@ -8,16 +8,10 @@ namespace AzureNamingTool.Attributes
 {
     public class RateFilter : Attribute, IResourceFilter
     {
-        private const string EndPoint = "YourEndPoint";
-
         public void OnResourceExecuting(ResourceExecutingContext context)
         {
             try
             {
-                if (!context.HttpContext.Request.Path.Value.Contains(EndPoint))
-                {
-                    throw new Exception($"This filter is intended to be used only on a specific end point '{EndPoint}' while it's being called from '{context.HttpContext.Request.Path.Value}'");
-                }
 
                 var minRequestRateFeature = context.HttpContext.Features.Get<IHttpMinRequestBodyDataRateFeature>();
                 var minResponseRateFeature = context.HttpContext.Features.Get<IHttpMinResponseDataRateFeature>();

@@ -54,6 +54,7 @@ namespace AzureNamingTool.Helpers
                 lstGeneratedNames.Add(lstGeneratedName);
                 var jsonGeneratedNames = JsonSerializer.Serialize(lstGeneratedNames);
                 await FileSystemHelper.WriteFile("generatednames.json", jsonGeneratedNames);
+                CacheHelper.InvalidateCacheObject("GeneratedName");
             }
             catch (Exception ex)
             {
@@ -70,6 +71,7 @@ namespace AzureNamingTool.Helpers
             try
             {
                 await FileSystemHelper.WriteFile("generatednames.json", "[]");
+                CacheHelper.InvalidateCacheObject("GeneratedName");
             }
             catch (Exception ex)
             {
@@ -86,7 +88,7 @@ namespace AzureNamingTool.Helpers
             List<AdminLogMessage> lstAdminLogMessages = new();
             try
             {
-                string data = await FileSystemHelper.ReadFile("adminlog.json");
+                string data = await FileSystemHelper.ReadFile("adminlogmessages.json");
                 var items = new List<AdminLogMessage>();
                 var options = new JsonSerializerOptions
                 {
@@ -129,7 +131,8 @@ namespace AzureNamingTool.Helpers
 
                 lstAdminLogMessages.Add(adminmessage);
                 var jsonAdminLogMessages = JsonSerializer.Serialize(lstAdminLogMessages);
-                await FileSystemHelper.WriteFile("adminlog.json", jsonAdminLogMessages);
+                await FileSystemHelper.WriteFile("adminlogmessages.json", jsonAdminLogMessages);
+                CacheHelper.InvalidateCacheObject("AdminLogMessage");
             }
             catch (Exception)
             {
@@ -145,7 +148,8 @@ namespace AzureNamingTool.Helpers
         {
             try
             {
-                await FileSystemHelper.WriteFile("adminlog.json", "[]");
+                await FileSystemHelper.WriteFile("adminlogmessages.json", "[]");
+                CacheHelper.InvalidateCacheObject("AdminLogMessage");
             }
             catch (Exception ex)
             {

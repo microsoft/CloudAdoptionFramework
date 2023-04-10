@@ -50,7 +50,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will create/update the specified component data.
         /// </summary>
-        /// <param name="item">json - Component data</param>
+        /// <param name="item">ResourceComponent (json) - Component data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceComponent item)
@@ -78,7 +78,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all components data.
         /// </summary>
-        /// <param name="items">json - All components configuration data</param>
+        /// <param name="items">List - ResourceComponent (json) - All components configuration data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]
