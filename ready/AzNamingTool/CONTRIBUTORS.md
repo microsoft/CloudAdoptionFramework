@@ -1,3 +1,7 @@
+[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Release Notes](RELEASENOTES.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
+
+# Azure Naming Tool v2 - Release Notes
+
 # Contributors
 
 Since the tool's inception, several people have contributed to the tool through several internal Microsoft hackathons and in their spare time. Here are their names in alphabetical order:
@@ -24,7 +28,7 @@ Since the tool's inception, several people have contributed to the tool through 
 - Mariojose Palma
 - Nikki Haase
 - [Purna Chandra Panda](https://github.com/PurnaChandraPanda)
-- [Rafael Fernández](https://github.com/rfernandezdo)
+- [Rafael Fernï¿½ndez](https://github.com/rfernandezdo)
 - [Rajmani Patel](https://github.com/rajmanipatel)
 - [Satheeshkumar Manoharan](https://github.com/infosatheesh2020)
 - [Sherri Babylon](https://github.com/shbabylo)

@@ -152,7 +152,7 @@
                                 if (resourceComponent.Name != "ResourceType")
                                 {
                                     <div class="form-check">
-                                        @if (optional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                        @if (optional.ToLower().Split(',').Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                         {
                                             <input title="Optional Component" class="form-check-input" type="checkbox" value="" id="optional-@GeneralHelper.NormalizeName(resourceComponent.Name, true)" checked>
                                             <label class="form-check-label" for="optional-@GeneralHelper.NormalizeName(resourceComponent.Name, true)">
@@ -184,7 +184,7 @@
                                 //@if (resourceComponent.Name != "ResourceType")
                                 //{
                                 <div class="form-check">
-                                    @if (exclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                    @if (exclude.ToLower().Split(',').Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                     {
                                         <input title="Excluded Component" class="form-check-input" type="checkbox" id="exclude-@GeneralHelper.NormalizeName(resourceComponent.Name, true)" checked>
                                         <label class="form-check-label" for="exclude-@GeneralHelper.NormalizeName(resourceComponent.Name, true)">
