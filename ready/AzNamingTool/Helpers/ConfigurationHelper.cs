@@ -12,6 +12,7 @@ using System.Text;
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using System;
+using Blazored.Toast.Services;
 
 namespace AzureNamingTool.Helpers
 {
@@ -42,11 +43,11 @@ namespace AzureNamingTool.Helpers
                     {
                         value = config.GetType().GetProperty(key).GetValue(config, null).ToString();
 
-                        if((decrypt) && (value != ""))
+                        if ((decrypt) && (value != ""))
                         {
                             value = GeneralHelper.DecryptString(value, config.SALTKey);
                         }
-                        
+
                         // Set the result to cache
                         CacheHelper.SetCacheObject(key, value);
                     }
@@ -667,7 +668,7 @@ namespace AzureNamingTool.Helpers
                 }
                 else
                 {
-                    AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedName.ResourceName + ") not successfully posted to webhook! " + response.ReasonPhrase  });
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedName.ResourceName + ") not successfully posted to webhook! " + response.ReasonPhrase });
                 }
             }
             catch (Exception ex)
@@ -677,7 +678,7 @@ namespace AzureNamingTool.Helpers
             return result;
         }
         public static async Task<string> GetProgramSetting(string programSetting)
-        { 
+        {
             string result = String.Empty;
             try
             {

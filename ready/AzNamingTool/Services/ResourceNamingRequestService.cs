@@ -2,6 +2,7 @@
 using AzureNamingTool.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
@@ -59,8 +60,9 @@ namespace AzureNamingTool.Services
                 // Loop through each component
                 foreach (var component in currentResourceComponents)
                 {
+                    string normalizedcomponentname = GeneralHelper.NormalizeName(component.Name, true);
                     // Check if the component is excluded for the Resource Type
-                    if (!resourceType.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true), StringComparison.CurrentCulture))
+                    if (!resourceType.Exclude.ToLower().Split(',').Contains(normalizedcomponentname))
                     {
                         // Attempt to retrieve value from JSON body
                         var prop = GeneralHelper.GetPropertyValue(d, component.Name);
@@ -131,7 +133,7 @@ namespace AzureNamingTool.Services
                         else
                         {
                             // Check if the prop is optional
-                            if ((!resourceType.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true))) && (!component.IsGloballyOptional))
+                            if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
                             {
                                 valid = false;
                                 break;
@@ -275,7 +277,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Get the current delimiter
-                serviceresponse = await ResourceDelimiterService.GetItem();
+                serviceresponse = await ResourceDelimiterService.GetCurrentItem();
                 if (serviceresponse.Success)
                 {
                     resourceDelimiter = (ResourceDelimiter)serviceresponse.ResponseObject;
@@ -321,10 +323,11 @@ namespace AzureNamingTool.Services
                 // Loop through each component
                 foreach (var component in currentResourceComponents)
                 {
+                    string normalizedcomponentname = GeneralHelper.NormalizeName(component.Name, true);
                     if (!component.IsCustom)
                     {
                         // Check if the component is excluded for the Resource Type
-                        if (!resourceType.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true), StringComparison.CurrentCulture))
+                        if (!resourceType.Exclude.ToLower().Split(',').Contains(normalizedcomponentname))
                         {
                             // Attempt to retrieve value from JSON body
                             var value = GeneralHelper.GetPropertyValue(request, component.Name);
@@ -414,7 +417,7 @@ namespace AzureNamingTool.Services
                                     {
                                         // Check if delimeter is an invalid character
                                         if (resourceType.InvalidCharacters != "")
-                                        { 
+                                        {
                                             if (!resourceType.InvalidCharacters.Contains(resourceDelimiter.Delimiter))
                                             {
                                                 if (name != "")
@@ -442,7 +445,7 @@ namespace AzureNamingTool.Services
                                     name += value;
 
                                     // Add property to array for individual component validation
-                                    if (!resourceType.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true)))
+                                    if (!resourceType.Exclude.ToLower().Split(',').Contains(normalizedcomponentname))
                                     {
                                         lstComponents.Add(new string[] { component.Name, value });
                                     }
@@ -450,7 +453,7 @@ namespace AzureNamingTool.Services
                                 else
                                 {
                                     // Check if the prop is optional
-                                    if ((!resourceType.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true))) && (!component.IsGloballyOptional))
+                                    if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
                                     {
                                         valid = false;
                                         sbMessage.Append(component.Name + " value was not provided. ");
@@ -460,7 +463,7 @@ namespace AzureNamingTool.Services
                             else
                             {
                                 // Check if the prop is optional
-                                if ((!resourceType.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true))) && (!component.IsGloballyOptional))
+                                if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
                                 {
                                     valid = false;
                                     sbMessage.Append(component.Name + " value was not provided. ");
@@ -470,20 +473,86 @@ namespace AzureNamingTool.Services
                     }
                     else
                     {
-                        // Get the custom components data
-                        serviceresponse = await CustomComponentService.GetItems();
-                        var customcomponents = (List<CustomComponent>)serviceresponse.ResponseObject;
-                        // Make sure the custom component has values
-                        if (customcomponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(component.Name, true)).Count() > 0)
+                        if (!component.IsFreeText)
+                        {
+                            // Get the custom components data
+                            serviceresponse = await CustomComponentService.GetItems();
+                            var customcomponents = (List<CustomComponent>)serviceresponse.ResponseObject;
+                            // Make sure the custom component has values
+                            if (customcomponents.Where(x => x.ParentComponent == normalizedcomponentname).Count() > 0)
+                            {
+                                // Make sure the CustomComponents property was provided
+                                if (!resourceType.Exclude.ToLower().Split(',').Contains(normalizedcomponentname))
+                                {
+                                    // Add property value to name, if exists
+                                    if (request.CustomComponents != null)
+                                    {
+                                        // Check if the custom compoment value was provided in the request
+                                        if (!request.CustomComponents.ContainsKey(normalizedcomponentname))
+                                        {
+                                            valid = false;
+                                            sbMessage.Append(component.Name + " value was not provided. ");
+                                        }
+                                        else
+                                        {
+                                            // Get the value from the provided custom components
+                                            var componentvalue = request.CustomComponents[normalizedcomponentname];
+                                            if (componentvalue == null)
+                                            {
+                                                // Check if the prop is optional
+                                                if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
+                                                {
+                                                    valid = false;
+                                                    sbMessage.Append(component.Name + " value was not provided. ");
+                                                }
+                                            }
+                                            else
+                                            {
+                                                // Check to make sure it is a valid custom component
+                                                var customComponents = await ConfigurationHelper.GetList<CustomComponent>();
+                                                var validcustomComponent = customComponents.Find(x => x.ParentComponent == normalizedcomponentname && x.ShortName == componentvalue);
+                                                if (validcustomComponent == null)
+                                                {
+                                                    valid = false;
+                                                    sbMessage.Append(component.Name + " value is not a valid custom component short name. ");
+                                                }
+                                                else
+                                                {
+                                                    if (name != "")
+                                                    {
+                                                        name += resourceDelimiter.Delimiter;
+                                                    }
+
+                                                    name += componentvalue;
+
+                                                    // Add property to array for individual component validation
+                                                    lstComponents.Add(new string[] { component.Name, componentvalue });
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Check if the prop is optional
+                                        if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
+                                        {
+                                            valid = false;
+                                            sbMessage.Append(component.Name + " value was not provided. ");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
                         {
                             // Make sure the CustomComponents property was provided
-                            if (!resourceType.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true), StringComparison.CurrentCulture))
+                            if (!resourceType.Exclude.ToLower().Split(',').Contains(normalizedcomponentname))
                             {
                                 // Add property value to name, if exists
                                 if (request.CustomComponents != null)
                                 {
                                     // Check if the custom compoment value was provided in the request
-                                    if (!request.CustomComponents.ContainsKey(GeneralHelper.NormalizeName(component.Name, true)))
+                                    if (!request.CustomComponents.ContainsKey(normalizedcomponentname))
                                     {
                                         valid = false;
                                         sbMessage.Append(component.Name + " value was not provided. ");
@@ -491,11 +560,11 @@ namespace AzureNamingTool.Services
                                     else
                                     {
                                         // Get the value from the provided custom components
-                                        var componentvalue = request.CustomComponents[GeneralHelper.NormalizeName(component.Name, true)];
+                                        var componentvalue = request.CustomComponents[normalizedcomponentname];
                                         if (componentvalue == null)
                                         {
                                             // Check if the prop is optional
-                                            if ((!resourceType.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true))) && (!component.IsGloballyOptional))
+                                            if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
                                             {
                                                 valid = false;
                                                 sbMessage.Append(component.Name + " value was not provided. ");
@@ -503,33 +572,22 @@ namespace AzureNamingTool.Services
                                         }
                                         else
                                         {
-                                            // Check to make sure it is a valid custom component
-                                            var customComponents = await ConfigurationHelper.GetList<CustomComponent>();
-                                            var validcustomComponent = customComponents.Find(x => x.ParentComponent == GeneralHelper.NormalizeName(component.Name, true) && x.ShortName == componentvalue);
-                                            if (validcustomComponent == null)
+                                            if (name != "")
                                             {
-                                                valid = false;
-                                                sbMessage.Append(component.Name + " value is not a valid custom component short name. ");
+                                                name += resourceDelimiter.Delimiter;
                                             }
-                                            else
-                                            {
-                                                if (name != "")
-                                                {
-                                                    name += resourceDelimiter.Delimiter;
-                                                }
 
-                                                name += componentvalue;
+                                            name += componentvalue;
 
-                                                // Add property to array for individual component validation
-                                                lstComponents.Add(new string[] { component.Name, componentvalue });
-                                            }
+                                            // Add property to array for individual component validation
+                                            lstComponents.Add(new string[] { component.Name, componentvalue });
                                         }
                                     }
                                 }
                                 else
                                 {
                                     // Check if the prop is optional
-                                    if ((!resourceType.Optional.ToLower().Contains(GeneralHelper.NormalizeName(component.Name, true))) && (!component.IsGloballyOptional))
+                                    if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
                                     {
                                         valid = false;
                                         sbMessage.Append(component.Name + " value was not provided. ");
@@ -577,7 +635,7 @@ namespace AzureNamingTool.Services
                 {
                     bool nameallowed = true;
                     // Check if duplicate names are allowed
-                    if(!ConfigurationHelper.VerifyDuplicateNamesAllowed())
+                    if (!ConfigurationHelper.VerifyDuplicateNamesAllowed())
                     {
                         // Check if the name already exists
                         serviceresponse = await GeneratedNamesService.GetItems();
@@ -597,7 +655,7 @@ namespace AzureNamingTool.Services
                             ResourceTypeName = resourceType.Resource
                         };
                         ServiceResponse responseGenerateName = await GeneratedNamesService.PostItem(generatedName);
-                        if(responseGenerateName.Success)
+                        if (responseGenerateName.Success)
                         {
                             response.Success = true;
                             response.ResourceName = name.ToLower();

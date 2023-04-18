@@ -20,6 +20,7 @@ namespace AzureNamingTool.Controllers
     {
         private ServiceResponse serviceResponse = new();
 
+        // GET api/<ResourceDelimitersController>
         /// <summary>
         /// This function will return the delimiters data.
         /// </summary>
@@ -46,6 +47,37 @@ namespace AzureNamingTool.Controllers
                 return BadRequest(ex);
             }
         }
+
+        // GET api/<ResourceDelimitersController>/5
+        /// <summary>
+        /// This function will return the specifed resource delimiter data.
+        /// </summary>
+        /// <param name="id">int - Resource Delimiter id</param>
+        /// <returns>json - Resource delimiter data</returns>
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                // Get list of items
+                serviceResponse = await ResourceDelimiterService.GetItem(id);
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+
 
         // POST api/<ResourceDelimitersController>
         /// <summary>

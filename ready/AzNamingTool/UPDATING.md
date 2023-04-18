@@ -1,8 +1,6 @@
-[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
+[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Release Notes](RELEASENOTES.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
 
 # Azure Naming Tool v2 - Updating
-
-<img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Image representing the Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
 [Overview](#overview)
 
