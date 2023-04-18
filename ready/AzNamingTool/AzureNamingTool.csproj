@@ -20,6 +20,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="VersionNotes\**" />
+    <Content Remove="VersionNotes\**" />
+    <EmbeddedResource Remove="VersionNotes\**" />
+    <None Remove="VersionNotes\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="appsettings.Development.json" />
     <Content Remove="appsettings.json" />
     <Content Remove="settings\appsettings.Development.json" />
@@ -72,10 +79,6 @@
     <None Update="settings\blank.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="VersionNotes\" />
   </ItemGroup>
 
 </Project>
