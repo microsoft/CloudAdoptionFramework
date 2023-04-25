@@ -138,7 +138,7 @@
         catch (Exception ex)
         {
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-            toastService.ShowError("There was a problem loading the page. Please try again", "ERROR");
+            toastService.ShowError("There was a problem loading the page. Please try again");
         }
     }
 

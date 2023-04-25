@@ -80,7 +80,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will create/update the specified project/app/service data.
         /// </summary>
-        /// <param name="item">json - Project/App/Service data</param>
+        /// <param name="item">ResourceProjAppSvc (json) - Project/App/Service data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceProjAppSvc item)
@@ -108,7 +108,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all projects/apps/services data.
         /// </summary>
-        /// <param name="items">json - All projects/apps/services data</param>
+        /// <param name="items">List - ResourceProjAppSvc (json) - All projects/apps/services data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

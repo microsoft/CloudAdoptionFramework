@@ -241,7 +241,7 @@
                 {
                     message.Type = MessageTypesEnum.SUCCESS;
                     message.Message = "Generated name deleted!";
-                    toastService.ShowSuccess(message.Message, "SUCCESS");
+                    toastService.ShowSuccess(message.Message);
                     AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedname.ResourceName + ") deleted." });
                     CacheHelper.InvalidateCacheObject("GeneratedName");
                     LoadData();
@@ -252,7 +252,7 @@
                     message.Type = MessageTypesEnum.ERROR;
                     message.Message = "Generated name deletion failed!";
                     message.MessageDetails = serviceResponse.ResponseMessage;
-                    toastService.ShowError(message.Message, "ERROR");
+                    toastService.ShowError(message.Message);
                 }
             }
             else
@@ -260,7 +260,7 @@
                 message.Type = MessageTypesEnum.ERROR;
                 message.Message = "Generated name deletion failed!";
                 message.MessageDetails = serviceResponse.ResponseMessage;
-                toastService.ShowError(message.Message, "ERROR");
+                toastService.ShowError(message.Message);
             }
 
         }
@@ -274,10 +274,9 @@
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Generated Names log. Are you sure?");
         if (confirm)
         {
-            await GeneratedNamesService.DeleteAllItems();
-            toastService.ShowSuccess("Generated Log purged!", "SUCCESS");
+            await LogHelper.PurgeGeneratedNames();
+            toastService.ShowSuccess("Generated Log purged!");
             AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Names log purged." });
-            CacheHelper.InvalidateCacheObject("GeneratedName");
             await LoadData();
             StateHasChanged();
         }

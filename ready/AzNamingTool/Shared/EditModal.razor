@@ -152,7 +152,7 @@
                                 if (resourceComponent.Name != "ResourceType")
                                 {
                                     <div class="form-check">
-                                        @if (optional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                        @if (optional.ToLower().Split(',').Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                         {
                                             <input title="Optional Component" class="form-check-input" type="checkbox" value="" id="optional-@GeneralHelper.NormalizeName(resourceComponent.Name, true)" checked>
                                             <label class="form-check-label" for="optional-@GeneralHelper.NormalizeName(resourceComponent.Name, true)">
@@ -184,7 +184,7 @@
                                 //@if (resourceComponent.Name != "ResourceType")
                                 //{
                                 <div class="form-check">
-                                    @if (exclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                    @if (exclude.ToLower().Split(',').Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                     {
                                         <input title="Excluded Component" class="form-check-input" type="checkbox" id="exclude-@GeneralHelper.NormalizeName(resourceComponent.Name, true)" checked>
                                         <label class="form-check-label" for="exclude-@GeneralHelper.NormalizeName(resourceComponent.Name, true)">
@@ -206,10 +206,9 @@
                 }
             </div>
             <div class="modal-footer">
-                @if (type != "ResourceComponent")
-                {
-                    <button title="Save" @onclick="Save" class="btn btn-success">Update</button>
-                }
+
+                <button title="Save" @onclick="Save" class="btn btn-success">Update</button>
+
                 <button title="Cancel" @onclick="Cancel" class="btn btn-secondary">Close</button>
             </div>
         </div>
@@ -340,12 +339,12 @@
                     }
                     else
                     {
-                        toastService.ShowError("You must enter a name!", "ERROR");
+                        toastService.ShowError("You must enter a name!");
                     }
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a name!", "ERROR");
+                    toastService.ShowError("You must enter a name!");
                 }
             }
             else
@@ -454,12 +453,12 @@
                     }
                     else
                     {
-                        toastService.ShowError("You must enter a valid short name!", "ERROR");
+                        toastService.ShowError("You must enter a valid short name!");
                     }
                 }
                 else
                 {
-                    toastService.ShowError("You must enter a name and short name!", "ERROR");
+                    toastService.ShowError("You must enter a name and short name!");
                 }
             }
 
@@ -468,19 +467,19 @@
                 if (serviceResponse.Success)
                 {
                     ModalInstance.CloseAsync();
-                    toastService.ShowSuccess(GeneralHelper.NormalizeName(type, false) + " updated!", "SUCCESS");
+                    toastService.ShowSuccess(GeneralHelper.NormalizeName(type, false) + " updated!");
                     AdminLogService.PostItem(new AdminLogMessage() { Title = "SUCCESS", Message = GeneralHelper.NormalizeName(type, false) + " updated!" });
                 }
                 else
                 {
-                    toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + serviceResponse.ResponseObject, "ERROR");
+                    toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + serviceResponse.ResponseObject);
                 }
             }
         }
         catch (Exception ex)
         {
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-            toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + ex.Message, "ERROR");
+            toastService.ShowError("There was an error updating the " + GeneralHelper.NormalizeName(type, false) + "! " + ex.Message);
         }
     }
 
@@ -520,7 +519,7 @@
                                 if (serviceResponse.Success)
                                 {
                                     responseMessage.Message += " ADDED as OPTIONAL!";
-                                }                                
+                                }
                                 break;
                             case "optional-remove":
                                 serviceResponse = await ResourceTypeService.UpdateTypeComponents("optional-remove", componentid);
@@ -564,16 +563,16 @@
                 switch (responseMessage.Type)
                 {
                     case MessageTypesEnum.INFORMATION:
-                        toastService.ShowInfo(responseMessage.Message, "INFORMATION");
+                        toastService.ShowInfo(responseMessage.Message);
                         break;
                     case MessageTypesEnum.SUCCESS:
-                        toastService.ShowSuccess(responseMessage.Message, "SUCCESS");
+                        toastService.ShowSuccess(responseMessage.Message);
                         break;
                     case MessageTypesEnum.WARNING:
-                        toastService.ShowWarning(responseMessage.Message, "WARNING");
+                        toastService.ShowWarning(responseMessage.Message);
                         break;
                     case MessageTypesEnum.ERROR:
-                        toastService.ShowError(responseMessage.Message, "ERROR");
+                        toastService.ShowError(responseMessage.Message);
                         break;
                 }
                 AdminLogService.PostItem(new AdminLogMessage() { Title = responseMessage.Type.ToString(), Message = responseMessage.Message });

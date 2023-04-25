@@ -7,6 +7,12 @@ using System.Net.NetworkInformation;
 using System.Net;
 using System.Runtime.Caching;
 using System.Reflection;
+using System.Net.Http;
+using System.Text;
+using System.Net.Http.Json;
+using System.Net.Http.Headers;
+using System;
+using Blazored.Toast.Services;
 
 namespace AzureNamingTool.Helpers
 {
@@ -22,16 +28,33 @@ namespace AzureNamingTool.Helpers
             return config;
         }
 
-        public static string GetAppSetting(string key)
+        public static string GetAppSetting(string key, bool decrypt = false)
         {
             string value = null;
             try
             {
-                var config = GetConfigurationData();
-
-                if (config.GetType().GetProperty(key) != null)
+                // Check if the data is cached
+                var data = CacheHelper.GetCacheObject(key);
+                if (data == null)
                 {
-                    value = config.GetType().GetProperty(key).GetValue(config, null).ToString();
+                    var config = GetConfigurationData();
+
+                    if (config.GetType().GetProperty(key) != null)
+                    {
+                        value = config.GetType().GetProperty(key).GetValue(config, null).ToString();
+
+                        if ((decrypt) && (value != ""))
+                        {
+                            value = GeneralHelper.DecryptString(value, config.SALTKey);
+                        }
+
+                        // Set the result to cache
+                        CacheHelper.SetCacheObject(key, value);
+                    }
+                }
+                else
+                {
+                    value = data.ToString();
                 }
             }
             catch (Exception ex)
@@ -41,15 +64,22 @@ namespace AzureNamingTool.Helpers
             return value;
         }
 
-        public static void SetAppSetting(string key, string value)
+        public static void SetAppSetting(string key, string value, bool encrypt = false)
         {
             try
             {
                 var config = GetConfigurationData();
+                string valueoriginal = value;
+                if (encrypt)
+                {
+                    value = GeneralHelper.EncryptString(value, config.SALTKey);
+                }
                 Type type = config.GetType();
                 System.Reflection.PropertyInfo propertyInfo = type.GetProperty(key);
                 propertyInfo.SetValue(config, value, null);
                 UpdateSettings(config);
+                // Save the original value to the cache
+                CacheHelper.SetCacheObject(key, valueoriginal);
             }
             catch (Exception ex)
             {
@@ -148,36 +178,46 @@ namespace AzureNamingTool.Helpers
                 var data = CacheHelper.GetCacheObject("isconnected");
                 if (data == null)
                 {
-                    // Atempt to ping a url first
-                    Ping ping = new Ping();
-                    String host = "github.com";
-                    byte[] buffer = new byte[32];
-                    int timeout = 1000;
-                    PingOptions pingOptions = new PingOptions();
-                    PingReply reply = ping.Send(host, timeout, buffer, pingOptions);
-                    if (reply.Status == IPStatus.Success)
+                    // Check if the connectivity check is enabled
+                    if (Convert.ToBoolean(ConfigurationHelper.GetAppSetting("ConnectivityCheckEnabled")))
                     {
-                        pingsuccessful = true;
-                        result = true;
-                    }
-
-                    // If ping is not successful, attempt to download a file
-                    if (!pingsuccessful)
-                    {
-                        // Atempt to download a file
-                        var request = (HttpWebRequest)WebRequest.Create("https://github.com/aznamingtool/AzureNamingTool/blob/main/connectiontest.png");
-                        request.KeepAlive = false;
-                        request.Timeout = 1500;
-                        using (var response = (HttpWebResponse)request.GetResponse())
+                        // Atempt to ping a url first
+                        Ping ping = new();
+                        String host = "github.com";
+                        byte[] buffer = new byte[32];
+                        int timeout = 1000;
+                        PingOptions pingOptions = new();
+                        PingReply reply = ping.Send(host, timeout, buffer, pingOptions);
+                        if (reply.Status == IPStatus.Success)
                         {
-                            if (response.StatusCode == HttpStatusCode.OK)
+                            pingsuccessful = true;
+                            result = true;
+                        }
+
+                        // If ping is not successful, attempt to download a file
+                        if (!pingsuccessful)
+                        {
+                            // Atempt to download a file
+                            var request = (HttpWebRequest)WebRequest.Create("https://github.com/aznamingtool/AzureNamingTool/blob/main/connectiontest.png");
+                            request.KeepAlive = false;
+                            request.Timeout = 1500;
+                            using (var response = (HttpWebResponse)request.GetResponse())
                             {
-                                result = true;
+                                if (response.StatusCode == HttpStatusCode.OK)
+                                {
+                                    result = true;
+                                }
+                                else
+                                {
+                                    AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = "Connectivity Check Failed:" + response.StatusDescription });
+                                }
                             }
                         }
                     }
-                    // Set the result to cache
-                    CacheHelper.SetCacheObject("isconnected", result);
+                    else
+                    {
+                        result = true;
+                    }
                 }
                 else
                 {
@@ -188,6 +228,9 @@ namespace AzureNamingTool.Helpers
             {
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
+
+            // Set the result to cache
+            CacheHelper.SetCacheObject("isconnected", result);
             return result;
         }
 
@@ -540,18 +583,15 @@ namespace AzureNamingTool.Helpers
 
                             if (versionalert != null)
                             {
+                                alert = versionalert.Alert;
                                 // Set the result to cache
-                                CacheHelper.SetCacheObject("versionalert-" + appversion, versionalert);
+                                CacheHelper.SetCacheObject("versionalert-" + appversion, versionalert.Alert);
                             }
                         }
                     }
                     else
                     {
-                        versionalert = (VersionAlert)cacheddata;
-                    }
-                    if (versionalert != null)
-                    {
-                        alert = versionalert.Alert;
+                        alert = (string)cacheddata;
                     }
                 }
             }
@@ -567,7 +607,7 @@ namespace AzureNamingTool.Helpers
             try
             {
                 string appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-                List<string> dismissedalerts = new List<string>(GetAppSetting("DismissedAlerts").Split(','));
+                List<string> dismissedalerts = new(GetAppSetting("DismissedAlerts").Split(','));
                 if (!dismissedalerts.Contains(appversion))
                 {
                     if (string.Join(",", dismissedalerts) == "")
@@ -603,6 +643,58 @@ namespace AzureNamingTool.Helpers
                 {
                     result = Convert.ToBoolean(cacheddata);
                 }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+            return result;
+        }
+
+        public static async Task<bool> PostToGenerationWebhook(string URL, GeneratedName generatedName)
+        {
+            bool result = false;
+            try
+            {
+                HttpClient httpClient = new()
+                {
+                    BaseAddress = new Uri(URL)
+                };
+                HttpResponseMessage response = await httpClient.PostAsJsonAsync("", generatedName);
+                if (response.IsSuccessStatusCode)
+                {
+                    result = true;
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedName.ResourceName + ") successfully posted to webhook!" });
+                }
+                else
+                {
+                    AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedName.ResourceName + ") not successfully posted to webhook! " + response.ReasonPhrase });
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Generated Name (" + generatedName.ResourceName + ") not successfully posted to webhook! " + ex.Message });
+            }
+            return result;
+        }
+        public static async Task<string> GetProgramSetting(string programSetting)
+        {
+            string result = String.Empty;
+            try
+            {
+                string data = (string)CacheHelper.GetCacheObject(programSetting);
+                if (String.IsNullOrEmpty(data))
+                {
+                    var response = await GeneralHelper.DownloadString("https://raw.githubusercontent.com/aznamingtool/AzureNamingTool/main/programsettings.json");
+                    var setting = JsonDocument.Parse(response);
+                    result = setting.RootElement.GetProperty(programSetting).ToString();
+                    CacheHelper.SetCacheObject(programSetting, result);
+                }
+                else
+                {
+                    result = data;
+                }
+                return result;
             }
             catch (Exception ex)
             {

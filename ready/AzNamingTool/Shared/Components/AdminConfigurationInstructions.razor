@@ -10,32 +10,46 @@
         Page Sections/Actions
     </h5>
     <div class="card card-body @theme.ThemeStyle">
-        <p>
-            <strong>Version Details</strong>
-        </p>
+        <h5>Version Details</h5>
         <p>This section displays the current tool version, along with any version alerts.</p>
-        <p>
-            <strong>Admin Password</strong>
-        </p>
+        <h5>Admin Password</h5>
         <p>This section allows you to update the <strong>Admin password</strong> for the tool.</p>
-        <p>
-            <strong>API Key</strong>
-        </p>
+        <h5>API Key</h5>
         <p>
             The Azure Naming Tool provides a RESTful API. Each API function requires an <strong>API Key</strong> to be provided. This section provides the ability to view/update the API Key for the tool.
         </p>
-        <p>
-            <strong>Clear Cache</strong>
-        </p>
+        <h5>Clear Cache</h5>
         <p>
             The Azure Naming Tool leverages caching to improve perofrmance. This section provides the ability to clear all cached data for the tool.
         </p>
-        <p>
-            <strong>Site Settings</strong>
-        </p>
-        <p>
-            This section allows for the configuration of site settings. 
-        </p>
+        <h5>Site Settings</h5>
+        <div>
+            <p>This section allows for the configuration of site settings.</p>
+            <ul>
+                <li>
+                    <strong>Allow Duplicate Names</strong>
+                    <p>
+                        By default, the Azure Naming Tool prevents duplicate resource names from being generated. This setting can be used to allow duplicate names.
+                    </p>
+                </li>
+                <li>
+                    <strong>Connectivity Check</strong>
+                    <p>
+                        The Azure Naming Tool will verify the tool has internet connectivity to enable update features. Use this setting to disable the connectivity check functionality.
+                    </p>
+                    <p class="alert alert-danger">
+                        <strong>NOTE</strong><br />
+                        Disabling this setting may result in connectivity errors being logged to the Admin Log.
+                    </p>
+                </li>
+                <li>
+                    <strong>Generation Webhook</strong>
+                    <p>
+                        The Azure Naming Tool can post generated names to a webhook. This can be used to integrate with other systems. Enter a valid URL below to save the webhook setting.
+                    </p>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 @code {
@@ -43,4 +57,4 @@
     public ThemeInfo? theme { get; set; }
     [Parameter]
     public bool admin { get; set; } = false;
-}
+    }

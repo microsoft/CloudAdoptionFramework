@@ -172,3 +172,7 @@ input:checked + .slider:before {
     pointer-events: none;
     cursor: not-allowed;
 }
+
+.blazored-toast-message {
+    hyphens:none !important;
+}

@@ -133,9 +133,9 @@
                                                                 </tr>
                                                                 @foreach (var resourceComponent in servicesData.ResourceComponents)
                                                                 {
-                                                                    if (!resourcetype.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                                    if (!resourcetype.Exclude.ToLower().Split(',').Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                                                     {
-                                                                        if (!resourcetype.Optional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                                        if (!resourcetype.Optional.ToLower().Split(',').Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                                                         {
                                                                             switch (resourceComponent.Name)
                                                                             {
@@ -392,7 +392,7 @@
         catch (Exception ex)
         {
             AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-            toastService.ShowError("There was a problem loading the page. Please try again", "ERROR");
+            toastService.ShowError("There was a problem loading the page. Please try again");
         }
     }
 
@@ -403,11 +403,12 @@
         {
             foreach (ResourceComponent resourceComponent in servicesData.ResourceComponents)
             {
+                string normalizedcomponentname = GeneralHelper.NormalizeName(resourceComponent.Name, true);
                 // Check if the component is excluded for the resource type
-                if (!type.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                if (!type.Exclude.ToLower().Split(',').Contains(normalizedcomponentname))
                 {
                     // Remove any optional components
-                    if (!type.Optional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                    if (!type.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
                     {
                         if (name != "")
                         {
@@ -438,9 +439,9 @@
                                 default:
                                     if (resourceComponent.IsCustom)
                                     {
-                                        if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 0)
+                                        if (servicesData.CustomComponents.Where(x => x.ParentComponent == normalizedcomponentname).Count() > 0)
                                         {
-                                            name += servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName;
+                                            name += servicesData.CustomComponents.Where(x => x.ParentComponent == normalizedcomponentname).FirstOrDefault().ShortName;
                                         }
                                     }
                                     break;

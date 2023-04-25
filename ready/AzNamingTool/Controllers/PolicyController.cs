@@ -17,7 +17,7 @@ namespace AzureNamingTool.Controllers
     [ApiKey]
     public class PolicyController : ControllerBase
     {
-        private ServiceResponse serviceResponse = new();
+        //private ServiceResponse serviceResponse = new();
         // GET: api/<PolicyController>
         //[HttpGet]
         //[Route("[action]")]

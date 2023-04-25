@@ -51,7 +51,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will import the provided configuration data (all components). This will overwrite the existing configuration data. 
         /// </summary>
-        /// <param name="configdata">json - Tool configuration File</param>
+        /// <param name="configdata">ConfigurationData (json) - Tool configuration File</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

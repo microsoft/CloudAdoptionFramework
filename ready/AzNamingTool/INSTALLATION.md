@@ -1,14 +1,14 @@
-[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
+[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Release Notes](RELEASENOTES.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
 
 # Azure Naming Tool v2 - Installation
-
-<img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Image representing the Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
 [Choosing an Installation Option](#choosing-an-installation-option)
 
 [How To Install](#how-to-install)
 
 * [Run as a Docker image](#run-as-a-docker-image) (Local development)
+
+* [Run as a Docker image with podman](#run-as-a-docker-image-with-podman) (Local development)
 
 * [Run as an Azure Web App Using GitHub Action](#run-as-an-azure-web-app-using-github-action) (.NET Application running in an Azure App Service, non-container)
 
@@ -25,6 +25,11 @@ The Azure Naming Tool was designed to be deployed in nearly any environment. Thi
 * [**Run as a Docker image**](#run-as-a-docker-image)
   * Ideal for local deployments
   * Requires docker engine installed in environment
+  * Requires storage volume mount
+
+* [**Run as a Docker image with podman**](#run-as-a-docker-image-with-podman)
+  * Ideal for local deployments
+  * Requires podman installed in environment
   * Requires storage volume mount
 
 * [**Run as an Azure Web App Using GitHub Action**](#run-as-an-azure-web-app-using-github-action)
@@ -101,6 +106,48 @@ docker run -d -p 8081:80 --mount source=azurenamingtoolvol,target=/app/settings 
 > Substitute 8081 for the port you used in the docker run command
 
 ***
+### Run as a Docker image with podman
+
+This process will allow you to deploy the Azure Naming Tool using Docker to your local environment.
+
+1. Scroll up to the top, left corner of this page.
+2. Click on the **CloudAdoptionFramework** link to open the root of this repository.
+3. Click the green **<>Code** button and select **Download ZIP**.
+4. Open your Downloads folder using File Explorer.
+5. Extract the contents of the ZIP archive.
+
+> **NOTE:**
+> Validate the project files extracted successfully and match the contents in the GitHub repository.
+6. Open a **Command Prompt**
+7. Change the directory to the **AzNamingTool** folder. For example:
+
+```cmd
+cd .\Downloads\CloudAdoptionFramework-master\CloudAdoptionFramework-master\ready\AzNamingTool
+```
+
+8. Run the following **Docker command** to build the image:
+
+```cmd
+podman build -t azurenamingtool .
+```
+
+> **NOTE:**
+> Ensure the '.' is included in the command
+9. Run the following **Docker command** to create a new container and mount a new volume:
+
+```cmd
+podman run -d -p 8081:8081 --mount type=volume,source=azurenamingtoolvol,target=/app/settings -e "ASPNETCORE_URLS=http://+:8081" azurenamingtool:latest
+```
+
+> **NOTES:**  
+> * Substitute 8081 for any port not in use on your machine
+> * You may see warnings in the command prompt regarding DataProtection and keys. These indicate that the keys are not persisted and are only local to the container instances.
+10. Access the site using the following URL: *http://localhost:8081*
+
+> **NOTE:**
+> Substitute 8081 for the port you used in the docker run command
+
+***
 ### Run as an Azure Web App Using GitHub Action
 
 (.NET application, non-container)
@@ -130,8 +177,8 @@ This process will allow you to deploy the Azure Naming Tool as a .NET applicatio
 **Create an Azure Web App** (if needed)  
 For an automated deployment of a Web App, utilize the button below and fill in the required information. Then proceed to step 4.    
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
-[![Deploy to Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmain%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmaster%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
+[![Deploy to Azure Gov](https://aka.ms/deploytoazuregovbutton)](https://portal.azure.us/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmicrosoft%2FCloudAdoptionFramework%2Fmaster%2Fready%2FAzNamingTool%2FDeployments%2FAppService-WebApp%2Fsolution.json)
 
 1. Create a new Azure Web App in the Azure portal.
 2. For the **Publish** option, select **Code**.
