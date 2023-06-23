@@ -1,6 +1,6 @@
-[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Release Notes](RELEASENOTES.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
+[Overview](/ready/AzNamingTool/README.md) | [Installation](/ready/AzNamingTool/docs/INSTALLATION.md) | [Updating](/ready/AzNamingTool/docs/UPDATING.md) | [Using the API](/ready/AzNamingTool/docs/USINGTHEAPI.md) | [Release Notes](/ready/AzNamingTool/RELEASENOTES.md) | [Version History](/ready/AzNamingTool/docs/VERSIONHISTORY.md) | [FAQ](/ready/AzNamingTool/docs/FAQ.md) | [Contributors](/ready/AzNamingTool/docs/CONTRIBUTORS.md)
 
-# Azure Naming Tool v2 - Overview
+# Azure Naming Tool
 
 <img src="./wwwroot/images/AzureNamingToolLogo.png?raw=true" alt="Image representing the Azure Naming Tool" title="Azure Naming Tool" height="150"/>
 
@@ -28,12 +28,12 @@ The Azure Naming Tool was created to help administrators define and manage their
 
 **Want a deep dive into the tool?**
 
-Check out [Bryan Soltis's](https://github.com/BryanSoltis) blog here: [Deep Diving into the Azure Naming Tool](https://soltisweb.com/blog/detail/2022-12-02-deep-diving-into-the-azure-naming-tool)
+Check out [Bryan Soltis'](https://github.com/BryanSoltis) blog here: [Deep Diving into the Azure Naming Tool](https://soltisweb.com/blog/detail/2022-12-02-deep-diving-into-the-azure-naming-tool)
 
 ## Azure Academy Video
 [Dean Cefola](https://github.com/DeanCefola) with [Azure Academy](https://www.youtube.com/c/AzureAcademy) made a great overview video. Click the image below to view the video on installing and configuring the tool as a container.
 
-[![Azure Academy Overview Video](./wwwroot/Screenshots/AzureAcademyVideo.png)](https://youtu.be/Ztmxx_KhZdE)
+[![Azure Academy Overview Video](/ready/AzNamingTool/wwwroot/Screenshots/AzureAcademyVideo.png)](https://youtu.be/Ztmxx_KhZdE)
 
 
 ## Project Structure
@@ -49,15 +49,7 @@ The Azure Naming Tool is a .NET 6 Blazor application with a RESTful API. The UI 
 
 ## Installation
 
-* [Run as a Docker image](INSTALLATION.md#run-as-a-docker-image) (Local development)
-
-* [Run as an Azure Web App Using GitHub Action](INSTALLATION.md#run-as-an-azure-web-app-using-github-action) (.NET Application running in an Azure App Service, non-container)
-
-* [Run as a Web App for Containers](INSTALLATION.md#run-as-a-web-app-for-containers) (Single container running in an Azure App Service)
-
-* [Run as an Azure Container App](INSTALLATION.md#run-as-an-azure-container-app) (Single container running in an Azure Container App)
-
-* [Run as a Stand-Alone Site](INSTALLATION.md#run-as-a-stand-alone-site) 
+[Choosing an Installation Option](/ready/AzNamingTool/docs/INSTALLATION.md)
 
 ## Important Notes
 
@@ -73,7 +65,7 @@ The following are important notes/aspects of the Azure Naming Tool:
 * The API requires an API Key for all executions. A default API Key (guid) will be generated on first launch. This value can be updated in the Admin section.
 * On the first launch, the application will prompt for the Admin password to be set.
 
-  ![Admin Password Prompt](./wwwroot/Screenshots/AdminPasswordPrompt.png)
+  ![Admin Password Prompt](/ready/AzNamingTool/wwwroot/Screenshots/AdminPasswordPrompt.png)
 
 ## Pages
 
@@ -81,22 +73,22 @@ The following are important notes/aspects of the Azure Naming Tool:
 
 The Home Page provides an overview of the tool and the components.
 
-![Home Page](./wwwroot/Screenshots/HomePage.png)
+![Home Page](/ready/AzNamingTool/wwwroot/Screenshots/HomePage.png)
 
 ### Configuration
 
 The Configuration Page shows the current Name Generation configuration. This page also provides an Admin section for updating the configuration.
 
-![Configuration Page](./wwwroot/Screenshots/ConfigurationPage.png)
+![Configuration Page](/ready/AzNamingTool/wwwroot/Screenshots/ConfigurationPage.png)
 
 ### Reference
 
 The Reference Page provides examples for each type of Azure resource. The example values do not include any excluded naming components. Optional components are always displayed and are identified below the example. Since unique names are only required at specific scopes, the examples provided are only generated for the scopes above the resource scope: resource group, resource group & region, region, global, subscription, and tenant.
 
-![Reference Page](./wwwroot/Screenshots/ReferencePage.png)
+![Reference Page](/ready/AzNamingTool/wwwroot/Screenshots/ReferencePage.png)
 
 ### Generate
 
 The Generate Page provides a dropdown menu to select an Azure resource. Once a resource is selected, naming component options are provided. Read-only components, like the value for a resource type or organization, cannot be changed. Optional components, if left blank, will be null and not shown in the output. Required components do not allow a null value, and the first value in the array is set as the default.
 
-![Generate Page](./wwwroot/Screenshots/GeneratePage1.png)
+![Generate Page](/ready/AzNamingTool/wwwroot/Screenshots/GeneratePage1.png)

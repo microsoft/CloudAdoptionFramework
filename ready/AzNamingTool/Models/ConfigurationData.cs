@@ -18,6 +18,7 @@ namespace AzureNamingTool.Models
         public List<CustomComponent> CustomComponents { get; set; }
         public List<GeneratedName> GeneratedNames { get; set; }
         public List<AdminLogMessage> AdminLogs { get; set; }
+        public List<AdminUser> AdminUsers { get; set; }
 
         public string? SALTKey { get; set; }
         public string? AdminPassword { get; set; }
@@ -26,5 +27,7 @@ namespace AzureNamingTool.Models
         public string? DuplicateNamesAllowed { get; set; } = "false";
         public string? GenerationWebhook { get; set; } = string.Empty;
         public string? ConnectivityCheckEnabled { get; set; } = "true";
+        public string? IdentityHeaderName { get; set; } = "X-MS-CLIENT-PRINCIPAL-NAME";
+        public string? ResourceTypeEditingAllowed { get; set; } = "false";
     }
 }

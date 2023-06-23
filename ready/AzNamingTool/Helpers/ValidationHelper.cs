@@ -18,62 +18,45 @@ namespace AzureNamingTool.Helpers
             return isValidated;
         }
 
-        public static bool ValidateShortName(string value, string type)
+        public static async Task<bool> ValidateShortName(string type, string value, string parentcomponent = null)
         {
             bool valid = false;
-
-            switch (type)
+            try
             {
-                case "ResourceEnvironment":
-                    if (value.Length < 6)
-                    {
-                        valid = true;
-                    }
-                    break;
-                case "ResourceLocation":
-                    if (value.Length < 11)
-                    {
-                        valid = true;
-                    }
-                    break;
-                case "ResourceOrg":
-                    if (value.Length < 6)
-                    {
-                        valid = true;
-                    }
-                    break;
-                case "ResourceProjAppSvc":
-                    if (value.Length < 4)
-                    {
-                        valid = true;
-                    }
-                    break;
-                case "ResourceType":
-                    if (value.Length < 11)
-                    {
-                        valid = true;
-                    }
-                    break;
-                case "ResourceUnitDept":
-                    if (value.Length < 4)
-                    {
-                        valid = true;
-                    }
-                    break;
-                case "ResourceFunction":
-                    if (value.Length < 11)
-                    {
-                        valid = true;
-                    }
-                    break;
-                case "CustomComponent":
-                    if (value.Length < 11)
-                    {
-                        valid = true;
-                    }
-                    break;
-            }
+                ResourceComponent resourceComponent = new();
+                List<ResourceComponent> resourceComponents = new();
+                ServiceResponse serviceResponse;
 
+                // Get the current components
+                serviceResponse = await ResourceComponentService.GetItems(true);
+                if (serviceResponse.Success)
+                {
+                    resourceComponents = (List<ResourceComponent>)serviceResponse.ResponseObject;
+
+                    // Check if it's a custom component
+                    if (type == "CustomComponent")
+                    {
+                        resourceComponent = resourceComponents.Find(x => GeneralHelper.NormalizeName(x.Name, true) == GeneralHelper.NormalizeName(parentcomponent, true));
+                    }
+                    else
+                    {
+                        resourceComponent = resourceComponents.Find(x => x.Name == type);
+                    }
+
+                    if (resourceComponent != null)
+                    {
+                        // Check if the name mathces the length requirements for the component
+                        if ((value.Length >= (Convert.ToInt32(resourceComponent.MinLength)) && (value.Length <= Convert.ToInt32(resourceComponent.MaxLength))))
+                        {
+                            valid = true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
             return valid;
         }
 

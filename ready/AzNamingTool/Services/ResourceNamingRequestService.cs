@@ -178,7 +178,7 @@ namespace AzureNamingTool.Services
 
                 if (valid)
                 {
-                    GeneratedName generatedName = new GeneratedName()
+                    GeneratedName generatedName = new()
                     {
                         CreatedOn = DateTime.Now,
                         ResourceName = name.ToLower(),
@@ -479,7 +479,7 @@ namespace AzureNamingTool.Services
                             serviceresponse = await CustomComponentService.GetItems();
                             var customcomponents = (List<CustomComponent>)serviceresponse.ResponseObject;
                             // Make sure the custom component has values
-                            if (customcomponents.Where(x => x.ParentComponent == normalizedcomponentname).Count() > 0)
+                            if (customcomponents.Where(x => x.ParentComponent == normalizedcomponentname).Any())
                             {
                                 // Make sure the CustomComponents property was provided
                                 if (!resourceType.Exclude.ToLower().Split(',').Contains(normalizedcomponentname))
@@ -488,12 +488,7 @@ namespace AzureNamingTool.Services
                                     if (request.CustomComponents != null)
                                     {
                                         // Check if the custom compoment value was provided in the request
-                                        if (!request.CustomComponents.ContainsKey(normalizedcomponentname))
-                                        {
-                                            valid = false;
-                                            sbMessage.Append(component.Name + " value was not provided. ");
-                                        }
-                                        else
+                                        if (request.CustomComponents.ContainsKey(normalizedcomponentname))
                                         {
                                             // Get the value from the provided custom components
                                             var componentvalue = request.CustomComponents[normalizedcomponentname];
@@ -530,6 +525,15 @@ namespace AzureNamingTool.Services
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            // Check if the prop is optional
+                                            if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
+                                            {
+                                                valid = false;
+                                                sbMessage.Append(component.Name + " value was not provided. ");
+                                            }
+                                        }
                                     }
                                     else
                                     {
@@ -552,12 +556,7 @@ namespace AzureNamingTool.Services
                                 if (request.CustomComponents != null)
                                 {
                                     // Check if the custom compoment value was provided in the request
-                                    if (!request.CustomComponents.ContainsKey(normalizedcomponentname))
-                                    {
-                                        valid = false;
-                                        sbMessage.Append(component.Name + " value was not provided. ");
-                                    }
-                                    else
+                                    if (request.CustomComponents.ContainsKey(normalizedcomponentname))
                                     {
                                         // Get the value from the provided custom components
                                         var componentvalue = request.CustomComponents[normalizedcomponentname];
@@ -581,6 +580,15 @@ namespace AzureNamingTool.Services
 
                                             // Add property to array for individual component validation
                                             lstComponents.Add(new string[] { component.Name, componentvalue });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Check if the prop is optional
+                                        if (!resourceType.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
+                                        {
+                                            valid = false;
+                                            sbMessage.Append(component.Name + " value was not provided. ");
                                         }
                                     }
                                 }
@@ -640,19 +648,20 @@ namespace AzureNamingTool.Services
                         // Check if the name already exists
                         serviceresponse = await GeneratedNamesService.GetItems();
                         var names = (List<GeneratedName>)serviceresponse.ResponseObject;
-                        if (names.Where(x => x.ResourceName == name).Count() > 0)
+                        if (names.Where(x => x.ResourceName == name).Any())
                         {
                             nameallowed = false;
                         }
                     }
                     if (nameallowed)
                     {
-                        GeneratedName generatedName = new GeneratedName()
+                        GeneratedName generatedName = new()
                         {
                             CreatedOn = DateTime.Now,
                             ResourceName = name.ToLower(),
                             Components = lstComponents,
-                            ResourceTypeName = resourceType.Resource
+                            ResourceTypeName = resourceType.Resource,
+                            User = request.CreatedBy
                         };
                         ServiceResponse responseGenerateName = await GeneratedNamesService.PostItem(generatedName);
                         if (responseGenerateName.Success)
@@ -660,6 +669,7 @@ namespace AzureNamingTool.Services
                             response.Success = true;
                             response.ResourceName = name.ToLower();
                             response.Message = sbMessage.ToString();
+                            response.resourceNameDetails = generatedName;
 
                             // Check if the GenerationWebhook is configured
                             String webhook = ConfigurationHelper.GetAppSetting("GenerationWebhook", true);

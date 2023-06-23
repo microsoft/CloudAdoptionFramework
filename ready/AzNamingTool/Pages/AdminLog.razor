@@ -31,7 +31,7 @@
             </button>
         </div>
         <div style="clear:both;"></div>
-        <div class="mb-3">This page displays a log of admin/configuration changes.</div>
+        <div class="mb-3">This page displays a log of Admin/Configuration changes.</div>
 
 
         @if (!dataLoaded)
@@ -54,8 +54,8 @@
                         </button>
                     </div>
                     <div class="card mb-3">
-                        <div class="card-header bg-default text-black">
-                            <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
+                        <div class="card-header bg-default text-dark">
+                            <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
                                 <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter Data
                             </a>
                         </div>
@@ -77,7 +77,7 @@
                                         <span class="input-group-text" id="addon-wrapping">
                                             <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
                                         </span>
-                                        <input class="form-control" type="search" placeholder="Filter by Title, Message"
+                                        <input class="form-control" type="search" placeholder="Filter by Source, Title, Message"
                                        @bind="filterData"
                                        @bind:event="oninput">
                                     </div>
@@ -97,6 +97,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Created On</th>
+                                    <th scope="col">Source</th>
                                     <th scope="col">Title</th>
                                     <th scope="col">Message</th>
                                 </tr>
@@ -109,6 +110,9 @@
                                     <tr>
                                         <td class="align-top">
                                             @message.CreatedOn.ToString()
+                                        </td>
+                                        <td class="align-top">
+                                            @message.Source
                                         </td>
                                         <td class="align-top">
                                             @message.Title
@@ -220,7 +224,7 @@
 
         if (!string.IsNullOrEmpty(filterData))
         {
-            if ((!message.Title.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!message.Message.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+            if ((!message.Source.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!message.Title.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!message.Message.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
                 visible = false;
         }
         return visible;

@@ -1,6 +1,6 @@
-[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Release Notes](RELEASENOTES.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
+[Overview](/ready/AzNamingTool/README.md) | [Installation](/ready/AzNamingTool/docs/INSTALLATION.md) | [Updating](/ready/AzNamingTool/docs/UPDATING.md) | [Using the API](/ready/AzNamingTool/docs/USINGTHEAPI.md) | [Release Notes](/ready/AzNamingTool/RELEASENOTES.md) | [Version History](/ready/AzNamingTool/docs/VERSIONHISTORY.md) | [FAQ](/ready/AzNamingTool/docs/FAQ.md) | [Contributors](/ready/AzNamingTool/docs/CONTRIBUTORS.md)
 
-# Azure Naming Tool v2 - Using the API
+# Using the API
 
 [Overview](#overview)
 
@@ -9,15 +9,13 @@
 ## Overview
 The Azure Naming Tool includes a fully-functional REST API for integrating with your existing systems. The API is enabled by default and an OpenAPI definition file is included, detailing all aspects of the API. 
 
-**NOTE**
-
-The current API is very developer-focused. We will continue to improve the functionality to expose more capabilities over time. 
+><br />**NOTE**<br />
+>The current API is very developer-focused. We will continue to improve the functionality to expose more capabilities over time. <br /><br />
 
 This page details how to integrate thew API into your existing architecture.
 
-**NOTE**
-
-All API calls require an API Key. This key can be found in the **Admin** section when authenticated to the site. 
+><br/>**NOTE**<br />
+>All API calls require an API Key. This key can be found in the **Admin** section when authenticated to the site. <br /><br />
 
 ## How to use the API
 The OpenAPI definition (Swagger file) documents all the classes required to interact with the API.  The required models will vary, depending on which API function is being requested. The OpenAPI definition details the individual models required for each function. 

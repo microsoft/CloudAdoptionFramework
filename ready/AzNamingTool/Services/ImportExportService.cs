@@ -75,6 +75,11 @@ namespace AzureNamingTool.Services
                     configdata.SALTKey = config.SALTKey;
                     configdata.AdminPassword = config.AdminPassword;
                     configdata.APIKey = config.APIKey;
+                    //IdentityHeaderName
+                    configdata.IdentityHeaderName = config.IdentityHeaderName;
+                    //AdminUsers
+                    serviceResponse = await AdminUserService.GetItems();
+                    configdata.AdminUsers = serviceResponse.ResponseObject;
                 }
 
                 serviceResponse.ResponseObject = configdata;
@@ -105,6 +110,7 @@ namespace AzureNamingTool.Services
                 await ResourceUnitDeptService.PostConfig(configdata.ResourceUnitDepts);
                 await CustomComponentService.PostConfig(configdata.CustomComponents);
                 await GeneratedNamesService.PostConfig(configdata.GeneratedNames);
+                await AdminUserService.PostConfig(configdata.AdminUsers);
                 await AdminLogService.PostConfig(configdata.AdminLogs);
 
                 var config = ConfigurationHelper.GetConfigurationData();
@@ -123,6 +129,10 @@ namespace AzureNamingTool.Services
                 if (configdata.APIKey != null)
                 {
                     config.APIKey = configdata.APIKey;
+                }
+                if (configdata.IdentityHeaderName != null)
+                {
+                    config.IdentityHeaderName = configdata.IdentityHeaderName;
                 }
 
                 var jsonWriteOptions = new JsonSerializerOptions()

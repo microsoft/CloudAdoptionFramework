@@ -14,5 +14,6 @@
         public List<CustomComponent>? CustomComponents { get; set; }
         public List<GeneratedName>? GeneratedNames { get; set; }
         public List<AdminLogMessage>? AdminLogMessages { get; set; }
+        public List<AdminUser>? AdminUsers { get; set; }
     }
 }

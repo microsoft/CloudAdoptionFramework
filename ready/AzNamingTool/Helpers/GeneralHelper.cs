@@ -59,6 +59,22 @@ namespace AzureNamingTool.Helpers
             return streamReader.ReadToEnd();
         }
 
+        public static bool IsBase64Encoded(string value)
+        {
+            bool base64encoded = false;
+            try
+            {
+                byte[] byteArray = Convert.FromBase64String(value);
+                base64encoded = true;
+            }
+            catch (FormatException)
+            {
+                // The string is not base 64. Dismiss the error and return false
+            }
+            return base64encoded;
+        }
+
+
         public static async Task<string> DownloadString(string url)
         {
             string data;

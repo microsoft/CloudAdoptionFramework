@@ -18,5 +18,6 @@
         /// long - Resource Id (example: 14)
         /// </summary>
         public long? ResourceId { get; set; } = 0;
+        public string? CreatedBy { get; set; } = "System";
     }
 }

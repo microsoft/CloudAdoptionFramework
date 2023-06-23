@@ -51,7 +51,7 @@ namespace AzureNamingTool.Services
             }
             return serviceResponse;
         }
-        
+
         public static async Task<ServiceResponse> PostItem(ResourceComponent item)
         {
             try

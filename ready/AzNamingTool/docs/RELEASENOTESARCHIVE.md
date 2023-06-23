@@ -1,8 +1,9 @@
-[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Release Notes](RELEASENOTES.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
+[Overview](/ready/AzNamingTool/README.md) | [Installation](/ready/AzNamingTool/docs/INSTALLATION.md) | [Updating](/ready/AzNamingTool/docs/UPDATING.md) | [Using the API](/ready/AzNamingTool/docs/USINGTHEAPI.md) | [Release Notes](/ready/AzNamingTool/RELEASENOTES.md) | [Version History](/ready/AzNamingTool/docs/VERSIONHISTORY.md) | [FAQ](/ready/AzNamingTool/docs/FAQ.md) | [Contributors](/ready/AzNamingTool/docs/CONTRIBUTORS.md)
 
 # Azure Naming Tool v2 - Release Notes Archive
 
-- [Version 2.7.0 (Current)](/ReleaseNotes.md)
+- [Version 2.8.0 (Current)](/ready/AzNamingTool/RELEASENOTES.md)
+- [Version 2.7.0](#version-270)
 - [Version 2.6.0](#version-260)
 - [Version 2.5.0](#version-250)
 - [Version 2.4.0](#version-240)
@@ -12,6 +13,23 @@
 - [Version 2.2.0](#version-220)
 - [Version 2.1.0](#version-210)
 - [Version 2.0.0](#version-200)
+
+## Version 2.7.0
+### Features
+- Added Free Form Text Field component
+- Updated Configuration page to display Free Form Text components
+- Updated Generate page to display Free Form Text components
+- Added RELEASE NOTES file
+- Added RELEASE NOTES ARCHIVE file
+- Added VERSION HISTORY timeline
+- Updated Documentation navigation/styling
+- Updated 2.7.0 version notes
+
+### Bug fixes
+- Updated Configuration page to not allow duplicate component options
+- Added additional functions to API retrieving a single Resource Component and Resource Delimiter (GetItem(int id))
+
+***
 
 ## Version 2.6.0
 ### Features
@@ -46,7 +64,7 @@ To migrate existing GLOBALLY OPTIONAL components:
 - Expand the **Globally Optional Configuration** section.
 - Click **ADD** to add the component as OPTIONAL for all resource types.
 
-![Edit Component](./wwwroot/Screenshots/EditComponent1.png)
+![Edit Component](/ready/AzNamingTool/wwwroot/Screenshots/EditComponent1.png)
 
 ### Features
 - Added ability to set component as OPTIONAL/EXCLUDE for all resource types
@@ -82,7 +100,7 @@ To migrate existing GLOBALLY OPTIONAL components:
 - Updated formatting/styling on Generate page
 - Updated validation on Generate page
 - Updated formatting/styling on Configuration page
-- Added ability for admin to delete generated names from log
+- Added ability for Admin to delete generated names from log
 - Added Instructions link to site pages
 - Updated Instructions with latest screenshots/details
 - Updated 2.4.0 version notes
