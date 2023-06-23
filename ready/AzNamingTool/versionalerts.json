@@ -7,6 +7,6 @@
   {
     "id": 2,
     "version": "2.8.0",
-    "alert": "<p><strong>IMPORTANT NOTES</strong></p><ul><li class=\"mb-3\">The Azure Naming Tool will moving to a new GitHub repo in the next version! This change will allow us more frequent updates, enhanced features, and the ability to request new features and report bugs.<br /><br /><a href=\"https://github.com/CloudAdoptionFramework/blob/master/ready/AzNamingTool/docs/V3REPOSITORYMIGRATION.md\" target=\"_blank\"><strong>View the Azure Naming Tool V3 Migration Guide</strong></a></li><li class=\"mb-3\">You can learn more about the new Identity Provider Integration <a href=\"https://soltisweb.com/blog/detail/2023-06-azurenamingtool-identityproviderintegrationdeepdive\" target=\"_blank\"><strong>HERE</strong></a>.</ul>"
+    "alert": "<p><strong>IMPORTANT NOTES</strong></p><ul><li class=\"mb-3\">The Azure Naming Tool will moving to a new GitHub repo in the next version! This change will allow us more frequent updates, enhanced features, and the ability to request new features and report bugs.<br /><br /><a href=\"https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/docs/V3REPOSITORYMIGRATION.md\" target=\"_blank\"><strong>View the Azure Naming Tool V3 Migration Guide</strong></a></li><li class=\"mb-3\">You can learn more about the new Identity Provider Integration <a href=\"https://soltisweb.com/blog/detail/2023-06-azurenamingtool-identityproviderintegrationdeepdive\" target=\"_blank\"><strong>HERE</strong></a>.</ul>"
   }
 ]

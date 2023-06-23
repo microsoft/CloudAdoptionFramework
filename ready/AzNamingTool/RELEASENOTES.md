@@ -5,7 +5,7 @@
 ## Version 2.8.0 (current)
 
 ### IMPORTANT NOTES
-- The Azure Naming Tool will moving to a new GitHub repo in the next version! This change will allow us more frequent updates, enhanced features, and the ability to request new features and report bugs. [**View the Azure Naming Tool V3 Migration Guide**](https://github.com/CloudAdoptionFramework/blob/master/ready/AzNamingTool/docs/V3REPOSITORYMIGRATION.md).
+- The Azure Naming Tool will moving to a new GitHub repo in the next version! This change will allow us more frequent updates, enhanced features, and the ability to request new features and report bugs. [**View the Azure Naming Tool V3 Migration Guide**](https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/docs/V3REPOSITORYMIGRATION.md).
 - You can learn more about the new Identity Provider Integration in [**HERE**](https://soltisweb.com/blog/detail/2023-06-azurenamingtool-identityproviderintegrationdeepdive).
 
 ### Features
