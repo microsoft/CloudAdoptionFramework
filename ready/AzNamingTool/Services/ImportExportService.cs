@@ -79,7 +79,9 @@ namespace AzureNamingTool.Services
                     configdata.IdentityHeaderName = config.IdentityHeaderName;
                     //AdminUsers
                     serviceResponse = await AdminUserService.GetItems();
-                    configdata.AdminUsers = serviceResponse.ResponseObject;
+                    configdata.AdminUsers = serviceResponse.ResponseObject;                    
+                    // ResourceTypeEditing
+                    configdata.ResourceTypeEditingAllowed = config.ResourceTypeEditingAllowed;
                 }
 
                 serviceResponse.ResponseObject = configdata;
@@ -110,7 +112,10 @@ namespace AzureNamingTool.Services
                 await ResourceUnitDeptService.PostConfig(configdata.ResourceUnitDepts);
                 await CustomComponentService.PostConfig(configdata.CustomComponents);
                 await GeneratedNamesService.PostConfig(configdata.GeneratedNames);
-                await AdminUserService.PostConfig(configdata.AdminUsers);
+                if (GeneralHelper.IsNotNull(configdata.AdminUsers))
+                {
+                    await AdminUserService.PostConfig(configdata.AdminUsers);
+                }
                 await AdminLogService.PostConfig(configdata.AdminLogs);
 
                 var config = ConfigurationHelper.GetConfigurationData();
@@ -133,6 +138,10 @@ namespace AzureNamingTool.Services
                 if (configdata.IdentityHeaderName != null)
                 {
                     config.IdentityHeaderName = configdata.IdentityHeaderName;
+                }
+                if (configdata.ResourceTypeEditingAllowed != null)
+                {
+                    config.ResourceTypeEditingAllowed = configdata.ResourceTypeEditingAllowed;
                 }
 
                 var jsonWriteOptions = new JsonSerializerOptions()
