@@ -80,7 +80,7 @@ namespace AzureNamingTool.Services
                     if (items.Exists(x => x.Id == item.Id))
                     {
                         // Remove the updated item from the list
-                        var existingitem = items.Find(x => (x.Name == item.Name));
+                        var existingitem = items.Find(x => (x.Id == item.Id));
                         int index = items.IndexOf(existingitem);
                         items.RemoveAt(index);
                     }
