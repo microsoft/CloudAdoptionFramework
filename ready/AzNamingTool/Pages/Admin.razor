@@ -601,12 +601,7 @@
                 }
                 break;
             case "clearcache":
-                ObjectCache memoryCache = MemoryCache.Default;
-                List<string> cacheKeys = memoryCache.Select(kvp => kvp.Key).ToList();
-                foreach (string cacheKey in cacheKeys)
-                {
-                    memoryCache.Remove(cacheKey);
-                }
+                CacheHelper.ClearAllCache();
                 message.Type = MessageTypesEnum.SUCCESS;
                 message.Header = "SUCCESS";
                 message.Message = "Cache cleared!";

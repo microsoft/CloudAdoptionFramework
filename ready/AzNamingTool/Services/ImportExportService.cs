@@ -68,6 +68,7 @@ namespace AzureNamingTool.Services
                 var config = ConfigurationHelper.GetConfigurationData();
                 configdata.DismissedAlerts = config.DismissedAlerts;
                 configdata.DuplicateNamesAllowed = config.DuplicateNamesAllowed;
+                configdata.ConnectivityCheckEnabled = config.ConnectivityCheckEnabled;
 
                 // Get the security settings
                 if (includeadmin)
@@ -79,7 +80,7 @@ namespace AzureNamingTool.Services
                     configdata.IdentityHeaderName = config.IdentityHeaderName;
                     //AdminUsers
                     serviceResponse = await AdminUserService.GetItems();
-                    configdata.AdminUsers = serviceResponse.ResponseObject;                    
+                    configdata.AdminUsers = serviceResponse.ResponseObject;
                     // ResourceTypeEditing
                     configdata.ResourceTypeEditingAllowed = config.ResourceTypeEditingAllowed;
                 }
@@ -112,7 +113,7 @@ namespace AzureNamingTool.Services
                 await ResourceUnitDeptService.PostConfig(configdata.ResourceUnitDepts);
                 await CustomComponentService.PostConfig(configdata.CustomComponents);
                 await GeneratedNamesService.PostConfig(configdata.GeneratedNames);
-                if (GeneralHelper.IsNotNull(configdata.AdminUsers))
+                if (configdata.AdminUsers != null)
                 {
                     await AdminUserService.PostConfig(configdata.AdminUsers);
                 }
@@ -121,13 +122,14 @@ namespace AzureNamingTool.Services
                 var config = ConfigurationHelper.GetConfigurationData();
                 config.DismissedAlerts = configdata.DismissedAlerts;
                 config.DuplicateNamesAllowed = configdata.DuplicateNamesAllowed;
+                config.ConnectivityCheckEnabled = configdata.ConnectivityCheckEnabled;
 
-                // Set the security settings
+                // Set the admin settings, if they are included in the import
                 if (configdata.SALTKey != null)
                 {
                     config.SALTKey = configdata.SALTKey;
                 }
-                if(configdata.AdminPassword != null)
+                if (configdata.AdminPassword != null)
                 {
                     config.AdminPassword = configdata.AdminPassword;
                 }
@@ -143,7 +145,6 @@ namespace AzureNamingTool.Services
                 {
                     config.ResourceTypeEditingAllowed = configdata.ResourceTypeEditingAllowed;
                 }
-
                 var jsonWriteOptions = new JsonSerializerOptions()
                 {
                     WriteIndented = true
@@ -154,7 +155,7 @@ namespace AzureNamingTool.Services
 
                 var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/appsettings.json");
                 File.WriteAllText(appSettingsPath, newJson);
-
+                CacheHelper.ClearAllCache();
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

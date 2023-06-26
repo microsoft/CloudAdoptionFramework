@@ -24,10 +24,10 @@ namespace AzureNamingTool.Models
         public string? AdminPassword { get; set; }
         public string? APIKey { get; set; }
         public string? DismissedAlerts { get; set; }
-        public string? DuplicateNamesAllowed { get; set; } = "false";
+        public string? DuplicateNamesAllowed { get; set; }
         public string? GenerationWebhook { get; set; } = string.Empty;
-        public string? ConnectivityCheckEnabled { get; set; } = "true";
+        public string? ConnectivityCheckEnabled { get; set; }
         public string? IdentityHeaderName { get; set; } = "X-MS-CLIENT-PRINCIPAL-NAME";
-        public string? ResourceTypeEditingAllowed { get; set; } = "false";
+        public string? ResourceTypeEditingAllowed { get; set; }
     }
 }

@@ -80,5 +80,22 @@ namespace AzureNamingTool.Helpers
             }
             return data.ToString();
         }
+
+        public static void ClearAllCache()
+        {
+            try
+            {
+                ObjectCache memoryCache = MemoryCache.Default;
+                List<string> cacheKeys = memoryCache.Select(kvp => kvp.Key).ToList();
+                foreach (string cacheKey in cacheKeys)
+                {
+                    memoryCache.Remove(cacheKey);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+        }
     }
 }
