@@ -1774,13 +1774,19 @@
                                 </div>
                                 <div class="card card-body @theme.ThemeStyle">
                                     <p>
-                                        Click <strong>Export</strong> to export the current Global Configuration. This includes all component, settings, and Admin passwords/API keys.
+                                        Click <strong>Export</strong> to export the current Global Configuration. This includes all components, options, and tool settings.
                                     </p>
                                     <p>
                                         <button type="button" class="btn btn-primary" @onclick=@(e => FormAction("Global",0,"download")) title="Export">
                                             <span class="oi oi-data-transfer-download" aria-hidden="true"></span> Export
                                         </button>
-                                        <input title="Include Admin Configuration" class="form-check-input" type="checkbox" @bind="@includeAdmin" style="margin-top: 9px; margin-left:10px;"> Include Admin Configuration?
+                                        @if (currentuser == "GlobalAdmin")
+                                        {
+                                            <span>
+                                                <input title="Include Security/Identity Provider Settings" class="form-check-input" type="checkbox" @bind="@includeAdmin" style="margin-top: 9px; margin-left:10px;">
+                                                Include Security/Identity Provider Settings?
+                                            </span>
+                                        }
                                     </p>
                                 </div>
                             </div>
@@ -1904,6 +1910,7 @@
     private bool refreshtypeshortnames = false;
     private bool refreshlocationshortnames = false;
     private bool includeAdmin = false;
+    private string currentuser =  String.Empty;
 
     private ResponseMessage message = new();
 
@@ -1913,6 +1920,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        currentuser = await IdentityHelper.GetCurrentUser(session);
         if (firstRender)
         {
             var result = await session.GetAsync<bool>("admin");
