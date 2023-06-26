@@ -3362,8 +3362,7 @@
             workingmodal.Close();
         }
 
-
-        if (message.Message != null)
+        if (!String.IsNullOrEmpty(message.Message))
         {
             message.Message = "(" + type + ") " + message.Message;
             switch (message.Type)
