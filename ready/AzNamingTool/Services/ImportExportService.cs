@@ -69,6 +69,7 @@ namespace AzureNamingTool.Services
                 configdata.DismissedAlerts = config.DismissedAlerts;
                 configdata.DuplicateNamesAllowed = config.DuplicateNamesAllowed;
                 configdata.ConnectivityCheckEnabled = config.ConnectivityCheckEnabled;
+                configdata.GenerationWebhook = config.GenerationWebhook;
 
                 // Get the security settings
                 if (includeadmin)
@@ -123,6 +124,7 @@ namespace AzureNamingTool.Services
                 config.DismissedAlerts = configdata.DismissedAlerts;
                 config.DuplicateNamesAllowed = configdata.DuplicateNamesAllowed;
                 config.ConnectivityCheckEnabled = configdata.ConnectivityCheckEnabled;
+                config.GenerationWebhook = configdata.GenerationWebhook;
 
                 // Set the admin settings, if they are included in the import
                 if (configdata.SALTKey != null)

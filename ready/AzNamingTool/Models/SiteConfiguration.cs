@@ -11,7 +11,7 @@
         public string? DuplicateNamesAllowed { get; set; }
         public string? GenerationWebhook { get; set; }
         public string? ConnectivityCheckEnabled { get; set; }
-        public string IdentityHeaderName { get; set; } = "X-MS-CLIENT-PRINCIPAL-NAME";
+        public string? IdentityHeaderName { get; set; }
         public string? ResourceTypeEditingAllowed { get; set; }
     }
 }
