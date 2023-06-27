@@ -21,11 +21,11 @@ While every effort has been made to minimize the impact, the migration of the Az
 
 #### 1. Backup your current Azure Naming Tool installation.
 
-It is recommended you create a [**Backup**](https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/UPDATING.md#backup-settings) of your configuration prior to the migration. This will ensure your customizations are retained and applied to the new installation. 
+It is recommended you create a [**Backup**](/ready/AzNamingTool/docs/UPDATING.md#backup-settings) of your configuration prior to the migration. This will ensure your customizations are retained and applied to the new installation. 
 
 #### 2. Backup code modifications/customizations
 
-The v3.0.0 migration process will require a completely new installation of the tool for your [**Installation**](https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/INSTALLATION.md) method. Depending on your selection, this may include:
+The v3.0.0 migration process will require a completely new installation of the tool for your [**Installation**](/ready/AzNamingTool/docs/INSTALLATION.md) method. Depending on your selection, this may include:
 
 - New GitHub repository (new fork of the Azure Naming Tool repo)
 - New GitHub secrets (if using the GitHub Action)
@@ -34,19 +34,19 @@ To prepare for these changes, it is recommended that create a backup of any cust
 
 #### 3. Review your installation process
 
-The migration to the new GitHub repository will require users to deploy a new installation of the code. It is recommended that users review the [**Installation**](https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/INSTALLATION.md) process for their desired environment prior to the migration. 
+The migration to the new GitHub repository will require users to deploy a new installation of the code. It is recommended that users review the [**Installation**](/ready/AzNamingTool/docs/INSTALLATION.md) process for their desired environment prior to the migration. 
 <br /><br /><br />
 ## Migration Timeline
 The following section details the migration timeline for the v3.0.0 release.
 
 1. v2.8.0 is released
     - Users will be informed of the upcoming code migration.
-    - Users will be informed of the need to [**Backup**](https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/UPDATING.md#backup-settings) their configuration.
+    - Users will be informed of the need to [**Backup**](/ready/AzNamingTool/docs/UPDATING.md#backup-settings) their configuration.
 2. v3.0.0 is released
     - All code is migrated to the new Azure Naming Tool GitHub repository.
     - All code within the current [**CloudAdoptionFramework/ready/AzNamingTool**](https://github.com/microsoft/CloudAdoptionFramework/tree/master/ready/AzNamingTool) is removed. Navigation links will be updated to point to the new repository.
-    - Users will be required to fork the new repository and update their [**Installation**](https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/INSTALLATION.md) method (if applicable).
+    - Users will be required to fork the new repository and update their [**Installation**](/ready/AzNamingTool/docs/INSTALLATION.md) method (if applicable).
     - Users will be required to manually migrate any customizations they have made to the codebase.
-    - Users will be required to re-deploy the application using the new GitHub repository and their selected [**Installation**](https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/INSTALLATION.md) method.
+    - Users will be required to re-deploy the application using the new GitHub repository and their selected [**Installation**](/ready/AzNamingTool/docs/INSTALLATION.md) method.
         - If using the built in GitHub Action, users will be required to create new GitHub secrets for the new repository.
-    - Users will be required to [**Restore**](https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/UPDATING.md#restore-settings) their configuration backup (if applicable).
+    - Users will be required to [**Restore**](/ready/AzNamingTool/docs/UPDATING.md#restore-settings) their configuration backup (if applicable).
