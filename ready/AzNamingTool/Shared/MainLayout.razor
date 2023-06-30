@@ -27,7 +27,11 @@
             {
                 if (currentuser != "System")
                 {
-                    <div class="w-100">@("User: " + currentuser)</div>
+                    <div class="w-100">
+                        @(
+                            "User: " + currentuser
+                            )
+                    </div>
                 }
             }
             @if (admin)
@@ -105,18 +109,18 @@
         {
             OpenPasswordModal();
         }
-        // Set the current user
-        var currentuservalue = await session.GetAsync<string>("currentuser");
-        if (!String.IsNullOrEmpty(currentuservalue.Value))
-        {
-            currentuser = currentuservalue.Value;
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         var adminresult = await session.GetAsync<bool>("admin");
         admin = (bool)adminresult.Value;
+        // Set the current user
+        var currentuservalue = await session.GetAsync<string>("currentuser");
+        if (!String.IsNullOrEmpty(currentuservalue.Value))
+        {
+            currentuser = currentuservalue.Value;
+        }
         if (firstRender)
         {
             // Check if the user has manually logged out. If so, don't attempt to identity them.
