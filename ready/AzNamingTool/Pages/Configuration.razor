@@ -45,9 +45,9 @@
                             <p>Please check the <a href="/adminlog" class="fw-bold">Admin Log</a> for additional details.</p>
                             <p>You can disable the connectivity check in the <span class="fw-bold">Site Settings</span> section in the <a href="/admin" class="fw-bold">Admin</a> utility.</p>
                         </div>
-                        <button type="button" class="close btn btn-light" data-dismiss="alert" aria-label="Close" @onclick="@(e => OnConnectivtyAlertDismissed())">
+                        @*<button type="button" class="close btn btn-light" data-dismiss="alert" aria-label="Close" @onclick="@(e => OnConnectivtyAlertDismissed())">
                             <span aria-hidden="true">Dismiss</span>
-                        </button>
+                        </button>*@
                     </div>
                 </div>
             }
@@ -58,10 +58,10 @@
                         <div class="mb-3">
                             @((MarkupString)versionalert)
                         </div>
-                        <button type="button" class="close btn btn-light" data-dismiss="alert" aria-label="Close" @onclick="@(e => OnConfigurationAlertDismissed())">
+                        @*<button type="button" class="close btn btn-light" data-dismiss="alert" aria-label="Close" @onclick="@(e => OnConfigurationAlertDismissed())">
                             <span aria-hidden="true">Dismiss</span>
                         </button>
-                        <input title="Do Not Show Again" class="form-check-input" type="checkbox" @bind="@dismissalert" style="margin-top: 9px; margin-left:10px;"> Do not show again
+                        <input title="Do Not Show Again" class="form-check-input" type="checkbox" @bind="@dismissalert" style="margin-top: 9px; margin-left:10px;"> Do not show again*@
                     </div>
                 </div>
             }
