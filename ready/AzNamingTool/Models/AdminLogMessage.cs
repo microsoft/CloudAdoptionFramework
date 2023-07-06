@@ -6,5 +6,6 @@
         public DateTime CreatedOn { get; set; } = DateTime.Now;
         public string Title { get; set; }
         public string Message { get; set; }
+        public string? Source { get; set; } = "System";
     }
 }

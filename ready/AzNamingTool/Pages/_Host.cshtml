@@ -1,13 +1,47 @@
 ﻿@page "/"
 @namespace AzureNamingTool.Pages
+@using AzureNamingTool.Helpers;
+@using AzureNamingTool.Models;
+@inject StateContainer state
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = "_Layout";
+
+    // Verify the site configration files are present
+    ConfigurationHelper.VerifyConfiguration(state);
+    ConfigurationHelper.VerifySecurity(state);
+
+    var identityProviderDetails = new IdentityProviderDetails();
+    // Check if there is an HttpContext object
+    if (this.HttpContext != null)
+    {
+        if(this.HttpContext.Request.Headers != null)
+        {
+            // Get the Identity provider, if using Azure App Service Authentication
+            if (this.HttpContext.Request.Headers.ContainsKey("X-MS-CLIENT-PRINCIPAL-IDP"))
+            {
+                // Set the identity provider
+                identityProviderDetails.CurrentIdentityProvider = this.HttpContext.Request.Headers["X-MS-CLIENT-PRINCIPAL-IDP"];
+            }
+        }
+
+        // Check if there is an IdentityHeaderName set
+        if (!String.IsNullOrEmpty(ConfigurationHelper.GetAppSetting("IdentityHeaderName", true)))
+        {
+            string headername = ConfigurationHelper.GetAppSetting("IdentityHeaderName", true);
+            // Check if the IdentityHeaderName header is present
+            if (this.HttpContext.Request.Headers.ContainsKey(headername))
+            {
+                // Set the current user
+                identityProviderDetails.CurrentUser = this.HttpContext.Request.Headers[headername];
+            }
+        }
+    }
 }
-<link href="_content/Blazored.Toast/blazored-toast.min.css" rel="stylesheet" />
+
 <link href="AzureNamingTool.styles.css" rel="stylesheet">
 
-<component type="typeof(App)" render-mode="ServerPrerendered" />
+<component type="typeof(App)" render-mode="ServerPrerendered" param-IdentityProviderDetails="identityProviderDetails" />
 
 <script>
 
@@ -53,12 +87,10 @@
     function htmlToCSV(filename, tableclass = "") {
         var data = [];
         var rows;
-        if(tableclass != "")
-        {
+        if (tableclass != "") {
             rows = document.querySelectorAll("table[class*=" + tableclass + "] tr ");
         }
-        else
-        {
+        else {
             rows = document.querySelectorAll("table tr");
         }
 
@@ -106,8 +138,8 @@
         document.body.appendChild(tag);
     }
 
-     function ShowAlert(message) {
-         alert(message);
+    function ShowAlert(message) {
+        alert(message);
     }
 
     function checkboxConfirmChange(checkbox, message) {

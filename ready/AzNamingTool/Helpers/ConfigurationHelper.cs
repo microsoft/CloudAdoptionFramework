@@ -13,6 +13,7 @@ using System.Net.Http.Json;
 using System.Net.Http.Headers;
 using System;
 using Blazored.Toast.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AzureNamingTool.Helpers
 {
@@ -39,14 +40,28 @@ namespace AzureNamingTool.Helpers
                 {
                     var config = GetConfigurationData();
 
+                    // Check if the app setting is already set
                     if (config.GetType().GetProperty(key) != null)
                     {
                         value = config.GetType().GetProperty(key).GetValue(config, null).ToString();
 
-                        if ((decrypt) && (value != ""))
+                        // Verify the value is encrypted, and should be decrypted
+                        if ((decrypt) && (value != "") && (GeneralHelper.IsBase64Encoded(value)))
                         {
                             value = GeneralHelper.DecryptString(value, config.SALTKey);
                         }
+
+                        // Set the result to cache
+                        CacheHelper.SetCacheObject(key, value);
+                    }
+                    else
+                    {
+                        // Create a new configuration object and get the default for the property
+                        SiteConfiguration newconfig = new();
+                        value = newconfig.GetType().GetProperty(key).GetValue(newconfig, null).ToString();
+
+                        // Set the result to the app settings
+                        SetAppSetting(key, value, decrypt);
 
                         // Set the result to cache
                         CacheHelper.SetCacheObject(key, value);
@@ -87,7 +102,7 @@ namespace AzureNamingTool.Helpers
             }
         }
 
-        public static void VerifyConfiguration()
+        public static async void VerifyConfiguration(StateContainer state)
         {
             try
             {
@@ -109,6 +124,13 @@ namespace AzureNamingTool.Helpers
                 {
                     // Migrate the data
                     FileSystemHelper.MigrateDataToFile("adminlog.json", "settings/", "adminlogmessages.json", "settings/", true);
+                }
+
+                // Sync cnfiguration data
+                if (!state.ConfigurationDataSynced)
+                {
+                    await SyncConfigurationData("ResourceComponent");
+                    state.SetConfigurationDataSynced(true);
                 }
             }
             catch (Exception ex)
@@ -187,11 +209,18 @@ namespace AzureNamingTool.Helpers
                         byte[] buffer = new byte[32];
                         int timeout = 1000;
                         PingOptions pingOptions = new();
-                        PingReply reply = ping.Send(host, timeout, buffer, pingOptions);
-                        if (reply.Status == IPStatus.Success)
+                        try
                         {
-                            pingsuccessful = true;
-                            result = true;
+                            PingReply reply = ping.Send(host, timeout, buffer, pingOptions);
+                            if (reply.Status == IPStatus.Success)
+                            {
+                                pingsuccessful = true;
+                                result = true;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Catch this exception but continue to try a web request instead
                         }
 
                         // If ping is not successful, attempt to download a file
@@ -201,16 +230,14 @@ namespace AzureNamingTool.Helpers
                             var request = (HttpWebRequest)WebRequest.Create("https://github.com/aznamingtool/AzureNamingTool/blob/main/connectiontest.png");
                             request.KeepAlive = false;
                             request.Timeout = 1500;
-                            using (var response = (HttpWebResponse)request.GetResponse())
+                            using var response = (HttpWebResponse)request.GetResponse();
+                            if (response.StatusCode == HttpStatusCode.OK)
                             {
-                                if (response.StatusCode == HttpStatusCode.OK)
-                                {
-                                    result = true;
-                                }
-                                else
-                                {
-                                    AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = "Connectivity Check Failed:" + response.StatusDescription });
-                                }
+                                result = true;
+                            }
+                            else
+                            {
+                                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = "Connectivity Check Failed:" + response.StatusDescription });
                             }
                         }
                     }
@@ -226,7 +253,7 @@ namespace AzureNamingTool.Helpers
             }
             catch (Exception ex)
             {
-                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = "There was a problem verifying connectivty. Error: " + ex.Message });
             }
 
             // Set the result to cache
@@ -258,6 +285,7 @@ namespace AzureNamingTool.Helpers
                         nameof(CustomComponent) => await FileSystemHelper.ReadFile("customcomponents.json"),
                         nameof(AdminLogMessage) => await FileSystemHelper.ReadFile("adminlogmessages.json"),
                         nameof(GeneratedName) => await FileSystemHelper.ReadFile("generatednames.json"),
+                        nameof(AdminUser) => await FileSystemHelper.ReadFile("adminusers.json"),
                         _ => "[]",
                     };
                     CacheHelper.SetCacheObject(typeof(T).Name, data);
@@ -323,6 +351,9 @@ namespace AzureNamingTool.Helpers
                     case nameof(GeneratedName):
                         await FileSystemHelper.WriteConfiguation(items, "generatednames.json");
                         break;
+                    case nameof(AdminUser):
+                        await FileSystemHelper.WriteConfiguation(items, "adminusers.json");
+                        break;
                     default:
                         break;
                 }
@@ -342,6 +373,7 @@ namespace AzureNamingTool.Helpers
                     nameof(CustomComponent) => await FileSystemHelper.ReadFile("customcomponents.json"),
                     nameof(AdminLogMessage) => await FileSystemHelper.ReadFile("adminlogmessages.json"),
                     nameof(GeneratedName) => await FileSystemHelper.ReadFile("generatednames.json"),
+                    nameof(AdminUser) => await FileSystemHelper.ReadFile("adminusers.json"),
                     _ => "[]",
                 };
 
@@ -356,6 +388,13 @@ namespace AzureNamingTool.Helpers
 
         public static async void UpdateSettings(SiteConfiguration config)
         {
+            // Clear the cache
+            ObjectCache memoryCache = MemoryCache.Default;
+            List<string> cacheKeys = memoryCache.Select(kvp => kvp.Key).ToList();
+            foreach (string cacheKey in cacheKeys)
+            {
+                memoryCache.Remove(cacheKey);
+            }
             var jsonWriteOptions = new JsonSerializerOptions()
             {
                 WriteIndented = true
@@ -519,7 +558,7 @@ namespace AzureNamingTool.Helpers
             state.SetVerified(false);
             state.SetAdmin(false);
             state.SetPassword(false);
-            state.SetAppTheme("bg-default text-black");
+            state.SetAppTheme("bg-default text-dark");
         }
 
         public static async Task<string> GetToolVersion()
@@ -701,6 +740,93 @@ namespace AzureNamingTool.Helpers
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
             return result;
+        }
+
+        /// <summary>
+        /// This function is used to sync default configuration data with the user's local version
+        /// </summary>
+        /// <param name="type">string - Type of configuration data to sync</param>
+        public static async Task SyncConfigurationData(string type)
+        {
+            try
+            {
+                bool update = false;
+
+                switch (type)
+                {
+                    case "ResourceComponent":
+                        // Get all the existing components
+                        List<ResourceComponent> currentComponents = new();
+                        ServiceResponse serviceResponse = new();
+                        serviceResponse = await ResourceComponentService.GetItems(true);
+                        if (serviceResponse.Success)
+                        {
+                            currentComponents = serviceResponse.ResponseObject;
+                            // Get the default component data
+                            List<ResourceComponent> defaultComponents = new();
+                            string data = await FileSystemHelper.ReadFile("resourcecomponents.json", "repository/");
+                            if (!String.IsNullOrEmpty(data))
+                            {
+                                var options = new JsonSerializerOptions
+                                {
+                                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                    PropertyNameCaseInsensitive = true
+                                };
+
+                                if (!String.IsNullOrEmpty(data))
+                                {
+                                    defaultComponents = JsonSerializer.Deserialize<List<ResourceComponent>>(data, options);
+                                }
+
+                                // Loop over the existing components to verify the data is complete
+                                foreach (ResourceComponent currentComponent in currentComponents)
+                                {
+                                    // Create a new component for any updates
+                                    ResourceComponent newComponent = currentComponent;
+                                    // Get the matching default component for the current component
+                                    ResourceComponent defaultcomponent = defaultComponents.Find(x => x.Name == currentComponent.Name);
+                                    // Check the data to see if it's been configured
+                                    if (String.IsNullOrEmpty(currentComponent.MinLength))
+                                    {
+                                        if (defaultcomponent != null)
+                                        {
+                                            newComponent.MinLength = defaultcomponent.MinLength;
+                                        }
+                                        else
+                                        {
+                                            newComponent.MinLength = "1";
+                                        }
+                                        update = true;
+                                    }
+
+                                    // Check the data to see if it's been configured
+                                    if (String.IsNullOrEmpty(currentComponent.MaxLength))
+                                    {
+                                        if (defaultcomponent != null)
+                                        {
+                                            newComponent.MaxLength = defaultcomponent.MaxLength;
+                                        }
+                                        else
+                                        {
+                                            newComponent.MaxLength = "10";
+                                        }
+                                        update = true;
+                                    }
+                                    if (update)
+                                    {
+                                        await ResourceComponentService.PostItem(newComponent);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                await AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            }
+
         }
     }
 }

@@ -7,6 +7,7 @@
 @inject ILogger<Generate> Logger
 @inject NavigationManager NavigationManager
 @inject StateContainer state
+@inject ProtectedSessionStorage session
 @inject IJSRuntime JsRuntime
 @inject IToastService toastService
 
@@ -26,7 +27,7 @@
         <div style="clear:both;"></div>
         <div class="mb-3">This page generates a name for the selected resource type.</div>
         <div class="card mb-3">
-            <h5 class="card-header bg-default text-black">
+            <h5 class="card-header bg-default text-dark">
                 Instructions
             </h5>
             <div class="card card-body @theme.ThemeStyle">
@@ -130,8 +131,8 @@
                                     </table>
                                 }
                                 <div id="guidelines" class="card mt-3">
-                                    <div class="card-header bg-default text-black">
-                                        <a id="NamingGuidlines" class="link-dark text-decoration-none" data-toggle="collapse" href="#namingguidelines" role="button" aria-expanded="false" aria-controls="namingguidelines">
+                                    <div class="card-header bg-default text-dark">
+                                        <a id="NamingGuidlines" class="link-dark text-decoration-none" data-bs-toggle="collapse" href="#namingguidelines" role="button" aria-expanded="false" aria-controls="namingguidelines">
                                             <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Naming Guidelines
                                         </a>
                                     </div>
@@ -200,7 +201,7 @@
                         @if (componentsVisible == "collapse")
                         {
                             <div class="mt-3 mb-3">
-                                <button type="button" title="Show/Hide Components" class="btn btn-primary" data-toggle="collapse" data-target="#components">Show/Hide Components</button>
+                                <button type="button" title="Show/Hide Components" class="btn btn-primary" data-bs-toggle="collapse" data-target="#components">Show/Hide Components</button>
                             </div>
                         }
 
@@ -408,7 +409,7 @@
                             }
 
                             @*<div class="card mb-3">
-                    <h5 class="card-header bg-default text-black">
+                    <h5 class="card-header bg-default text-dark">
                     Delimiter (Configured by site administrator)
                     </h5>
                     <div class="card card-body @theme.ThemeStyle">
@@ -500,6 +501,7 @@
     private ResourceNameResponse resourceNameRequestResponse;
     private ResourceType currentResourceType;
     private List<string> multiselectedResourceTypes = new();
+    private string? currentuser = String.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -512,6 +514,9 @@
         {
             await SetServicesData();
         }
+
+        var currentuservalue = await session.GetAsync<string>("currentuser");
+        currentuser = (string)currentuservalue.Value;
     }
 
     private async Task SetServicesData()
@@ -557,6 +562,8 @@
         resourceNameRequest.ResourceProjAppSvc = selectedResourceProjAppSvc;
         resourceNameRequest.ResourceUnitDept = selectedResourceUnitDept;
         resourceNameRequest.CustomComponents = selectedCustomComponents;
+        string currentuser = await IdentityHelper.GetCurrentUser(session);
+        resourceNameRequest.CreatedBy = currentuser;
 
         sbNames.Append("<table class=\"table text-light generatednames\">");
         sbNames.Append("<thead>");

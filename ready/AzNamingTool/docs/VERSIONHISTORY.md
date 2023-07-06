@@ -1,9 +1,12 @@
-﻿[Overview](./) | [Installation](INSTALLATION.md) | [Updating](UPDATING.md) | [Using the API](USINGTHEAPI.md) | [Release Notes](RELEASENOTES.md) | [Version History](VERSIONHISTORY.md) | [FAQ](FAQ.md) | [Contributors](CONTRIBUTORS.md)
+﻿[Overview](/ready/AzNamingTool/README.md) | [Installation](/ready/AzNamingTool/docs/INSTALLATION.md) | [Updating](/ready/AzNamingTool/docs/UPDATING.md) | [Using the API](/ready/AzNamingTool/docs/USINGTHEAPI.md) | [Release Notes](/ready/AzNamingTool/RELEASENOTES.md) | [Version History](/ready/AzNamingTool/docs/VERSIONHISTORY.md) | [FAQ](/ready/AzNamingTool/docs/FAQ.md) | [Contributors](/ready/AzNamingTool/docs/CONTRIBUTORS.md)
 
-# Azure Naming Tool v2 - Version History
+# Version History
+
+## 2023 - June
+- [Version 2.8.0 (Current)](/ready/AzNamingTool/RELEASENOTES.md)
 
 ## 2023 - April
-- [Version 2.7.0 (Current)](RELEASENOTES.md)
+- [Version 2.7.0](RELEASENOTESARCHIVE.md#version-270)
 - [Version 2.6.0](RELEASENOTESARCHIVE.md#version-260)
 
 ## 2023 - February

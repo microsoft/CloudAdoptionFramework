@@ -72,7 +72,7 @@ namespace AzureNamingTool.Services
             ServiceResponse serviceReponse = new();
             try
             {
-                List<AdminLogMessage> lstAdminLogMessages = new List<AdminLogMessage>();
+                List<AdminLogMessage> lstAdminLogMessages = new();
                 await ConfigurationHelper.WriteList<AdminLogMessage>(lstAdminLogMessages);
                 serviceReponse.Success = true;
             }

@@ -68,6 +68,8 @@ namespace AzureNamingTool.Services
                 var config = ConfigurationHelper.GetConfigurationData();
                 configdata.DismissedAlerts = config.DismissedAlerts;
                 configdata.DuplicateNamesAllowed = config.DuplicateNamesAllowed;
+                configdata.ConnectivityCheckEnabled = config.ConnectivityCheckEnabled;
+                configdata.GenerationWebhook = config.GenerationWebhook;
 
                 // Get the security settings
                 if (includeadmin)
@@ -75,6 +77,13 @@ namespace AzureNamingTool.Services
                     configdata.SALTKey = config.SALTKey;
                     configdata.AdminPassword = config.AdminPassword;
                     configdata.APIKey = config.APIKey;
+                    //IdentityHeaderName
+                    configdata.IdentityHeaderName = config.IdentityHeaderName;
+                    //AdminUsers
+                    serviceResponse = await AdminUserService.GetItems();
+                    configdata.AdminUsers = serviceResponse.ResponseObject;
+                    // ResourceTypeEditing
+                    configdata.ResourceTypeEditingAllowed = config.ResourceTypeEditingAllowed;
                 }
 
                 serviceResponse.ResponseObject = configdata;
@@ -105,18 +114,24 @@ namespace AzureNamingTool.Services
                 await ResourceUnitDeptService.PostConfig(configdata.ResourceUnitDepts);
                 await CustomComponentService.PostConfig(configdata.CustomComponents);
                 await GeneratedNamesService.PostConfig(configdata.GeneratedNames);
+                if (configdata.AdminUsers != null)
+                {
+                    await AdminUserService.PostConfig(configdata.AdminUsers);
+                }
                 await AdminLogService.PostConfig(configdata.AdminLogs);
 
                 var config = ConfigurationHelper.GetConfigurationData();
                 config.DismissedAlerts = configdata.DismissedAlerts;
                 config.DuplicateNamesAllowed = configdata.DuplicateNamesAllowed;
+                config.ConnectivityCheckEnabled = configdata.ConnectivityCheckEnabled;
+                config.GenerationWebhook = configdata.GenerationWebhook;
 
-                // Set the security settings
+                // Set the admin settings, if they are included in the import
                 if (configdata.SALTKey != null)
                 {
                     config.SALTKey = configdata.SALTKey;
                 }
-                if(configdata.AdminPassword != null)
+                if (configdata.AdminPassword != null)
                 {
                     config.AdminPassword = configdata.AdminPassword;
                 }
@@ -124,7 +139,14 @@ namespace AzureNamingTool.Services
                 {
                     config.APIKey = configdata.APIKey;
                 }
-
+                if (configdata.IdentityHeaderName != null)
+                {
+                    config.IdentityHeaderName = configdata.IdentityHeaderName;
+                }
+                if (configdata.ResourceTypeEditingAllowed != null)
+                {
+                    config.ResourceTypeEditingAllowed = configdata.ResourceTypeEditingAllowed;
+                }
                 var jsonWriteOptions = new JsonSerializerOptions()
                 {
                     WriteIndented = true
@@ -135,7 +157,7 @@ namespace AzureNamingTool.Services
 
                 var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/appsettings.json");
                 File.WriteAllText(appSettingsPath, newJson);
-
+                CacheHelper.ClearAllCache();
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

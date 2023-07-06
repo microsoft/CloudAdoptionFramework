@@ -35,6 +35,8 @@ namespace AzureNamingTool.Helpers
                 servicesData.GeneratedNames = (List<GeneratedName>)serviceReponse.ResponseObject;
                 serviceReponse = await AdminLogService.GetItems();
                 servicesData.AdminLogMessages = (List<AdminLogMessage>)serviceReponse.ResponseObject;
+                serviceReponse = await AdminUserService.GetItems();
+                servicesData.AdminUsers = (List<AdminUser>)serviceReponse.ResponseObject;
                 return servicesData;
             }
             catch(Exception ex)

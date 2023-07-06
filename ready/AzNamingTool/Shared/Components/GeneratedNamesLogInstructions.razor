@@ -15,24 +15,28 @@ else
     </p>
 }
 <div class="card">
-    <h5 class="card-header bg-default text-black">
+    <h5 class="card-header bg-default text-dark">
         Page Sections/Actions
     </h5>
     <div class="card card-body @theme.ThemeStyle">
-        <p>
-            <strong>Export Generated Names Log</strong>
-        </p>
-        <p>
-            This functionality allows the generated names to be exported to a CSV file. The <strong>Filter</strong> option can be used to specify the names exported.
-        </p>
+        <div class="card">
+            <div class="card-body">
+                <h5>Export Generated Names Log</h5>
+                <p>
+                    This functionality allows the generated names to be exported to a CSV file. The <strong>Filter</strong> option can be used to specify the names exported.
+                </p>
+            </div>
+        </div>
         @if (admin)
         {
-            <p>
-                <strong>Purge Generated Names Log</strong>
-            </p>
-            <p>
-                This option will delete all <strong>Generated Names Log</strong> data. This action cannot be undone!
-            </p>
+            <div class="card">
+                <div class="card-body">
+                    <h5>Purge Generated Names Log</h5>
+                    <p>
+                        This option will delete all <strong>Generated Names Log</strong> data. This action cannot be undone!
+                    </p>
+                </div>
+            </div>
         }
     </div>
 </div>

@@ -16,6 +16,7 @@ builder.Services.AddServerSideBlazor().AddHubOptions(x => x.MaximumReceiveMessag
 builder.Services.AddBlazorDownloadFile();
 builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredModal();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSingleton<StateContainer>();
 

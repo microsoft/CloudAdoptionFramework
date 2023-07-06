@@ -71,8 +71,8 @@
                         }
                     </div>
                     <div class="card mb-3">
-                        <div class="card-header bg-default text-black">
-                            <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
+                        <div class="card-header bg-default text-dark">
+                            <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
                                 <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter Data
                             </a>
                         </div>
@@ -94,7 +94,7 @@
                                         <span class="input-group-text" id="addon-wrapping">
                                             <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
                                         </span>
-                                        <input class="form-control" type="search" placeholder="Filter by Generated Name, Resource Type, Components"
+                                        <input class="form-control" type="search" placeholder="Filter by Created By, Generated Name, Resource Type, Components"
                                        @bind="filterData"
                                        @bind:event="oninput">
                                     </div>
@@ -118,6 +118,7 @@
                                         <th scope="col"></th>
                                     }
                                     <th scope="col">Created On</th>
+                                    <th scope="col">Created By</th>
                                     <th scope="col">Generated Name</th>
                                     <th scope="col">Resource Type</th>
                                     <th scope="col">Components</th>
@@ -139,6 +140,9 @@
                                         }
                                         <td class="align-top">
                                             @name.CreatedOn.ToString()
+                                        </td>
+                                        <td class="align-top">
+                                            @name.User
                                         </td>
                                         <td class="align-top">
                                             @name.ResourceName
@@ -304,7 +308,7 @@
 
         if (!string.IsNullOrEmpty(filterData))
         {
-            if ((!name.ResourceName.ToLower().Contains(filterData)) && (!name.ResourceTypeName.ToLower().Contains(filterData)) && (!string.Join(",", name.Components).ToLower().Contains(filterData)))
+            if ((!name.User.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!name.ResourceName.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!name.ResourceTypeName.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!string.Join(",", name.Components).Contains(filterData, StringComparison.OrdinalIgnoreCase)))
                 visible = false;
         }
         return visible;

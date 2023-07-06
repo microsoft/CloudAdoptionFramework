@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Html
 @inject IToastService toastService
 @inject StateContainer state
+@inject ProtectedSessionStorage session
 
 <div class="modal fade show d-block" tabindex="-1" role="dialog">
     <div class="modal-backdrop fade show" @onclick="Cancel"></div>
@@ -19,22 +20,45 @@
                     <label for="name" style="font-weight:bold;">Name</label>
                     <input title="Name" value="@itemName" type="text" class="form-control @theme.ThemeStyle" id="name" @onchange="@((ui) => { itemName = (string)ui.Value;})" />
                 </div>
-                @if (type != "ResourceComponent")
+                @switch (type)
                 {
-                    <div class="form-group mb-3">
-                        <label for="shortName" style="font-weight:bold;">Short Name</label>
-                        <input title="Short Name" value="@itemShortName" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemShortName = (string)ui.Value;})" />
-                    </div>
-                }
-                else
-                {
-                    <div class="form-group mb-3">
-                        <label for="shortName" style="font-weight:bold;">Field Type</label>
-                        <select @bind="componenttype" class="form-control @theme.ThemeStyle">
-                            <option value="standard">Standard - User selects an option from a pre-defined list</option>
-                            <option value="freetext">Free Form Text - User inputs custom value</option>
-                        </select>
-                    </div>
+                    case "ResourceComponent":
+                        <div class="form-group mb-3">
+                            <div class="mb-3">
+                                <div class="fw-bold">
+                                    Field Type
+                                </div>
+                                <select @bind="componenttype" class="form-control @theme.ThemeStyle">
+                                    <option value="standard">Standard - User selects an option from a pre-defined list</option>
+                                    <option value="freetext">Free Form Text - User inputs custom value</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <div class="fw-bold">
+                                    Minimum Length
+                                </div>
+                                <div>
+                                    <input title="Minimum Length" value="@itemMinLength" type="text" class="form-control @theme.ThemeStyle" id="minlength" @onchange="@((ui) => { itemMinLength = (string)ui.Value;})" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="fw-bold">
+                                    Maximum Length
+                                </div>
+                                <div>
+                                    <input title="Maximum Length" value="@itemMaxLength" type="text" class="form-control @theme.ThemeStyle" id="maxlength" @onchange="@((ui) => { itemMaxLength = (string)ui.Value;})" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" />
+                                </div>
+                            </div>
+                        </div>
+                        break;
+                    case "AdminUser":
+                        break;
+                    default:
+                        <div class="form-group mb-3">
+                            <label for="shortName" style="font-weight:bold;">Short Name</label>
+                            <input title="Short Name" value="@itemShortName" type="text" class="form-control @theme.ThemeStyle" id="shortname" @onchange="@((ui) => { itemShortName = (string)ui.Value;})" />
+                        </div>
+                        break;
                 }
             </div>
             <div class="modal-footer">
@@ -57,76 +81,101 @@
     [Parameter] public string message { get; set; }
     [Parameter] public string type { get; set; }
     [Parameter] public string? parentcomponent { get; set; }
+    [Parameter] public ServicesData servicesData { get; set; }
 
 
     private ServiceResponse serviceResponse = new();
     private string? itemName;
     private string? itemShortName;
+    private string itemMinLength = "1";
+    private string itemMaxLength = "10";
     private string? componenttype;
     private bool isfreetext = false;
+    private string? currentuser;
 
     protected override async void OnInitialized()
     {
-
+        currentuser = await IdentityHelper.GetCurrentUser(session);
     }
 
     async void Save()
     {
         bool valid = false;
-        if (type == "ResourceComponent")
+        switch (type)
         {
-            if (!String.IsNullOrEmpty(itemName))
-            {
-                // Make sure the name is unique
-                serviceResponse = await ResourceComponentService.GetItems(true);
-                if (serviceResponse.Success)
+            case "ResourceComponent":
+                if (!String.IsNullOrEmpty(itemName))
                 {
-                    List<ResourceComponent> resourceComponents = serviceResponse.ResponseObject;
-                    if (resourceComponents.Where(x => GeneralHelper.NormalizeName(x.Name, true) == GeneralHelper.NormalizeName(itemName, true)).Count() > 0)
+                    // Make sure the min/max length is valid
+                    if (Convert.ToInt32(itemMaxLength) < Convert.ToInt32(itemMinLength))
                     {
-                        toastService.ShowError("You must enter a unique component name!");
+                        toastService.ShowError("The Maximum Length must equal/greater than the Minimum length!");
+                    }
+                    else
+                    {
+                        // Make sure the name is unique
+                        List<ResourceComponent> resourceComponents = servicesData.ResourceComponents;
+                        if (resourceComponents.Where(x => GeneralHelper.NormalizeName(x.Name, true) == GeneralHelper.NormalizeName(itemName, true)).Count() > 0)
+                        {
+                            toastService.ShowError("You must enter a unique component name!");
+                        }
+                        else
+                        {
+                            valid = true;
+                            if (componenttype == "freetext")
+                            {
+                                isfreetext = true;
+                            }
+                            ResourceComponent resourceComponent = new()
+                                {
+                                    Name = itemName,
+                                    DisplayName = itemName,
+                                    IsCustom = true,
+                                    IsFreeText = isfreetext,
+                                    MinLength = itemMinLength,
+                                    MaxLength = itemMaxLength
+                                };
+                            serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                        }
+                    }
+                }
+                break;
+            case "AdminUser":
+                if (!String.IsNullOrEmpty(itemName))
+                {
+                    // Check if the item already exists
+                    serviceResponse = await AdminUserService.GetItems();
+                    List<AdminUser> adminUsers = servicesData.AdminUsers;
+                    if (adminUsers.Any(x => x.Name == itemName))
+                    {
+                        toastService.ShowError("You must enter a unique Admin User name!");
                     }
                     else
                     {
                         valid = true;
-                        if(componenttype == "freetext")
-                        {
-                            isfreetext = true;
-                        }
-                        ResourceComponent resourceComponent = new()
+                        AdminUser adminUser = new AdminUser()
                             {
-                                Name = itemName,
-                                DisplayName = itemName,
-                                IsCustom = true,
-                                IsFreeText = isfreetext
+                                Name = itemName
                             };
-                        serviceResponse = await ResourceComponentService.PostItem(resourceComponent);
+                        serviceResponse = await AdminUserService.PostItem(adminUser);
                     }
                 }
-                else
+
+                break;
+            default:
+                if ((itemName != null) && (itemShortName != null))
                 {
-                    toastService.ShowError("You must enter a name!");
-                }
-            }
-        }
-        else
-        {
-            if ((itemName != null) && (itemShortName != null))
-            {
-                if ((itemName != "") && (itemShortName != ""))
-                {
-                    if (ValidationHelper.ValidateShortName(itemShortName, type))
+                    if ((itemName != "") && (itemShortName != ""))
                     {
-                        itemShortName = itemShortName.ToLower();
-                        string normailzedname = GeneralHelper.NormalizeName(itemName, true);
-                        switch (type)
+                        if (await ValidationHelper.ValidateShortName(type, itemShortName, this.parentcomponent))
                         {
-                            case "ResourceEnvironment":
-                                // Check if the item already exists
-                                serviceResponse = await ResourceEnvironmentService.GetItems();
-                                if (serviceResponse.Success)
-                                {
-                                    List<ResourceEnvironment> resourceEnvironments = serviceResponse.ResponseObject;
+                            itemShortName = itemShortName.ToLower();
+                            string normailzedname = GeneralHelper.NormalizeName(itemName, true);
+                            switch (type)
+                            {
+                                case "ResourceEnvironment":
+                                    // Check if the item already exists
+                                    List<ResourceEnvironment> resourceEnvironments = servicesData.ResourceEnvironments;
                                     if (resourceEnvironments.Any(x => GeneralHelper.NormalizeName(x.Name, true) == normailzedname || x.ShortName == itemShortName))
                                     {
                                         toastService.ShowError("You must enter a unique Resource Environment name and short name!");
@@ -142,14 +191,11 @@
                                             };
                                         serviceResponse = await ResourceEnvironmentService.PostItem(resourceEnvironment);
                                     }
-                                }
-                                break;
-                            case "ResourceLocation":
-                                // Check if the item already exists
-                                serviceResponse = await ResourceLocationService.GetItems();
-                                if (serviceResponse.Success)
-                                {
-                                    List<ResourceLocation> resourceLocations = serviceResponse.ResponseObject;
+                                    break;
+                                case "ResourceLocation":
+                                    // Check if the item already exists
+                                    serviceResponse = await ResourceLocationService.GetItems();
+                                    List<ResourceLocation> resourceLocations = servicesData.ResourceLocations;
                                     if (resourceLocations.Any(x => GeneralHelper.NormalizeName(x.Name, true) == normailzedname || x.ShortName == itemShortName))
                                     {
                                         toastService.ShowError("You must enter a unique Resource Location name and short name!");
@@ -165,14 +211,11 @@
                                             };
                                         serviceResponse = await ResourceLocationService.PostItem(resourceLocation);
                                     }
-                                }
-                                break;
-                            case "ResourceOrg":
-                                // Check if the item already exists
-                                serviceResponse = await ResourceOrgService.GetItems();
-                                if (serviceResponse.Success)
-                                {
-                                    List<ResourceOrg> resourceOrgs = serviceResponse.ResponseObject;
+                                    break;
+                                case "ResourceOrg":
+                                    // Check if the item already exists
+                                    serviceResponse = await ResourceOrgService.GetItems();
+                                    List<ResourceOrg> resourceOrgs = servicesData.ResourceOrgs;
                                     if (resourceOrgs.Any(x => GeneralHelper.NormalizeName(x.Name, true) == normailzedname || x.ShortName == itemShortName))
                                     {
                                         toastService.ShowError("You must enter a unique Resource Org name and short name!");
@@ -188,14 +231,11 @@
                                             };
                                         serviceResponse = await ResourceOrgService.PostItem(resourceOrg);
                                     }
-                                }
-                                break;
-                            case "ResourceProjAppSvc":
-                                // Check if the item already exists
-                                serviceResponse = await ResourceProjAppSvcService.GetItems();
-                                if (serviceResponse.Success)
-                                {
-                                    List<ResourceProjAppSvc> resourceProjAppSvcs = serviceResponse.ResponseObject;
+                                    break;
+                                case "ResourceProjAppSvc":
+                                    // Check if the item already exists
+                                    serviceResponse = await ResourceProjAppSvcService.GetItems();
+                                    List<ResourceProjAppSvc> resourceProjAppSvcs = servicesData.ResourceProjAppSvcs;
                                     if (resourceProjAppSvcs.Any(x => GeneralHelper.NormalizeName(x.Name, true) == normailzedname || x.ShortName == itemShortName))
                                     {
                                         toastService.ShowError("You must enter a unique Resource Project/App/Service name and short name!");
@@ -211,14 +251,11 @@
                                             };
                                         serviceResponse = await ResourceProjAppSvcService.PostItem(resourceProjAppSvc);
                                     }
-                                }
-                                break;
-                            case "ResourceUnitDept":
-                                // Check if the item already exists
-                                serviceResponse = await ResourceUnitDeptService.GetItems();
-                                if (serviceResponse.Success)
-                                {
-                                    List<ResourceUnitDept> resourceUnitDepts = serviceResponse.ResponseObject;
+                                    break;
+                                case "ResourceUnitDept":
+                                    // Check if the item already exists
+                                    serviceResponse = await ResourceUnitDeptService.GetItems();
+                                    List<ResourceUnitDept> resourceUnitDepts = servicesData.ResourceUnitDepts;
                                     if (resourceUnitDepts.Any(x => GeneralHelper.NormalizeName(x.Name, true) == normailzedname || x.ShortName == itemShortName))
                                     {
                                         toastService.ShowError("You must enter a unique Resource Unit/Dept name and short name!");
@@ -234,14 +271,11 @@
                                             };
                                         serviceResponse = await ResourceUnitDeptService.PostItem(resourceUnitDept);
                                     }
-                                }
-                                break;
-                            case "ResourceFunction":
-                                // Check if the item already exists
-                                serviceResponse = await ResourceFunctionService.GetItems();
-                                if (serviceResponse.Success)
-                                {
-                                    List<ResourceFunction> resourceFunctions = serviceResponse.ResponseObject;
+                                    break;
+                                case "ResourceFunction":
+                                    // Check if the item already exists
+                                    serviceResponse = await ResourceFunctionService.GetItems();
+                                    List<ResourceFunction> resourceFunctions = servicesData.ResourceFunctions;
                                     if (resourceFunctions.Any(x => GeneralHelper.NormalizeName(x.Name, true) == normailzedname || x.ShortName == itemShortName))
                                     {
                                         toastService.ShowError("You must enter a unique Resource Function name and short name!");
@@ -257,14 +291,11 @@
                                             };
                                         serviceResponse = await ResourceFunctionService.PostItem(resourceFunction);
                                     }
-                                }
-                                break;
-                            case "CustomComponent":
-                                // Check if the item already exists
-                                serviceResponse = await CustomComponentService.GetItems();
-                                if (serviceResponse.Success)
-                                {
-                                    List<CustomComponent> customComponents = serviceResponse.ResponseObject;
+                                    break;
+                                case "CustomComponent":
+                                    // Check if the item already exists
+                                    serviceResponse = await CustomComponentService.GetItems();
+                                    List<CustomComponent> customComponents = servicesData.CustomComponents;
                                     if (customComponents.Any(x => GeneralHelper.NormalizeName(x.Name, true) == normailzedname || x.ShortName == itemShortName))
                                     {
                                         toastService.ShowError("You must enter a unique Custom Component name and short name!");
@@ -276,12 +307,18 @@
                                             {
                                                 Name = itemName,
                                                 ShortName = itemShortName.ToLower(),
-                                                ParentComponent = GeneralHelper.NormalizeName(this.parentcomponent, true)
+                                                ParentComponent = GeneralHelper.NormalizeName(this.parentcomponent, true),
+                                                MinLength = itemMinLength,
+                                                MaxLength = itemMaxLength
                                             };
                                         serviceResponse = await CustomComponentService.PostItem(customComponent);
                                     }
-                                }
-                                break;
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            toastService.ShowError("You must enter a valid name and short name! Please check the Minimum and Maximum length requirements.");
                         }
                     }
                     else
@@ -289,11 +326,7 @@
                         toastService.ShowError("You must enter a name and short name!");
                     }
                 }
-                else
-                {
-                    toastService.ShowError("You must enter a name and short name!");
-                }
-            }
+                break;
         }
 
         if (valid)
@@ -302,7 +335,7 @@
             {
                 ModalInstance.CloseAsync();
                 toastService.ShowSuccess(type.Replace("Resource", "Resource ") + " added!");
-                AdminLogService.PostItem(new AdminLogMessage() { Title = "SUCCESS", Message = "(" + type + ") " + itemName + " added!" });
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "SUCCESS", Message = "(" + type + ") " + itemName + " added!", Source = currentuser });
             }
             else
             {

@@ -30,13 +30,11 @@ namespace AzureNamingTool.Helpers
             {
                 try
                 {
-                    using (FileStream fstr = File.Open(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName), FileMode.Truncate, FileAccess.Write))
-                    {
-                        StreamWriter sw = new StreamWriter(fstr);
-                        sw.Write(content);
-                        sw.Flush();
-                        sw.Dispose();
-                    }
+                    using FileStream fstr = File.Open(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName), FileMode.Truncate, FileAccess.Write);
+                    StreamWriter sw = new(fstr);
+                    sw.Write(content);
+                    sw.Flush();
+                    sw.Dispose();
                     return;
                 }
                 catch (Exception)

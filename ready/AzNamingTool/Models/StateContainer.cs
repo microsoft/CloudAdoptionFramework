@@ -8,6 +8,7 @@
         private string? _apptheme;
         private bool? _newsenabled;
         public bool _reloadnav;
+        public bool? _configurationdatasynced;
 
         public bool Verified
         {
@@ -59,7 +60,7 @@
 
         public string AppTheme
         {
-            get => _apptheme ?? "bg-default text-black";
+            get => _apptheme ?? "bg-default text-dark";
             set
             {
                 _apptheme = value;
@@ -95,6 +96,21 @@
             NotifyStateChanged();
         }
 
+        public bool ConfigurationDataSynced
+        {
+            get => _configurationdatasynced ?? false;
+            set
+            {
+                _configurationdatasynced = value;
+                NotifyStateChanged();
+            }
+        }
+
+        public void SetConfigurationDataSynced(bool configurationdatasynced)
+        {
+            _configurationdatasynced = configurationdatasynced;
+            NotifyStateChanged();
+        }
 
         public event Action? OnChange;
 
