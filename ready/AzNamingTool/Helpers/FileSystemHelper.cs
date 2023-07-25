@@ -18,14 +18,31 @@ namespace AzureNamingTool.Helpers
         public static async Task<string> ReadFile(string fileName, string folderName = "settings/")
         {
             await CheckFile(folderName + fileName);
-            string data = await File.ReadAllTextAsync(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName));
+            string data = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName));
             return data;
         }
 
         public static async Task WriteFile(string fileName, string content, string folderName = "settings/")
         {
             await CheckFile(folderName + fileName);
-            File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName), content);
+            int retries = 0;
+            while (retries < 10)
+            {
+                try
+                {
+                    using FileStream fstr = File.Open(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, folderName + fileName), FileMode.Truncate, FileAccess.Write);
+                    StreamWriter sw = new(fstr);
+                    sw.Write(content);
+                    sw.Flush();
+                    sw.Dispose();
+                    return;
+                }
+                catch (Exception)
+                {
+                    Thread.Sleep(50);
+                    retries++;
+                }
+            }
         }
 
         public static async Task CheckFile(string fileName)
@@ -79,18 +96,18 @@ namespace AzureNamingTool.Helpers
                 DirectoryInfo dirRepository = new("repository");
                 foreach (FileInfo file in dirRepository.GetFiles())
                 {
-                    if(file.Name == filename)
-                    { 
+                    if (file.Name == filename)
+                    {
                         // Copy the repository file to the settings folder
                         file.CopyTo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + file.Name), true);
                         result = true;
                         // Clear any cached data
-                        
+
                         break;
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
             }
@@ -106,7 +123,7 @@ namespace AzureNamingTool.Helpers
             await WriteFile(destinationfilename, data, destinationfolderName);
 
             // Check if the source file should be removed (In repository and settings folders)
-            if(delete)
+            if (delete)
             {
                 File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repository/" + sourcefileName));
                 File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings/" + sourcefileName));

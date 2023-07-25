@@ -7,18 +7,24 @@
 @inject ILogger<Reference> Logger
 @inject NavigationManager NavigationManager
 @inject StateContainer state
+@inject IToastService toastService
 
 <PageTitle>Azure Naming Tool - Reference</PageTitle>
 
 <div class="card @theme.ThemeStyle">
     <div class="card-body">
-        <h1>Reference</h1>
-        <div class="mb-3">This page provides an example name for each resource type using the defined configuration.</div>
-        <div class="mb-3">
-            <button class="btn btn-primary" title="Instructions" @onclick="@(e => OnInstructionsClick())">
-                View Instructions
+        <div style="float:left;">
+            <h1>
+                Reference
+            </h1>
+        </div>
+        <div style="float:right;">
+            <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                <span class="oi oi-document" aria-hidden="true"></span> Documentation
             </button>
         </div>
+        <div style="clear:both;"></div>
+        <div class="mb-3">This page provides an example name for each resource type using the defined configuration.</div>
 
         @if (servicesData.ResourceTypes == null)
         {
@@ -28,11 +34,13 @@
         }
         else
         {
-            <div class="card" style="margin-bottom:10px;">
-                <h5 class="card-header text-white bg-secondary">
-                    Jump To
-                </h5>
-                <div class="card card-body @theme.ThemeStyle">
+            <div class="card mb-3">
+                <div class="card-header bg-default text-dark">
+                    <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#jumpto" role="button" aria-expanded="false" aria-controls="jumpto">
+                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Jump To
+                    </a>
+                </div>
+                <div class="collapse show card card-body @theme.ThemeStyle" id="jumpto">
                     <p>
                         Use the filters below to jump to a specifc resource type.
                     </p>
@@ -58,18 +66,6 @@
                             }
                         }
                     </select>
-                    <div class="form-group row mt-3">
-                        <div class="input-group flex-nowrap">
-                            <div class="input-group flex-nowrap mb-3">
-                                <span class="input-group-text" id="addon-wrapping">
-                                    <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
-                                </span>
-                                <input class="form-control" type="search" placeholder="Filter by Name, Short Name"
-                                   @bind="filterData"
-                                   @bind:event="oninput">
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             <table class="table table-responsive  @theme.ThemeStyle w-100">
@@ -84,7 +80,14 @@
                                     <tbody>
                                         <tr class="bg-secondary">
                                             <td style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;">
-                                                <h5 class="text-white bg-secondary" style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;">@resourcetype.Resource</h5>
+                                                @if (resourcetype.Property != "")
+                                                {
+                                                    <h5 class="text-white bg-secondary" style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;">@resourcetype.Resource - @resourcetype.Property                                                  </h5>
+                                                }
+                                                else
+                                                {
+                                                    <h5 class="text-white bg-secondary" style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;">@resourcetype.Resource                                                    </h5>
+                                                }
                                             </td>
                                         </tr>
                                         <tr>
@@ -95,7 +98,7 @@
                                                         <tbody>
                                                             <tr>
                                                                 <td>
-                                                                    <strong>Example:  @GenerateName(resourcetype, resourcetype.ShortName, resourcetype.StaticValues)001</strong><a id="@resourcetype.Id"></a>
+                                                                    <strong>Example:  @GenerateName(resourcetype, resourcetype.ShortName, resourcetype.StaticValues)</strong><a id="@resourcetype.Id"></a>
                                                                 </td>
                                                             </tr>
                                                         </tbody>
@@ -130,9 +133,9 @@
                                                                 </tr>
                                                                 @foreach (var resourceComponent in servicesData.ResourceComponents)
                                                                 {
-                                                                    if (!resourcetype.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                                    if (!resourcetype.Exclude.ToLower().Split(',').Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                                                     {
-                                                                        if (!resourcetype.Optional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                                                                        if (!resourcetype.Optional.ToLower().Split(',').Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
                                                                         {
                                                                             switch (resourceComponent.Name)
                                                                             {
@@ -219,14 +222,17 @@
                                                                                 default:
                                                                                     if (resourceComponent.IsCustom)
                                                                                     {
-                                                                                        <tr>
-                                                                                            <td class="align-top w-25">
-                                                                                                @resourceComponent.Name:
-                                                                                            </td>
-                                                                                            <td style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;" class="align-top">
-                                                                                                @servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().Name (@servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName)
-                                                                                            </td>
-                                                                                        </tr>
+                                                                                        if (servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).Count() > 0)
+                                                                                        {
+                                                                                            <tr>
+                                                                                                <td class="align-top w-25">
+                                                                                                    @resourceComponent.Name:
+                                                                                                </td>
+                                                                                                <td style="word-wrap:anywhere;overflow-wrap:anywhere;white-space: normal;" class="align-top">
+                                                                                                    @servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().Name (@servicesData.CustomComponents.Where(x=>x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName)
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        }
                                                                                     }
                                                                                     break;
                                                                             }
@@ -351,6 +357,8 @@
 @code {
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
     private ServicesData servicesData = new();
     private ResourceDelimiter? resourceDelimiter;
     public string filterData { get; set; }
@@ -360,15 +368,32 @@
 
     protected override async Task OnInitializedAsync()
     {
-        servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
-        resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
-
-        // Get the list of categories
-        categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+        await SetServicesData();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (servicesData == null)
+        {
+            await SetServicesData();
+        }
+    }
+
+    private async Task SetServicesData()
+    {
+        try
+        {
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
+            resourceDelimiter = (ResourceDelimiter)servicesData.ResourceDelimiters[0];
+
+            // Get the list of categories
+            categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            toastService.ShowError("There was a problem loading the page. Please try again");
+        }
     }
 
     protected string GenerateName(ResourceType type, string shortName, string staticvalues)
@@ -378,11 +403,12 @@
         {
             foreach (ResourceComponent resourceComponent in servicesData.ResourceComponents)
             {
+                string normalizedcomponentname = GeneralHelper.NormalizeName(resourceComponent.Name, true);
                 // Check if the component is excluded for the resource type
-                if (!type.Exclude.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                if (!type.Exclude.ToLower().Split(',').Contains(normalizedcomponentname))
                 {
                     // Remove any optional components
-                    if (!type.Optional.ToLower().Contains(GeneralHelper.NormalizeName(resourceComponent.Name, true)))
+                    if (!type.Optional.ToLower().Split(',').Contains(normalizedcomponentname))
                     {
                         if (name != "")
                         {
@@ -413,7 +439,10 @@
                                 default:
                                     if (resourceComponent.IsCustom)
                                     {
-                                        name += servicesData.CustomComponents.Where(x => x.ParentComponent == GeneralHelper.NormalizeName(resourceComponent.Name, true)).FirstOrDefault().ShortName;
+                                        if (servicesData.CustomComponents.Where(x => x.ParentComponent == normalizedcomponentname).Count() > 0)
+                                        {
+                                            name += servicesData.CustomComponents.Where(x => x.ParentComponent == normalizedcomponentname).FirstOrDefault().ShortName;
+                                        }
                                     }
                                     break;
                             }
@@ -429,6 +458,10 @@
                 }
             }
 
+            if (name != "")
+            {
+                name += "1";
+            }
 
             // Apply the regex to the generate name
             Regex regx = new(type.Regx);
@@ -455,7 +488,6 @@
 
     }
 
-
     private async void OnTypeChanged(ChangeEventArgs e)
     {
         await JsRuntime.InvokeVoidAsync("scrollIntoView", e.Value.ToString());
@@ -476,5 +508,30 @@
                 visible = false;
         }
         return visible;
+    }
+
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Reference");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "referenceinstructions");
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+        }
     }
 }

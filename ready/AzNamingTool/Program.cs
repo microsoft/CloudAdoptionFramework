@@ -1,11 +1,11 @@
 using AzureNamingTool.Attributes;
-using AzureNamingTool.Helpers;
 using BlazorDownloadFile;
 using Blazored.Toast;
 using Microsoft.OpenApi.Models;
 using Blazored.Modal;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
+using AzureNamingTool.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +16,7 @@ builder.Services.AddServerSideBlazor().AddHubOptions(x => x.MaximumReceiveMessag
 builder.Services.AddBlazorDownloadFile();
 builder.Services.AddBlazoredToast();
 builder.Services.AddBlazoredModal();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSingleton<StateContainer>();
 
@@ -26,7 +27,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Version = "v" + Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion,
         Title = "Azure Naming Tool API",
-        Description = "An ASP.NET Core Web API for managing the Azure Naming tool configuration. All API requests require the configured API Key (found in the site Admin configuration)."
+        Description = "An ASP.NET Core Web API for managing the Azure Naming tool configuration. All API requests require the configured API Key (found in the site Admin configuration). You can find more details in the <a href=\"https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/USINGTHEAPI.md\" target=\"_new\">Azure Naming Tool API documentation</a>."
     });
 
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -52,7 +53,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    app.UseCors();
+    app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) // allow any origin
+                .AllowCredentials()); // allow credentials
 }
 else
 {

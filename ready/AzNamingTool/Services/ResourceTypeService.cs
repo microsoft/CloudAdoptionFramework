@@ -3,21 +3,23 @@ using AzureNamingTool.Models;
 using Microsoft.AspNetCore.Components;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Text.Json;
+using ResourceType = AzureNamingTool.Models.ResourceType;
 
 namespace AzureNamingTool.Services
 {
     public class ResourceTypeService
     {
         private static ServiceResponse serviceResponse = new();
-        
+
         public static async Task<ServiceResponse> GetItems(bool admin = true)
         {
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceType>();
+                var items = await ConfigurationHelper.GetList<ResourceType>();
                 if (!admin)
                 {
                     serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(x => x.Resource).ToList();
@@ -42,7 +44,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var data = await GeneralHelper.GetList<ResourceType>();
+                var data = await ConfigurationHelper.GetList<ResourceType>();
                 var item = data.Find(x => x.Id == id);
                 serviceResponse.ResponseObject = item;
                 serviceResponse.Success = true;
@@ -61,7 +63,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Make sure the new item short name only contains letters/numbers
-                if (!GeneralHelper.CheckAlphanumeric(item.ShortName))
+                if (!ValidationHelper.CheckAlphanumeric(item.ShortName))
                 {
                     serviceResponse.Success = false;
                     serviceResponse.ResponseObject = "Short name must be alphanumeric.";
@@ -72,7 +74,7 @@ namespace AzureNamingTool.Services
                 item.ShortName = item.ShortName.ToLower();
 
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceType>();
+                var items = await ConfigurationHelper.GetList<ResourceType>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -102,7 +104,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceType>(items);
+                await ConfigurationHelper.WriteList<ResourceType>(items.OrderBy(x => x.Id).ToList());
                 serviceResponse.ResponseObject = "Item added!";
                 serviceResponse.Success = true;
             }
@@ -120,14 +122,14 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceType>();
+                var items = await ConfigurationHelper.GetList<ResourceType>();
                 // Get the specified item
                 var item = items.Find(x => x.Id == id);
                 // Remove the item from the collection
                 items.Remove(item);
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceType>(items);
+                await ConfigurationHelper.WriteList<ResourceType>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -158,7 +160,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceType>(newitems);
+                await ConfigurationHelper.WriteList<ResourceType>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -178,14 +180,17 @@ namespace AzureNamingTool.Services
             {
 
                 string category = type.Resource;
-                if (category.Contains('/'))
+                if (!String.IsNullOrEmpty(category))
                 {
-                    category = category[..category.IndexOf("/")];
-                }
+                    if (category.Contains('/'))
+                    {
+                        category = category[..category.IndexOf("/")];
+                    }
 
-                if (!categories.Contains(category))
-                {
-                    categories.Add(category);
+                    if (!categories.Contains(category))
+                    {
+                        categories.Add(category);
+                    }
                 }
             }
 
@@ -194,9 +199,17 @@ namespace AzureNamingTool.Services
 
         public static List<ResourceType> GetFilteredResourceTypes(List<ResourceType> types, string filter)
         {
+            List<ResourceType> currenttypes = new();
             // Filter out resource types that should have name generation
-            List<ResourceType> filteredtypes = types.Where(x => x.Resource.StartsWith(filter) && x.Property.ToLower() != "display name" && x.ShortName != "").ToList();
-            return filteredtypes;
+            if (filter != "")
+            {
+                currenttypes = types.Where(x => x.Resource.ToLower().StartsWith(filter.ToLower() + "/") && x.Property.ToLower() != "display name" && x.ShortName != "").ToList();
+            }
+            else
+            {
+                currenttypes = types;
+            }
+            return currenttypes;
         }
 
         public static async Task<ServiceResponse> RefreshResourceTypes(bool shortNameReset = false)
@@ -208,7 +221,7 @@ namespace AzureNamingTool.Services
                 serviceResponse = await ResourceTypeService.GetItems();
                 List<ResourceType> types = (List<ResourceType>)serviceResponse.ResponseObject;
                 string url = "https://raw.githubusercontent.com/microsoft/CloudAdoptionFramework/master/ready/AzNamingTool/repository/resourcetypes.json";
-                
+
                 string refreshdata = await GeneralHelper.DownloadString(url);
                 if (refreshdata != "")
                 {
@@ -233,7 +246,7 @@ namespace AzureNamingTool.Services
                             ResourceType oldtype = types[i];
                             newtype.Exclude = oldtype.Exclude;
                             newtype.Optional = oldtype.Optional;
-                            newtype.Enabled= oldtype.Enabled;
+                            newtype.Enabled = oldtype.Enabled;
                             if ((!shortNameReset) || (oldtype.ShortName == ""))
                             {
                                 newtype.ShortName = oldtype.ShortName;
@@ -252,20 +265,84 @@ namespace AzureNamingTool.Services
 
                     // Update the settings file
                     serviceResponse = await PostConfig(types);
-                    
+
                     // Update the repository file
                     await FileSystemHelper.WriteFile("resourcetypes.json", refreshdata, "repository/");
 
                     // Clear cached data
-                    GeneralHelper.InvalidateCacheObject("ResourceType");
+                    CacheHelper.InvalidateCacheObject("ResourceType");
 
                     // Update the current configuration file version data information
-                    await GeneralHelper.UpdateConfigurationFileVersion("resourcetypes");
+                    await ConfigurationHelper.UpdateConfigurationFileVersion("resourcetypes");
                 }
                 else
                 {
                     AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = "There was a problem refreshing the resource types configuration." });
                 }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
+            }
+            return serviceResponse;
+        }
+
+        public static async Task<ServiceResponse> UpdateTypeComponents(string operation, int componentid)
+        {
+            try
+            {
+                serviceResponse = await ResourceComponentService.GetItem(componentid);
+                ResourceComponent resourceComponent = (ResourceComponent)serviceResponse.ResponseObject;
+                string component = GeneralHelper.NormalizeName(resourceComponent.Name, false);
+                serviceResponse = await ResourceTypeService.GetItems();
+                List<ResourceType> resourceTypes = (List<ResourceType>)serviceResponse.ResponseObject;
+                List<string> currentvalues = new();
+                // Update all the resource type component settings
+                foreach (ResourceType currenttype in resourceTypes)
+                {
+                    switch (operation)
+                    {
+                        case "optional-add":
+                            currentvalues = new List<string>(currenttype.Optional.Split(','));
+                            if (!currentvalues.Contains(component))
+                            {
+                                currentvalues.Add(component);
+                                currenttype.Optional = String.Join(",", currentvalues.ToArray());
+                                await ResourceTypeService.PostItem(currenttype);
+                            }
+                            break;
+                        case "optional-remove":
+                            currentvalues = new List<string>(currenttype.Optional.Split(','));
+                            if (currentvalues.Contains(component))
+                            {
+                                currentvalues.Remove(component);
+                                currenttype.Optional = String.Join(",", currentvalues.ToArray());
+                                await ResourceTypeService.PostItem(currenttype);
+                            }
+                            break;
+                        case "exclude-add":
+                            currentvalues = new List<string>(currenttype.Exclude.Split(','));
+                            if (!currentvalues.Contains(component))
+                            {
+                                currentvalues.Add(component);
+                                currenttype.Exclude = String.Join(",", currentvalues.ToArray());
+                                await ResourceTypeService.PostItem(currenttype);
+                            }
+                            break;
+                        case "exclude-remove":
+                            currentvalues = new List<string>(currenttype.Exclude.Split(','));
+                            if (currentvalues.Contains(component))
+                            {
+                                currentvalues.Remove(component);
+                                currenttype.Exclude = String.Join(",", currentvalues.ToArray());
+                                await ResourceTypeService.PostItem(currenttype);
+                            }
+                            break;
+                    }
+                }
+                serviceResponse.Success = true;
             }
             catch (Exception ex)
             {

@@ -12,7 +12,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceProjAppSvc>();
+                var items = await ConfigurationHelper.GetList<ResourceProjAppSvc>();
                 serviceResponse.ResponseObject = items.OrderBy(x => x.SortOrder).ToList();
                 serviceResponse.Success = true;
             }
@@ -30,7 +30,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var data = await GeneralHelper.GetList<ResourceProjAppSvc>();
+                var data = await ConfigurationHelper.GetList<ResourceProjAppSvc>();
                 var item = data.Find(x => x.Id == id);
                 serviceResponse.ResponseObject = item;
                 serviceResponse.Success = true;
@@ -49,7 +49,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Make sure the new item short name only contains letters/numbers
-                if (!GeneralHelper.CheckAlphanumeric(item.ShortName))
+                if (!ValidationHelper.CheckAlphanumeric(item.ShortName))
                 {
                     serviceResponse.Success = false;
                     serviceResponse.ResponseObject = "Short name must be alphanumeric.";
@@ -60,7 +60,7 @@ namespace AzureNamingTool.Services
                 item.ShortName = item.ShortName.ToLower();
 
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceProjAppSvc>();
+                var items = await ConfigurationHelper.GetList<ResourceProjAppSvc>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -129,7 +129,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceProjAppSvc>(items);
+                await ConfigurationHelper.WriteList<ResourceProjAppSvc>(items);
                 serviceResponse.ResponseObject = "Item added!";
                 serviceResponse.Success = true;
             }
@@ -147,7 +147,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceProjAppSvc>();
+                var items = await ConfigurationHelper.GetList<ResourceProjAppSvc>();
                 // Get the specified item
                 var item = items.Find(x => x.Id == id);
                 // Remove the item from the collection
@@ -162,7 +162,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceProjAppSvc>(items);
+                await ConfigurationHelper.WriteList<ResourceProjAppSvc>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -186,7 +186,7 @@ namespace AzureNamingTool.Services
                 foreach (ResourceProjAppSvc item in items)
                 {
                     // Make sure the new item short name only contains letters/numbers
-                    if (!GeneralHelper.CheckAlphanumeric(item.ShortName))
+                    if (!ValidationHelper.CheckAlphanumeric(item.ShortName))
                     {
                         serviceResponse.Success = false;
                         serviceResponse.ResponseObject = "Short name must be alphanumeric.";
@@ -203,7 +203,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceProjAppSvc>(newitems);
+                await ConfigurationHelper.WriteList<ResourceProjAppSvc>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

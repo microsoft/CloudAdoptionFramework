@@ -1,15 +1,48 @@
 ﻿@page "/"
 @namespace AzureNamingTool.Pages
+@using AzureNamingTool.Helpers;
+@using AzureNamingTool.Models;
+@inject StateContainer state
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = "_Layout";
+
+    // Verify the site configration files are present
+    ConfigurationHelper.VerifyConfiguration(state);
+    ConfigurationHelper.VerifySecurity(state);
+
+    var identityProviderDetails = new IdentityProviderDetails();
+    // Check if there is an HttpContext object
+    if (this.HttpContext != null)
+    {
+        if(this.HttpContext.Request.Headers != null)
+        {
+            // Get the Identity provider, if using Azure App Service Authentication
+            if (this.HttpContext.Request.Headers.ContainsKey("X-MS-CLIENT-PRINCIPAL-IDP"))
+            {
+                // Set the identity provider
+                identityProviderDetails.CurrentIdentityProvider = this.HttpContext.Request.Headers["X-MS-CLIENT-PRINCIPAL-IDP"];
+            }
+        }
+
+        // Check if there is an IdentityHeaderName set
+        if (!String.IsNullOrEmpty(ConfigurationHelper.GetAppSetting("IdentityHeaderName", true)))
+        {
+            string headername = ConfigurationHelper.GetAppSetting("IdentityHeaderName", true);
+            // Check if the IdentityHeaderName header is present
+            if (this.HttpContext.Request.Headers.ContainsKey(headername))
+            {
+                // Set the current user
+                identityProviderDetails.CurrentUser = this.HttpContext.Request.Headers[headername];
+            }
+        }
+    }
 }
-<link href="_content/Blazored.Toast/blazored-toast.min.css" rel="stylesheet" />
-<link href="_content/Blazored.Modal/blazored-modal.css" rel="stylesheet" />
 
-<component type="typeof(App)" render-mode="ServerPrerendered" />
+<link href="AzureNamingTool.styles.css" rel="stylesheet">
 
-<script src="_content/Blazored.Modal/blazored.modal.js"></script>
+<component type="typeof(App)" render-mode="ServerPrerendered" param-IdentityProviderDetails="identityProviderDetails" />
+
 <script>
 
     //Get the button:
@@ -51,9 +84,15 @@
         return document.getElementById(id).checked;
     };
 
-    function htmlToCSV(filename) {
+    function htmlToCSV(filename, tableclass = "") {
         var data = [];
-        var rows = document.querySelectorAll("table tr");
+        var rows;
+        if (tableclass != "") {
+            rows = document.querySelectorAll("table[class*=" + tableclass + "] tr ");
+        }
+        else {
+            rows = document.querySelectorAll("table tr");
+        }
 
         for (var i = 0; i < rows.length; i++) {
             var row = [], cols = rows[i].querySelectorAll("td, th");
@@ -99,6 +138,10 @@
         document.body.appendChild(tag);
     }
 
+    function ShowAlert(message) {
+        alert(message);
+    }
+
     function checkboxConfirmChange(checkbox, message) {
         if (checkbox.checked) {
             var confirmBox = confirm(message);
@@ -110,6 +153,10 @@
                 checkbox.checked = false;
             };
         }
+    }
+
+    function expandMultiSelectParent(sender) {
+        console.log("test!");
     }
 
 </script>

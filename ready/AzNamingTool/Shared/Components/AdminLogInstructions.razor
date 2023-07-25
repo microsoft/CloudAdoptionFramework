@@ -1,0 +1,37 @@
+﻿@using AzureNamingTool.Models;
+<p>
+    The <strong>Admin Log</strong> page allows the viewing of all the logged events within the Azure Naming Tool. This includes security events, configuration changes, and log activity. Use the <strong>Filter</strong>  to filter the list of records.
+</p>
+<p>
+    <img style="width:600px;" class="img-fluid" src="Screenshots/AdminLog1.png" alt="Admin Log" />
+</p>
+<div class="card">
+    <h5 class="card-header bg-default text-dark">
+        Page Sections/Actions
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <div class="card">
+            <div class="card-body">
+                <p>
+                    <strong>Export Admin Log</strong>
+                </p>
+                <p>This option allows you to export the <strong>Admin Log</strong> to a CSV file.</p>        <div class="card">
+                </div>
+        </div>
+            <div class="card-body">
+                <p>
+                    <strong>Purge Admin Log</strong>
+                </p>
+                <p>
+                    This option will delete all <strong>Admin Log</strong> data. This action cannot be undone!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+}

@@ -18,7 +18,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<GeneratedName>();
+                var items = await ConfigurationHelper.GetList<GeneratedName>();
                 serviceResponse.ResponseObject = items.OrderByDescending(x => x.CreatedOn).ToList();
                 serviceResponse.Success = true;
             }
@@ -26,6 +26,25 @@ namespace AzureNamingTool.Services
             {
                 await AdminLogService.PostItem(new AdminLogMessage{ Title = "ERROR", Message = ex.Message });
                 serviceResponse.Success = false;
+            }
+            return serviceResponse;
+        }
+
+        public static async Task<ServiceResponse> GetItem(int id)
+        {
+            try
+            {
+                // Get list of items
+                var data = await ConfigurationHelper.GetList<GeneratedName>();
+                var item = data.Find(x => x.Id == id);
+                serviceResponse.ResponseObject = item;
+                serviceResponse.Success = true;
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
             }
             return serviceResponse;
         }
@@ -40,7 +59,7 @@ namespace AzureNamingTool.Services
             try
             {
                 /// Get the previously generated names
-                var items = await GeneralHelper.GetList<GeneratedName>();
+                var items = await ConfigurationHelper.GetList<GeneratedName>();
                 if ((items != null) && (items.Count > 0))
                 {
                     generatedName.Id = items.Max(x => x.Id) + 1;
@@ -53,9 +72,9 @@ namespace AzureNamingTool.Services
                 items.Add(generatedName);
 
                 // Write items to file
-                await GeneralHelper.WriteList<GeneratedName>(items);
+                ConfigurationHelper.WriteList<GeneratedName>(items);
 
-                GeneralHelper.InvalidateCacheObject("generatednames.json");
+                CacheHelper.InvalidateCacheObject("generatednames.json");
 
                 serviceReponse.Success = true;
             }
@@ -65,6 +84,30 @@ namespace AzureNamingTool.Services
                 serviceReponse.Success = false;
             }
             return serviceReponse;
+        }
+
+        public static async Task<ServiceResponse> DeleteItem(int id)
+        {
+            try
+            {
+                // Get list of items
+                var items = await ConfigurationHelper.GetList<GeneratedName>();
+                // Get the specified item
+                var item = items.Find(x => x.Id == id);
+                // Remove the item from the collection
+                items.Remove(item);
+
+                // Write items to file
+                await ConfigurationHelper.WriteList<GeneratedName>(items);
+                serviceResponse.Success = true;
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.ResponseObject = ex;
+                serviceResponse.Success = false;
+            }
+            return serviceResponse;
         }
 
         /// <summary>
@@ -77,7 +120,7 @@ namespace AzureNamingTool.Services
             try
             {
                 List<GeneratedName> items = new List<GeneratedName>();
-                await GeneralHelper.WriteList<GeneratedName>(items);
+                await ConfigurationHelper.WriteList<GeneratedName>(items);
                 serviceReponse.Success = true;
             }
             catch (Exception ex)
@@ -105,7 +148,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<GeneratedName>(newitems);
+                await ConfigurationHelper.WriteList<GeneratedName>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

@@ -20,6 +20,7 @@ namespace AzureNamingTool.Controllers
     {
         private ServiceResponse serviceResponse = new();
 
+        // GET api/<ResourceDelimitersController>
         /// <summary>
         /// This function will return the delimiters data.
         /// </summary>
@@ -47,11 +48,42 @@ namespace AzureNamingTool.Controllers
             }
         }
 
+        // GET api/<ResourceDelimitersController>/5
+        /// <summary>
+        /// This function will return the specifed resource delimiter data.
+        /// </summary>
+        /// <param name="id">int - Resource Delimiter id</param>
+        /// <returns>json - Resource delimiter data</returns>
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                // Get list of items
+                serviceResponse = await ResourceDelimiterService.GetItem(id);
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+
+
         // POST api/<ResourceDelimitersController>
         /// <summary>
         /// This function will create/update the specified delimiter data.
         /// </summary>
-        /// <param name="item">json - Delimiter data</param>
+        /// <param name="item">ResourceDelimiter (json) - Delimiter data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceDelimiter item)
@@ -80,7 +112,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all delimiters data.
         /// </summary>
-        /// <param name="items">json - All delimiters data</param>
+        /// <param name="items">List - ResourceDelimiter (json) - All delimiters data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

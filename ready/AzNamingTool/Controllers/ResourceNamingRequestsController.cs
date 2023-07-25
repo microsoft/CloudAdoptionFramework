@@ -26,7 +26,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will generate a resoure type name for specifed component values. This function requires full definition for all components. It is recommended to use the RequestName API function for name generation.   
         /// </summary>
-        /// <param name="request">json - Resource Name Request data</param>
+        /// <param name="request">ResourceNameRequestWithComponents (json) - Resource Name Request data</param>
         /// <returns>string - Name generation response</returns>
         [HttpPost]
         [Route("[action]")]
@@ -56,7 +56,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will generate a resoure type name for specifed component values, using a simple data format.  
         /// </summary>
-        /// <param name="request">json - Resource Name Request data</param>
+        /// <param name="request">ResourceNameRequest (json) - Resource Name Request data</param>
         /// <returns>string - Name generation response</returns>
         [HttpPost]
         [Route("[action]")]
@@ -64,6 +64,7 @@ namespace AzureNamingTool.Controllers
         {
             try
             {
+                request.CreatedBy = "API";
                 ResourceNameResponse resourceNameRequestResponse = await ResourceNamingRequestService.RequestName(request);
 
                 if (resourceNameRequestResponse.Success)

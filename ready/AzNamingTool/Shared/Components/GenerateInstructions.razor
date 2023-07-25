@@ -1,0 +1,84 @@
+﻿@using AzureNamingTool.Models;
+<p>
+    The <strong>Generate</strong> page allows users to generate names with the selected options. Names can be generated for a single resource type or mutliple resource types. The <strong>Generate</strong> page will display the required and optional components configured by the administrator.
+</p>
+<div class="card mb-3">
+    <h5 class="card-header bg-default text-dark">
+        Generate Mode
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <p>
+            This section allows the user to select the desired resource type(s) name to generate. Use the <strong>Category</strong> selector to filter the list of resource types.
+        </p>
+        <div class="card">
+            <div class="card-body">
+                <h5>Single Resource Type</h5>
+                <p>This option will generate a single resource type name using the selected components. All naming guidelines will be applied.</p>
+                <p>
+                    <img style="width:600px;" class="img-fluid" src="Screenshots/GeneratePage1.png" alt="Generate 1" />
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5>Multiple Resource Types</h5>
+                <p>This option will generate a resource type name for each selected resource type using the selected components. All naming guidelines will be applied. All components will be required.</p>
+                <p>
+                    <img style="width:600px;" class="img-fluid" src="Screenshots/GeneratePage2.png" alt="Generate 2" />
+                </p>
+                <p>
+                    After selecting the desired options, click <strong>Generate</strong> to generate the resource type name(s). The application will attempt to validate the generated name(s) with the naming guidelines.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card mb-3">
+    <h5 class="card-header bg-default text-dark">
+        Generated Name(s)
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <p>
+            This section will display the generated name(s), along with any notes for the validation process. The list of names can be exported to a CSV file for use in other applications.
+        </p>
+        <p>
+            <img style="width:600px;" class="img-fluid" src="Screenshots/GeneratePage3.png" alt="Generate 3" />
+        </p>
+    </div>
+</div>
+<div class="card mb-3">
+    <h5 class="card-header bg-default text-dark">
+        Resource Type(s)
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <p>
+            This section allows the user to selected the desired resource type(s) name to generate. Use the <strong>Category</strong> selector to filter the list of resource types.
+        </p>
+    </div>
+</div>
+<div class="card mb-3">
+    <h5 class="card-header bg-default text-dark">
+        Naming Guidelines (Single Resource Type)
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <p>
+            This section displays the naming guidelines for the selected resource type. These guidelines wil be used to validate the generated name.
+        </p>
+    </div>
+</div>
+<div class="card mb-3">
+    <h5 class="card-header bg-default text-dark">
+        Components
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <p>
+            Select the desired values for the required components. Optional components may be omitted.
+        </p>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+}

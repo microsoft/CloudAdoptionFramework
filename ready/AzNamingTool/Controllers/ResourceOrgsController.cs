@@ -81,7 +81,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will create/update the specified org data.
         /// </summary>
-        /// <param name="item">json - Org data</param>
+        /// <param name="item">ResourceOrg (json) - Org data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceOrg item)
@@ -109,7 +109,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all orgs data.
         /// </summary>
-        /// <param name="items">json - All orgs data</param>
+        /// <param name="items">List - ResourceOrg (json) - All orgs data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

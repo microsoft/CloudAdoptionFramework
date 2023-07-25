@@ -13,5 +13,8 @@ namespace AzureNamingTool.Models
         public bool Enabled { get; set; }
         public int SortOrder { get; set; } = 0;
         public bool IsCustom { get; set; } = false;
+        public bool IsFreeText { get; set; } = false;
+        public string? MinLength { get; set; }
+        public string? MaxLength { get; set; }
     }
 }

@@ -6,30 +6,13 @@ namespace AzureNamingTool.Services
     public class ResourceDelimiterService
     {
         private static ServiceResponse serviceResponse = new();
-        public static async Task<ServiceResponse> GetItem()
-        {
-            try
-            {
-                // Get list of items
-                var items = await GeneralHelper.GetList<ResourceDelimiter>();
-                serviceResponse.ResponseObject = items.OrderBy(y => y.SortOrder).OrderByDescending(y => y.Enabled).ToList()[0];
-                serviceResponse.Success = true;
-            }
-            catch (Exception ex)
-            {
-                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
-                serviceResponse.Success = false;
-                serviceResponse.ResponseObject = ex;
-            }
-            return serviceResponse;
-        }
 
         public static async Task<ServiceResponse> GetItems(bool admin)
         {
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceDelimiter>();
+                var items = await ConfigurationHelper.GetList<ResourceDelimiter>();
                 if (!admin)
                 {
                     serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(y => y.SortOrder).ToList();
@@ -49,12 +32,49 @@ namespace AzureNamingTool.Services
             return serviceResponse;
         }
 
+        public static async Task<ServiceResponse> GetItem(int id)
+        {
+            try
+            {
+                // Get list of items
+                var data = await ConfigurationHelper.GetList<ResourceDelimiter>();
+                var item = data.Find(x => x.Id == id);
+                serviceResponse.ResponseObject = item;
+                serviceResponse.Success = true;
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
+            }
+            return serviceResponse;
+        }
+
+        public static async Task<ServiceResponse> GetCurrentItem()
+        {
+            try
+            {
+                // Get list of items
+                var items = await ConfigurationHelper.GetList<ResourceDelimiter>();
+                serviceResponse.ResponseObject = items.OrderBy(y => y.SortOrder).OrderByDescending(y => y.Enabled).ToList()[0];
+                serviceResponse.Success = true;
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                serviceResponse.Success = false;
+                serviceResponse.ResponseObject = ex;
+            }
+            return serviceResponse;
+        }
+
         public static async Task<ServiceResponse> PostItem(ResourceDelimiter item)
         {
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceDelimiter>();
+                var items = await ConfigurationHelper.GetList<ResourceDelimiter>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -121,7 +141,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceDelimiter>(items);
+                await ConfigurationHelper.WriteList<ResourceDelimiter>(items);
                 serviceResponse.ResponseObject = "Item added!";
                 serviceResponse.Success = true;
             }
@@ -183,7 +203,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceDelimiter>(newitems);
+                await ConfigurationHelper.WriteList<ResourceDelimiter>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

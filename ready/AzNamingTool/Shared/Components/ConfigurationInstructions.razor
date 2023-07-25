@@ -1,0 +1,179 @@
+﻿@using AzureNamingTool.Models;
+<p>
+    The <strong>Configuration</strong> page is used to view/set the configuration for the tool and the resource naming components. This page is separated into multiple sections. Each section displays the configuration for the individual components.
+</p>
+@if (admin)
+{
+    <p>
+        <img style="width:600px;" class="img-fluid" src="Screenshots/ConfigurationPageAdmin.png" alt="Configuration" />
+    </p>
+}
+else
+{
+    <p>
+        <img style="width:600px;" class="img-fluid" src="Screenshots/ConfigurationPage.png" alt="Configuration" />
+    </p>
+}
+@if (admin)
+{
+    <div class="card mb-3">
+        <h5 class="card-header bg-default text-dark">
+            Base Configuration
+        </h5>
+        <div class="card card-body @theme.ThemeStyle">
+            <p>
+                This section provides the ability to configure the base components required for resource name generation.
+            </p>
+            <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Components
+                    </h5>
+                    <p>
+                        This section allows the configuration of which components will be used for resource name generation. Components can be enabled/disabled, ordered, and edited.
+                    </p>
+                    <p>
+                        The <strong>Globally Optional Configuration/Globally Exclude Configuration</strong> section allows adding/removing the component for <strong>ALL</strong> resource types.
+                    </p>
+                    <p>
+                        Use the <strong>Resource Types</strong> section to update individual resource type configuration.
+
+                    </p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Delimiters
+                    </h5>
+                    <p>
+                        The Azure Naming Tool allows for a delimiter to be used between components when a name is generated. This section allows the selection of the delimiter. In the event a resource type does not allow the selected delimiter, it will be removed.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-3">
+        <h5 class="card-header bg-default text-dark">
+            Component Configuration
+        </h5>
+        <div class="card card-body @theme.ThemeStyle">
+            <p>
+                This section provides the ability to configure the individual components used in name generation. Each component provides the ability to add/edit/delete items, as well as set the desired sort order.
+                Note: The Resource Type and Location components allow limited configuration to ensure compatibility with Azure.
+            </p>
+            <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Export
+                    </h5>
+                    <p>
+                        Component configuration is stored as a JSON file within the application. Each component configuration file can be exported and stored for backup purposes. It is recommended to export all configuration files when updating the Azure Naming Tool version.
+                    </p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Refresh
+                    </h5>
+                    <p>
+                        For Resource Types and Locations, the list of components can be refreshed to the latest published version in the Azure Naming Tool Github repo. These files are frequently updated with new resource types, locations, and naming guidelines.
+                    </p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Reset
+                    </h5>
+                    <p>When the tool is installed, a default configuration is used for each component. The <strong>Reset</strong> feature allows the default configuration to be restored for the component.</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Import
+                    </h5>
+                    <p>The tool provides the ability to import a new configuration for each component, if needed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-3">
+        <h5 class="card-header bg-default text-dark">
+            General Configuration
+        </h5>
+        <div class="card card-body @theme.ThemeStyle">
+            <p>
+                This section provides functionality to modify the master configuration for the tool. Administrators can export the current configuration (combining all component configuration files into a JSON file), or import a new configuration. This feature is used for backup/restore of the installation configuration.
+            </p>
+            <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Global Configuration
+                    </h5>
+                    <p>
+                        This section allows the user to import/export a complete configuration for the Azure Naming Tool Application. All component configuration files are combined into a single JSON file. This file is used when backing up/restoring the tool configuration.
+                    </p>
+                    @*<div class="card">
+                <div class="card-body">
+                <h5>Policy</h5>
+                <p>
+                This section allows for the creation of an Azure Policy file. The configured components are converted to an Azure Policy Definition file to enforce the configuration with your subscription.
+                </p>
+                </div>
+                </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-3">
+        <h5 class="card-header bg-default text-dark">
+            Base Configuration
+        </h5>
+        <div class="card card-body @theme.ThemeStyle">
+            <p>
+                This section displays the current required/optional base components for resource name generation.
+            </p>
+                        <div class="card">
+                <div class="card-body">
+                    <h5>
+                    Components
+                </h5
+            <p>
+                This section displays the current required/optional components which will be used for resource name generation.
+            </p>
+                </div>
+            </div>
+                        <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Delimiters</h5
+            <p>
+                This section displays the current delimiter. In the event a resource type does not allow the selected delimiter, it will be removed.
+            </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-3">
+        <h5 class="card-header bg-default text-dark">
+            Component Configuration
+        </h5>
+        <div class="card card-body @theme.ThemeStyle">
+            <p>
+                This section displays the current required/optional components. Each component displays the current component options that can be selected.
+            </p>
+        </div>
+    </div>
+}
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+}

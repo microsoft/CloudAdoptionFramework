@@ -21,14 +21,14 @@ namespace AzureNamingTool.Controllers
     public class AdminController : ControllerBase
     {
         private ServiceResponse serviceResponse = new();
-        private Config config = GeneralHelper.GetConfigurationData();
+        private SiteConfiguration config = ConfigurationHelper.GetConfigurationData();
 
         // POST api/<AdminController>
         /// <summary>
         /// This function will update the Admin Password. 
         /// </summary>
         /// <param name="password">string - New Admin Password</param>
-        /// <param name="adminpassword">Current Admin Password</param>
+        /// <param name="adminpassword">string - Current Admin Password</param>
         /// <returns>string - Successful update</returns>
         [HttpPost]
         [Route("[action]")]
@@ -66,7 +66,7 @@ namespace AzureNamingTool.Controllers
         /// This function will update the API Key. 
         /// </summary>
         /// <param name="apikey">string - New API Key</param>
-        /// <param name="adminpassword">Current Admin Password</param>
+        /// <param name="adminpassword">string - Current Admin Password</param>
         /// <returns>dttring - Successful update</returns>
         [HttpPost]
         [Route("[action]")]
@@ -103,7 +103,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will generate a new API Key. 
         /// </summary>
-        /// <param name="adminpassword">Current Admin Password</param>
+        /// <param name="adminpassword">string - Current Admin Password</param>
         /// <returns>string - Successful update / Generated API Key</returns>
 
         [HttpPost]
@@ -137,5 +137,139 @@ namespace AzureNamingTool.Controllers
             }
         }
 
+        /// <summary>
+        /// This function will return the admin log data.
+        /// </summary>
+        /// <returns>json - Current admin log data</returns>
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> GetAdminLog([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
+        {
+            try
+            {
+                serviceResponse = await AdminLogService.GetItems();
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+        /// <summary>
+        /// This function will purge the admin log data.
+        /// </summary>
+        /// <returns>dttring - Successful operation</returns>
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> PurgeAdminLog([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
+        {
+            try
+            {
+                serviceResponse = await AdminLogService.DeleteAllItems();
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+        /// <summary>
+        /// This function will return the generated names data.
+        /// </summary>
+        /// <returns>json - Current generated names data</returns>
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<IActionResult> GetGeneratedNamesLog()
+        {
+            try
+            {
+                serviceResponse = await GeneratedNamesService.GetItems();
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+        /// <summary>
+        /// This function will purge the generated names data.
+        /// </summary>
+        /// <returns>dttring - Successful operation</returns>
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> PurgeGeneratedNamesLog([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
+        {
+            try
+            {
+                serviceResponse = await GeneratedNamesService.DeleteAllItems();
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
+        /// <summary>
+        /// This function will reset the site configuration. THIS CANNOT BE UNDONE!
+        /// </summary>
+        /// <returns>dttring - Successful operation</returns>
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> ResetSiteConfiguration([BindRequired][FromHeader(Name = "AdminPassword")] string adminpassword)
+        {
+            try
+            {
+
+                if (ConfigurationHelper.ResetSiteConfiguration())
+                {
+                    return Ok("Site configuration reset suceeded!");
+                }
+                else
+                {
+                    return BadRequest("Site configuration reset failed!");
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
     }
 }

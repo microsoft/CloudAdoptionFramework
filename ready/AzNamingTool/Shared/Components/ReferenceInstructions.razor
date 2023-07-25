@@ -1,0 +1,45 @@
+﻿@using AzureNamingTool.Models;
+
+<p>
+    The <strong>Reference</strong> page displays all sample resource type names, using the configured components.
+</p>
+<p>
+    <img style="width:600px;" class="img-fluid" src="Screenshots/ReferencePage.png" alt="Reference Page" />
+</p>
+<div class="card">
+    <h5 class="card-header bg-default text-dark">
+        Page Sections/Actions
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <div class="card">
+            <div class="card-body">
+                <h5>Example</h5>
+                <p>
+                    This section displays a sample generated name for the resource type using the current components.
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5>Components</h5>
+                <p>
+                    This section displays the first option for each component. These components are used to generate the sample name.
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5>Naming Guidelines</h5>
+                <p>
+                    This section displays the naming guidelines for the resource type.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+}

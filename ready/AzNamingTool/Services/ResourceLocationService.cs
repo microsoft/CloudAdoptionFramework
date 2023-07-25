@@ -13,7 +13,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceLocation>();
+                var items = await ConfigurationHelper.GetList<ResourceLocation>();
                 if (!admin)
                 {
                     serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(x => x.Name).ToList();
@@ -38,7 +38,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var data = await GeneralHelper.GetList<ResourceLocation>();
+                var data = await ConfigurationHelper.GetList<ResourceLocation>();
                 var item = data.Find(x => x.Id == id);
                 serviceResponse.ResponseObject = item;
                 serviceResponse.Success = true;
@@ -57,7 +57,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Make sure the new item short name only contains letters/numbers
-                if (!GeneralHelper.CheckAlphanumeric(item.ShortName))
+                if (!ValidationHelper.CheckAlphanumeric(item.ShortName))
                 {
                     serviceResponse.Success = false;
                     serviceResponse.ResponseObject = "Short name must be alphanumeric.";
@@ -68,7 +68,7 @@ namespace AzureNamingTool.Services
                 item.ShortName = item.ShortName.ToLower();
 
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceLocation>();
+                var items = await ConfigurationHelper.GetList<ResourceLocation>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -105,7 +105,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceLocation>(items);
+                await ConfigurationHelper.WriteList<ResourceLocation>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -122,14 +122,14 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceLocation>();
+                var items = await ConfigurationHelper.GetList<ResourceLocation>();
                 // Get the specified item
                 var item = items.Find(x => x.Id == id);
                 // Remove the item from the collection
                 items.Remove(item);
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceLocation>(items);
+                await ConfigurationHelper.WriteList<ResourceLocation>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -153,7 +153,7 @@ namespace AzureNamingTool.Services
                 foreach (ResourceLocation item in items)
                 {
                     // Make sure the new item short name only contains letters/numbers
-                    if (!GeneralHelper.CheckAlphanumeric(item.ShortName))
+                    if (!ValidationHelper.CheckAlphanumeric(item.ShortName))
                     {
                         serviceResponse.Success = false;
                         serviceResponse.ResponseObject = "Short name must be alphanumeric.";
@@ -169,7 +169,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceLocation>(newitems);
+                await ConfigurationHelper.WriteList<ResourceLocation>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -236,12 +236,12 @@ namespace AzureNamingTool.Services
 
                     // Update the repository file
                     await FileSystemHelper.WriteFile("resourcelocations.json", refreshdata, "repository/");
-                    
+
                     // Clear cached data
-                    GeneralHelper.InvalidateCacheObject("ResourceLocation");
+                    CacheHelper.InvalidateCacheObject("ResourceLocation");
 
                     // Update the current configuration file version data information
-                    await GeneralHelper.UpdateConfigurationFileVersion("resourcelocations");
+                    await ConfigurationHelper.UpdateConfigurationFileVersion("resourcelocations");
                 }
                 else
                 {

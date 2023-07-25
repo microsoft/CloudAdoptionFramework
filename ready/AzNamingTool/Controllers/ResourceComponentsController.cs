@@ -46,11 +46,40 @@ namespace AzureNamingTool.Controllers
             }
         }
 
+        // GET api/<resourcecomponentsController>/5
+        /// <summary>
+        /// This function will return the specifed resource component data.
+        /// </summary>
+        /// <param name="id">int - Resource Component id</param>
+        /// <returns>json - Resource component data</returns>
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                // Get list of items
+                serviceResponse = await ResourceComponentService.GetItem(id);
+                if (serviceResponse.Success)
+                {
+                    return Ok(serviceResponse.ResponseObject);
+                }
+                else
+                {
+                    return BadRequest(serviceResponse.ResponseObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+                return BadRequest(ex);
+            }
+        }
+
         // POST api/<ResourceComponentsController>
         /// <summary>
         /// This function will create/update the specified component data.
         /// </summary>
-        /// <param name="item">json - Component data</param>
+        /// <param name="item">ResourceComponent (json) - Component data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ResourceComponent item)
@@ -78,7 +107,7 @@ namespace AzureNamingTool.Controllers
         /// <summary>
         /// This function will update all components data.
         /// </summary>
-        /// <param name="items">json - All components configuration data</param>
+        /// <param name="items">List - ResourceComponent (json) - All components configuration data</param>
         /// <returns>bool - PASS/FAIL</returns>
         [HttpPost]
         [Route("[action]")]

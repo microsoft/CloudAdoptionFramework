@@ -1,0 +1,882 @@
+﻿@page "/admin"
+@using AzureNamingTool.Helpers;
+@using AzureNamingTool.Models;
+@using System.Runtime.Caching;
+@using AzureNamingTool.Services;
+@using Blazored.Toast.Configuration;
+@using Microsoft.AspNetCore.Html
+@using Microsoft.Extensions.Logging
+@using System.Reflection;
+@inject IJSRuntime JsRuntime
+@inject StateContainer state
+@inject ProtectedSessionStorage session
+@inject IToastService toastService
+@inject NavigationManager NavigationManager
+@inject ProtectedLocalStorage storage
+
+<PageTitle>Azure Naming Tool - Admin</PageTitle>
+<div class="card  @theme.ThemeStyle">
+    <div class="card-body">
+        <!-- Pop it above the backdrop -->
+        <div class="@theme.ThemeStyle">
+            <div style="float:left;">
+                <h1>
+                    Admin
+                </h1>
+            </div>
+            @if (admin)
+            {
+                <div style="float:right;">
+                    <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                        <span class="oi oi-document" aria-hidden="true"></span> Documentation
+                    </button>
+                </div>
+            }
+            <div style="clear:both;"></div>
+            <div>
+                @if (!admin)
+                {
+                    <p>
+                        Enter the Global Admin Password to configure the Azure Naming Tool site.
+                    </p>
+                    <div class="form-group">
+                        <label for="password" style="font-weight:bold">Global Admin Password</label>
+                        <input title="Password" class="form-control mb-3" type="password" @onchange="@((ui) => { SetFormValue("login",(string)ui.Value);})" />
+                    </div>
+                }
+                else
+                {
+                    <p>
+                        This page allows you to security settings, view cache data, and site configurations for the Azure Naming Tool.
+                    </p>
+                    <div class="card mb-3" style="width:auto;">
+                        <div class="card-header bg-default text-dark">
+                            <a id="versiondetailslink" class="link-dark text-decoration-none" data-bs-toggle="collapse" href="#versiondetails" role="button" aria-expanded="false" aria-controls="versiondetails">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> <strong>Version Details</strong>
+                            </a>
+                        </div>
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="versiondetails">
+                            <div class="mb-3">
+                                <strong>Current version:</strong> @appversion
+                            </div>
+                            @if (versionalert != "")
+                            {
+                                <div class="alert alert-warning" role="alert">
+                                    <div>
+                                        @((MarkupString)versionalert)
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <h5 class="card-header text-white bg-secondary text-white">
+                            <a class="text-decoration-none text-white" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#security" role="button" aria-expanded="false" aria-controls="security">
+                                <h5><span class="oi oi-chevron-bottom" aria-hidden="true"></span> Security</h5>
+                            </a>
+                        </h5>
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="security">
+                            @if (currentuser == "GlobalAdmin")
+                            {
+                                <div class="card mb-3">
+                                    <div class="card-header bg-default text-dark">
+                                        <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#updatepassword" role="button" aria-expanded="false" aria-controls="updatepassword">
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Global Admin Password
+                                        </a>
+                                    </div>
+                                    <div class="collapse show card card-body @theme.ThemeStyle" id="updatepassword">
+                                        <p>
+                                            Enter a new <strong>Global Admin</strong> password for the site.
+                                        </p>
+                                        <p><strong>Requirements</strong></p>
+                                        <ul>
+                                            <li>Contain a number</li>
+                                            <li>Contain one upper case letter</li>
+                                            <li>Be at least 8 characters</li>
+                                        </ul>
+                                        <div class="form-group">
+                                            <input title="New Password" id="newpassword" class="form-control  mb-3" type="password" @onchange="@((ui) => { SetFormValue("password",(string)ui.Value);})" />
+                                            <button title="Save Password" type="button" disabled="@disabled" class="btn btn-success" @onclick="@(e => AdminFormAction("password"))">Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mb-3">
+                                    <div class="card-header bg-default text-dark">
+                                        <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#updateapikey" role="button" aria-expanded="false" aria-controls="updateapikey">
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> API Key
+                                        </a>
+                                    </div>
+                                    <div class="collapse show  card card-body @theme.ThemeStyle" id="updateapikey">
+                                        <p>
+                                            The current API key is displayed. Click <strong>Generate</strong> to generate a new random API Key, or update the text to the desired value.
+                                        </p>
+                                        <div class="form-group">
+                                            <input title="API Key" id="currentapikey" class="form-control mb-3" type="text" @onchange="@((ui) => { SetFormValue("apikey",(string)ui.Value);})" value="@currentapikey" />
+                                            <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("apikeysave"))" title="Save API Key">Save</button>
+                                            <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("apikeygenerate"))" title="Generate API Key">Generate</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    <span style="font-style:italic;">Log in with the Global Admin password to update these settings.</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <h5 class="card-header text-white bg-secondary text-white">
+                            <a class="text-decoration-none text-white" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#identityprovidersettings" role="button" aria-expanded="false" aria-controls="identityprovidersettings">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Identity Provider Settings
+                            </a>
+                        </h5>
+                        <div class="collapse show  card card-body @theme.ThemeStyle" id="identityprovidersettings">
+                            @if (currentuser == "GlobalAdmin")
+                            {
+                                <p>
+                                    This section is used to configure the <strong>Identity Provider</strong> settings for the site if authentication is implemented. The Azure Naming Tool is designed to work with <strong><a href="https://learn.microsoft.com/en-us/azure/app-service/overview-authentication-authorization" target="_blank">Azure App Service Authentication</a></strong>, by default. If the Azure Naming Tool is configured to identify users, the site will track user activity. Users can also be designated as Admins using the <strong>Admin Users</strong> configuration.
+                                </p>
+                                <p>
+                                    You can learn more about the new Identity Provider Integration <a href=\"https://soltisweb.com/blog/detail/2023-06-azurenamingtool-identityproviderintegrationdeepdive\" target=\"_blank\"><strong>HERE</strong></a>.
+                                </p>
+                                @if (!String.IsNullOrEmpty(currentidentityprovider))
+                                {
+                                    <div class="mb-3">
+                                        <p class="alert alert-success alert-dismissible fade show" role="alert">
+                                            <strong>Azure App Service Authentication Enabled!</strong><br /><br />
+                                            <strong>Current Identity provider:</strong> @currentidentityprovider.ToUpper()<br /><br />
+                                            <strong>Default Idenitty Header Name:</strong> X-MS-CLIENT-PRINCIPAL-NAME
+                                        </p>
+                                    </div>
+                                }
+                                <div class="card mb-3">
+                                    <div class="card card-header bg-default text-dark" style="font-weight:bold;">
+                                        <a id="identityheadername" class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;" href="#identityheadername" role="button" aria-expanded="false" aria-controls="identityheadername">
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Identity Header Name
+                                        </a>
+                                    </div>
+                                    <div class="collapse show card card-body @theme.ThemeStyle" id="identityheadername">
+                                        <p>
+                                            This setting is used to identify site users when authenticating using an Identity provider. Authentication using an Identity provider will often inject headers into the request. The site will check for the specified header name and assign the value as the user's identity. This value will be used to log user activity.
+                                        </p>
+                                        <div class="form-group mb-3">
+                                            <input title="Identity Header Name" id="currentidentityheadername" class="form-control mb-3" type="text" @onchange="@((ui) => { SetFormValue("identityheadername",(string)ui.Value);})" value="@currentidentityheadername" />
+                                            <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("identityheadernamesave"))" title="Save Identity Header Name">Save</button>
+                                        </div>
+                                        <p class="alert alert-info" role="alert">
+                                            <strong>NOTE</strong><br />
+                                            The Azure Naming Tool is configured for <strong><a href="https://learn.microsoft.com/en-us/azure/app-service/overview-authentication-authorization" target="_blank">Azure App Service Authentication</a></strong> using the <a href="https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-user-identities#access-user-claims-in-app-code" target="_blank"><strong>X-MS-CLIENT-PRINCIPAL-NAME</strong></a> header name. If using a different Identity provider, update the setting to the header name that contains the user's id.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="card mb-3">
+                                    <div class="card card-header bg-default text-dark" style="font-weight:bold;">
+                                        <a id="adminusers" class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;" href="#adminusers" role="button" aria-expanded="false" aria-controls="adminusers">
+                                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Admin Users
+                                        </a>
+                                    </div>
+                                    <div class="collapse show card card-body @theme.ThemeStyle" id="adminusers">
+                                        <div class="mb-3">
+                                            <p>
+                                                When authenticating users with an Identity provider, the <strong>Identity Header Name</strong> setting can be used to idenity site users. Enter the user id below to assign the user as an <strong>Admin</strong> for the Azure Naming Tool.
+                                            </p>
+                                            @if (!String.IsNullOrEmpty(currentidentityprovider))
+                                            {
+                                                @switch (currentidentityprovider.ToLower())
+                                                {
+                                                    case "aad":
+                                                        <p class="alert alert-info alert-dismissible fade show" role="alert">
+                                                            When using <strong>@currentidentityprovider.ToUpper()</strong> for Azure App Service Authentication, the <strong>X-MS-CLIENT-PRINCIPAL-NAME</strong> header value will be the user's email address.<br /><br /><strong>Example:</strong> example@xyz.com<br /><br />This value should be used to designate the user as an <strong>Admin</strong>.
+                                                        </p>
+                                                        break;
+                                                    case "github":
+                                                        <p class="alert alert-info alert-dismissible fade show" role="alert">
+                                                            When using <strong>@currentidentityprovider.ToUpper()</strong> for Azure App Service Authentication, the <strong>X-MS-CLIENT-PRINCIPAL-NAME</strong> header value will be the user's name.<br /><br /><strong>Example:</strong> John Smith)<br /><br />This value should be used to designate the user as an <strong>Admin</strong>.
+                                                        </p>
+                                                        break;
+                                                    case "google":
+                                                        <p class="alert alert-info alert-dismissible fade show" role="alert">
+                                                            When using <strong>@currentidentityprovider.ToUpper()</strong> for Azure App Service Authentication, the <strong>X-MS-CLIENT-PRINCIPAL-NAME</strong> header value will be the user's email address.<br /><br /><strong>Example:</strong>: example@gmail.com<br /><br />This value should be used to designate the user as an <strong>Admin</strong>.
+                                                        </p>
+                                                        break;
+                                                }
+                                            }
+                                        </div>
+                                        <div class="mb-3">
+                                            <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("adminuseradd"))" title="Add Admin User">
+                                                <span class="oi oi-plus" aria-hidden="true"></span> Add Admin User
+                                            </button>
+                                        </div>
+                                        @if (servicesData.AdminUsers.Count > 0)
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table @theme.ThemeStyle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in @servicesData.AdminUsers)
+                                                        {
+                                                            <tr>
+                                                                <td>@item.Name</td>
+                                                                <td>
+                                                                    @if (GeneralHelper.NormalizeName(currentuser, true) != GeneralHelper.NormalizeName(@item.Name, true))
+                                                                    {
+                                                                        <button type="button" class="btn btn-danger" @onclick="@(e => AdminFormAction("adminuserdelete",item.Id))" title="Delete">
+                                                                            <span class="oi oi-x" aria-hidden="true"></span>
+                                                                        </button>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <p style="font-style:italic;">There currently no assigned admin users.</p>
+                                        }
+                                        <p class="alert alert-warning">
+                                            <strong>NOTE</strong><br />
+                                            Added users will need to close their browser and re-open the site for the change to take effect.
+                                        </p>
+
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    <span style="font-style:italic;">Log in with the Global Admin password to update these settings.</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <h5 class="card-header text-white bg-secondary text-white">
+                            <a class="text-decoration-none text-white" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#cache" role="button" aria-expanded="false" aria-controls="cache">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Cache
+                            </a>
+                        </h5>
+                        <div class="collapse show  card card-body @theme.ThemeStyle" id="cache">
+                            <p>
+                                The tool uses caching for data to improve performance. Click <strong>Clear</strong> to clear all cached data.
+                            </p>
+                            <div class="form-group">
+                                <p>
+                                    <button type="button" class="btn btn-primary" @onclick="@(e => AdminFormAction("viewcachedata"))" title="View Cache Data">View Cache Data</button>
+                                    <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("clearcache"))" title="Clear Cache">Clear Cache Data</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-3">
+                        <h5 class="card-header text-white bg-secondary text-white">
+                            <a class="text-decoration-none text-white" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#sitesettings" role="button" aria-expanded="false" aria-controls="sitesettings">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Site Settings
+                            </a>
+                        </h5>
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="sitesettings">
+                            <div class="card mb-3" style="width:auto;">
+                                <div class="card-header bg-default text-dark">
+                                    <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#duplicatenames" role="button" aria-expanded="false" aria-controls="duplicatenames">
+                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Allow Duplicate Names
+                                    </a>
+                                </div>
+                                <div class="collapse show card card-body @theme.ThemeStyle" id="duplicatenames">
+                                    <div class="mb-3">
+                                        <p>
+                                            By default, the Azure Naming Tool prevents duplicate resource names from being generated. This setting can be used to allow duplicate names.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="switch" title="Duplicate Names Allowed">
+                                            <input type="checkbox" checked="@duplicatenamesallowed" @oninput='args => SettingChanged(args, "duplicatenamesallowed")'>
+                                            <span class="slider round"></span>
+                                        </label>
+                                        <span class="align-text-top"> Enable</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-3" style="width:auto;">
+                                <div class="card-header bg-default text-dark">
+                                    <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#resourcetypeediting" role="button" aria-expanded="false" aria-controls="resourcetypeediting">
+                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Resource Type Editing
+                                    </a>
+                                </div>
+                                <div class="collapse show card card-body @theme.ThemeStyle" id="resourcetypeediting">
+                                    <div class="mb-3">
+                                        <p>
+                                            By default, Resource Type Validation is configured to match the Azure portal. These values can be overriden by enabling the following setting.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="switch" title="Resource Type Editing Enabled">
+                                            <input type="checkbox" checked="@resourcetypeeditingallowed" @oninput='args => SettingChanged(args, "resourcetypeeditingallowed")'>
+                                            <span class="slider round"></span>
+                                        </label>
+                                        <span class="align-text-top"> Enable</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mb-3" style="width:auto;">
+                                <div class="card-header bg-default text-dark">
+                                    <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#connectivitycheck" role="button" aria-expanded="false" aria-controls="connectivitycheck">
+                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Connectivity Check
+                                    </a>
+                                </div>
+                                <div class="collapse show card card-body @theme.ThemeStyle" id="connectivitycheck">
+                                    <div class="mb-3">
+                                        <p>
+                                            The Azure Naming Tool will verify the tool has internet connectivity to enable update features. Use this setting to disable the connectivity check functionality.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="switch" title="Connectivity Check Enabled">
+                                            <input type="checkbox" checked="@connectivitycheckenabled" @oninput='args => SettingChanged(args, "connectivitycheckenabled")'>
+                                            <span class="slider round"></span>
+                                        </label>
+                                        <span class="align-text-top"> Enable</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card mb-3" style="width:auto;">
+                                <div class="card-header bg-default text-dark">
+                                    <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#generationwebhook" role="button" aria-expanded="false" aria-controls="generationwebhook">
+                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Generation Webhook
+                                    </a>
+                                </div>
+                                <div class="collapse show card card-body @theme.ThemeStyle" id="generationwebhook">
+                                    <div class="mb-3">
+                                        <p>
+                                            The Azure Naming Tool can post generated names to a webhook. This can be used to integrate with other systems. Enter a valid URL below to save the webhook setting.
+                                        </p>
+                                        <p>
+                                            Generated names will be posted using the <strong><a href="https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/Models/GeneratedName.cs" target="_blank">GeneratedName</a></strong> JSON format.
+                                        </p>
+                                        <p>
+                                            <button type="button" class="btn btn-primary" @onclick="@(e => AdminFormAction("samplepost"))" title="Sample Post">Sample Post</button>
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input title="Generation Webhook" id="currentgenerationwebhook" class="form-control" type="text" @onchange="@((ui) => { SetFormValue("generationwebhook",(string)ui.Value);})" value="@currentgenerationwebhook" />
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-success w-auto" @onclick="@(e => AdminFormAction("generationwebhooksave"))" title="Save Generate Webhook">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div>
+                @if (!admin)
+                {
+                    <button type="button" class="btn btn-success" @onclick="@(e => AdminFormAction("login"))" title="Login">Login</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    protected ThemeInfo? theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
+    [CascadingParameter]
+    private IdentityProviderDetails? identityProviderDetails { get; set; }
+    private ServicesData servicesData = new();
+    private string? currentpassword;
+    private string? newpassword;
+    private string? currentapikey;
+    private string? currentidentityheadername;
+    private string? currentidentityprovider;
+    private ResponseMessage message = new();
+    private bool admin;
+    private bool versionalertshown = false;
+    private bool disabled = true;
+    private bool showversionalert = false;
+    private bool dismissalert = false;
+    private bool duplicatenamesallowed = false;
+    private bool connectivitycheckenabled = true;
+    private bool resourcetypeeditingallowed = false;
+    private string currentgenerationwebhook = string.Empty;
+    private string versionalert = string.Empty;
+    private string? appversion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+    private SiteConfiguration config = ConfigurationHelper.GetConfigurationData();
+    private string? currentuser;
+
+    protected override async void OnInitialized()
+    {
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        currentuser = await IdentityHelper.GetCurrentUser(session);
+        if (firstRender)
+        {
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, true);
+            var result = await session.GetAsync<bool>("admin");
+            admin = (bool)result.Value;
+            if (admin)
+            {
+                currentapikey = GeneralHelper.DecryptString(config.APIKey, config.SALTKey);
+                // Determine if the version notification has been dismissed
+                var resultVersionAlert = await session.GetAsync<bool>("versionalert-" + appversion + "-shown");
+                versionalertshown = resultVersionAlert.Success ? resultVersionAlert.Value : false;
+                versionalert = ConfigurationHelper.GetVersionAlert(true).Result;
+                if (versionalert != "")
+                {
+                    showversionalert = true;
+                }
+                duplicatenamesallowed = Convert.ToBoolean(ConfigurationHelper.GetAppSetting("DuplicateNamesAllowed"));
+                connectivitycheckenabled = Convert.ToBoolean(ConfigurationHelper.GetAppSetting("ConnectivityCheckEnabled"));
+                resourcetypeeditingallowed = Convert.ToBoolean(ConfigurationHelper.GetAppSetting("ResourceTypeEditingAllowed"));
+                currentgenerationwebhook = ConfigurationHelper.GetAppSetting("GenerationWebhook", true);
+                currentidentityheadername = ConfigurationHelper.GetAppSetting("IdentityHeaderName", true);
+                if (identityProviderDetails != null)
+                {
+                    if (!String.IsNullOrEmpty(identityProviderDetails.CurrentIdentityProvider))
+                    {
+                        currentidentityprovider = identityProviderDetails.CurrentIdentityProvider;
+                    }
+                }
+            }
+
+            await storage.SetAsync("apptheme", theme.ThemeStyle);
+            state.AppTheme = theme.ThemeStyle;
+
+            StateHasChanged();
+        }
+    }
+
+    private async void AdminFormAction(string action, int id = 0)
+    {
+        message = new ResponseMessage();
+        message.Header = "INFORMATION";
+        message.Type = MessageTypesEnum.INFORMATION;
+        ServiceResponse serviceResponse = new();
+        bool redirect = false;
+        bool confirm = false;
+
+        switch (action)
+        {
+            case "login":
+                // Check the password
+                if (currentpassword == GeneralHelper.DecryptString(config.AdminPassword, config.SALTKey))
+                {
+                    state.SetAdmin(true);
+                    await session.SetAsync("admin", true);
+                    await session.SetAsync("currentuser", "GlobalAdmin");
+                    // Load the current API Key
+                    currentapikey = GeneralHelper.DecryptString(config.APIKey, config.SALTKey);
+                    message.Type = MessageTypesEnum.INFORMATION;
+                    message.Header = "INFORMATION";
+                    message.Message = "Global Admin logged in.";
+                    admin = true;
+                    redirect = true;
+                }
+                else
+                {
+                    state.SetAdmin(false);
+                    await session.SetAsync("admin", false);
+                    message.Type = MessageTypesEnum.ERROR;
+                    message.Header = "ERROR";
+                    message.Message = "Login failed!";
+                }
+                break;
+            case "logout":
+                state.SetAdmin(false);
+                await session.SetAsync("admin", false);
+                message.Type = MessageTypesEnum.INFORMATION;
+                message.Header = "INFORMATION";
+                message.Message = "User Logged out.";
+                redirect = true;
+                break;
+            case "password":
+                bool confirmPassword = await JsRuntime.InvokeAsync<bool>("confirm", "This will change the Global Admin Password. Are you sure?");
+                if (confirmPassword)
+                {
+                    // Set the new admin password
+                    serviceResponse = await AdminService.UpdatePassword(newpassword);
+                    if (serviceResponse.Success)
+                    {
+                        message.Type = MessageTypesEnum.SUCCESS;
+                        message.Header = "SUCCESS";
+                        message.Message = "Global Admin Password updated!";
+                    }
+                    else
+                    {
+                        message.Type = MessageTypesEnum.ERROR;
+                        message.Header = "ERROR";
+                        message.Message = "There was a problem updating the Global Admin Password!";
+                    }
+                }
+                break;
+            case "identityheadernamesave":
+                bool confirmIdentityHeaderNameSave = await JsRuntime.InvokeAsync<bool>("confirm", "This will update the current Identity Header Name. Are you sure?");
+                if (confirmIdentityHeaderNameSave)
+                {
+                    serviceResponse = await AdminService.UpdateIdentityHeaderName(currentidentityheadername);
+                    if (serviceResponse.Success)
+                    {
+                        message.Type = MessageTypesEnum.SUCCESS;
+                        message.Header = "SUCCESS";
+                        message.Message = "Identity Header Name updated!";
+                    }
+                    else
+                    {
+                        message.Type = MessageTypesEnum.ERROR;
+                        message.Header = "ERROR";
+                        message.Message = "There was a problem updating the Identity Header Name!";
+                    }
+                }
+                break;
+            case "apikeysave":
+                bool confrimAPIKeySave = await JsRuntime.InvokeAsync<bool>("confirm", "This will update the current API Key. Are you sure?");
+                if (confrimAPIKeySave)
+                {
+                    serviceResponse = await AdminService.UpdateAPIKey(currentapikey);
+                    if (serviceResponse.Success)
+                    {
+                        message.Type = MessageTypesEnum.SUCCESS;
+                        message.Header = "SUCCESS";
+                        message.Message = "API Key updated!";
+                    }
+                    else
+                    {
+                        message.Type = MessageTypesEnum.ERROR;
+                        message.Header = "ERROR";
+                        message.Message = "There was a problem updating the API Key!";
+                    }
+                }
+                break;
+            case "apikeygenerate":
+                bool confrimAPIKeyGenerate = await JsRuntime.InvokeAsync<bool>("confirm", "This will generate a new API Key. Are you sure?");
+                if (confrimAPIKeyGenerate)
+                {
+                    serviceResponse = await AdminService.GenerateAPIKey();
+                    if (serviceResponse.Success)
+                    {
+                        currentapikey = serviceResponse.ResponseObject;
+                        message.Type = MessageTypesEnum.SUCCESS;
+                        message.Header = "SUCCESS";
+                        message.Message = "API Key updated!";
+                    }
+                    else
+                    {
+                        message.Type = MessageTypesEnum.ERROR;
+                        message.Header = "ERROR";
+                        message.Message = "There was a problem generating the API Key!";
+                    }
+                }
+                break;
+            case "generationwebhooksave":
+                bool confirmGenerationWebhook = await JsRuntime.InvokeAsync<bool>("confirm", "This will update the current Generation Webhook. Are you sure?");
+                if (confirmGenerationWebhook)
+                {
+                    if (currentgenerationwebhook != "")
+                    {
+                        if (!Uri.IsWellFormedUriString(currentgenerationwebhook, UriKind.Absolute))
+                        {
+                            message.Header = "ERROR";
+                            message.Type = MessageTypesEnum.ERROR;
+                            message.Message = "You must enter a valid URL!";
+                            break;
+                        }
+                    }
+                    ConfigurationHelper.SetAppSetting("GenerationWebhook", currentgenerationwebhook, true);
+                    message.Type = MessageTypesEnum.SUCCESS;
+                    message.Header = "SUCCESS";
+                    message.Message = "Generation Webhook configuration saved!";
+                }
+                break;
+            case "clearcache":
+                CacheHelper.ClearAllCache();
+                message.Type = MessageTypesEnum.SUCCESS;
+                message.Header = "SUCCESS";
+                message.Message = "Cache cleared!";
+                break;
+            case "viewcachedata":
+                string cachedata = CacheHelper.GetAllCacheData();
+                await ShowInformationModal("bg-navcolor", "Cache Data", "<p>This is the current cache data.</p>" + cachedata);
+                break;
+            case "samplepost":
+                string webhookdata = await FileSystemHelper.ReadFile("samplewebhookdata.json", "");
+                await ShowInformationModal("bg-navcolor", "Sample Post", "<p>This is a sample Generation Webhook post.</p><code style=\"display: block; white-space: pre-wrap;\">" + webhookdata + "</code>");
+                break;
+
+            case "adminuseradd":
+                ShowAddModal(id, "AdminUser", "Add Admin User", "<p>Add an Admin User.</p>");
+                break;
+            case "adminuserdelete":
+                confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+                if (confirm)
+                {
+                    serviceResponse = await AdminUserService.DeleteItem(Convert.ToInt32(id));
+                    if (serviceResponse.Success)
+                    {
+                        message.Type = MessageTypesEnum.SUCCESS;
+                        message.Message = "Admin User deleted!";
+                    }
+                    else
+                    {
+                        message.Type = MessageTypesEnum.ERROR;
+                        message.Message = "Admin User deletion failed!";
+                        message.MessageDetails = serviceResponse.ResponseMessage;
+                    }
+                }
+                break;
+        }
+
+        config = ConfigurationHelper.GetConfigurationData();
+
+        if (message.Message != null)
+        {
+            switch (message.Type)
+            {
+                case MessageTypesEnum.INFORMATION:
+                    toastService.ShowInfo(message.Message);
+                    break;
+                case MessageTypesEnum.SUCCESS:
+                    toastService.ShowSuccess(message.Message);
+                    break;
+                case MessageTypesEnum.WARNING:
+                    toastService.ShowWarning(message.Message);
+                    break;
+                case MessageTypesEnum.ERROR:
+                    toastService.ShowError(message.Message);
+                    break;
+            }
+            AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message, Source = currentuser });
+        }
+
+
+        servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+        state.SetNavReload(true);
+        StateHasChanged();
+
+        if (redirect)
+        {
+            if (admin)
+            {
+                NavigationManager.NavigateTo(NavigationManager.Uri, true);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/", true);
+            }
+        }
+
+    }
+
+    private void SetFormValue(string type, string value)
+    {
+        switch (type)
+        {
+            case "login":
+                currentpassword = value;
+                break;
+            case "password":
+                newpassword = value;
+                // Validate the password complexity
+                if (ValidationHelper.ValidatePassword(newpassword))
+                {
+                    disabled = false;
+                }
+                else
+                {
+                    disabled = true;
+                }
+                break;
+            case "identityheadername":
+                currentidentityheadername = value;
+                break;
+            case "apikey":
+                currentapikey = value;
+                break;
+            case "generationwebhook":
+                currentgenerationwebhook = value;
+                break;
+        }
+    }
+
+    private async void SettingChanged(ChangeEventArgs e, string setting)
+    {
+        message = new ResponseMessage();
+        message.Header = "INFORMATION";
+        message.Type = MessageTypesEnum.INFORMATION;
+        try
+        {
+            if (e.Value != null)
+            {
+                switch (setting)
+                {
+                    case "duplicatenamesallowed":
+                        ConfigurationHelper.SetAppSetting("DuplicateNamesAllowed", e.Value.ToString());
+                        message.Message = "Duplicate Names Allowed setting updated to " + e.Value.ToString().ToUpper() + "!";
+                        break;
+                    case "connectivitycheckenabled":
+                        ConfigurationHelper.SetAppSetting("ConnectivityCheckEnabled", e.Value.ToString());
+                        message.Message = "Connectivity Check Enabled setting updated to " + e.Value.ToString().ToUpper() + "!";
+                        // Update the tool connection setting to true, if the connecvity check is disabled. This will cause the stie to always assume there is connectivity and attempt external connections.
+                        if (!(bool)e.Value)
+                        {
+                            CacheHelper.SetCacheObject("isconnected", true);
+                        }
+                        else
+                        {
+                            CacheHelper.InvalidateCacheObject("isconnected");
+                        }
+                        if (!(bool)e.Value)
+                        {
+                            await ShowInformationModal("bg-danger", "ATTENTION", "<p>Disabling this setting may result in connectivity errors being logged to the Admin Log.<p>");
+                        }
+
+                        break;
+                    case "resourcetypeeditingallowed":
+                        ConfigurationHelper.SetAppSetting("ResourceTypeEditingAllowed", e.Value.ToString());
+                        message.Message = "Resource Type Editing Allowed setting updated to " + e.Value.ToString().ToUpper() + "!";
+                        if ((bool)e.Value)
+                        {
+                            await ShowInformationModal("bg-danger", "ATTENTION", "<p>Disabling this setting may result in name generation that will fail regex validation for the resource type.</p><p>Please use caution when editing Resource Type validation settings.");
+                        }
+                        break;
+                }
+                message.Type = MessageTypesEnum.SUCCESS;
+                message.Header = "SUCCESS";
+            }
+            else
+            {
+                message.Message = "There was a problem updating the setting!";
+                message.Header = "ERROR";
+            }
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            message.Message = "There was a problem updating the setting!";
+            message.Header = "ERROR";
+        }
+
+        if (message.Message != null)
+        {
+            switch (message.Type)
+            {
+                case MessageTypesEnum.INFORMATION:
+                    toastService.ShowInfo(message.Message);
+                    break;
+                case MessageTypesEnum.SUCCESS:
+                    toastService.ShowSuccess(message.Message);
+                    break;
+                case MessageTypesEnum.WARNING:
+                    toastService.ShowWarning(message.Message);
+                    break;
+                case MessageTypesEnum.ERROR:
+                    toastService.ShowError(message.Message);
+                    break;
+            }
+            AdminLogService.PostItem(new AdminLogMessage() { Title = message.Type.ToString(), Message = message.Message, Source = currentuser });
+        }
+
+        servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+        state.SetNavReload(true);
+        StateHasChanged();
+    }
+
+    private async Task OnConfigurationAlertDismissed()
+    {
+        await session.SetAsync("versionalert-" + appversion + "-shown", true);
+        if (dismissalert)
+        {
+            ConfigurationHelper.DismissVersionAlert();
+        }
+    }
+
+    async Task ShowInformationModal(string headerstyle, string title, string message)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(InformationModal.message), message);
+        parameters.Add(nameof(InformationModal.title), title);
+        parameters.Add(nameof(InformationModal.headerstyle), headerstyle);
+        parameters.Add("theme", theme);
+
+        var options = new ModalOptions()
+            {
+                HideCloseButton = true,
+                UseCustomLayout = true
+            };
+
+        var modal = Modal.Show<InformationModal>(title, parameters, options);
+        var result = await modal.Result;
+        if (!result.Cancelled)
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Admin");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "adminconfigurationinstructions");
+            parameters.Add(nameof(InformationModal.admin), admin);
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+        }
+    }
+
+    async void ShowAddModal(int id, string type, string title, string message, string parentcomponent = "")
+    {
+        var parameters = new ModalParameters();
+        parameters.Add(nameof(AddModal.id), id);
+        parameters.Add(nameof(AddModal.type), type);
+        parameters.Add(nameof(AddModal.message), message);
+        parameters.Add(nameof(AddModal.title), title);
+        if (parentcomponent != null)
+        {
+            parameters.Add(nameof(AddModal.parentcomponent), parentcomponent);
+        }
+        parameters.Add(nameof(AddModal.servicesData), servicesData);
+        parameters.Add("theme", theme);
+
+        var options = new ModalOptions()
+            {
+                HideCloseButton = true,
+                UseCustomLayout = true
+            };
+
+        var modal = Modal.Show<AddModal>(title, parameters, options);
+        var result = await modal.Result;
+        if (!result.Cancelled)
+        {
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, admin);
+            state.SetNavReload(true);
+            StateHasChanged();
+        }
+    }
+}

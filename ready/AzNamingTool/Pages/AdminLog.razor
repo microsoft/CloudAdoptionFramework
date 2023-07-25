@@ -20,8 +20,18 @@
 <PageTitle>Azure Naming Tool - Admin Log</PageTitle>
 <div class="card  @theme.ThemeStyle">
     <div class="card-body">
-        <h1>Admin Log</h1>
-        <div class="mb-3">This page displays a log of admin/configuration changes.</div>
+        <div style="float:left;">
+            <h1>
+                Admin Log
+            </h1>
+        </div>
+        <div style="float:right;">
+            <button class="btn btn-secondary" title="Instructions" @onclick="@(e => ShowInstructionsModal())">
+                <span class="oi oi-document" aria-hidden="true"></span> Documentation
+            </button>
+        </div>
+        <div style="clear:both;"></div>
+        <div class="mb-3">This page displays a log of Admin/Configuration changes.</div>
 
 
         @if (!dataLoaded)
@@ -32,7 +42,7 @@
         }
         else
         {
-            <div class="mb-3">
+            <div>
                 @if (lstAdminLogMessages.Count > 0)
                 {
                     <div class="mb-3">
@@ -43,13 +53,13 @@
                             Purge Admin Log
                         </button>
                     </div>
-                    <div class="card">
-                        <div class="card-header bg-default text-black">
-                            <a class="text-decoration-none text-dark" data-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
-                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter
+                    <div class="card mb-3">
+                        <div class="card-header bg-default text-dark">
+                            <a class="text-decoration-none text-dark" data-bs-toggle="collapse" style="display:block;font-weight:bold;" href="#filter" role="button" aria-expanded="false" aria-controls="filter">
+                                <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Filter Data
                             </a>
                         </div>
-                        <div class="collapse card card-body @theme.ThemeStyle" id="filter">
+                        <div class="collapse show card card-body @theme.ThemeStyle" id="filter">
                             <div class="form-group row mb-3">
                                 <div style="width:auto;">
                                     <input class="form-control" type="date" style="width: 150px;" @bind="startdate" @bind:event="oninput" />
@@ -61,13 +71,13 @@
                                     <input class="form-control" type="date" style="width: 150px;" @bind="enddate" @bind:event="oninput" />
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <div class="input-group flex-nowrap mb-3">
-                                    <div class="input-group flex-nowrap mb-3">
+                            <div class="form-group row mb-3">
+                                <div class="input-group flex-nowrap">
+                                    <div class="input-group flex-nowrap">
                                         <span class="input-group-text" id="addon-wrapping">
                                             <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
                                         </span>
-                                        <input class="form-control" type="search" placeholder="Filter by Title, Message"
+                                        <input class="form-control" type="search" placeholder="Filter by Source, Title, Message"
                                        @bind="filterData"
                                        @bind:event="oninput">
                                     </div>
@@ -87,6 +97,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Created On</th>
+                                    <th scope="col">Source</th>
                                     <th scope="col">Title</th>
                                     <th scope="col">Message</th>
                                 </tr>
@@ -99,6 +110,9 @@
                                     <tr>
                                         <td class="align-top">
                                             @message.CreatedOn.ToString()
+                                        </td>
+                                        <td class="align-top">
+                                            @message.Source
                                         </td>
                                         <td class="align-top">
                                             @message.Title
@@ -127,6 +141,8 @@
 
     [CascadingParameter]
     protected ThemeInfo? theme { get; set; }
+    [CascadingParameter]
+    public IModalService Modal { get; set; }
     private bool admin;
     private bool dataLoaded = false;
     List<AdminLogMessage> lstAdminLogMessages = new();
@@ -140,16 +156,15 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        ServiceResponse serviceResponse = new();
-        var result = await session.GetAsync<bool>("admin");
-        admin = (bool)result.Value;
-        if (!admin)
-        {
-            NavigationManager.NavigateTo("/");
-        }
-
         if (firstRender)
         {
+            var result = await session.GetAsync<bool>("admin");
+            admin = (bool)result.Value;
+            if (!admin)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+            ServiceResponse serviceResponse = new();
             serviceResponse = await AdminLogService.GetItems();
             lstAdminLogMessages = (List<AdminLogMessage>)serviceResponse.ResponseObject;
 
@@ -176,10 +191,10 @@
         confirm = await JsRuntime.InvokeAsync<bool>("confirm", "This will purge the Admin Log. Are you sure?");
         if (confirm)
         {
-            await AdminLogService.DeleteAllItems();
-            toastService.ShowSuccess("Admin Log purged!", "SUCCESS");
-            AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Admin Log log purged." });
-            GeneralHelper.InvalidateCacheObject("AdminLogMessage");
+            await LogHelper.PurgeAdminLog();
+            toastService.ShowSuccess("Admin Log purged!");
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "INFORMATION", Message = "Admin Log purged." });
+            CacheHelper.InvalidateCacheObject("AdminLogMessage");
             serviceResponse = await AdminLogService.GetItems();
             lstAdminLogMessages = (List<AdminLogMessage>)serviceResponse.ResponseObject;
             dataLoaded = true;
@@ -209,7 +224,7 @@
 
         if (!string.IsNullOrEmpty(filterData))
         {
-            if ((!message.Title.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!message.Message.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+            if ((!message.Source.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!message.Title.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!message.Message.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
                 visible = false;
         }
         return visible;
@@ -220,5 +235,30 @@
         startdate = DateTime.Today.AddDays(-30);
         enddate = DateTime.Today;
         filterData = "";
+    }
+    
+    private async void ShowInstructionsModal()
+    {
+        try
+        {
+            var parameters = new ModalParameters();
+            parameters.Add(nameof(InformationModal.message), null);
+            parameters.Add(nameof(InformationModal.title), "Admin Log");
+            parameters.Add(nameof(InformationModal.headerstyle), "bg-navcolor");
+            parameters.Add(nameof(InformationModal.component), "adminloginstructions");
+            parameters.Add("theme", theme);
+
+            var options = new ModalOptions()
+                {
+                    HideCloseButton = true,
+                    UseCustomLayout = true
+                };
+
+            var modal = Modal.Show<InformationModal>("Instructions", parameters, options);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+        }
     }
 }

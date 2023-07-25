@@ -1,0 +1,48 @@
+﻿@using AzureNamingTool.Models;
+<p>
+    The <strong>Generate Names Log</strong> displays all names generated using the Azure Naming Tool, along with the selected components.
+</p>
+@if (admin)
+{
+    <p>
+        <img style="width:600px;" class="img-fluid" src="Screenshots/GeneratedNamesLogAdmin.png" alt="Generated Names Log" />
+    </p>
+}
+else
+{
+    <p>
+        <img style="width:600px;" class="img-fluid" src="Screenshots/GeneratedNamesLog.png" alt="Generated Names Log" />
+    </p>
+}
+<div class="card">
+    <h5 class="card-header bg-default text-dark">
+        Page Sections/Actions
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <div class="card">
+            <div class="card-body">
+                <h5>Export Generated Names Log</h5>
+                <p>
+                    This functionality allows the generated names to be exported to a CSV file. The <strong>Filter</strong> option can be used to specify the names exported.
+                </p>
+            </div>
+        </div>
+        @if (admin)
+        {
+            <div class="card">
+                <div class="card-body">
+                    <h5>Purge Generated Names Log</h5>
+                    <p>
+                        This option will delete all <strong>Generated Names Log</strong> data. This action cannot be undone!
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+}

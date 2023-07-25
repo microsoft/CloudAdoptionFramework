@@ -1,0 +1,200 @@
+﻿@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models
+@using AzureNamingTool.Services
+@using Microsoft.AspNetCore.Html
+@inject IToastService toastService
+@inject StateContainer state
+@inject IJSRuntime JsRuntime
+
+<div class="modal fade show d-block" tabindex="-1" role="dialog">
+    <div class="modal-backdrop fade show" @onclick="Save"></div>
+    <div class="modal-dialog" style="z-index: 1050; max-width: 700px;">
+        <!-- Pop it above the backdrop -->
+        <div class="modal-content @theme.ThemeStyle">
+            <div class="modal-header bg-navcolor text-white">
+                <h3 class="modal-title">Select Resource Types</h3>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Select the resource types.
+                </p>
+
+                <div class="form-group row mt-3">
+                    <div class="input-group flex-nowrap">
+                        <div class="input-group flex-nowrap mb-3">
+                            <span class="input-group-text" id="addon-wrapping">
+                                <span class="oi oi-magnifying-glass" id="addon-wrapping"></span>
+                            </span>
+                            <input class="form-control" type="search" placeholder="Filter by Name, Short Name"
+                                   @bind="filterData"
+                                   @bind:event="oninput">
+                        </div>
+                    </div>
+                </div>
+
+                <div class=" card @theme.ThemeStyle mb-3">
+                    <h5 class="card-header text-white bg-secondary text-white">
+                        <a id="ResourceDelimiter" class="link-light text-decoration-none" data-bs-toggle="collapse" style="display:block;" href="#resourcetypes" role="button" aria-expanded="false" aria-controls="resourcetypes">
+                            <span class="oi oi-chevron-bottom" aria-hidden="true"></span> Resource Types
+                        </a>
+                    </h5>
+                    <div class="collapse show card card-body @theme.ThemeStyle" id="resourcetypes">
+                        @foreach (var category in categories)
+                        {
+                            if (!IsCategoryVisible(category))
+                                continue;
+                            <div id="@("multitypecontainer_"+@category)" class="card mb-3">
+                                <div class="card-header bg-default text-dark">
+                                    <a id="NamingGuidlines" class="link-dark text-decoration-none" data-bs-toggle="collapse" href="@("#multitypesection_"+@category)" role="button" aria-expanded="false" aria-controls="@("multitypesection_"+@category)">
+                                        <span class="oi oi-chevron-bottom" aria-hidden="true"></span> @category
+                                    </a>
+                                </div>
+                                <div class="collapse show card card-body @theme.ThemeStyle" id="@("multitypesection_"+@category)">
+                                    <ul style="list-style-type: none;word-break: break-word;">
+                                        @foreach (var resourceType in ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, category))
+                                        {
+                                            if (!IsTypeVisible(resourceType))
+                                                continue;
+                                            <li>
+                                                <div class="form-check">
+                                                    @if (multiselectedResourceTypes.Contains(resourceType.Id.ToString()))
+                                                    {
+                                                        <input class="form-check-input" type="checkbox" checked value="@resourceType.Id" id="@("multitype_"+@resourceType.Id)" @onchange="eventArgs => { OnMultiTypesChange(resourceType.Id.ToString(), eventArgs.Value); }">
+                                                    }
+                                                    else
+                                                    {
+                                                        <input class="form-check-input" type="checkbox" value="@resourceType.Id" id="@("multitype_"+@resourceType.Id)" @onchange="eventArgs => { OnMultiTypesChange(resourceType.Id.ToString(), eventArgs.Value); }">
+                                                    }
+                                                    @if (resourceType.Property != "")
+                                                    {
+                                                        <label class="form-check-label" for="flexCheckDefault">
+                                                            @resourceType.Resource - @resourceType.Property (@resourceType.ShortName)
+                                                        </label>
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class="form-check-label" for="flexCheckDefault">
+                                                            @resourceType.Resource (@resourceType.ShortName)
+                                                        </label>
+                                                    }
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button title="Close" @onclick="Save" class="btn btn-success">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+    [Parameter] public ThemeInfo theme { get; set; }
+    [Parameter] public string title { get; set; }
+    [Parameter] public string message { get; set; }
+    [Parameter] public List<string> multiselectedResourceTypes { get; set; }
+
+    private ServicesData servicesData = new();
+    private List<string> categories = new();
+    public string filterData { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SetServicesData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (servicesData == null)
+        {
+            await SetServicesData();
+        }
+    }
+
+    private async Task SetServicesData()
+    {
+        try
+        {
+            servicesData = await ServicesHelper.LoadServicesData(servicesData, false);
+            List<ResourceType> filteredtypes = new List<ResourceType>();
+            // Filter out the types w/o the scope
+            foreach (ResourceType type in servicesData.ResourceTypes)
+            {
+                filteredtypes.Add(type);
+            }
+            servicesData.ResourceTypes = filteredtypes;
+
+            // Get the list of categories
+            categories = ResourceTypeService.GetTypeCategories(servicesData.ResourceTypes);
+        }
+        catch (Exception ex)
+        {
+            AdminLogService.PostItem(new AdminLogMessage() { Title = "ERROR", Message = ex.Message });
+            toastService.ShowError("There was a problem loading the page. Please try again");
+        }
+    }
+
+    private async void OnMultiTypesChange(string aSelectedId, object aChecked)
+    {
+        if ((bool)aChecked)
+        {
+            if (!multiselectedResourceTypes.Contains(aSelectedId))
+            {
+                multiselectedResourceTypes.Add(aSelectedId);
+            }
+        }
+        else
+        {
+            if (multiselectedResourceTypes.Contains(aSelectedId))
+            {
+                multiselectedResourceTypes.Remove(aSelectedId);
+            }
+        }
+        StateHasChanged();
+    }
+
+    async void Save()
+    {
+        await ModalInstance.CloseAsync(ModalResult.Ok(multiselectedResourceTypes));
+    }
+
+    public bool IsTypeVisible(ResourceType type)
+    {
+        bool visible = true;
+
+        if (!string.IsNullOrEmpty(filterData))
+        {
+            if ((!type.Resource.Contains(filterData, StringComparison.OrdinalIgnoreCase)) && (!type.ShortName.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+                visible = false;
+        }
+        return visible;
+    }
+
+    public bool IsCategoryVisible(string category)
+    {
+        bool visible = true;
+        bool typevisible = false;
+
+        if (!string.IsNullOrEmpty(filterData))
+        {
+            // Gett all the types for the category
+            @foreach (var type in ResourceTypeService.GetFilteredResourceTypes(servicesData.ResourceTypes, category))
+            {
+                if ((type.Resource.Contains(filterData, StringComparison.OrdinalIgnoreCase)) || (type.ShortName.Contains(filterData, StringComparison.OrdinalIgnoreCase)))
+                {
+                    typevisible = true;
+                }
+            }
+            visible = typevisible;
+        }
+        return visible;
+    }
+}

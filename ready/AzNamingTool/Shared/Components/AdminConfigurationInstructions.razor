@@ -1,0 +1,116 @@
+﻿@using AzureNamingTool.Models;
+<p>
+    The <strong>Admin</strong> utility allows the user to view version information, configure site settings, update passwords/keys, and clear the site cache.
+</p>
+<p>
+    <img style="width:600px;" class="img-fluid" src="Screenshots/AdminConfiguration.png" alt="Admin configuration" />
+</p>
+<div class="card">
+    <h5 class="card-header bg-default text-dark">
+        Page Sections/Actions
+    </h5>
+    <div class="card card-body @theme.ThemeStyle">
+        <div class="card">
+            <div class="card-body">
+                <h5>Version Details</h5>
+                <p>This section displays the current tool version, along with any version alerts.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5>Admin Password</h5>
+                <p>This section allows you to update the <strong>Admin password</strong> for the tool.</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5>Identity Settings</h5>
+                <div>
+                    <p>This section allows for the configuration of the identity settings, if using an Identity provider for Authentication.</p>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong>Identity Header Name</strong>
+                            <p>
+                                This setting is used to identify site users when authenticating using an Identity provider. Authentication using an Identity provider will often inject headers into the request. The site will check for the specified header name and assign the value as the user's identity. This value will be used to log user activity.
+                            </p>
+                            <p>The process to use this setting is:</p>
+                            <ol class="mb-3">
+                                <li>Implement authentication where the site is hosted. If hosting in Azure App Services, you can view a tutorial <a href="https://learn.microsoft.com/en-us/azure/app-service/scenario-secure-app-authentication-app-service" target="_blank"><strong>here</strong></a>.</li>
+                                <li>Determine the <strong>header name</strong> that contains your desired user identifier (email, name, GUID, etc.). This may be different, depending on the Identity provider you use.</li>
+                                <li> Enter the header name in the <strong>Identity Header Name</strong> setting.</li>
+                            </ol>
+                            <p class="alert alert-info" role="alert">
+                                <strong>NOTE</strong><br />
+                                The Azure Naming Tool is configured for <strong><a href="https://learn.microsoft.com/en-us/azure/app-service/overview-authentication-authorization" target="_blank">Azure App Service Authentication</a></strong> using the <a href="https://learn.microsoft.com/en-us/azure/app-service/configure-authentication-user-identities#access-user-claims-in-app-code" target="_blank"><strong>X-MS-CLIENT-PRINCIPAL-NAME</strong></a> header name. If using a different Identity provider, update the setting to the header name that contains the user's id.
+                            </p>
+                        </li>
+                        <li>
+                            <strong>Admin Users</strong>
+                            <p>
+                                When using an Identity provider, the <strong>Identity Header Name</strong> setting can be used to identify site users. Enter the user id below to assign the user as an <strong>Admin</strong> for the Azure Naming Tool.
+                            </p>
+                            <p>
+                                Enter the user id (as determined by the <strong>Identity Header Name</strong> setting above) for each Admin user.
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5>API Key</h5>
+                <p>
+                    The Azure Naming Tool provides a RESTful API. Each API function requires an <strong>API Key</strong> to be provided. This section provides the ability to view/update the API Key for the tool.
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5>Clear Cache</h5>
+                <p>
+                    The Azure Naming Tool leverages caching to improve perofrmance. This section provides the ability to clear all cached data for the tool.
+                </p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h5>Site Settings</h5>
+                <div>
+                    <p>This section allows for the configuration of site settings.</p>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong>Allow Duplicate Names</strong>
+                            <p>
+                                By default, the Azure Naming Tool prevents duplicate resource names from being generated. This setting can be used to allow duplicate names.
+                            </p>
+                        </li>
+                        <li>
+                            <strong>Connectivity Check</strong>
+                            <p>
+                                The Azure Naming Tool will verify the tool has internet connectivity to enable update features. Use this setting to disable the connectivity check functionality.
+                            </p>
+                            <p class="alert alert-danger">
+                                <strong>NOTE</strong><br />
+                                Disabling this setting may result in connectivity errors being logged to the Admin Log.
+                            </p>
+                        </li>
+                        <li>
+                            <strong>Generation Webhook</strong>
+                            <p>
+                                The Azure Naming Tool can post generated names to a webhook. This can be used to integrate with other systems. Enter a valid URL below to save the webhook setting.
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ThemeInfo? theme { get; set; }
+    [Parameter]
+    public bool admin { get; set; } = false;
+}

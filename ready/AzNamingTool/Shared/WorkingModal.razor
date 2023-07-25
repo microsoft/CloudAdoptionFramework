@@ -1,0 +1,49 @@
+﻿@using AzureNamingTool.Helpers
+@using AzureNamingTool.Models;
+@inject StateContainer state
+@inject ProtectedSessionStorage session
+@inject IToastService toastService
+@inject ILogger<PasswordModal> Logger
+
+<div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);"
+     aria-modal="true" role="dialog">
+    <div class="modal-backdrop fade show" @onclick="Cancel"></div>
+    <div class="modal-dialog" style="z-index: 1050">
+        <div class="modal-content @state.AppTheme">
+            <div class="modal-body mx-auto">
+                <div class="p-5 text-center">
+                    @if (!String.IsNullOrEmpty(message))
+                    {
+                        <p class="p-3" style="font-style:italic;">
+                            @message
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="p-3" style="font-style:italic;">
+                            Working....
+                        </p>
+                    }
+                    <img class="p-3" src="/images/loading-buffering.gif" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private bool disabled = true;
+
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
+    [Parameter] public string? message { get; set; }
+
+    private Task Cancel()
+    {
+        return OnClose.InvokeAsync(false);
+    }
+
+    private async Task ModalSave()
+    {
+    }
+}

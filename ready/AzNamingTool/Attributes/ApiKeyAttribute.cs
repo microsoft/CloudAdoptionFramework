@@ -20,7 +20,7 @@ namespace AzureNamingTool.Attributes
                 return;
             }
 
-            var config = GeneralHelper.GetConfigurationData();
+            var config = ConfigurationHelper.GetConfigurationData();
 
             //var appSettings = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
 

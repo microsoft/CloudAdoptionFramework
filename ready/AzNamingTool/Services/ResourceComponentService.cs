@@ -1,6 +1,7 @@
 ﻿using AzureNamingTool.Helpers;
 using AzureNamingTool.Models;
 using System.Net.WebSockets;
+using System.Security.AccessControl;
 
 namespace AzureNamingTool.Services
 {
@@ -12,7 +13,7 @@ namespace AzureNamingTool.Services
         {
             try
             {
-                var items = await GeneralHelper.GetList<ResourceComponent>();
+                var items = await ConfigurationHelper.GetList<ResourceComponent>();
                 if (!admin)
                 {
                     serviceResponse.ResponseObject = items.Where(x => x.Enabled == true).OrderBy(y => y.SortOrder).ToList();
@@ -37,7 +38,7 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var data = await GeneralHelper.GetList<ResourceComponent>();
+                var data = await ConfigurationHelper.GetList<ResourceComponent>();
                 var item = data.Find(x => x.Id == id);
                 serviceResponse.ResponseObject = item;
                 serviceResponse.Success = true;
@@ -50,13 +51,13 @@ namespace AzureNamingTool.Services
             }
             return serviceResponse;
         }
-        
+
         public static async Task<ServiceResponse> PostItem(ResourceComponent item)
         {
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceComponent>();
+                var items = await ConfigurationHelper.GetList<ResourceComponent>();
 
                 // Set the new id
                 if (item.Id == 0)
@@ -79,7 +80,7 @@ namespace AzureNamingTool.Services
                     if (items.Exists(x => x.Id == item.Id))
                     {
                         // Remove the updated item from the list
-                        var existingitem = items.Find(x => x.Id == item.Id);
+                        var existingitem = items.Find(x => (x.Id == item.Id));
                         int index = items.IndexOf(existingitem);
                         items.RemoveAt(index);
                     }
@@ -94,7 +95,7 @@ namespace AzureNamingTool.Services
                     // Check for the new sort order
                     if (items.Exists(x => x.SortOrder == item.SortOrder))
                     {
-                        // Remove the updated item from the list
+                        // Insert the new item
                         items.Insert(items.IndexOf(items.FirstOrDefault(x => x.SortOrder == item.SortOrder)), item);
                     }
                     else
@@ -114,11 +115,12 @@ namespace AzureNamingTool.Services
                 foreach (ResourceComponent thisitem in items.OrderBy(x => x.SortOrder).OrderByDescending(x => x.Enabled).ToList())
                 {
                     thisitem.SortOrder = position;
+                    thisitem.Id = position;
                     position += 1;
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(items);
+                await ConfigurationHelper.WriteList<ResourceComponent>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -135,14 +137,38 @@ namespace AzureNamingTool.Services
             try
             {
                 // Get list of items
-                var items = await GeneralHelper.GetList<ResourceComponent>();
+                var items = await ConfigurationHelper.GetList<ResourceComponent>();
                 // Get the specified item
                 var item = items.Find(x => x.Id == id);
 
+                // Delete any resource type settings for the component
+                List<string> currentvalues = new();
+                serviceResponse = await ResourceTypeService.GetItems();
+                List<Models.ResourceType> resourceTypes = (List<Models.ResourceType>)serviceResponse.ResponseObject;
+                foreach (Models.ResourceType currenttype in resourceTypes)
+                {
+                    currentvalues = new List<string>(currenttype.Optional.Split(','));
+                    if (currentvalues.Contains(GeneralHelper.NormalizeName(item.Name, false)))
+                    {
+                        currentvalues.Remove(GeneralHelper.NormalizeName(item.Name, false));
+                        currenttype.Optional = String.Join(",", currentvalues.ToArray());
+                    }
+
+                    currentvalues = new List<string>(currenttype.Exclude.Split(','));
+                    if (currentvalues.Contains(GeneralHelper.NormalizeName(item.Name, false)))
+                    {
+                        currentvalues.Remove(GeneralHelper.NormalizeName(item.Name, false));
+                        currenttype.Exclude = String.Join(",", currentvalues.ToArray());
+                    }
+
+                    await ResourceTypeService.PostItem(currenttype);
+                }
+
+
                 // Delete any custom components for this resource component
-                var components = await GeneralHelper.GetList<CustomComponent>();
+                var components = await ConfigurationHelper.GetList<CustomComponent>();
                 components.RemoveAll(x => x.ParentComponent == GeneralHelper.NormalizeName(item.Name, true));
-                await GeneralHelper.WriteList<CustomComponent>(components);
+                await ConfigurationHelper.WriteList<CustomComponent>(components);
 
                 // Remove the item from the collection
                 items.Remove(item);
@@ -152,11 +178,12 @@ namespace AzureNamingTool.Services
                 foreach (ResourceComponent thisitem in items.OrderBy(x => x.SortOrder).ToList())
                 {
                     thisitem.SortOrder = position;
+                    thisitem.Id = position;
                     position += 1;
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(items);
+                await ConfigurationHelper.WriteList<ResourceComponent>(items);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)
@@ -213,7 +240,7 @@ namespace AzureNamingTool.Services
                 }
 
                 // Write items to file
-                await GeneralHelper.WriteList<ResourceComponent>(newitems);
+                await ConfigurationHelper.WriteList<ResourceComponent>(newitems);
                 serviceResponse.Success = true;
             }
             catch (Exception ex)

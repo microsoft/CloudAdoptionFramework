@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "version": "2.5.0",
+    "alert": "<p><strong>IMPORTANT NOTE</strong></p><p>The V2.5.0 update removes GLOBALLY OPTIONAL functionality for components. The update contains new functionality that allows a component to be ADDED/REMOVED as OPTIONAL/EXLCUDE for all resource types.</p><p>To migrate existing GLOBALLY OPTIONAL components:</p><ul><li>On the Configuration page, click the Edit button for the component you wish to migrate.</li><li>Expand the Globally Optional Configuration section.</li><li>Click ADD to add the component as OPTIONAL for all resource types.</li></ul>"
+  },
+  {
+    "id": 2,
+    "version": "2.8.0",
+    "alert": "<p><strong>IMPORTANT NOTES</strong></p><ul><li class=\"mb-3\">The Azure Naming Tool will moving to a new GitHub repo in the next version! This change will allow us more frequent updates, enhanced features, and the ability to request new features and report bugs.<br /><br /><a href=\"https://github.com/microsoft/CloudAdoptionFramework/blob/master/ready/AzNamingTool/docs/V3REPOSITORYMIGRATION.md\" target=\"_blank\"><strong>View the Azure Naming Tool V3 Migration Guide</strong></a></li><li class=\"mb-3\">You can learn more about the new Identity Provider Integration <a href=\"https://soltisweb.com/blog/detail/2023-06-azurenamingtool-identityproviderintegrationdeepdive\" target=\"_blank\"><strong>HERE</strong></a>.</ul>"
+  }
+]
