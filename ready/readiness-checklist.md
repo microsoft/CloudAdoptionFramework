@@ -1,1 +1,0 @@
-The [Ready checklist](https://learn.microsoft.com/azure/cloud-adoption-framework/ready/) is a series of articles that will help you prepare your Azure environment for cloud adoption through actionable guidance. 
