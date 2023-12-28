@@ -45,7 +45,7 @@
     "Policy_CostCenter_Tag":		"Append CostCenter TAG & its value from the Resource Group"
     "LocalAdmin-Username":			"KeyVault-Secret LocalAdmin Username"
     "Local-Admin-Password":			"KeyVault-Secret LocalAdmin Password"
-    "KeyVault-user-id":			"AAD object ID of the user that requires access to Key Vault."
+    "KeyVault-user-id":			"Microsoft Entra object ID of the user that requires access to Key Vault."
 	"LogAnalytics_DataRetention":		"Number of days data will be retained in Log Analytics"
     "LogAnalytics_Location":		"Region to use when establishing the workspace"
 

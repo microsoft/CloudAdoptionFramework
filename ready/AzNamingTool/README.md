@@ -1,5 +1,4 @@
-The Azure Naming Tool has been moved to a new GitHub repo in the Microsoft Patterns & Practices Organization. 
-This change will allow us more frequent updates, enhanced features, and the ability to request new features and report bugs.
+The Azure Naming Tool has been moved to a new GitHub repo in the Microsoft patterns & practices GitHub organization. This change will allow us more frequent updates, enhanced features, and the ability to request new features and report bugs.
 
 [**Go to the new Azure Naming Tool Repo**](https://github.com/mspnp/AzureNamingTool)
 
