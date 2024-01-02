@@ -280,8 +280,8 @@
       "KeyVault-user-id": {
         "type": "string",
         "metadata": {
-          "displayName": "KeyVault-User Access will be granted to an Azure AD Object ID i.e. (abc123de-f456-ghi7-89jk-l0mno123pqr4)",
-          "description": "AAD object ID of the user that requires access to Key Vault."
+          "displayName": "Key Vault User Access will be granted to an Microsoft Entra Object ID i.e. (0c6b631a-cd39-4ae8-8778-4c11989b3e1a)",
+          "description": "Microsoft Entra object ID of the user that requires access to Key Vault."
         },
         "allowedValues": []
       },
